@@ -1,0 +1,61 @@
+[[actions]]
+description = "samples from union FHIR DocumentReference + FHIR DiagnosticReport"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef.sql",
+]
+
+[[actions]]
+description = "calc 1x for each note_ref the note_author_date"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef_author.sql",
+]
+
+[[actions]]
+description = "sample for aspects ('dx', 'lab', 'rx')"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef_dx.sql",
+    "athena/pcx__sample_casedef_lab.sql",
+    "athena/pcx__sample_casedef_rx.sql",
+]
+
+[[actions]]
+description = "sample temporality ('pre', 'peri', 'peri_post', 'post')"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef_pre.sql",
+    "athena/pcx__sample_casedef_peri.sql",
+    "athena/pcx__sample_casedef_peri_post.sql",
+    "athena/pcx__sample_casedef_post.sql",
+]
+
+[[actions]]
+description = "sample size limit patients"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef_pre_limit_patient_10.sql",
+    "athena/pcx__sample_casedef_peri_limit_patient_10.sql",
+    "athena/pcx__sample_casedef_peri_post_limit_patient_10.sql",
+    "athena/pcx__sample_casedef_post_limit_patient_10.sql",
+]
+
+[[actions]]
+description = "sample size limit notes"
+type = "build:parallel"
+files = [
+    "athena/pcx__sample_casedef_pre_limit_note_50.sql",
+    "athena/pcx__sample_casedef_peri_limit_note_50.sql",
+    "athena/pcx__sample_casedef_peri_post_limit_note_50.sql",
+    "athena/pcx__sample_casedef_post_limit_note_50.sql",
+]
+
+[[actions]]
+description = "sample task"
+type = "build:serial"
+files = [
+    "athena/ibd__sample_task.sql",
+    "athena/ibd__sample_task_aspect.sql",
+    "athena/ibd__sample_task_tier.sql",
+]

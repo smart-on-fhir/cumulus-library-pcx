@@ -1,0 +1,72 @@
+[[actions]]
+description = "upload client_dictionary.csv"
+type = "build:serial"
+files = [
+    "../spreadsheet/file_upload_client_views.toml",
+]
+
+[[actions]]
+description = "client subject"
+type = "build:serial"
+files = [
+    "athena/pcx__client_subject.sql",
+]
+
+[[actions]]
+description = "client paris"
+type = "build:serial"
+files = [
+    "athena/pcx__client_paris.sql",
+]
+
+[[actions]]
+description = "client encounter"
+type = "build:serial"
+files = [
+    "athena/pcx__client_encounter.sql",
+]
+
+[[actions]]
+description = "client therapy line"
+type = "build:serial"
+files = [
+    "athena/pcx__client_therapy_line.sql",
+    "athena/pcx__client_therapy_line_class.sql",
+    "athena/pcx__client_therapy_line_evidence.sql",
+]
+
+[[actions]]
+description = "client timeline"
+type = "build:serial"
+files = [
+    "athena/pcx__client_timeline.sql",
+    "athena/pcx__client_timeline_latest.sql",
+]
+
+[[actions]]
+description = "client outcome assessments"
+type = "build:serial"
+files = [
+    "athena/pcx__client_outcome.sql",
+]
+
+[[actions]]
+description = "client dictionary coverage"
+type = "build:serial"
+files = [
+    "athena/pcx__client_dictionary_coverage.sql",
+]
+
+[[actions]]
+description = "client SQL views -> CSV files"
+type = "export:flat"
+tables = [
+    "pcx__client_subject",
+    "pcx__client_paris",
+    "pcx__client_encounter",
+    "pcx__client_timeline",
+    "pcx__client_therapy_line",
+    "pcx__client_therapy_line_class",
+    "pcx__client_outcome",
+    "pcx__client_dictionary_coverage",
+]

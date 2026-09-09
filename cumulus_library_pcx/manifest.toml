@@ -1,0 +1,61 @@
+study_prefix = "pcx"
+# data_dictionary = "../spreadsheet/data_dictionary.csv"
+
+[[stages.study_population]]
+type = "submanifest"
+files = ['study_population.toml']
+
+[[stages.study_variable]]
+type = "submanifest"
+files = ['study_variable.toml']
+
+[[stages.study_variable_wide]]
+type = "submanifest"
+files = ['study_variable_wide.toml']
+
+[[stages.casedef]]
+type = "submanifest"
+files = ['casedef.toml']
+
+[[stages.sample]]
+type = "submanifest"
+files = ['sample.toml']
+
+# ------ <Elastic Search Tasks> ------
+# NOTE: These are commented out because leaving them 
+#       in the manifest will cause the build to fail if the user does not have the relevant 
+#       file to upload on their machine. 
+#       This is a bad AntiPattern. We should never do this again :/ 
+# Before running this, you should pip install
+# https://github.com/smart-on-fhir/rapid-elastic
+# Disabled by Default
+# [[stages.elastic_query]]
+# type = "submanifest"
+# files = ['elastic_query.toml']
+# skip_by_default=true
+
+# [[stages.elastic_output]]
+# type = "submanifest"
+# files = ['elastic_output.toml']
+# skip_by_default=true
+# ------ </Elastic Search Tasks> ------
+
+#[[stages.eligible]]
+#type = "submanifest"
+#files = ['eligible.toml']
+#
+#[[stages.outcome]]
+#type = "submanifest"
+#files = ['outcome.toml']
+#
+#[[stages.client_views]]
+#type = "submanifest"
+#files = ['client_views.toml']
+#
+#[[stages.qa_athena]]
+#type = "submanifest"
+#files = ['qa_athena.toml']
+#
+#[[stages.cube]]
+#type = "submanifest"
+#files = ['cube.toml']

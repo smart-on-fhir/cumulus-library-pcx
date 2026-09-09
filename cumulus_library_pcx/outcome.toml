@@ -1,0 +1,30 @@
+[[actions]]
+description = "PUCAI + PCDAI definitions"
+type = "build:serial"
+files = [
+    "../spreadsheet/file_upload_outcome.toml",
+]
+
+[[actions]]
+description = "IBD outcome activity index (PUCAI + PCDAI)"
+type = "build:parallel"
+files = [
+    "athena/pcx__outcome_pucai_base.sql",
+    "athena/pcx__outcome_pcdai_base.sql",
+]
+
+[[actions]]
+description = "IBD outcome remission (remission_clinical)"
+type = "build:serial"
+files = [
+    "athena/pcx__outcome_remission_clinical_evidence.sql",
+    "athena/pcx__outcome_remission_clinical.sql",
+    "athena/pcx__outcome_remission_clinical_sustained.sql",
+]
+
+[[actions]]
+description = "IBD outcome surgery (first qualifying surgery)"
+type = "build:parallel"
+files = [
+    "athena/pcx__outcome_surgery.sql",
+]
