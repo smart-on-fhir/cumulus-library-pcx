@@ -110,8 +110,8 @@ def make() -> list[Path]:
                            'sample size limit patients'),
         manifest.SqlAction(make_temporality_limit_note(50),
                            'sample size limit notes'),
-        manifest.SqlAction(make_sample_task(),
-                           'sample task', "build:serial"),
+        #manifest.SqlAction(make_sample_task(), TODO: not yet implemented
+        #                   'sample task', "build:serial"),
     ]
 
     return [manifest.save_actions_toml(actions, 'sample.toml')]
