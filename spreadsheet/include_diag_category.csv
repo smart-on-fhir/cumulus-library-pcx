@@ -1,0 +1,7 @@
+system,code,display
+"http://terminology.hl7.org/CodeSystem/v2-0074","LAB","Laboratory"
+"http://terminology.hl7.org/CodeSystem/v2-0074","RAD","Radiology"
+"http://terminology.hl7.org/CodeSystem/v2-0074","PAT","Pathology"
+"http://terminology.hl7.org/CodeSystem/v2-0074","CT","CAT Scan"
+"http://terminology.hl7.org/CodeSystem/v2-0074","MRI","Magnetic Resonance Imaging"
+"http://terminology.hl7.org/CodeSystem/v2-0074","US","Ultrasound"

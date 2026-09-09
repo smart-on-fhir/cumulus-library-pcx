@@ -1,0 +1,55 @@
+config_type = "file_upload"
+
+[tables.valueset_dx_atrt]
+file = "dx_atrt.csv"
+
+[tables.valueset_dx_brain_cancer]
+file = "dx_brain_cancer.csv"
+
+[tables.valueset_dx_medulloblastoma]
+file = "dx_medulloblastoma.csv"
+
+[tables.valueset_lab_absolute_neutrophil_count]
+file = "lab_absolute_neutrophil_count.csv"
+
+[tables.valueset_lab_albumin]
+file = "lab_albumin.csv"
+
+[tables.valueset_lab_alt]
+file = "lab_alt.csv"
+
+[tables.valueset_lab_ast]
+file = "lab_ast.csv"
+
+[tables.valueset_lab_creatinine]
+file = "lab_creatinine.csv"
+
+[tables.valueset_lab_hemoglobin]
+file = "lab_hemoglobin.csv"
+
+[tables.valueset_lab_platelet_count]
+file = "lab_platelet_count.csv"
+
+[tables.valueset_lab_total_bilirubin]
+file = "lab_total_bilirubin.csv"
+
+[tables.valueset_rx_agent_carboplatin]
+file = "rx_agent_carboplatin.csv"
+
+[tables.valueset_rx_agent_cisplatin]
+file = "rx_agent_cisplatin.csv"
+
+[tables.valueset_rx_agent_cyclophosphamide]
+file = "rx_agent_cyclophosphamide.csv"
+
+[tables.valueset_rx_agent_etoposide]
+file = "rx_agent_etoposide.csv"
+
+[tables.valueset_rx_agent_methotrexate]
+file = "rx_agent_methotrexate.csv"
+
+[tables.valueset_rx_agent_thiotepa]
+file = "rx_agent_thiotepa.csv"
+
+[tables.valueset_rx_agent_vincristine]
+file = "rx_agent_vincristine.csv"

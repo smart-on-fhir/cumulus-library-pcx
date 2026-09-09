@@ -1,0 +1,9 @@
+system,code,display
+http://loinc.org,2160-0,Creatinine [Mass/volume] in Serum or Plasma
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1072,Creatinine
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012596,Creatinine
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014727,Creatinine
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014916,"CREATININE, SERUM OR PLASMA"
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230015328,Creatinine (Prime +)
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1526296,Creatinine
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,210000003,External Creatinine
