@@ -10,3 +10,22 @@ http://hl7.org/fhir/sid/icd-9-cm,V58.69,"Methotrexate, long term, current use",4
 http://hl7.org/fhir/sid/icd-9-cm,V58.69,On methotrexate therapy,4
 http://hl7.org/fhir/sid/icd-9-cm,V58.83,Encounter for methotrexate monitoring,4
 http://hl7.org/fhir/sid/icd-9-cm,V58.83,Encounter for monitoring of methotrexate therapy,4
+http://hl7.org/fhir/sid/icd-10-cm,N17.0,Acute kidney failure with tubular necrosis,3
+http://hl7.org/fhir/sid/icd-10-cm,T50.905S,"Adverse effect of unspecified drugs, medicaments and biological substances, sequela",2
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X1A,"Poisoning by antineoplastic and immunosuppressive drugs, accidental (unintentional), initial encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X1D,"Poisoning by antineoplastic and immunosuppressive drugs, accidental (unintentional), subsequent encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X1S,"Poisoning by antineoplastic and immunosuppressive drugs, accidental (unintentional), sequela",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X2A,"Poisoning by antineoplastic and immunosuppressive drugs, intentional self-harm, initial encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X2D,"Poisoning by antineoplastic and immunosuppressive drugs, intentional self-harm, subsequent encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X2S,"Poisoning by antineoplastic and immunosuppressive drugs, intentional self-harm, sequela",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X3A,"Poisoning by antineoplastic and immunosuppressive drugs, assault, initial encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X3D,"Poisoning by antineoplastic and immunosuppressive drugs, assault, subsequent encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X3S,"Poisoning by antineoplastic and immunosuppressive drugs, assault, sequela",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X4A,"Poisoning by antineoplastic and immunosuppressive drugs, undetermined, initial encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X4D,"Poisoning by antineoplastic and immunosuppressive drugs, undetermined, subsequent encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X4S,"Poisoning by antineoplastic and immunosuppressive drugs, undetermined, sequela",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X5A,"Adverse effect of antineoplastic and immunosuppressive drugs, initial encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X5D,"Adverse effect of antineoplastic and immunosuppressive drugs, subsequent encounter",1
+http://hl7.org/fhir/sid/icd-10-cm,T45.1X5S,"Adverse effect of antineoplastic and immunosuppressive drugs, sequela",1
+http://hl7.org/fhir/sid/icd-10-cm,Z79.899,Other long term (current) drug therapy,4
+http://hl7.org/fhir/sid/icd-10-cm,Z51.81,Encounter for therapeutic drug level monitoring,4
