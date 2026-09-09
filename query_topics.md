@@ -28,6 +28,8 @@ retain a one-edit fuzzy medulloblastoma spelling alternative. See the
 | pcx_organ_function_labs | Organ-function tests, toxicity, and methotrexate monitoring/rescue                         |
 | pcx_predisposition      | Germline findings, testing, uncertainty, and negative results                              |
 | pcx_trial_eligibility   | ACNS0334 mentions and candidate comparability evidence                                     |
+| enc_transfer            | Transfer-of-care, outside-institution, and prior-treatment-elsewhere language, for incident-case (newly diagnosed here) screening |
+| rx_chemotherapy         | Backbone agents of ACNS0334 induction/consolidation (vincristine, carboplatin, cyclophosphamide, cisplatin, thiotepa, etoposide): generic and brand names, with context-gated abbreviations; methotrexate is a separate topic |
 
 No tiers are assigned. Topic membership does not represent diagnostic certainty.
 The molecular vocabulary follows the four-group framework described by
@@ -77,6 +79,6 @@ result files were modified during this edit.
 
 ## Current repository alignment
 
-The topic file still contains 14 distinct topics. This documentation refresh checked that inventory but did not repeat the earlier parser or server tests. Current structured population filters are ages 0–8 at visits and a minimum 365-day encounter span; these are separate from the text queries and can restrict the patient pool presented for review.
+The topic file contains 16 distinct topics. `rx_chemotherapy` was added 2026-09-09 for the six backbone agents in `spreadsheet/rx_agent_*.csv` other than methotrexate; drug names stand alone like `rx_agent_methotrexate`, while abbreviations (VCR, CBDCA, CTX, CPM, CDDP, VP-16) require treatment context in the same note. `enc_transfer` was added 2026-09-09 to surface evidence that a patient was diagnosed or treated elsewhere before presenting, which bears on the newly-diagnosed and no-prior-therapy criteria and on where T₀ should be anchored; a hit is a screening flag for chart review, not a determination of transfer status. It requires disease context in the same note and has not been run against a server. The earlier parser and server tests were not repeated for it. Current structured population filters are ages 0–8 at visits and a minimum 365-day encounter span; these are separate from the text queries and can restrict the patient pool presented for review.
 
 Lab retrieval is broader than numeric lab valuesets. The five folate variables and expanded AST/ALT, platelet and local creatinine definitions do not require adding every code to note-text queries. Interpret results using source documents and the [data dictionary](spreadsheet/data_dictionary.csv); topic hits alone do not populate those structured columns.
