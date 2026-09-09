@@ -1,0 +1,38 @@
+# Package metadata for the PNOC30 Cumulus Library study.
+
+[project]
+name = "cumulus-library-pcx"
+version = "0.1.0"
+requires-python = ">= 3.11"
+dependencies = [
+    "tomli_w",
+    "cumulus-library >= 6.3.1",
+    "pydantic",
+    # Optional NLP/elastic integration (uncomment if you use the chart-review
+    # sampling + rapid-elastic pipeline):
+    # "rapid-elastic @ git+https://github.com/smart-on-fhir/rapid-elastic.git@main",
+]
+description = "Cumulus Library study for the PNOC030 ATRT registry and PCX comparator analysis."
+readme = "README.md"
+license = { text = "Apache License 2.0" }
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Home = "https://smarthealthit.org/cumulus-a-universal-sidecar-for-a-smart-learning-healthcare-system/"
+Documentation = "https://docs.smarthealthit.org/cumulus/"
+
+[build-system]
+requires = ["flit_core >=3.12,<4"]
+build-backend = "flit_core.buildapi"
+
+[project.optional-dependencies]
+dev = ["black", "pylint"]
+test = ["pytest", "pytest-cov", "pytest-xdist"]
+
+[tool.flit.sdist]
+include = ["cumulus_library_pcx/"]
