@@ -14,23 +14,14 @@ retain a one-edit fuzzy medulloblastoma spelling alternative. See the
 
 | Topic                   | Candidate evidence                                                                         |
 |-------------------------|--------------------------------------------------------------------------------------------|
-| dx_medulloblastoma      | Named disease, morphology codes, and posterior-fossa-context historical PNET language      |
-| dx_atrt                 | Named ATRT or contextual rhabdoid disease, for differential diagnosis and reclassification |
+| dx_medulloblastoma      | Named disease with wildcards, ICD-O morphology codes 9470–9477/3, and posterior-fossa-context historical PNET language; the MB patient-level join key |
+| dx_atrt                 | Named ATRT, 9508/3, or rhabdoid with CNS/INI1/SMARCB1/SMARCA4/BRG1 context, for exclusion and reclassification |
 | rx_agent_methotrexate   | Methotrexate names, brands, and contextual MTX abbreviation across formulations            |
-| pcx_systemic_therapy    | Agents, protocols, treatment cycles, and stem-cell support                                 |
-| pcx_surgery             | Biopsy, resection, operative reports, and residual disease                                 |
-| pcx_metastasis_staging  | Chang M stage, CSF, brain/spine dissemination, and negative staging evidence               |
-| pcx_response_assessment | Measurable disease and response assessments, including negative findings                   |
-| pcx_disease_event       | Progression, recurrence, remission, second malignancy, and death                           |
-| pcx_patient_timeline    | Diagnosis, treatment, enrollment, vital status, and follow-up evidence                     |
-| pcx_organ_function_labs | Organ-function tests, toxicity, and methotrexate monitoring/rescue                         |
-| pcx_predisposition      | Germline findings, testing, uncertainty, and negative results                              |
-| pcx_trial_eligibility   | ACNS0334 mentions and candidate comparability evidence                                     |
 | transition_of_care_recall | General patient-transfer language: transfer of care, outside hospital/records/provider, referred from, previously treated at, establish care, second opinion, transport (transition_of_care.py) |
 | transition_of_care_ppv  | Brain-tumor-specific transfer settings: transferred/referred for neurosurgery, proton, stem-cell rescue or protocol; resected or induction started at an outside hospital; outside pathology or slides reviewed here; outside CT/MRI showing a posterior fossa mass; treatment-naive or newly diagnosed on arrival; or an outside-institution term with a tumor/surgery/oncology term in the same note (transition_of_care.py) |
 | rx_chemotherapy         | Backbone agents of ACNS0334 induction/consolidation (vincristine, carboplatin, cyclophosphamide, cisplatin, thiotepa, etoposide): generic and brand names, with context-gated abbreviations; methotrexate is a separate topic |
-| diagnosis_recall        | dx_medulloblastoma OR dx_atrt OR the other ACNS0334 embryonal entities (ETMR, pineoblastoma, medulloepithelioma, embryonal NOS, CNS-PNET, their ICD-O codes, ACNS0334); both dx_* rows are verbatim branches, so each is a subset by construction (diagnosis.py) |
-| diagnosis_ppv           | An entity term from diagnosis_recall AND diagnosis-establishing language in the same note (final/integrated diagnosis, pathology showed, histology pattern, WHO grade, molecular subgroup or INI1/SMARCB1 loss, diagnosed on/with, M-stage, primary site, ICD-O code) (diagnosis.py) |
+| diagnosis_recall        | dx_medulloblastoma OR dx_atrt OR every other CNS tumor family in CnsDiagnosisCategory (ETMR, pineoblastoma, sPNET, embryonal NOS, glioma, ependymoma, craniopharyngioma, choroid plexus, germ cell, glioneuronal, CNS sarcoma) and generic brain-tumor terms; both dx_* rows are verbatim branches (diagnosis.py) |
+| diagnosis_ppv           | A named tumor entity or ICD-O code AND diagnosis-establishing language (final/integrated/pathologic diagnosis, patholog*, histolog*, biops*, resect*, WHO grade, consistent with, histology pattern, M-stage, primary site) in the same note (diagnosis.py) |
 | surgery_recall          | Tumor surgery, extent of resection, residual disease, second-look and dates (surgery.py); single words and abbreviations |
 | surgery_ppv             | Tumor surgery, extent of resection, residual disease, second-look and dates (surgery.py); multi-word phrases written when the fact is documented |
 | metastasis_recall       | Chang staging inputs: CSF cytology, brain/spine MRI, extraneural disease, metastatic sites (metastasis.py); single words and abbreviations |
@@ -55,8 +46,6 @@ retain a one-edit fuzzy medulloblastoma spelling alternative. See the
 | registry_eligibility_ppv | ACNS0334 comparability criteria: age at surgery, newly diagnosed high-risk disease, prior therapy, organ function (registry_eligibility.py); multi-word phrases written when the fact is documented |
 | medulloblastoma_recall  | Compact any-dose discovery summary: MTX, radiation, group, survival in one pass (medulloblastoma.py); single words and abbreviations |
 | medulloblastoma_ppv     | Compact any-dose discovery summary: MTX, radiation, group, survival in one pass (medulloblastoma.py); multi-word phrases written when the fact is documented |
-| document_topic          | Routing gate: embryonal entity OR methotrexate OR backbone agent OR protocol OR a compact anchor term from any task (document_topic.py) |
-| document_type           | Document-title/section cues alone, to sample across note types for the study-neutral classifier (document_type.py) |
 
 No tiers are assigned. Topic membership does not represent diagnostic certainty.
 The molecular vocabulary follows the four-group framework described by
@@ -78,7 +67,9 @@ The queries contain no age or methotrexate-exposure requirement for cohort entry
 
 ## Task-named queries (recall versus PPV)
 
-Added 2026-09-09; revised the same day for intersection use. Each LLM extraction module in
+Added 2026-09-09; revised the same day for intersection use, then merged with a second
+independently written set (best-of-breed: wildcard stems and AND-structured PPV clauses from the
+second set; gated abbreviations, phrase lists, brand names and negative-evidence phrases from the first). Each LLM extraction module in
 `cumulus_library_pcx/llm/models/` has queries named for the module file so routing is
 mechanical. Where a broad and a narrow form differ they are suffixed `_recall` and `_ppv`;
 where one query serves both purposes the bare module name is used (`document_topic`,
@@ -111,15 +102,18 @@ four evidence blocks the compact model summarizes (methotrexate, radiation, mole
 vital status) and `medulloblastoma_ppv` the phrase forms of the same; `document_topic` is a
 single compact routing gate (entities, drugs, protocols and one anchor term per task) kept
 short to stay well under the query-string clause limit; `document_type` matches title and
-section cues only. Short abbreviations (CR/PR/SD/PD, CSI, MTX, OSH, gene symbols) are always
-gated by companion terms. Wildcards and regex are deliberately not used; every slash, hyphen
-or caret is inside a quoted phrase so the query-string parser cannot read it as an operator.
+section cues only. Short abbreviations (CR/PR/SD/PD, CSI, RT, MTX, OSH, gene symbols) are always
+gated by companion terms. Trailing wildcards (`resect*`, `chromosom*`) are used since the 2026-09-09
+merge; wildcard terms are never placed inside quoted phrases, `progress*` is avoided because it
+matches every "Progress Note" title (progression/progressive/progressed are listed instead), and
+every slash, hyphen or caret is inside a quoted phrase so the query-string parser cannot read it
+as an operator or regex. Wildcard terms bypass the analyzer; confirm the index lowercases them.
 
 A `_recall` hit is a candidate for the task; a `_ppv` hit is a candidate more likely to yield a
 non-null annotation. Neither establishes the fact. PPV and recall are untested until the
 queries run against the server and a reviewed sample; adjust term lists from that sample rather
-than from intuition. The remaining `pcx_*` rows were retained unchanged; they still carry the
-per-note disease-context gate and overlap these.
+than from intuition. All `pcx_*` rows and `document_topic`/`document_type` were retired on 2026-09-09; each
+`pcx_*` topic is superseded by its task-named pair.
 
 ## Naming and integration
 
@@ -151,6 +145,6 @@ result files were modified during this edit.
 
 ## Current repository alignment
 
-The topic file contains 43 distinct topics. `pcx_molecular_pathology` and `pcx_radiation` were retired on 2026-09-09 (`radiation_recall` likewise supersedes `pcx_radiation`): under the intersection design `molecular_recall` covers a superset of its terms without the per-note disease gate, and `molecular_ppv` is the narrow form. `rx_chemotherapy` was added 2026-09-09 for the six backbone agents in `spreadsheet/rx_agent_*.csv` other than methotrexate; drug names stand alone like `rx_agent_methotrexate`, while abbreviations (VCR, CBDCA, CTX, CPM, CDDP, VP-16) require treatment context in the same note. `enc_transfer` (added earlier on 2026-09-09) was replaced the same day by `transition_of_care_recall` and `transition_of_care_ppv`, which select notes for `transition_of_care.py`: evidence that a patient was diagnosed, resected or treated elsewhere before presenting, which bears on the newly-diagnosed and no-prior-therapy criteria, on where the definitive surgery happened, and on where T₀ should be anchored. A hit is a screening flag for chart review, not a determination of transfer status. Both match transfer language alone (no disease-context gate, per the intersection design below) and have not been run against a server. Current structured population filters are ages 0–8 at visits and a minimum 365-day encounter span; these are separate from the text queries and can restrict the patient pool presented for review.
+The topic file contains 32 distinct topics. `pcx_molecular_pathology` and `pcx_radiation` were retired on 2026-09-09 (`radiation_recall` likewise supersedes `pcx_radiation`): under the intersection design `molecular_recall` covers a superset of its terms without the per-note disease gate, and `molecular_ppv` is the narrow form. `rx_chemotherapy` was added 2026-09-09 for the six backbone agents in `spreadsheet/rx_agent_*.csv` other than methotrexate; drug names stand alone like `rx_agent_methotrexate`, while abbreviations (VCR, CBDCA, CTX, CPM, CDDP, VP-16) require treatment context in the same note. `enc_transfer` (added earlier on 2026-09-09) was replaced the same day by `transition_of_care_recall` and `transition_of_care_ppv`, which select notes for `transition_of_care.py`: evidence that a patient was diagnosed, resected or treated elsewhere before presenting, which bears on the newly-diagnosed and no-prior-therapy criteria, on where the definitive surgery happened, and on where T₀ should be anchored. A hit is a screening flag for chart review, not a determination of transfer status. Both match transfer language alone (no disease-context gate, per the intersection design below) and have not been run against a server. Current structured population filters are ages 0–8 at visits and a minimum 365-day encounter span; these are separate from the text queries and can restrict the patient pool presented for review.
 
 Lab retrieval is broader than numeric lab valuesets. The five folate variables and expanded AST/ALT, platelet and local creatinine definitions do not require adding every code to note-text queries. Interpret results using source documents and the [data dictionary](spreadsheet/data_dictionary.csv); topic hits alone do not populate those structured columns.
