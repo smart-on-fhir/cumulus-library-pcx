@@ -9,11 +9,11 @@ file = "dx_brain_cancer.csv"
 [tables.valueset_dx_medulloblastoma]
 file = "dx_medulloblastoma.csv"
 
+[tables.valueset_dx_methotrexate_toxic]
+file = "dx_methotrexate_toxic.csv"
+
 [tables.valueset_lab_absolute_neutrophil_count]
 file = "lab_absolute_neutrophil_count.csv"
-
-[tables.valueset_lab_albumin]
-file = "lab_albumin.csv"
 
 [tables.valueset_lab_alt]
 file = "lab_alt.csv"
@@ -24,11 +24,26 @@ file = "lab_ast.csv"
 [tables.valueset_lab_creatinine]
 file = "lab_creatinine.csv"
 
+[tables.valueset_lab_folate]
+file = "lab_folate.csv"
+
+[tables.valueset_lab_folate_interpretation]
+file = "lab_folate_interpretation.csv"
+
+[tables.valueset_lab_folate_rbc]
+file = "lab_folate_rbc.csv"
+
+[tables.valueset_lab_folate_unspecified]
+file = "lab_folate_unspecified.csv"
+
+[tables.valueset_lab_folate_whole_blood]
+file = "lab_folate_whole_blood.csv"
+
 [tables.valueset_lab_hemoglobin]
 file = "lab_hemoglobin.csv"
 
-[tables.valueset_lab_platelet_count]
-file = "lab_platelet_count.csv"
+[tables.valueset_lab_platelets]
+file = "lab_platelets.csv"
 
 [tables.valueset_lab_total_bilirubin]
 file = "lab_total_bilirubin.csv"

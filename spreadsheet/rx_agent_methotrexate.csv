@@ -70,3 +70,18 @@ methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,284592,methotrexate 5 M
 methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,284593,methotrexate 10 MG Oral Tablet [Trexall] [SBD]
 methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,284594,methotrexate 7.5 MG Oral Tablet [Trexall] [SBD]
 methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,284595,methotrexate 15 MG Oral Tablet [Trexall] [SBD]
+methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,1544379,methotrexate (Rasuvo)
+methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,1655957,methotrexate 25 MG/ML Injection
+methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,1921593,methotrexate (Xatmep)
+methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,284900,methotrexate (Trexall)
+methotrexate,http://www.nlm.nih.gov/research/umls/rxnorm,311627,Methotrexate 25 MG/ML Injectable Solution
+methotrexate,urn:oid:2.16.840.1.113883.3.3710.200.402,110582,methotrexate (bulk)
+methotrexate,urn:oid:2.16.840.1.113883.3.3710.200.402,5506,methotrexate sodium
+methotrexate,urn:oid:2.16.840.1.113883.6.253,036423,Methotrexate
+methotrexate,urn:oid:2.16.840.1.113883.6.253,044283,Methotrexate
+methotrexate,urn:oid:2.16.840.1.113883.6.253,129841,Methotrexate Sodium
+methotrexate,urn:oid:2.16.840.1.113883.6.312,132377,"Methotrexate Sodium, Preservative Free 25 mg/mL injectable solution"
+methotrexate,urn:oid:2.16.840.1.113883.6.314,d00060,"Methotrexate Sodium, Preservative Free 25 mg/mL injectable solution"
+methotrexate,urn:oid:2.16.840.1.113883.6.68,21300050002900,Methotrexate
+methotrexate,urn:oid:2.16.840.1.113883.6.68,21300050100310,Methotrexate
+methotrexate,urn:oid:2.16.840.1.113883.6.68,21300050102062,Methotrexate Sodium
