@@ -1,0 +1,12 @@
+system,code,display,tier
+http://hl7.org/fhir/sid/icd-9-cm,584.5,Methotrexate renal toxicity,3
+http://hl7.org/fhir/sid/icd-9-cm,909.5,"Adverse reaction to methotrexate, sequela",2
+http://hl7.org/fhir/sid/icd-9-cm,909.5,"Methotrexate adverse reaction, sequela",2
+http://hl7.org/fhir/sid/icd-9-cm,963.1,Accidental methotrexate overdose,1
+http://hl7.org/fhir/sid/icd-9-cm,963.1,Methotrexate toxicity,1
+http://hl7.org/fhir/sid/icd-9-cm,E933.1,Methotrexate adverse reaction,1
+http://hl7.org/fhir/sid/icd-9-cm,V58.69,Long term methotrexate user,4
+http://hl7.org/fhir/sid/icd-9-cm,V58.69,"Methotrexate, long term, current use",4
+http://hl7.org/fhir/sid/icd-9-cm,V58.69,On methotrexate therapy,4
+http://hl7.org/fhir/sid/icd-9-cm,V58.83,Encounter for methotrexate monitoring,4
+http://hl7.org/fhir/sid/icd-9-cm,V58.83,Encounter for monitoring of methotrexate therapy,4
