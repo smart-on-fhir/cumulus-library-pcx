@@ -6,8 +6,18 @@ cohorts, prioritizing Group 3.
 
 The current [README](README.md) defines a useful feasibility cohort and OS comparison.
 It does not yet specify a trial-aligned reproduction or an observational treatment-effect
-analysis. The items below are gaps in that specification and proposed resolutions;
-they are not findings from an audit of patient data or a completed implementation.
+analysis. The scientific items below remain gaps and proposed resolutions. The repository findings in the next section were checked against current files; no patient data or completed cross-network analysis was audited.
+
+## Current implementation findings
+
+- The active manifest runs population, variable, wide-variable, case-definition and sample stages. Outcome, eligibility and cube stages remain disabled.
+- The population SQL applies ages 0–8 at visits, not all ages at diagnosis. It also requires at least two distinct encounter-period ordinals and a minimum 365-day observed encounter span. This filter is not censoring and can remove early deaths or short follow-up. Survival analyses should not inherit this restriction without a justified selection design.
+- The 166-row column dictionary is present and registered. Cross-network field availability and semantic validation remain incomplete. `lab_folate_interpretation` is a boolean flag in one table and an interpretation code in another; the dictionary cannot resolve that name conflict.
+- Lab valuesets now include expanded AST, ALT and platelet LOINCs and local AST/ALT/creatinine codes. Creatinine still contains only one LOINC; proposed multi-site additions remain unimplemented. Hemoglobin still includes local reticulocyte hemoglobin code 923. Estimated and special-context measurements need explicit pooling decisions.
+- Folate has five separate variables. Unspecified local folate specimens remain unresolved; the likely hematocrit component was removed pending verification. Qualitative/narrative values are not represented by the numeric wide quantity fields.
+- Boolean wide evidence fields are TRUE or NULL, not proof of clinical absence or treatment receipt. Typed wide tables retain distinct evidence rows rather than one adjudicated result per patient.
+- Medication valuesets comprise seven files and 131 entries. Full terminology-release/historical coverage, local mapping, administration ascertainment and clinical validation remain open.
+- Package metadata and inactive generated artifacts retain legacy terminology. They should not be mistaken for implemented PCX survival logic.
 
 ## Reference study
 
@@ -137,5 +147,5 @@ is not a sufficient success criterion.
 3. **Observational treatment-effect analysis:** explicit baseline treatment strategies,
    confounding assessment, timing controls and sensitivity analyses.
 
-Recorded on 2026-09-08 from the paper-to-README comparison. These limitations remain
+The original scientific comparison was recorded on 2026-09-08 and has been supplemented with the current repository findings above. These limitations remain
 open until their definitions, required data and validation evidence are documented.

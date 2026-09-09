@@ -4,7 +4,7 @@ Updated 2026-09-08 using the Cumulus `rapid-elastic` skill. These are candidate
 queries for human chart review, based on the PCX README and document-topic models.
 Clinical terminology and retrieval performance still need domain-expert review.
 
-`query_topics.tsv` has two columns, `topic` and `query`. Queries use the `note`
+[`spreadsheet/query_topics.tsv`](spreadsheet/query_topics.tsv) has two columns, `topic` and `query`. Queries use the `note`
 field and Lucene query-string syntax, as sent by the local rapid-elastic adapter.
 They are not Kibana KQL expressions. The definitions use explicit grouping and
 retain a one-edit fuzzy medulloblastoma spelling alternative. See the
@@ -63,14 +63,20 @@ revised, so old results under those retained names are stale for these definitio
 
 ## Validation and execution
 
-All 14 rows passed exact-header, two-column, unique-name, quote/parenthesis, and
+The original query review recorded that all 14 rows passed exact-header, two-column, unique-name, quote/parenthesis, and
 field-scope checks. The sibling Cumulus IEM Boolean-tree utility parsed and rendered
 every query, with full token consumption and no mixed-precedence groups.
 These local checks do not establish server acceptance, analyzer behavior, or
 clinical sensitivity/specificity.
 
-No live search, result upload, or generated-manifest/SQL changes were performed.
+During the original query review, no live search, result upload, or generated-manifest/SQL changes were performed. The current main manifest still disables Elastic query and output stages; generated SQL in the repository is not evidence that a search has run.
 Before running, review the terminology and use a fresh output directory or explicitly
 archive existing results. rapid-elastic skips already-existing topic result files.
 Exclude retired PNOC30 result CSVs when generating a new output manifest. No cached
 result files were modified during this edit.
+
+## Current repository alignment
+
+The topic file still contains 14 distinct topics. This documentation refresh checked that inventory but did not repeat the earlier parser or server tests. Current structured population filters are ages 0–8 at visits and a minimum 365-day encounter span; these are separate from the text queries and can restrict the patient pool presented for review.
+
+Lab retrieval is broader than numeric lab valuesets. The five folate variables and expanded AST/ALT, platelet and local creatinine definitions do not require adding every code to note-text queries. Interpret results using source documents and the [data dictionary](spreadsheet/data_dictionary.csv); topic hits alone do not populate those structured columns.

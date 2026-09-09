@@ -5,7 +5,7 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 | Model module | Study purpose |
 |---|---|
 | `diagnosis`, `surgery`, `metastasis` | Original and revised diagnoses, age, definitive surgery, residual disease, MRI and CSF staging |
-| `registry_eligibility` | `PcxTrialEligibilityAnnotation`: evidence for a separate trial-like cohort; broad discovery includes all ages |
+| `registry_eligibility` | `PcxTrialEligibilityAnnotation`: evidence for a separate trial-like cohort; the scientific discovery goal includes all ages, but current structured selection uses ages 0–8 at visits |
 | `molecular` | Report-level classification and assay provenance; separate MYC/MYCN and gain/amplification; preserve conflicting calls |
 | `systemic_therapy`, `treatment` | Regimens, induction/consolidation, delivered versus planned doses, cycles and stem-cell infusion |
 | `radiation` | Receipt, timing, field, dose and indication, including post-chemotherapy and salvage treatment |
@@ -41,4 +41,12 @@ Other changed contracts include:
 - Generic treatment examples are replaced by shared delivery-status and treatment-phase enums.
 - New response/laboratory annotations support the broader reproduction specification.
 
-No schema-generation entry point or in-repository callers of the old annotation classes were found during this update. External schema consumers must update imports, regenerate their JSON schemas and map payload changes before running extraction. This update does not migrate SQL, spreadsheets, stored annotations or existing extraction outputs, and does not resolve all limitations recorded in the project root.
+External schema consumers must use the current class names, regenerate schemas and explicitly migrate old payloads. No end-to-end inference stage is enabled in the main manifest. Model definitions and schema tests do not establish that stored annotations or external consumers have been migrated.
+
+## Current integration and verification
+
+`tests/test_llm_models.py` imports the PCX models and tests schema generation, evidence spans, unknown status, planned-versus-administered treatment, molecular conflicts, eligibility defaults and date consistency. Run `python -m pytest tests/test_llm_models.py` in an environment with the test dependencies. This documentation refresh did not rerun the model suite or clinical extraction.
+
+The active structured stages are population, variables, wide variables, case definition and sampling. The 14 retrieval topics are separate from model-field names and require explicit routing. Neither schema existence nor note retrieval establishes patient-level survival, trial eligibility or treatment-effect estimates.
+
+The registered [data dictionary](spreadsheet/data_dictionary.csv) describes current SQL columns, not the complete JSON annotation schema. Its date display types must not replace the precision-aware dates in the models. Lab CSVs now separate folate specimens and interpretation evidence; structured raw coded/text results should be consulted when the numeric wide field is null. The folate interpretation column-name conflict remains documented in [README](README.md).

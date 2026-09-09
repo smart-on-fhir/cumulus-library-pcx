@@ -1,5 +1,5 @@
 study_prefix = "pcx"
-# data_dictionary = "../spreadsheet/data_dictionary.csv"
+data_dictionary = "../spreadsheet/data_dictionary.csv"
 
 [[stages.study_population]]
 type = "submanifest"
@@ -34,10 +34,11 @@ files = ['sample.toml']
 # files = ['elastic_query.toml']
 # skip_by_default=true
 
-# [[stages.elastic_output]]
-# type = "submanifest"
-# files = ['elastic_output.toml']
-# skip_by_default=true
+[[stages.elastic_output]]
+type = "submanifest"
+files = ['elastic_output.toml']
+skip_by_default=true
+
 # ------ </Elastic Search Tasks> ------
 
 #[[stages.eligible]]
