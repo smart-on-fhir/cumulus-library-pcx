@@ -2,6 +2,7 @@ import os
 import json
 from pathlib import Path
 from typing import Dict, Any
+from datetime import datetime
 from cumulus_library_pcx.tools import fhir_reference
 
 #-----------------------------------------------------------------------------
@@ -74,6 +75,17 @@ def path_template(file_sql: Path | str = None) -> Path:
     if not file_sql:
         return path_project() / 'template'
     return path_project() / 'template' / file_sql
+
+#-----------------------------------------------------------------------------
+# Custom File(s)
+#-----------------------------------------------------------------------------
+def path_custom(file_custom: Path | str = None) -> Path:
+    if not file_custom:
+        return path_project() / 'custom'
+    return path_project() / 'custom' / file_custom
+
+def save_custom(file_custom: Path | str, contents: str) -> Path:
+    return Path(write_text(contents, path_custom(file_custom)))
 
 #-----------------------------------------------------------------------------
 # Tests File(s)
@@ -204,3 +216,24 @@ def file_to_simplename(filename: Path | str) -> str:
     """
     name_part = filename.name if isinstance(filename, Path) else filename
     return name_part.split('.')[0]
+
+#-----------------------------------------------------------------------------
+# YYYY-MM-DD
+#-----------------------------------------------------------------------------
+def date_str(datetime_obj=None) -> str:
+    if not datetime_obj:
+        datetime_obj = datetime.now()
+    return datetime_obj.strftime("%Y-%m-%d")
+
+def read_query_topics(path: Path|str):
+    """Yield (topic, query) pairs, skipping the header row."""
+    if not isinstance(path, Path):
+        path = Path(path_spreadsheet(path))
+
+    with open(path, encoding="utf-8") as fh:
+        next(fh, None)  # header: topic<TAB>query
+        for line in fh:
+            line = line.rstrip("\n")
+            if line:
+                topic, _, query = line.partition("\t")
+                yield topic, query
