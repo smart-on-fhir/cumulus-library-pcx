@@ -1,0 +1,245 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "MetastasisEvidence": {
+      "description": "Result of a single Chang-staging input assessment.",
+      "enum": [
+        "POSITIVE",
+        "NEGATIVE",
+        "INDETERMINATE",
+        "UNAVAILABLE"
+      ],
+      "title": "MetastasisEvidence",
+      "type": "string"
+    },
+    "MetastasisSiteMention": {
+      "description": "A single documented metastatic site (applies when there is metastasis, i.e. Chang\nM2/M3/M4). Emit one per distinct site.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "site": {
+          "$ref": "#/$defs/MetastaticSite",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "CSF: positive CSF/cytology. SPINE: spinal drop metastases. BRAIN: intracranial metastasis beyond primary. LEPTOMENINGEAL: leptomeningeal spread. BONE_MARROW: marrow involvement. KIDNEY / LIVER: named viscus. OTHER: another site. NONE_OF_THE_ABOVE: no metastatic site documented."
+        },
+        "site_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date this metastatic site was documented, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Site Date"
+        },
+        "site_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for site_date. Null when site_date is null."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MetastasisSiteMention",
+      "type": "object"
+    },
+    "MetastaticSite": {
+      "description": "Anatomic site of metastatic dissemination.",
+      "enum": [
+        "CSF",
+        "SPINE",
+        "BRAIN",
+        "LEPTOMENINGEAL",
+        "BONE_MARROW",
+        "KIDNEY",
+        "LIVER",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MetastaticSite",
+      "type": "string"
+    },
+    "MetastaticStagingInputsMention": {
+      "description": "Staging assessments documented together; preserve dates for temporal review.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "csf_collection_site": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Lumbar, ventricular, or other site exactly as documented; null if unknown.",
+          "title": "Csf Collection Site"
+        },
+        "csf_collection_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CSF specimen collection date, not result-signoff date; ISO date at supported precision.",
+          "title": "Csf Collection Date"
+        },
+        "csf_collection_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision of csf_collection_date; null when absent."
+        },
+        "brain_mri_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Brain metastatic assessment date, ISO date at supported precision.",
+          "title": "Brain Mri Date"
+        },
+        "brain_mri_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision of brain_mri_date; null when absent."
+        },
+        "spine_mri_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Spine metastatic assessment date, ISO date at supported precision.",
+          "title": "Spine Mri Date"
+        },
+        "spine_mri_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision of spine_mri_date; null when absent."
+        },
+        "spine_mri_findings": {
+          "$ref": "#/$defs/MetastasisEvidence",
+          "default": "UNAVAILABLE",
+          "description": "Spine MRI for drop metastases / spinal leptomeningeal seeding. POSITIVE: seeding present. NEGATIVE: spine MRI done, no seeding. UNAVAILABLE: spine MRI not done or not reported."
+        },
+        "brain_mri_findings": {
+          "$ref": "#/$defs/MetastasisEvidence",
+          "default": "UNAVAILABLE",
+          "description": "Brain MRI for intracranial metastasis/seeding beyond the primary. POSITIVE: intracranial seeding present. NEGATIVE: done, none. UNAVAILABLE: not done or not reported."
+        },
+        "csf_cytology": {
+          "$ref": "#/$defs/MetastasisEvidence",
+          "default": "UNAVAILABLE",
+          "description": "CSF cytology; record lumbar versus ventricular source and collection date separately. POSITIVE: malignant cells present. NEGATIVE: cytology negative. UNAVAILABLE: not performed or not reported."
+        },
+        "extraneural_metastasis": {
+          "$ref": "#/$defs/MetastasisEvidence",
+          "default": "UNAVAILABLE",
+          "description": "Metastasis outside the CNS (bone marrow, bone, viscera). POSITIVE: extraneural metastasis present. NEGATIVE: worked up, none. UNAVAILABLE: no extraneural workup or not reported."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MetastaticStagingInputsMention",
+      "type": "object"
+    }
+  },
+  "description": "Metastasis / Chang-staging annotations from a single clinical note.\n\n    ",
+  "properties": {
+    "staging_inputs": {
+      "$ref": "#/$defs/MetastaticStagingInputsMention"
+    },
+    "metastasis_sites": {
+      "description": "All documented metastatic sites; empty list if none / localized disease.",
+      "items": {
+        "$ref": "#/$defs/MetastasisSiteMention"
+      },
+      "title": "Metastasis Sites",
+      "type": "array"
+    }
+  },
+  "required": [
+    "staging_inputs"
+  ],
+  "title": "PcxMetastasisAnnotation",
+  "type": "object"
+}

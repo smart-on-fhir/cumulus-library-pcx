@@ -1,0 +1,162 @@
+{
+  "$defs": {
+    "AssessmentTimepoint": {
+      "enum": [
+        "BASELINE",
+        "DURING_INDUCTION",
+        "END_INDUCTION",
+        "DURING_CONSOLIDATION",
+        "END_CONSOLIDATION",
+        "FOLLOW_UP",
+        "OTHER",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "AssessmentTimepoint",
+      "type": "string"
+    },
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "ResponseAssessmentMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "timepoint": {
+          "$ref": "#/$defs/AssessmentTimepoint",
+          "default": "NOT_DOCUMENTED",
+          "description": "Documented treatment-relative timepoint; do not infer end-consolidation from a remission statement."
+        },
+        "response": {
+          "$ref": "#/$defs/ResponseStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "Explicit CR/PR/SD/PD or assessment result. Missing imaging is not CR; do not assign CR from resection alone."
+        },
+        "radiologically_evaluable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit evaluable/measurable disease on imaging at this assessment; null if unknown. Baseline evaluability determines the primary-response denominator.",
+          "title": "Radiologically Evaluable"
+        },
+        "cytologically_evaluable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit cytologically evaluable disease at this assessment; null if unknown.",
+          "title": "Cytologically Evaluable"
+        },
+        "assessment_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Actual response assessment date, ISO date at supported precision.",
+          "title": "Assessment Date"
+        },
+        "assessment_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for assessment_date; null if absent."
+        },
+        "assessment_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "MRI, CSF cytology or clinical assessment as documented.",
+          "title": "Assessment Method"
+        },
+        "review_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Local versus central review if stated; preserve disagreements as separate assessments.",
+          "title": "Review Context"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "ResponseAssessmentMention",
+      "type": "object"
+    },
+    "ResponseStatus": {
+      "enum": [
+        "COMPLETE_RESPONSE",
+        "PARTIAL_RESPONSE",
+        "STABLE_DISEASE",
+        "PROGRESSIVE_DISEASE",
+        "NOT_EVALUABLE",
+        "INDETERMINATE",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "ResponseStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "assessments": {
+      "description": "All baseline and subsequent assessments. Empty means no assessment extracted, not no disease.",
+      "items": {
+        "$ref": "#/$defs/ResponseAssessmentMention"
+      },
+      "title": "Assessments",
+      "type": "array"
+    }
+  },
+  "title": "PcxResponseAnnotation",
+  "type": "object"
+}

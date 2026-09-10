@@ -1,0 +1,332 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "DeliveryStatus": {
+      "enum": [
+        "ADMINISTERED",
+        "PLANNED",
+        "HELD",
+        "CANCELLED",
+        "EXPLICITLY_NOT_RECEIVED",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "DeliveryStatus",
+      "type": "string"
+    },
+    "RadiationField": {
+      "description": "Radiation field used by PCX chart review.",
+      "enum": [
+        "CRANIOSPINAL",
+        "CRANIOSPINAL_WITH_FOCAL_BOOST",
+        "FOCAL_TUMOR_BED",
+        "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "RadiationField",
+      "type": "string"
+    },
+    "RadiationMethod": {
+      "description": "Radiation delivery method used by PCX chart review.",
+      "enum": [
+        "PHOTON",
+        "PROTON",
+        "COMBINATION_PROTONS_AND_PHOTONS",
+        "ELECTRONS",
+        "THREE_D_CONFORMAL",
+        "IMRT",
+        "STEREOTACTIC_RADIOSURGERY",
+        "GAMMA_KNIFE",
+        "BRACHYTHERAPY",
+        "OTHER",
+        "NOT_REPORTED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "RadiationMethod",
+      "type": "string"
+    },
+    "RadiationRoundMention": {
+      "description": "A single radiation round: method, field, dates, and doses. Emit one per distinct\ncourse of radiation documented in this note. Leave dose fields null when not stated or\nnot applicable (metastatic-site doses require metastasis; whole-ventricular is only for\ngerm-cell tumors).",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "delivery_status": {
+          "$ref": "#/$defs/DeliveryStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "ADMINISTERED requires delivered RT; PLANNED or HELD is not exposure. Explicit non-receipt must be stated, not inferred from silence."
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED"
+        },
+        "indication": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Initial treatment, post-chemotherapy residual/metastatic disease, salvage after relapse or other documented indication. Do not infer from dose.",
+          "title": "Indication"
+        },
+        "assessed_through_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date through which explicit non-receipt or delivery is assessed.",
+          "title": "Assessed Through Date"
+        },
+        "assessed_through_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for assessed_through_date; null if absent."
+        },
+        "dose_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact delivered dose(s), field(s) and units; preserve mixed units here instead of assigning incorrect shared units.",
+          "title": "Dose Verbatim"
+        },
+        "radiation_method": {
+          "$ref": "#/$defs/RadiationMethod",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Delivery method/energy. PHOTON / PROTON / COMBINATION_PROTONS_AND_PHOTONS / ELECTRONS by modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE. BRACHYTHERAPY. OTHER: another method. NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+        },
+        "radiation_field": {
+          "$ref": "#/$defs/RadiationField",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Treated field. CRANIOSPINAL: CSI without a documented boost. CRANIOSPINAL_WITH_FOCAL_BOOST: craniospinal irradiation plus a tumor-bed boost. FOCAL_TUMOR_BED: focal/involved-field only. WHOLE_VENTRICULAR_WITH_FOCAL_BOOST: whole-ventricular plus boost (germ-cell). OTHER: another field. NONE_OF_THE_ABOVE: field not stated."
+        },
+        "radiation_start_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Round start date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Radiation Start Date"
+        },
+        "radiation_start_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for radiation_start_date. Null when it is null."
+        },
+        "radiation_end_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Round end date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Radiation End Date"
+        },
+        "radiation_end_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for radiation_end_date. Null when it is null."
+        },
+        "focal_dose_to_primary_site": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focal boost dose to the primary tumor site (numeric, in dose_units). Null if not stated.",
+          "title": "Focal Dose To Primary Site"
+        },
+        "total_dose_to_primary_site": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Total dose to the primary site (focal + craniospinal/whole-ventricular if given). Null if not stated.",
+          "title": "Total Dose To Primary Site"
+        },
+        "focal_dose_to_metastatic_site": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focal boost dose to a metastatic site (only if radiation given to metastasis). Null otherwise.",
+          "title": "Focal Dose To Metastatic Site"
+        },
+        "total_dose_to_metastatic_site": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Total dose to a metastatic site (only if radiation given to metastasis). Null otherwise.",
+          "title": "Total Dose To Metastatic Site"
+        },
+        "craniospinal_dose": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Craniospinal-axis dose (only if craniospinal radiation given). Null otherwise.",
+          "title": "Craniospinal Dose"
+        },
+        "whole_ventricular_dose": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whole-ventricular dose (only for germ-cell tumors). Null otherwise.",
+          "title": "Whole Ventricular Dose"
+        },
+        "dose_units": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RadiationUnits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Units for the dose fields in this round. CGY: centigray. GY: gray (=100 cGy). CGE: cobalt gray equivalent (proton). Null if no dose is stated or units are mixed; preserve mixed units in dose_verbatim."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "RadiationRoundMention",
+      "type": "object"
+    },
+    "RadiationUnits": {
+      "description": "Radiation dose units used by PCX chart review.",
+      "enum": [
+        "CGY",
+        "GY",
+        "CGE"
+      ],
+      "title": "RadiationUnits",
+      "type": "string"
+    },
+    "TreatmentPhase": {
+      "enum": [
+        "INDUCTION",
+        "CONSOLIDATION",
+        "POST_CONSOLIDATION",
+        "SALVAGE",
+        "OTHER",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "TreatmentPhase",
+      "type": "string"
+    }
+  },
+  "description": "Radiation-therapy annotations from a single clinical note (a list \u2014 rounds repeat).\n\n    ",
+  "properties": {
+    "radiation_rounds": {
+      "description": "All radiation rounds documented in this note; empty list if none.",
+      "items": {
+        "$ref": "#/$defs/RadiationRoundMention"
+      },
+      "title": "Radiation Rounds",
+      "type": "array"
+    }
+  },
+  "title": "PcxRadiationAnnotation",
+  "type": "object"
+}

@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "TopicRelevance": {
+      "description": "Highest level of patient-specific evidence for a requested topic.",
+      "enum": [
+        "EXPLICIT",
+        "IMPLICIT",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "TopicRelevance",
+      "type": "string"
+    },
+    "TopicRelevanceMention": {
+      "description": "Classify one fixed PCX topic using patient-specific document evidence.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "relevance": {
+          "$ref": "#/$defs/TopicRelevance",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "EXPLICIT when the topic is directly named or measured for this patient. IMPLICIT only when the document contains the topic-specific supporting facts in the parent field description. NONE_OF_THE_ABOVE when neither level is supported. Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confidence in the relevance classification from 0.0 to 1.0.",
+          "title": "Confidence"
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.",
+          "title": "Reasoning"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TopicRelevanceMention",
+      "type": "object"
+    }
+  },
+  "description": "Wide-friendly routing gate for the PCX extraction models.\n\nEach routing field matches its extraction module's filename without ``.py``.",
+  "properties": {
+    "response": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Baseline measurable/evaluable disease, CR/PR/SD/PD, end-induction or end-consolidation assessment, including explicitly negative MRI/CSF findings."
+    },
+    "diagnosis": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "ATRT, medulloblastoma, other CNS embryonal diagnosis, WHO-CNS5 integrated diagnosis, primary site, or diagnosis date."
+    },
+    "molecular": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Medulloblastoma subgroup, MYC/MYCN, chromosome alterations, assay provenance, WNT/SHH/Group 3/Group 4, methylation class, or a qualifying pathology and molecular report."
+    },
+    "event": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Initial diagnosis, progression, recurrence, refractory disease, second malignancy, second primary, death, response, or current disease status."
+    },
+    "metastasis": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Chang M stage, brain/spine metastatic imaging, CSF cytology, leptomeningeal spread, or extraneural metastatic disease."
+    },
+    "surgery": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Tumor biopsy/resection, surgery date, procedure type, or extent of resection."
+    },
+    "radiation": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Radiation course, modality, field, start/stop date, craniospinal or focal treatment, and dose."
+    },
+    "systemic_therapy": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Chemotherapy protocol, regimen, cycle, administered agent, dose, route, high-dose methotrexate, induction/consolidation, stem-cell rescue or prior treatment."
+    },
+    "laboratory": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Hemoglobin, platelets, absolute neutrophils, creatinine, ALT, AST, bilirubin, creatinine clearance/measured GFR, MTX level, or documented toxicity. Include explicit normal and abnormal results; absent testing is not a negative result."
+    },
+    "predisposition": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; include negative tests and VUS."
+    },
+    "patient": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "Initial tumor-detecting MRI date, vital status, last known alive date, death date, event-free follow-up, definitive surgery, treatment initiation or actual trial enrollment."
+    },
+    "registry_eligibility": {
+      "$ref": "#/$defs/TopicRelevanceMention",
+      "description": "ACNS0334 comparability: age at definitive surgery, newly diagnosed high-risk embryonal disease, ATRT exclusion/reclassification, pretreatment history or renal/hepatic/cardiac/pulmonary/marrow adequacy. Include explicit negatives."
+    }
+  },
+  "required": [
+    "response",
+    "diagnosis",
+    "molecular",
+    "event",
+    "metastasis",
+    "surgery",
+    "radiation",
+    "systemic_therapy",
+    "laboratory",
+    "predisposition",
+    "patient",
+    "registry_eligibility"
+  ],
+  "title": "DocumentTopicAnnotation",
+  "type": "object"
+}

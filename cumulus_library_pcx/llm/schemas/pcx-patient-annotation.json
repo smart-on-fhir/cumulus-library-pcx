@@ -1,0 +1,278 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "EventFreeFollowUpMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "event_free": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "True only for explicit follow-up without progression/relapse, secondary malignancy or death; false if such an event is documented. Alive alone is insufficient; null if unknown.",
+          "title": "Event Free"
+        },
+        "assessment_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of documented event-free status assessment, not extraction date; candidate EFS censoring evidence only.",
+          "title": "Assessment Date"
+        },
+        "assessment_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for assessment_date; null if absent."
+        },
+        "assessment_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Clinical follow-up, imaging or other supporting evaluation as stated.",
+          "title": "Assessment Method"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "EventFreeFollowUpMention",
+      "type": "object"
+    },
+    "TimelineAnchor": {
+      "enum": [
+        "ORIGINAL_DIAGNOSIS",
+        "FIRST_LOCAL_DIAGNOSIS",
+        "INITIAL_TUMOR_MRI",
+        "DEFINITIVE_SURGERY",
+        "TRIAL_ENROLLMENT",
+        "TREATMENT_INITIATION",
+        "INDUCTION_COMPLETION",
+        "CONSOLIDATION_COMPLETION"
+      ],
+      "title": "TimelineAnchor",
+      "type": "string"
+    },
+    "TimelineAnchorMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "anchor": {
+          "$ref": "#/$defs/TimelineAnchor"
+        },
+        "anchor_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date explicitly supporting this anchor, ISO date at supported precision. No proxy substitutions.",
+          "title": "Anchor Date"
+        },
+        "anchor_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for anchor_date; null if absent."
+        },
+        "protocol_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Named trial/protocol for enrollment or treatment dates. Enrollment requires explicit documentation.",
+          "title": "Protocol Name"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "anchor"
+      ],
+      "title": "TimelineAnchorMention",
+      "type": "object"
+    },
+    "VitalStatus": {
+      "enum": [
+        "ALIVE",
+        "DECEASED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "VitalStatus",
+      "type": "string"
+    },
+    "VitalStatusMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "vital_status": {
+          "$ref": "#/$defs/VitalStatus",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Explicit patient status; administrative records alone do not establish alive status."
+        },
+        "death_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Actual death date, never a later note date. Preserve partial dates with precision.",
+          "title": "Death Date"
+        },
+        "death_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for death_date; null if absent."
+        },
+        "last_known_alive_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Latest date this document establishes the patient was alive; not automatically the latest encounter or note date.",
+          "title": "Last Known Alive Date"
+        },
+        "last_known_alive_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for last_known_alive_date; null if absent."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "VitalStatusMention",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "anchors": {
+      "items": {
+        "$ref": "#/$defs/TimelineAnchorMention"
+      },
+      "title": "Anchors",
+      "type": "array"
+    },
+    "vital_status": {
+      "$ref": "#/$defs/VitalStatusMention"
+    },
+    "event_free_follow_up": {
+      "description": "Dated follow-up evidence for downstream EFS ascertainment; retain conflicts across notes.",
+      "items": {
+        "$ref": "#/$defs/EventFreeFollowUpMention"
+      },
+      "title": "Event Free Follow Up",
+      "type": "array"
+    }
+  },
+  "required": [
+    "vital_status"
+  ],
+  "title": "PcxPatientTimelineAnnotation",
+  "type": "object"
+}

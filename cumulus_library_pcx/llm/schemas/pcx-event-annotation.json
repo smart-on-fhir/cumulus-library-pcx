@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "EventMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "event_type": {
+          "$ref": "#/$defs/EventType",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Documented event. Use clinician-designated progression or relapse; progression can follow partial response. SECOND_MALIGNANCY does not require proven treatment causation. SECOND_PRIMARY requires explicit designation, not a time/site heuristic. Exclude suspected, negated or family-history events."
+        },
+        "source_of_event_diagnosis": {
+          "$ref": "#/$defs/SourceOfEventDiagnosis",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Evidence actually establishing this event; no arbitrary proximity window or surgery priority."
+        },
+        "event_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Earliest date explicitly establishing this event, ISO date at supported precision. Do not replace earlier confirmed progression with a later biopsy date. For death use actual death date, never the note date.",
+          "title": "Event Date"
+        },
+        "event_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for event_date; null if absent."
+        },
+        "date_of_progression_mri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit progression MRI date, retained separately from clinical confirmation; null for other events.",
+          "title": "Date Of Progression Mri"
+        },
+        "date_of_progression_mri_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for date_of_progression_mri; null if absent."
+        },
+        "confirmation_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Later confirmation date if explicitly distinct from first event evidence.",
+          "title": "Confirmation Date"
+        },
+        "confirmation_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for confirmation_date; null if absent."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "EventMention",
+      "type": "object"
+    },
+    "EventType": {
+      "enum": [
+        "INITIAL_DIAGNOSIS",
+        "RECURRENCE",
+        "PROGRESSION",
+        "REMISSION",
+        "SECOND_MALIGNANCY",
+        "SECOND_PRIMARY",
+        "DECEASED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "SourceOfEventDiagnosis": {
+      "enum": [
+        "PATHOLOGY",
+        "IMAGING",
+        "CSF_CYTOLOGY",
+        "CLINICAL",
+        "DEATH_RECORD",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "SourceOfEventDiagnosis",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "events": {
+      "description": "Distinct documented events, including undated events. Deduplication and EFS adjudication occur downstream.",
+      "items": {
+        "$ref": "#/$defs/EventMention"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "title": "PcxEventAnnotation",
+  "type": "object"
+}

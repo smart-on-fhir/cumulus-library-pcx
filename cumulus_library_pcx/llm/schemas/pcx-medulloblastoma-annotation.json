@@ -1,0 +1,225 @@
+{
+  "$defs": {
+    "EvidenceStatus": {
+      "enum": [
+        "RECEIVED",
+        "EXPLICITLY_NOT_RECEIVED",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "EvidenceStatus",
+      "type": "string"
+    },
+    "GroupEvidence": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "classification_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Documented subgroup method; clinical summary is not automatically methylation confirmation.",
+          "title": "Classification Method"
+        },
+        "source_report": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source molecular report as stated; preserve conflicts in molecular.py reports.",
+          "title": "Source Report"
+        },
+        "group": {
+          "$ref": "#/$defs/MedulloblastomaGroup",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Explicit molecular group: WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, CONFLICTING, OTHER. NONE_OF_THE_ABOVE for absent or indeterminate classification. Do not infer from treatment or histology."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "GroupEvidence",
+      "type": "object"
+    },
+    "MedulloblastomaGroup": {
+      "enum": [
+        "WNT",
+        "SHH",
+        "GROUP_3",
+        "GROUP_4",
+        "NON_WNT_NON_SHH",
+        "CONFLICTING",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MedulloblastomaGroup",
+      "type": "string"
+    },
+    "SurvivalEvidence": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "patient_deceased": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "True only for explicit death, false only for explicit alive status, null when undocumented.",
+          "title": "Patient Deceased"
+        },
+        "death_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Actual date of death, exact day only. Never substitute the note date.",
+          "title": "Death Date"
+        },
+        "last_known_alive_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact day the patient was documented alive. A note mentioning a deceased patient is not alive evidence.",
+          "title": "Last Known Alive Date"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "SurvivalEvidence",
+      "type": "object"
+    },
+    "TreatmentEvidence": {
+      "description": "Patient-specific delivered treatment for medulloblastoma at any dose and route,\nincluding historical delivery. Exclude treatment for unrelated diseases or tumors. Orders, plans, held doses and discussion alone do not establish receipt.\nAn explicit negative applies only through the documented assessment date.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/EvidenceStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "RECEIVED: explicitly administered or delivered, any dose, including historical treatment. EXPLICITLY_NOT_RECEIVED: explicit non-receipt through assessment. NOT_DOCUMENTED: silence, plans, hypothetical or uncertain receipt."
+        },
+        "first_received_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Earliest explicitly dated administration. Exact day only; null for partial or missing dates.",
+          "title": "First Received Date"
+        },
+        "assessed_through_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date through which receipt or explicit non-receipt is documented. Never infer from the extraction date.",
+          "title": "Assessed Through Date"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TreatmentEvidence",
+      "type": "object"
+    }
+  },
+  "description": "One note's evidence for the PCX medulloblastoma comparison. Do not infer\nsubgroup from age, treatment or histology. Any-dose flags do not identify the ACNS0334 high-dose induction regimen;\nuse systemic_therapy.py for delivered dose, phase and backbone evidence. Preserve verbatim spans for all findings and conflicting evidence\nacross notes for downstream review. Diagnosis and age come from structured data.",
+  "properties": {
+    "molecular_group": {
+      "$ref": "#/$defs/GroupEvidence"
+    },
+    "methotrexate": {
+      "$ref": "#/$defs/TreatmentEvidence"
+    },
+    "radiation": {
+      "$ref": "#/$defs/TreatmentEvidence"
+    },
+    "survival": {
+      "$ref": "#/$defs/SurvivalEvidence"
+    }
+  },
+  "required": [
+    "molecular_group",
+    "methotrexate",
+    "radiation",
+    "survival"
+  ],
+  "title": "PcxMedulloblastomaAnnotation",
+  "type": "object"
+}

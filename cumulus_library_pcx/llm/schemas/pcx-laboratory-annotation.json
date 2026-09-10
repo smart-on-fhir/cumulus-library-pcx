@@ -1,0 +1,269 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "LaboratoryResultMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "test": {
+          "$ref": "#/$defs/LaboratoryTest"
+        },
+        "result_verbatim": {
+          "description": "Exact value, comparator and units. Preserve age-specific normal ranges and whether GFR is indexed. Serum creatinine is not interchangeable with measured GFR/clearance.",
+          "title": "Result Verbatim",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Numeric reported result; null for qualitative results. Retain inequalities in result_verbatim.",
+          "title": "Value"
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact documented units; do not invent or convert units.",
+          "title": "Units"
+        },
+        "reference_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Documented normal range or upper limit of normal, including age context.",
+          "title": "Reference Range"
+        },
+        "collection_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Specimen/measurement date, ISO date at supported precision.",
+          "title": "Collection Date"
+        },
+        "collection_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for collection_date; null if absent."
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Baseline eligibility, on-treatment toxicity or MTX clearance; include hours after MTX and transfusion context only if stated.",
+          "title": "Context"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "test",
+        "result_verbatim"
+      ],
+      "title": "LaboratoryResultMention",
+      "type": "object"
+    },
+    "LaboratoryTest": {
+      "enum": [
+        "ABSOLUTE_NEUTROPHIL_COUNT",
+        "PLATELET_COUNT",
+        "HEMOGLOBIN",
+        "CREATININE_CLEARANCE",
+        "MEASURED_GFR",
+        "SERUM_CREATININE",
+        "TOTAL_BILIRUBIN",
+        "AST",
+        "ALT",
+        "METHOTREXATE_LEVEL",
+        "OTHER"
+      ],
+      "title": "LaboratoryTest",
+      "type": "string"
+    },
+    "ToxicityMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "toxicity": {
+          "description": "Documented adverse event; do not infer toxicity from a lab without clinical interpretation.",
+          "title": "Toxicity",
+          "type": "string"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit CTCAE grade; never infer from a value alone.",
+          "title": "Grade"
+        },
+        "grading_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Named grading system/version if stated; do not assume CTCAE v4 because the paper used it.",
+          "title": "Grading System"
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED"
+        },
+        "event_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Documented toxicity date, ISO date at supported precision.",
+          "title": "Event Date"
+        },
+        "event_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for event_date; null if absent."
+        },
+        "attribution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Clinician-attributed relationship to treatment, including treatment-related death only if explicitly stated.",
+          "title": "Attribution"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "toxicity"
+      ],
+      "title": "ToxicityMention",
+      "type": "object"
+    },
+    "TreatmentPhase": {
+      "enum": [
+        "INDUCTION",
+        "CONSOLIDATION",
+        "POST_CONSOLIDATION",
+        "SALVAGE",
+        "OTHER",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "TreatmentPhase",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "results": {
+      "items": {
+        "$ref": "#/$defs/LaboratoryResultMention"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "toxicities": {
+      "items": {
+        "$ref": "#/$defs/ToxicityMention"
+      },
+      "title": "Toxicities",
+      "type": "array"
+    }
+  },
+  "title": "PcxLaboratoryAnnotation",
+  "type": "object"
+}

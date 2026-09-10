@@ -1,0 +1,269 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "DefinitiveSurgerySettingMention": {
+      "description": "Institution at which the definitive (initial, maximal) tumor resection was performed.\n\nACNS0334 anchors age eligibility on the date of definitive surgery, and the\ntrial strata depend on residual disease measured after it. The surgery\nmodel extracts the operation, its date, extent of resection and residual\ndisease; this mention only records where it happened, so the phenotype\nlayer knows whether the definitive operative report and postoperative\nimaging are local documents or outside records.\n\nDefinitive surgery is the initial resection intended to remove the tumor.\nA biopsy-only procedure, a shunt or EVD, a second-look resection after\ninduction, and surgery for recurrence are not the definitive surgery and\nmust not set this value.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "surgery_setting": {
+          "$ref": "#/$defs/SurgerySetting",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Where the definitive tumor resection was performed. Choose one. EXTERNAL: the initial resection was performed at another institution, such as 's/p gross total resection at an outside hospital' or 'resected at Hospital X prior to transfer'; THIS_INSTITUTION: the initial resection was performed at Boston Children's Hospital (BCH), including when the patient was transferred here for the operation after outside imaging; NONE_OF_THE_ABOVE: the note does not say where the definitive surgery was done, no resection is documented, or only a biopsy, shunt, or second-look procedure is described."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "DefinitiveSurgerySettingMention",
+      "type": "object"
+    },
+    "DiagnosisSetting": {
+      "description": "Where the patient's tissue diagnosis of the embryonal tumor was first established.",
+      "enum": [
+        "EXTERNAL",
+        "THIS_INSTITUTION",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "DiagnosisSetting",
+      "type": "string"
+    },
+    "DiagnosisSettingMention": {
+      "description": "Institution at which the patient's embryonal tumor diagnosis was first established.\n\nDiagnosis means the tissue (histologic) diagnosis from the resection or\nbiopsy specimen. The diagnosis date itself is extracted by the diagnosis\nmodel. This mention only records whether that diagnosis was made at this\ninstitution or elsewhere, which tells the phenotype layer whether the coded\ndiagnosis date is an establishment date or a transfer recording, and\nwhether the primary pathology report should exist locally.\n\nUse the initial tissue diagnosis. A later central review, methylation\nclassification, molecular subgrouping, or reclassification (for example\nmedulloblastoma revised to ETMR or ATRT) at this institution does not make\nan outside diagnosis internal.\n\nImaging that first showed the mass is recorded separately in\nimaging_detected_externally. Do not extract family history, negated or\nrule-out tumor, or a suspected/probable/working diagnosis.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "diagnosis_setting": {
+          "$ref": "#/$defs/DiagnosisSetting",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Where the patient's tissue diagnosis was first established. Choose one. EXTERNAL: the initial resection or biopsy and its pathology were done at another institution, such as 'resected at CHOP, pathology showed medulloblastoma', 'outside pathology reviewed here and confirmed', or 'diagnosed in Brazil', even if later confirmed, subgrouped, or reclassified at Boston Children's Hospital (BCH); THIS_INSTITUTION: the initial resection or biopsy and pathology were done at Boston Children's Hospital (BCH), even if the patient was transferred from an outside emergency department or hospital after imaging showed the mass; NONE_OF_THE_ABOVE: the note does not say where the tissue diagnosis was established, or no patient-level embryonal tumor diagnosis is documented."
+        },
+        "imaging_detected_externally": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "True when the note states the brain mass was first identified on imaging (CT or MRI) at another institution before the patient came here, whether or not surgery was then done here, such as 'CT at outside ED showed a posterior fossa mass and patient was transferred to Boston Children's Hospital (BCH)'; false when the note states the initial imaging was done at Boston Children's Hospital (BCH); null when the note does not say where the tumor was first imaged.",
+          "title": "Imaging Detected Externally"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "DiagnosisSettingMention",
+      "type": "object"
+    },
+    "PriorTherapyAtEntryMention": {
+      "description": "Tumor-directed therapy received BEFORE the patient's tumor care at this institution began.\n\nACNS0334 excluded patients with prior radiotherapy or chemotherapy, with\nsteroids allowed. This mention records whether such treatment happened\nelsewhere, so the phenotype layer can separate a patient who is newly\ndiagnosed and treatment-naive on arrival from one whose induction, or\nwhose relapse treatment, began at another institution.\n\nTumor-directed therapy means chemotherapy of any regimen (including a\npartial or single induction cycle elsewhere), radiation of any field or\ndose, and high-dose chemotherapy with stem-cell rescue. Dexamethasone or\nother steroids for edema, a shunt or EVD for hydrocephalus, anticonvulsants\nand supportive care are NOT tumor-directed therapy. Tumor resection is\nrecorded as a modality so the sequence is preserved, but surgery alone does\nnot make a patient EXPERIENCED.\n\nScope is the period before care at this institution. Extract when the note\nties the exposure to prior or outside care, to the time of transfer, or to\na treatment history whose starts precede care here. Do not extract from\nstatements about therapy started at this institution, and do not extract\nfamily history.\n\nCapture the regimen, agent, or modality phrase in spans.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "prior_therapy_exposure": {
+          "$ref": "#/$defs/PriorTherapyExposure",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Chemotherapy or radiation exposure before tumor care at Boston Children's Hospital (BCH) began. Choose one. NAIVE: the note states no chemotherapy and no radiation had been given before care here, such as 'newly diagnosed, treatment-naive', 'no prior therapy', 'has not received any chemotherapy or radiation', or prior management limited to resection, steroids, shunt or EVD; EXPERIENCED: at least one chemotherapy administration or radiation course was delivered at another institution before tumor care at Boston Children's Hospital (BCH), whether completed, interrupted, or failed, such as 'received induction cycle 1 at outside hospital', 'completed Head Start induction elsewhere', 'craniospinal radiation at Hospital X', or 'transferred after progression on chemotherapy'; NONE_OF_THE_ABOVE: prior treatment exposure is not documented, or the note does not distinguish outside therapy from therapy started here."
+        },
+        "prior_therapy_modalities": {
+          "description": "Tumor-directed modalities received elsewhere before care at Boston Children's Hospital (BCH) began, one entry per distinct modality documented. CHEMOTHERAPY: any systemic chemotherapy, including a partial cycle; RADIATION: any radiation, focal or craniospinal, photon or proton; TUMOR_SURGERY: resection or biopsy of the tumor; STEM_CELL_RESCUE: high-dose chemotherapy with autologous stem-cell infusion; STEROIDS_ONLY: the note states steroids were the only treatment before arrival; OTHER: a tumor-directed treatment not listed, such as a targeted agent or trial drug; NONE_OF_THE_ABOVE: no prior modality is documented. Emit an empty list when prior_therapy_exposure is NONE_OF_THE_ABOVE and nothing is stated.",
+          "items": {
+            "$ref": "#/$defs/PriorTherapyModality"
+          },
+          "title": "Prior Therapy Modalities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "PriorTherapyAtEntryMention",
+      "type": "object"
+    },
+    "PriorTherapyExposure": {
+      "description": "Whether the patient had received any tumor-directed chemotherapy or\nradiation before tumor care at this institution began.",
+      "enum": [
+        "NAIVE",
+        "EXPERIENCED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "PriorTherapyExposure",
+      "type": "string"
+    },
+    "PriorTherapyModality": {
+      "description": "Tumor-directed treatment modalities received elsewhere before care at this\ninstitution began.",
+      "enum": [
+        "CHEMOTHERAPY",
+        "RADIATION",
+        "TUMOR_SURGERY",
+        "STEM_CELL_RESCUE",
+        "STEROIDS_ONLY",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "PriorTherapyModality",
+      "type": "string"
+    },
+    "SurgerySetting": {
+      "description": "Where the patient's definitive tumor surgery was performed.",
+      "enum": [
+        "EXTERNAL",
+        "THIS_INSTITUTION",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "SurgerySetting",
+      "type": "string"
+    },
+    "TransferInMention": {
+      "description": "Transfer of the patient's tumor care INTO this institution from another institution.\n\nA transfer in means the embryonal tumor was already diagnosed by tissue\nand/or already treated (tumor resection, chemotherapy, or radiation) at\nanother institution (another hospital, another pediatric oncology or\nneurosurgery service, or a center abroad) before the patient's tumor care\nat this institution began. Include an accepted inpatient transfer of a\npatient resected at the outside hospital, a patient who started induction\nelsewhere and continues it here, and an outpatient new-patient visit for a\npatient followed elsewhere after treatment.\n\nThe following are NOT a transfer in and must not be extracted:\n* transfer from an outside emergency department or hospital after imaging\n  showed a brain mass, when no tissue diagnosis and no tumor-directed\n  treatment (other than steroids, shunt or EVD for hydrocephalus) occurred\n  there; record that case in diagnosis_setting.imaging_detected_externally\n* transfers within this institution (emergency department to inpatient,\n  inpatient to clinic, neurosurgery to oncology)\n* outside labs, imaging, infusions, or radiation done locally at the\n  direction of this institution's oncology team (shared care is not a transfer)\n* transfer OUT of this institution, including referral elsewhere for proton\n  therapy or stem-cell rescue\n* family history\n\nCapture the outside institution name in spans when it is stated.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "transfer_in_timing": {
+          "$ref": "#/$defs/TransferInTiming",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "When the patient's tumor care moved to Boston Children's Hospital (BCH), relative to this note. Choose one. THIS_ENCOUNTER: this note documents the patient's first Boston Children's Hospital (BCH) visit or admission for the tumor after diagnosis or treatment elsewhere, such as a new patient visit, a transfer-of-care visit, or an accepted inpatient transfer of a patient already resected or already on chemotherapy at the outside hospital; PRIOR: the transfer to Boston Children's Hospital (BCH) happened before this encounter and the note recounts it as history, such as 'transferred care to BCH after induction cycle 2' or 'established care with us following resection at an outside hospital'; PLANNED: the transfer is proposed or pending and the patient has not yet been seen at Boston Children's Hospital (BCH) for the tumor, such as an outside referral letter or 'will establish oncology care at BCH'; NONE_OF_THE_ABOVE: no transfer of tumor care into the institution is documented, or the patient arrived from an outside facility with imaging only and no tissue diagnosis or tumor-directed treatment elsewhere."
+        },
+        "transfer_in_date": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date the patient's tumor care at Boston Children's Hospital (BCH) began, in ISO YYYY-MM-DD format (e.g. 2021-03-15). Emit null when the note does not state the date, including when transfer_in_timing is THIS_ENCOUNTER and the visit date is not written in the text. Never emit placeholder text. When only month or year precision is available, use the first date consistent with it (March 2021 -> 2021-03-01, 2021 -> 2021-01-01) and record the actual precision in transfer_in_date_precision.",
+          "title": "Transfer In Date"
+        },
+        "transfer_in_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision actually supported by the source text for transfer_in_date. DAY: day, month, and year were explicitly stated; MONTH: month and year were explicitly stated; YEAR: only year was explicitly stated; Use null when transfer_in_date is null."
+        },
+        "transfer_in_reason": {
+          "$ref": "#/$defs/TransferInReason",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Documented reason tumor care moved to Boston Children's Hospital (BCH). Choose one. CLINICAL_REFERRAL: the move was driven by the disease or its treatment, such as referral for pediatric neuro-oncology or neurosurgical expertise, second-look surgery, high-dose chemotherapy with stem-cell rescue, proton or craniospinal radiation, enrollment on a protocol such as ACNS0334, progression or relapse, a higher level of care, or a second opinion sought because of the disease; RELOCATION_OR_ACCESS: the move was unrelated to disease course, such as the family moved, insurance changed, the prior provider left, distance or convenience, or family preference not tied to disease status; NONE_OF_THE_ABOVE: no reason is documented or the reason does not fit these options."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TransferInMention",
+      "type": "object"
+    },
+    "TransferInReason": {
+      "description": "Why tumor care moved to this institution. Separates disease-driven referral\n(a confounder: referred patients have higher-risk or progressing disease,\nor need a service the referring center lacks) from moves unrelated to\ndisease course.",
+      "enum": [
+        "CLINICAL_REFERRAL",
+        "RELOCATION_OR_ACCESS",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "TransferInReason",
+      "type": "string"
+    },
+    "TransferInTiming": {
+      "description": "When, relative to this note's encounter, the patient's tumor care moved to\nthis institution from another institution.",
+      "enum": [
+        "THIS_ENCOUNTER",
+        "PRIOR",
+        "PLANNED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "TransferInTiming",
+      "type": "string"
+    }
+  },
+  "description": "Patient-level transition-of-care annotations extracted from a single clinical note.\n\nCaptures whether and when the patient's embryonal tumor care transferred\ninto this institution from another institution and why, where the tissue\ndiagnosis and the definitive surgery were performed, and whether the\npatient had received chemotherapy or radiation before care here began.\n\"This institution\" is the institution whose clinicians authored the note.\n\nBase every value on patient-specific statements in this note. Do not\nextract family history, negated or rule-out tumor, or a\nsuspected/probable/working diagnosis. Arrival from an outside emergency\ndepartment with imaging only is not a transfer of care.",
+  "properties": {
+    "transfer_in": {
+      "$ref": "#/$defs/TransferInMention"
+    },
+    "diagnosis_setting": {
+      "$ref": "#/$defs/DiagnosisSettingMention"
+    },
+    "definitive_surgery_setting": {
+      "$ref": "#/$defs/DefinitiveSurgerySettingMention"
+    },
+    "prior_therapy_at_entry": {
+      "$ref": "#/$defs/PriorTherapyAtEntryMention"
+    }
+  },
+  "required": [
+    "transfer_in",
+    "diagnosis_setting",
+    "definitive_surgery_setting",
+    "prior_therapy_at_entry"
+  ],
+  "title": "PcxTransitionOfCareAnnotation",
+  "type": "object"
+}

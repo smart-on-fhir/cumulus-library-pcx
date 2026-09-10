@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "CancerPredispositionMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "gene_or_syndrome": {
+          "description": "Patient's documented germline gene/syndrome, e.g. SUFU, PTCH1 or TP53; record other findings verbatim.",
+          "title": "Gene Or Syndrome",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/PredispositionStatus",
+          "default": "UNEVALUATED",
+          "description": "PRESENT for pathogenic/likely pathogenic germline finding or diagnosed syndrome; ABSENT only for explicitly negative testing; UNCERTAIN for VUS, never PRESENT; UNEVALUATED for missing testing."
+        },
+        "variant_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact variant and classification if stated.",
+          "title": "Variant Verbatim"
+        },
+        "report_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Genetics report date, ISO date at supported precision.",
+          "title": "Report Date"
+        },
+        "report_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for report_date; null if absent."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "gene_or_syndrome"
+      ],
+      "title": "CancerPredispositionMention",
+      "type": "object"
+    },
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "PredispositionStatus": {
+      "enum": [
+        "PRESENT",
+        "ABSENT",
+        "UNCERTAIN",
+        "UNEVALUATED"
+      ],
+      "title": "PredispositionStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/CancerPredispositionMention"
+      },
+      "title": "Findings",
+      "type": "array"
+    }
+  },
+  "title": "PcxPredispositionAnnotation",
+  "type": "object"
+}

@@ -1,0 +1,403 @@
+{
+  "$defs": {
+    "AgeAtDiagnosisMention": {
+      "description": "Patient's age at initial diagnosis in completed months. Extract only if explicitly\nstated. Preserve all ages; age at definitive surgery is a separate trial criterion.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "age_at_diagnosis_months": {
+          "anyOf": [
+            {
+              "maximum": 1500,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit age at initial diagnosis in completed months (e.g. '2 years' -> 24); not age at definitive surgery. Null if unstated.",
+          "title": "Age At Diagnosis Months"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "AgeAtDiagnosisMention",
+      "type": "object"
+    },
+    "ChangMStage": {
+      "description": "Chang metastasis stage (Chang M-stage). Direct-extraction fallback; the derived\nstage is to be adjudicated downstream from the metastasis.py staging inputs.",
+      "enum": [
+        "M0",
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "ChangMStage",
+      "type": "string"
+    },
+    "ChangMStageMention": {
+      "description": "Documented Chang metastasis stage (M-stage) at diagnosis/staging, when stated\ndirectly. Do not derive it from imaging or cytology here; the derived stage is\nadjudicated downstream from the metastasis.py inputs.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "chang_m_stage": {
+          "$ref": "#/$defs/ChangMStage",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "M0: no metastasis (localized). M1: positive CSF cytology only. M2: intracranial metastasis beyond primary. M3: spinal/leptomeningeal metastasis. M4: metastasis outside the CNS. NONE_OF_THE_ABOVE: M-stage not documented."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "ChangMStageMention",
+      "type": "object"
+    },
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "DiagnosisDateGoldMention": {
+      "description": "Date of the confirmatory ('gold standard') tissue diagnosis: prefer the surgery /\nbiopsy procedure date that produced the diagnostic specimen over a later report date.\nNot necessarily the definitive surgery.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "diagnosis_date_gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confirmatory tissue-diagnosis date, ISO YYYY-MM-DD, first-of-period if coarse. Null if unstated.",
+          "title": "Diagnosis Date Gold"
+        },
+        "diagnosis_date_gold_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for diagnosis_date_gold. Null when diagnosis_date_gold is null."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "DiagnosisDateGoldMention",
+      "type": "object"
+    },
+    "DiagnosisDateMention": {
+      "description": "Date the patient was first diagnosed with this embryonal tumor. If several dates\nappear, use the earliest diagnosis date.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "diagnosis_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Earliest diagnosis date, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated.",
+          "title": "Diagnosis Date"
+        },
+        "diagnosis_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision supported by the text for diagnosis_date. Null when diagnosis_date is null."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "DiagnosisDateMention",
+      "type": "object"
+    },
+    "DiseaseSubtype": {
+      "description": "Embryonal diagnoses, including exclusions and historical classifications.",
+      "enum": [
+        "ATRT",
+        "MEDULLOBLASTOMA",
+        "ETMR",
+        "PINEOBLASTOMA",
+        "LEGACY_SPNET",
+        "OTHER_CNS_EMBRYONAL",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "DiseaseSubtype",
+      "type": "string"
+    },
+    "DiseaseSubtypeMention": {
+      "description": "The patient's documented CNS embryonal tumor diagnosis. Choose the single best\nsubtype supported by pathology/molecular text in THIS note. Do not extract negated,\nrule-out, suspected/probable, or family-history diagnoses.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "disease_subtype": {
+          "$ref": "#/$defs/DiseaseSubtype",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Documented diagnosis using only evidence from this note. Choose exactly one. ATRT: atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the CNS. Record ATRT as an exclusion/reclassification; do not infer it from a marker alone. MEDULLOBLASTOMA: medulloblastoma of any histology or molecular group (WNT, SHH, Group 3, Group 4), incl. medullomyoblastoma and MBEN. ETMR: embryonal tumor with multilayered rosettes. PINEOBLASTOMA: pineoblastoma. LEGACY_SPNET: historical supratentorial PNET/CNS-PNET without a modern diagnosis. OTHER_CNS_EMBRYONAL: other embryonal CNS tumor or embryonal tumor NOS. NONE_OF_THE_ABOVE: no embryonal-tumor diagnosis is documented in this note."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "DiseaseSubtypeMention",
+      "type": "object"
+    },
+    "IntegratedDiagnosisMention": {
+      "description": "The diagnosis exactly as the note words it: the WHO-CNS5 integrated diagnosis when\nstated, and any deprecated pre-CNS5 term used for THIS tumor. Verbatim wording only; the\nmolecular classification itself is extracted by molecular.py, and no modern entity is to\nbe inferred from a legacy term.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "integrated_diagnosis_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The exact WHO-CNS5 integrated-diagnosis phrase as written in the note (e.g. 'Medulloblastoma, SHH-activated and TP53-mutant'). Null if not stated.",
+          "title": "Integrated Diagnosis Verbatim"
+        },
+        "historical_diagnosis_term": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A deprecated or legacy (pre-WHO-CNS5) diagnosis term the note uses for THIS tumor -- e.g. 'PNET', 'CNS-PNET', 'supratentorial PNET', 'cerebellar sarcoma', 'medulloblastoma variant'. Capture the exact historical phrase verbatim so a downstream crosswalk can review it against a current diagnosis; do not infer a modern entity from a legacy term. Null when the note uses only current integrated-diagnosis terminology, or no such term is stated. Do not record family-history, negated, or rule-out terms.",
+          "title": "Historical Diagnosis Term"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "IntegratedDiagnosisMention",
+      "type": "object"
+    },
+    "MedulloblastomaHistology": {
+      "description": "WHO histologic pattern of medulloblastoma (distinct from molecular group).",
+      "enum": [
+        "CLASSIC",
+        "DESMOPLASTIC_NODULAR",
+        "EXTENSIVE_NODULARITY_MBEN",
+        "LARGE_CELL_ANAPLASTIC",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MedulloblastomaHistology",
+      "type": "string"
+    },
+    "MedulloblastomaHistologyMention": {
+      "description": "Histologic pattern when the diagnosis is medulloblastoma. Leave NONE_OF_THE_ABOVE if\nthe histologic pattern is not stated or the tumor is not a medulloblastoma.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "histology": {
+          "$ref": "#/$defs/MedulloblastomaHistology",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "CLASSIC: classic medulloblastoma. DESMOPLASTIC_NODULAR: desmoplastic/nodular. EXTENSIVE_NODULARITY_MBEN: medulloblastoma with extensive nodularity (MBEN). LARGE_CELL_ANAPLASTIC: large-cell and/or anaplastic. NONE_OF_THE_ABOVE: histologic pattern not stated or not a medulloblastoma."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MedulloblastomaHistologyMention",
+      "type": "object"
+    },
+    "TumorLocationMention": {
+      "description": "Primary anatomic site of the tumor as the note words it. Prefer the imaging\nimpression, then the pathology gross description.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "tumor_location_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact site phrase from the note (e.g. 'left cerebellar hemisphere'). Null if not stated.",
+          "title": "Tumor Location Verbatim"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TumorLocationMention",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Extract confirmed patient-specific diagnoses, including documented history.\nExclude suspected, negated, rule-out, and family-history diagnoses. Preserve\nexact diagnosis/site wording and legacy terms without inferring modern entities.\nMolecular classification is handled separately. Unknown findings do not imply\neligibility or exclusion. Extract only explicitly documented M-stage; do not\nderive it from imaging or cytology here. Histology is unknown when unstated or\nnot medulloblastoma. Every mention carries verbatim spans; has_mention must agree\nwith the spans.",
+  "properties": {
+    "disease_subtype": {
+      "$ref": "#/$defs/DiseaseSubtypeMention"
+    },
+    "medulloblastoma_histology": {
+      "$ref": "#/$defs/MedulloblastomaHistologyMention"
+    },
+    "integrated_diagnosis": {
+      "$ref": "#/$defs/IntegratedDiagnosisMention"
+    },
+    "tumor_location": {
+      "$ref": "#/$defs/TumorLocationMention"
+    },
+    "chang_m_stage": {
+      "$ref": "#/$defs/ChangMStageMention"
+    },
+    "age_at_diagnosis": {
+      "$ref": "#/$defs/AgeAtDiagnosisMention"
+    },
+    "diagnosis_date": {
+      "$ref": "#/$defs/DiagnosisDateMention"
+    },
+    "diagnosis_date_gold": {
+      "$ref": "#/$defs/DiagnosisDateGoldMention"
+    }
+  },
+  "required": [
+    "disease_subtype",
+    "medulloblastoma_histology",
+    "integrated_diagnosis",
+    "tumor_location",
+    "chang_m_stage",
+    "age_at_diagnosis",
+    "diagnosis_date",
+    "diagnosis_date_gold"
+  ],
+  "title": "PcxDiagnosisAnnotation",
+  "type": "object"
+}

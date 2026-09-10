@@ -1,0 +1,630 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "DeliveryStatus": {
+      "enum": [
+        "ADMINISTERED",
+        "PLANNED",
+        "HELD",
+        "CANCELLED",
+        "EXPLICITLY_NOT_RECEIVED",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "DeliveryStatus",
+      "type": "string"
+    },
+    "MedicalTherapyCycleMention": {
+      "description": "A named or numbered chemotherapy cycle (for protocols that use cycles).",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED",
+          "description": "Documented induction, consolidation or salvage phase."
+        },
+        "protocol_name_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Protocol linking this cycle to its regimen if stated.",
+          "title": "Protocol Name Verbatim"
+        },
+        "completion_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit planned, started, completed, interrupted or discontinued cycle status.",
+          "title": "Completion Status"
+        },
+        "interruption_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Reason for interruption/discontinuation only if stated; do not infer toxicity or progression.",
+          "title": "Interruption Reason"
+        },
+        "cycle_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle name or number as written (e.g. 'Induction Cycle 2', 'Cycle 3'). Null if none.",
+          "title": "Cycle Name"
+        },
+        "cycle_start_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle start date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Cycle Start Date"
+        },
+        "cycle_start_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for cycle_start_date. Null when it is null."
+        },
+        "cycle_stop_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle stop date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Cycle Stop Date"
+        },
+        "cycle_stop_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for cycle_stop_date. Null when it is null."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MedicalTherapyCycleMention",
+      "type": "object"
+    },
+    "MedicalTherapyRegimenMention": {
+      "description": "A medical-therapy (chemotherapy) regimen: the protocol the patient is treated on or\nin accordance with, its start/stop, and the agents it comprises. Emit one per distinct\nregimen documented in this note.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED"
+        },
+        "documented_trial_arm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit randomized arm assignment, if any. Do not infer randomization from observed treatment.",
+          "title": "Documented Trial Arm"
+        },
+        "protocol_name_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Treatment protocol name as written (e.g. 'ACNS0334', 'CCG99703', 'Head Start'). Null if the note states the patient is not treated per a protocol, or no protocol is named.",
+          "title": "Protocol Name Verbatim"
+        },
+        "regimen_start_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regimen start date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Regimen Start Date"
+        },
+        "regimen_start_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for regimen_start_date. Null when it is null."
+        },
+        "regimen_stop_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regimen stop date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Regimen Stop Date"
+        },
+        "regimen_stop_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for regimen_stop_date. Null when it is null."
+        },
+        "agents": {
+          "description": "Agents documented for this regimen; inspect delivery_status to establish receipt, not the protocol name.",
+          "items": {
+            "$ref": "#/$defs/TherapyAgentMention"
+          },
+          "title": "Agents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MedicalTherapyRegimenMention",
+      "type": "object"
+    },
+    "StemCellInfusionMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "delivery_status": {
+          "$ref": "#/$defs/DeliveryStatus",
+          "default": "NOT_DOCUMENTED"
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED"
+        },
+        "infusion_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Actual stem-cell infusion date, not collection date.",
+          "title": "Infusion Date"
+        },
+        "infusion_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for infusion_date; null if absent."
+        },
+        "cycle_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Associated consolidation cycle, only when documented.",
+          "title": "Cycle Name"
+        },
+        "cell_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Autologous peripheral blood, bone marrow or other documented source.",
+          "title": "Cell Source"
+        },
+        "cd34_cells_per_kg": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit absolute CD34+ cells/kg; convert a stated multiplier such as 2 x 10^6 to 2000000. Never substitute collected dose for infused dose.",
+          "title": "Cd34 Cells Per Kg"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "StemCellInfusionMention",
+      "type": "object"
+    },
+    "TherapyAdministrationMention": {
+      "description": "One documented administration or protocol dose for an agent.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "delivery_status": {
+          "$ref": "#/$defs/DeliveryStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "ADMINISTERED requires actual receipt. Planned protocol doses, held doses and cancelled orders remain separate."
+        },
+        "phase": {
+          "$ref": "#/$defs/TreatmentPhase",
+          "default": "NOT_DOCUMENTED",
+          "description": "Documented phase of this dose; never infer from drug name alone."
+        },
+        "cycle_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle linked to this administration, if stated.",
+          "title": "Cycle Name"
+        },
+        "administration_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Administration date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Administration Date"
+        },
+        "administration_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for administration_date. Null when it is null."
+        },
+        "dose_amount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Numeric dose amount as documented. Use the per-body-surface-area amount when the note gives g/m2 or mg/m2; otherwise use the administered amount. Null if no numeric dose is stated.",
+          "title": "Dose Amount"
+        },
+        "dose_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dose unit exactly as written, including denominator when present, such as 'g/m2', 'mg/m2', or 'mg/kg'. Null when dose_amount is null.",
+          "title": "Dose Unit"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Administration route as written, such as intravenous, intrathecal, or oral. Null if not stated.",
+          "title": "Route"
+        },
+        "high_dose_methotrexate_explicit_bool": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "True only when this administration is explicitly called high-dose methotrexate. False only when explicitly characterized as not high-dose; null when unknown. Numeric dose-based classification occurs downstream. This label does not establish receipt; inspect delivery_status.",
+          "title": "High Dose Methotrexate Explicit Bool"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TherapyAdministrationMention",
+      "type": "object"
+    },
+    "TherapyAgentMention": {
+      "description": "A single systemic agent documented in treatment planning or delivery. Emit one per distinct\nagent (e.g. vincristine, cisplatin, cyclophosphamide, methotrexate).",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "delivery_status": {
+          "$ref": "#/$defs/DeliveryStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "Receipt of this agent when individual doses are not detailed. Plans do not establish exposure."
+        },
+        "agent_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Therapeutic agent name as written (generic preferred). Null if none documented.",
+          "title": "Agent Name"
+        },
+        "therapy_start_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent start date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Therapy Start Date"
+        },
+        "therapy_start_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for therapy_start_date. Null when it is null."
+        },
+        "therapy_stop_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent stop date, ISO YYYY-MM-DD. Null if not stated.",
+          "title": "Therapy Stop Date"
+        },
+        "therapy_stop_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for therapy_stop_date. Null when it is null."
+        },
+        "administrations": {
+          "description": "All distinct dated administrations or explicitly stated protocol doses for this agent in the document. Empty when no administration-level detail is stated.",
+          "items": {
+            "$ref": "#/$defs/TherapyAdministrationMention"
+          },
+          "title": "Administrations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "TherapyAgentMention",
+      "type": "object"
+    },
+    "TreatmentPhase": {
+      "enum": [
+        "INDUCTION",
+        "CONSOLIDATION",
+        "POST_CONSOLIDATION",
+        "SALVAGE",
+        "OTHER",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "TreatmentPhase",
+      "type": "string"
+    }
+  },
+  "description": "Systemic-therapy annotations from a single clinical note.\n\n    ",
+  "properties": {
+    "regimens": {
+      "description": "All medical-therapy regimens documented in this note; empty list if none.",
+      "items": {
+        "$ref": "#/$defs/MedicalTherapyRegimenMention"
+      },
+      "title": "Regimens",
+      "type": "array"
+    },
+    "stem_cell_infusions": {
+      "description": "Documented stem-cell rescue/infusion events, separate from collection and plans.",
+      "items": {
+        "$ref": "#/$defs/StemCellInfusionMention"
+      },
+      "title": "Stem Cell Infusions",
+      "type": "array"
+    },
+    "cycles": {
+      "description": "All named/numbered therapy cycles documented in this note; empty list if none.",
+      "items": {
+        "$ref": "#/$defs/MedicalTherapyCycleMention"
+      },
+      "title": "Cycles",
+      "type": "array"
+    }
+  },
+  "title": "PcxSystemicTherapyAnnotation",
+  "type": "object"
+}

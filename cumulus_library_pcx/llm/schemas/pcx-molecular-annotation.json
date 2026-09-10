@@ -1,0 +1,329 @@
+{
+  "$defs": {
+    "AlterationStatus": {
+      "enum": [
+        "PRESENT",
+        "ABSENT",
+        "INDETERMINATE",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "AlterationStatus",
+      "type": "string"
+    },
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "MbMolecularGroup": {
+      "enum": [
+        "WNT",
+        "SHH",
+        "GROUP_3",
+        "GROUP_4",
+        "NON_WNT_NON_SHH",
+        "NOT_SUBGROUPED",
+        "INDETERMINATE",
+        "CONFLICTING",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MbMolecularGroup",
+      "type": "string"
+    },
+    "MolecularAlterationMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "target": {
+          "description": "Exact gene/chromosome, e.g. MYC, MYCN, TP53, isochromosome 17q, chromosome 8, 10 or 11. Keep MYC and MYCN separate.",
+          "title": "Target",
+          "type": "string"
+        },
+        "alteration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Amplification, gain, loss, mutation or isochromosome as stated. Amplification and gain are distinct; preserve the reported term.",
+          "title": "Alteration"
+        },
+        "status": {
+          "$ref": "#/$defs/AlterationStatus",
+          "default": "NOT_DOCUMENTED",
+          "description": "ABSENT requires explicitly negative testing; silence is NOT_DOCUMENTED."
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Somatic, germline or unknown as documented; never infer germline from tumor-only testing.",
+          "title": "Origin"
+        },
+        "report_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of the source result, ISO date at supported precision.",
+          "title": "Report Date"
+        },
+        "report_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for report_date; null if absent."
+        },
+        "source_report": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Documented source report identifier or title linking this alteration to its classification.",
+          "title": "Source Report"
+        },
+        "testing_method": {
+          "$ref": "#/$defs/MolecularMethod",
+          "default": "NOT_DOCUMENTED",
+          "description": "Method supporting this alteration, if stated."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "target"
+      ],
+      "title": "MolecularAlterationMention",
+      "type": "object"
+    },
+    "MolecularMethod": {
+      "enum": [
+        "DNA_METHYLATION",
+        "SEQUENCING",
+        "IMMUNOHISTOCHEMISTRY",
+        "FISH",
+        "COPY_NUMBER_ANALYSIS",
+        "CLINICAL_SUMMARY",
+        "OTHER",
+        "NOT_DOCUMENTED"
+      ],
+      "title": "MolecularMethod",
+      "type": "string"
+    },
+    "MolecularReportMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "molecular_group": {
+          "$ref": "#/$defs/MbMolecularGroup",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Explicit medulloblastoma group. NON_WNT_NON_SHH does not distinguish Group 3 from 4. Preserve conflicting calls; never infer a group from a single alteration."
+        },
+        "integrated_diagnosis_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact diagnosis/classification, including ETMR, pineoblastoma or revised non-embryonal diagnoses. ATRT can be an exclusion/reclassification finding.",
+          "title": "Integrated Diagnosis Verbatim"
+        },
+        "methylation_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact methylation class/subclass, including SHH-I/II or Group 3 subtype if reported.",
+          "title": "Methylation Class"
+        },
+        "calibrated_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit classifier score on a 0\u20131 scale; do not invent a confidence threshold.",
+          "title": "Calibrated Score"
+        },
+        "methods": {
+          "description": "Methods documented for this result. A note quoting a group without the original method is CLINICAL_SUMMARY.",
+          "items": {
+            "$ref": "#/$defs/MolecularMethod"
+          },
+          "title": "Methods",
+          "type": "array"
+        },
+        "report_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of this molecular report, ISO date at supported precision; distinct from original diagnosis.",
+          "title": "Report Date"
+        },
+        "report_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for report_date; null if absent."
+        },
+        "source_report": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Report identifier, laboratory or referenced report title as documented; do not invent identifiers.",
+          "title": "Source Report"
+        },
+        "specimen": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tumor, blood or other specimen as documented.",
+          "title": "Specimen"
+        },
+        "review_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Local, central, retrospective or revised review, only if documented.",
+          "title": "Review Context"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit uncertainty, insufficient tissue, failed testing or conflicting classifications. Null if not stated.",
+          "title": "Uncertainty"
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MolecularReportMention",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "reports": {
+      "description": "One entry per report/classification; retain conflicting reports separately.",
+      "items": {
+        "$ref": "#/$defs/MolecularReportMention"
+      },
+      "title": "Reports",
+      "type": "array"
+    },
+    "alterations": {
+      "description": "Documented alterations or explicit negative results; empty is not a negative panel.",
+      "items": {
+        "$ref": "#/$defs/MolecularAlterationMention"
+      },
+      "title": "Alterations",
+      "type": "array"
+    }
+  },
+  "title": "PcxMolecularAnnotation",
+  "type": "object"
+}

@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "DatePrecision": {
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "ExtentOfResection": {
+      "description": "Documented extent of tumor resection.",
+      "enum": [
+        "GROSS_TOTAL_RESECTION",
+        "NEAR_TOTAL_RESECTION",
+        "PARTIAL_RESECTION",
+        "BIOPSY",
+        "NOT_AVAILABLE"
+      ],
+      "title": "ExtentOfResection",
+      "type": "string"
+    },
+    "SurgeryMention": {
+      "description": "A single neurosurgical procedure for the tumor, with its type, resection extent, and\ndate. Emit one SurgeryMention per distinct operation documented in this note.",
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "surgery_role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Documented role: definitive initial surgery, second-look after induction, or recurrence/salvage. Null if unstated.",
+          "title": "Surgery Role"
+        },
+        "age_at_surgery_months": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit age at this operation in months. Do not substitute age at diagnosis or restrict to under 36 months.",
+          "title": "Age At Surgery Months"
+        },
+        "residual_tumor_area_cm2": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit postoperative residual tumor AREA in cm2. Do not convert a length or volume to area, or infer from GTR/NTR/STR.",
+          "title": "Residual Tumor Area Cm2"
+        },
+        "residual_measurement_verbatim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exact residual dimensions and units, including inequalities. Preserve even when area cannot be extracted.",
+          "title": "Residual Measurement Verbatim"
+        },
+        "residual_assessment_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Postoperative imaging assessment date, ISO date at supported precision; not automatically surgery date.",
+          "title": "Residual Assessment Date"
+        },
+        "residual_assessment_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision of residual_assessment_date; null when absent."
+        },
+        "surgery_type": {
+          "$ref": "#/$defs/SurgeryType",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "CRANIOTOMY: open cranial tumor resection/debulking. SPINAL_LAMINECTOMY: spinal laminectomy for tumor. ENDOSCOPIC_ENDONASAL: endoscopic endonasal tumor surgery. STEREOTACTIC_BIOPSY: stereotactic-guided biopsy. LITT: laser interstitial thermal therapy. OTHER: other tumor-directed surgery. NONE_OF_THE_ABOVE: no tumor surgery documented in this note."
+        },
+        "extent_of_resection": {
+          "$ref": "#/$defs/ExtentOfResection",
+          "default": "NOT_AVAILABLE",
+          "description": "GROSS_TOTAL_RESECTION: GTR / complete / no residual. NEAR_TOTAL_RESECTION: NTR / >90% with minimal residual. PARTIAL_RESECTION: subtotal / partial / debulking with residual. BIOPSY: biopsy only. NOT_AVAILABLE: extent not stated (default)."
+        },
+        "surgery_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of this surgery, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated.",
+          "title": "Surgery Date"
+        },
+        "surgery_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for surgery_date. Null when surgery_date is null."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "SurgeryMention",
+      "type": "object"
+    },
+    "SurgeryType": {
+      "description": "Completed tumor-directed surgical procedure.",
+      "enum": [
+        "CRANIOTOMY",
+        "SPINAL_LAMINECTOMY",
+        "ENDOSCOPIC_ENDONASAL",
+        "STEREOTACTIC_BIOPSY",
+        "LITT",
+        "OTHER",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "SurgeryType",
+      "type": "string"
+    }
+  },
+  "description": "Surgery annotations from a single clinical note (a list \u2014 surgeries repeat).\n\n    ",
+  "properties": {
+    "surgeries": {
+      "description": "All tumor-directed surgeries documented in this note; empty list if none.",
+      "items": {
+        "$ref": "#/$defs/SurgeryMention"
+      },
+      "title": "Surgeries",
+      "type": "array"
+    }
+  },
+  "title": "PcxSurgeryAnnotation",
+  "type": "object"
+}
