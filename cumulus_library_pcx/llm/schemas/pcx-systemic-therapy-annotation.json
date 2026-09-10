@@ -625,6 +625,6 @@
       "type": "array"
     }
   },
-  "title": "PcxSystemicTherapyAnnotation",
+  "title": "SystemicTherapyAnnotation",
   "type": "object"
 }

@@ -1,24 +1,29 @@
 {
   "$defs": {
     "DocumentType": {
-      "description": "Primary purpose of a clinical document.",
+      "description": "Primary purpose and producing service of a clinical document. Mutually exclusive.",
       "enum": [
-        "PROCEDURE_NOTE",
-        "SURGICAL_OPERATION_NOTE",
+        "OPERATIVE_NOTE",
         "PATHOLOGY_REPORT",
-        "DIAGNOSTIC_IMAGING_STUDY",
-        "HISTORY_AND_PHYSICAL",
+        "IMAGING_REPORT",
+        "GENETICS_DOCUMENT",
+        "TREATMENT_ADMINISTRATION_RECORD",
+        "RADIATION_ONCOLOGY_NOTE",
+        "TUMOR_BOARD_NOTE",
+        "RESEARCH_PROTOCOL_DOCUMENT",
+        "TRANSFER_DOCUMENT",
         "DISCHARGE_SUMMARY",
-        "CONSULT_NOTE",
-        "PROGRESS_NOTE",
-        "NURSING_NOTE",
+        "END_OF_LIFE_DOCUMENT",
+        "NEUROSURGERY_NOTE",
+        "ONCOLOGY_NOTE",
+        "OTHER_CLINICAL_NOTE",
         "OTHER"
       ],
       "title": "DocumentType",
       "type": "string"
     },
     "DocumentTypeMention": {
-      "description": "Classify one clinical document before downstream extraction.\n\nSet ``has_mention`` to true when the title, headings, authoring context, or body\nprovides document-specific classification evidence. Put the shortest verbatim\ntitle or section cues in ``spans``. Set ``has_mention`` to false, use ``OTHER``,\nand return an empty span list only when the document is empty, unreadable, or too\nambiguous to classify more specifically.\n\nDocument type is a routing feature, not a clinical phenotype. Study-specific\nextraction priority belongs in selector SQL rather than in this model.",
+      "description": "Classify one clinical document before task routing.\n\nSet ``has_mention`` to true when the title, headings, author or service, or body\nprovides classification evidence, and put the shortest verbatim title, header, or\nsignature cue in ``spans``. Set ``has_mention`` to false, use ``OTHER``, and return an\nempty span list only when the document is empty, unreadable, or too ambiguous to\nclassify.\n\nDocument type is a routing feature, not a clinical finding. It says which extraction\ntasks should read the note (DOCUMENT_TASKS), not what the note concludes.",
       "properties": {
         "has_mention": {
           "description": "Indicates whether the concept was mentioned in the text.",
@@ -36,26 +41,33 @@
         "document_type": {
           "$ref": "#/$defs/DocumentType",
           "default": "OTHER",
-          "description": "\nAssign exactly one document type using the document's main purpose, following the\nDocType Annotation Guidelines (draft May 31, 2025). Use the title, author/service,\nencounter context and body together. A quoted report or a procedure mentioned in a\nhistory does not change the type of the document containing it.\n\nDECISION PATH:\n1. For procedure/test reports, distinguish interpretation of a biopsy specimen\n   (PATHOLOGY_REPORT), an operation (SURGICAL_OPERATION_NOTE), non-operative\n   procedures or invasive/interventional treatment (PROCEDURE_NOTE), and non-invasive\n   imaging/diagnostic testing (DIAGNOSTIC_IMAGING_STUDY).\n2. For other notes, consider discharge, explicitly titled H&P, nursing, consult/new\n   patient, ongoing specialty care, rehabilitation/nutrition/therapy/allied health,\n   then Progress/Clinic/Office titles. Apply the detailed definitions below, including\n   the nursing exceptions, before falling back to OTHER.\n3. Category-specific inclusions and exclusions take precedence over broad title cues.\n   Do not classify from the author's specialty or an isolated word alone.\n\nPROCEDURE_NOTE: a report created immediately following a non-operative procedure,\nrecording indications, events, tolerance and post-procedure diagnosis when applicable.\nSurgery is not the primary act. Include interventional cardiology/cardiac\ncatheterization, interventional radiology, invasive diagnostic procedures such as\nbronchoscopy and bone marrow aspiration, GI endoscopy/colonoscopy/sigmoidoscopy and\nother invasive '-scopy' procedures, intubation, and osteopathic manipulation.\nExclude surgical operations, pathology interpretation and non-invasive diagnostic\nstudies. A marrow aspiration procedure report differs from a marrow biopsy pathology\ninterpretation.\n\nSURGICAL_OPERATION_NOTE: an operative report, operation note or brief operative note\ncreated following surgery, describing the operation, pre/postoperative diagnoses,\nprocedural course and postoperative condition. Include outpatient, dental, podiatric\nand other specialty operations. Exclude diagnostic studies, interventional radiology\nand surgical progress notes. Neither 'surgical' in a title nor surgeon authorship is\nsufficient: surgical pathology is PATHOLOGY_REPORT; surgical follow-up is PROGRESS_NOTE.\n\nPATHOLOGY_REPORT: a pathologist-authored interpretation of a biopsy/specimen,\nincluding specimen site, final diagnosis and gross/microscopic findings. Include\nanatomic/surgical pathology, bone marrow biopsy interpretations and biopsy results.\nA title need not contain 'pathology': Gross Description, Specimen Information or\nbiopsy-result sections can establish the report context. Surgical pathology reports\nbelong here, not under surgery or procedure. Exclude oncology notes and other\nnon-pathologist notes merely discussing pathology; 'biopsy' alone does not turn a\nprocedure note into a pathology interpretation.\n\nDIAGNOSTIC_IMAGING_STUDY: an interpreting clinician's report of non-invasive imaging\nor diagnostic testing. Include XR/mammography, CT, MRI, ultrasound, PET, ECG/EKG,\nechocardiography, pulmonary function testing, bone density, EEG and EMG. This category\nis not limited to radiology authors. Exclude invasive '-scopy' procedures,\ninterventional radiology, excision biopsy and blood/fluid laboratory reports.\n\nHISTORY_AND_PHYSICAL: a clearly titled History and Physical, H&P or H+P documenting\ninitial evaluation, admission, pre-admission, pre-surgery or pre-procedure status.\nMay be authored by a physician, nurse, other provider or medical student. Exclude\nprogress, daily rounding, follow-up and notes without a clearly labeled H&P title.\nHistory, examination and assessment sections alone are not sufficient.\n\nDISCHARGE_SUMMARY: a synopsis of a completed hospital, outpatient or post-acute care\nepisode supporting continuity after discharge. It may describe the reason for care,\nprocedures/treatment, condition, disposition and follow-up. Include physician and\nnurse discharge summaries. Per the Nursing section's explicit rule, nursing\ndischarge instructions also belong here. Per the detailed Discharge Summary exclusion\ntable, exclude ED Discharge Notes and outpatient transfer notes; assess those against\nthe remaining categories and use OTHER if none apply. A discharge title alone does\nnot override these exclusions.\n\nCONSULT_NOTE: a requested specialist opinion/advice, consultation or referral request.\nInclude face-to-face consultations, telemedicine and second opinions without direct\npatient interaction. The decision tree also routes Consult or New Patient titles\nhere when documenting an initial specialist evaluation. Distinguish clearly titled\nH&P and ongoing specialist follow-up, which belongs to PROGRESS_NOTE. History,\nexamination and assessment/plan sections can appear in consults and do not make them H&P.\n\nPROGRESS_NOTE: an encounter-associated record of clinical status, illness or treatment\nprogress during hospitalization or an outpatient visit. Include specialist ongoing\ncare/follow-up, daily rounding, rehabilitation, nutrition, therapy, allied health,\nsurgical progress and nursing progress. Progress/Clinic/Office titles support this\nclassification when the purpose is an encounter update. Examples include ED progress,\nhome care progress, pharmacy, social work and case-manager progress notes. A standalone\nadministrative case-management document belongs to OTHER.\n\nNURSING_NOTE: a nursing-titled general note, admission note or nursing assessment and\nplan that meets no more specific category. Use as a last resort for nursing documents,\nnot merely because a nurse is the author. Nursing progress is PROGRESS_NOTE; nursing\nH&P is HISTORY_AND_PHYSICAL; nursing discharge summaries and nursing discharge\ninstructions are DISCHARGE_SUMMARY.\n\nOTHER: no formal category fits after checking the alternatives. Include standalone\nimmunization documents, death certificates, medication summaries, external/send-out\nlaboratory reports (e.g. LabCorp/Quest), administrative/billing notes, generic patient\ninstructions/education, telephone encounters, refill requests, standalone external\ndocuments, administrative case-management notes, HIPAA consent/authorization, fax\ncover sheets, claims, authorization letters and record requests. Apply the explicit\nnursing-discharge-instructions exception above. Do not label a recognizable clinical\nreport OTHER simply because it originated externally. Use OTHER for empty/unreadable\nor insufficiently identifiable documents as well.\n"
+          "description": "\nAssign exactly one document type from the producing service and the document's primary\npurpose. Use the title, author or service, headings, and body together. Classify the\ndocument as a whole: a quoted pathology result, MRI impression, or operative history inside\na clinic note does not change the type of the note that quotes it. Types are defined so\nthat at most one applies. When two definitions could both fit, the EARLIER entry in this\nlist wins.\n\n1. END_OF_LIFE_DOCUMENT: the document records the patient's death or the transition to\n   comfort-focused care: death note or death summary, pronouncement, autopsy consent or\n   report, hospice enrollment or referral, palliative care consult whose purpose is\n   end-of-life planning, DNR/DNI or goals-of-care documentation. Wins over every other type\n   regardless of authoring service.\n\n2. RESEARCH_PROTOCOL_DOCUMENT: the document exists because of a clinical trial or registry:\n   research consent, eligibility checklist, enrollment or randomization confirmation,\n   on-study or off-study note, protocol deviation, study coordinator note, protocol\n   treatment roadmap. Named-protocol treatment inside an ordinary oncology note is NOT this\n   type.\n\n3. TRANSFER_DOCUMENT: the document moves care between institutions or carries another\n   institution's information: inter-facility transfer or acceptance note, referral letter\n   from or to an outside provider, outside-records summary or review, transport team record,\n   a scanned or transcribed outside document (outside operative note, outside pathology,\n   outside imaging). A discharge summary written here for a patient going elsewhere is a\n   DISCHARGE_SUMMARY, not this.\n\n4. DISCHARGE_SUMMARY: a synopsis of a completed admission written at discharge: reason for\n   admission, hospital course, procedures and treatment given, condition and disposition,\n   follow-up. Includes chemotherapy-admission discharge summaries authored by oncology.\n   Excludes ED discharge notes and nursing discharge instructions (OTHER_CLINICAL_NOTE).\n\n5. OPERATIVE_NOTE: the surgeon's report of an operation: operative report, brief operative\n   note, procedure note for a tumor resection, biopsy, shunt, EVD, or second-look surgery.\n   Pre-operative and post-operative visit notes are NEUROSURGERY_NOTE, not this.\n\n6. PATHOLOGY_REPORT: a pathologist-signed interpretation of tissue or fluid: surgical\n   pathology with final diagnosis, gross and microscopic description, immunohistochemistry,\n   FISH, and any molecular or methylation addendum attached to the same accession, CSF or\n   other cytology, autopsy neuropathology, and outside-slide consultation reports signed by\n   a pathologist. A clinician's note discussing the pathology is not this.\n\n7. IMAGING_REPORT: a radiologist's read of a study: MRI brain or spine, CT, PET, ultrasound,\n   with technique, findings, and impression. Includes staging and surveillance studies. A\n   neuro-oncology note summarizing the MRI is not this.\n\n8. GENETICS_DOCUMENT: the document is about the patient's germline or inherited risk:\n   clinical genetics or genetic counseling note, germline test result or panel report,\n   cancer predisposition assessment, family pedigree. Tumor-only molecular results attached\n   to a pathology accession are PATHOLOGY_REPORT, not this.\n\n9. TREATMENT_ADMINISTRATION_RECORD: a structured record of what was given rather than a\n   narrative note: medication administration record, chemotherapy infusion or treatment\n   flowsheet, chemotherapy order set or treatment plan/roadmap with doses and cycle days,\n   pharmacy verification, stem-cell infusion record. If it has a narrative assessment and\n   plan, it is a note, not this.\n\n10. TUMOR_BOARD_NOTE: a multidisciplinary tumor board or neuro-oncology conference\n    summary: case presentation, integrated review of pathology, molecular, imaging and\n    staging, and the consensus recommendation.\n\n11. RADIATION_ONCOLOGY_NOTE: any note authored by radiation oncology: consultation,\n    simulation or planning note, on-treatment visit, end-of-treatment or completion\n    summary, radiation follow-up. Includes notes recommending against or deferring\n    radiation.\n\n12. NEUROSURGERY_NOTE: any non-operative note authored by neurosurgery: consultation,\n    admission H&P, pre-operative and post-operative visits, inpatient progress, clinic\n    follow-up, shunt or hydrocephalus management.\n\n13. ONCOLOGY_NOTE: any note authored by oncology, neuro-oncology, or hematology/oncology\n    that is not one of the types above: new-patient consultation, admission H&P for\n    chemotherapy, daily inpatient progress note, clinic visit, treatment planning note,\n    interval history, off-therapy or survivorship visit, telephone or nurse-practitioner\n    oncology note. This is the default for the treating team's own documentation.\n\n14. OTHER_CLINICAL_NOTE: a clinical encounter note from any other service or setting:\n    emergency department, PICU or critical care, general pediatrics or hospitalist,\n    rehabilitation, physical or occupational or speech therapy, nutrition, endocrinology,\n    ophthalmology, neurology, nursing, social work, psychology, anesthesia, ED discharge\n    note, nursing discharge instructions.\n\n15. OTHER: not a clinical document, or unclassifiable: administrative or billing note,\n    consent unrelated to research, patient education, immunization record, medication\n    list without administration data, telephone encounter with no clinical content,\n    fax cover, records request, empty or unreadable document.\n"
         },
         "confidence": {
-          "description": "Confidence in the document-type classification from 0.0 to 1.0. Use lower values when the title, authoring context, and body conflict or provide weak evidence.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Confidence",
-          "type": "number"
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confidence in the document-type classification from 0.0 to 1.0. Use lower values when title, authoring service, and body point to different types.",
+          "title": "Confidence"
         }
       },
       "required": [
         "has_mention",
-        "spans",
-        "confidence"
+        "spans"
       ],
       "title": "DocumentTypeMention",
       "type": "object"
     }
   },
-  "description": "Study-neutral document-type classification for one clinical document.",
+  "description": "PCX document-type classification for one clinical document.",
   "properties": {
     "document_type": {
       "$ref": "#/$defs/DocumentTypeMention"

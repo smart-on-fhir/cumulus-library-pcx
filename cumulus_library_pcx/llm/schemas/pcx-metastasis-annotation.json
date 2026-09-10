@@ -240,6 +240,6 @@
   "required": [
     "staging_inputs"
   ],
-  "title": "PcxMetastasisAnnotation",
+  "title": "MetastasisAnnotation",
   "type": "object"
 }

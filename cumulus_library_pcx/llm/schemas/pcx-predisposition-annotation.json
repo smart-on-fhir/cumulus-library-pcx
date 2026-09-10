@@ -101,6 +101,6 @@
       "type": "array"
     }
   },
-  "title": "PcxPredispositionAnnotation",
+  "title": "PredispositionAnnotation",
   "type": "object"
 }

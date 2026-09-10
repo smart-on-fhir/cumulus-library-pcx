@@ -357,6 +357,6 @@
     "diagnosis_date",
     "diagnosis_date_gold"
   ],
-  "title": "PcxDiagnosisAnnotation",
+  "title": "DiagnosisAnnotation",
   "type": "object"
 }

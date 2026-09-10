@@ -185,6 +185,6 @@
       "type": "array"
     }
   },
-  "title": "PcxSurgeryAnnotation",
+  "title": "SurgeryAnnotation",
   "type": "object"
 }

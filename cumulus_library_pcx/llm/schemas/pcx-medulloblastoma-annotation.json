@@ -220,6 +220,6 @@
     "radiation",
     "survival"
   ],
-  "title": "PcxMedulloblastomaAnnotation",
+  "title": "MedulloblastomaAnnotation",
   "type": "object"
 }

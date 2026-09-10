@@ -1,6 +1,22 @@
 from enum import StrEnum
 from datetime import date
+import os
+import warnings
 from pydantic import BaseModel, Field, model_validator
+
+
+STRICT_MENTIONS = os.environ.get("CUMULUS_PCX_STRICT_MENTIONS", "0") == "1"
+
+
+class MentionValidationWarning(UserWarning):
+    """An extracted mention has inconsistent evidence or date precision."""
+
+
+def _mention_validation_issue(message: str):
+    if STRICT_MENTIONS:
+        raise ValueError(message)
+    warnings.warn(message, MentionValidationWarning, stacklevel=3)
+
 
 class SpanAugmentedMention(BaseModel):
     """
@@ -14,7 +30,7 @@ class SpanAugmentedMention(BaseModel):
     @model_validator(mode="after")
     def validate_evidence_and_dates(self):
         if self.has_mention != bool(self.spans) or any(not span.strip() for span in self.spans):
-            raise ValueError("Mention presence must agree with nonempty verbatim evidence spans")
+            _mention_validation_issue("Mention presence must agree with nonempty verbatim evidence spans")
         for name in type(self).model_fields:
             if not name.endswith("_precision"):
                 continue
@@ -23,15 +39,21 @@ class SpanAugmentedMention(BaseModel):
                 continue
             value, precision = getattr(self, date_name), getattr(self, name)
             if (value is None) != (precision is None):
-                raise ValueError(f"{date_name} and {name} must both be present or both null")
+                _mention_validation_issue(f"{date_name} and {name} must both be present or both null")
+                continue
             if value is not None:
-                parsed = date.fromisoformat(value) if isinstance(value, str) else value
+                try:
+                    parsed = date.fromisoformat(value) if isinstance(value, str) else value
+                except ValueError:
+                    _mention_validation_issue(f"{date_name} must use a valid YYYY-MM-DD date")
+                    continue
                 if isinstance(value, str) and parsed.isoformat() != value:
-                    raise ValueError(f"{date_name} must use YYYY-MM-DD")
+                    _mention_validation_issue(f"{date_name} must use YYYY-MM-DD")
+                    continue
                 if precision == DatePrecision.MONTH and parsed.day != 1:
-                    raise ValueError("Month-precision dates must use the first day of the month")
+                    _mention_validation_issue("Month-precision dates must use the first day of the month")
                 if precision == DatePrecision.YEAR and (parsed.month, parsed.day) != (1, 1):
-                    raise ValueError("Year-precision dates must use January 1")
+                    _mention_validation_issue("Year-precision dates must use January 1")
         return self
 
     has_mention: bool = Field(

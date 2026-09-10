@@ -264,6 +264,6 @@
       "type": "array"
     }
   },
-  "title": "PcxLaboratoryAnnotation",
+  "title": "LaboratoryAnnotation",
   "type": "object"
 }

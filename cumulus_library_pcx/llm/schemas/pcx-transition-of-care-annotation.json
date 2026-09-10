@@ -264,6 +264,6 @@
     "definitive_surgery_setting",
     "prior_therapy_at_entry"
   ],
-  "title": "PcxTransitionOfCareAnnotation",
+  "title": "TransitionOfCareAnnotation",
   "type": "object"
 }

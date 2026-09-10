@@ -157,6 +157,6 @@
       "type": "array"
     }
   },
-  "title": "PcxResponseAnnotation",
+  "title": "ResponseAnnotation",
   "type": "object"
 }

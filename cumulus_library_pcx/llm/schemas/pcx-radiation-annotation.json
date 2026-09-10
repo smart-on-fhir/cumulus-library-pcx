@@ -327,6 +327,6 @@
       "type": "array"
     }
   },
-  "title": "PcxRadiationAnnotation",
+  "title": "RadiationAnnotation",
   "type": "object"
 }

@@ -324,6 +324,6 @@
       "type": "array"
     }
   },
-  "title": "PcxMolecularAnnotation",
+  "title": "MolecularAnnotation",
   "type": "object"
 }

@@ -273,6 +273,6 @@
   "required": [
     "vital_status"
   ],
-  "title": "PcxPatientTimelineAnnotation",
+  "title": "PatientTimelineAnnotation",
   "type": "object"
 }

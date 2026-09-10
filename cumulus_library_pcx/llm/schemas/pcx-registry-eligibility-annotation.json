@@ -132,6 +132,6 @@
     "adequate_pulmonary_function",
     "adequate_marrow_function"
   ],
-  "title": "PcxTrialEligibilityAnnotation",
+  "title": "TrialEligibilityAnnotation",
   "type": "object"
 }

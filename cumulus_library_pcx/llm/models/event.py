@@ -7,7 +7,7 @@ EHR diagnosis, surgery and treatment dates must remain separate candidate anchor
 """
 from enum import StrEnum
 from pydantic import BaseModel, Field
-from cumulus_library_pcx.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 
 class EventType(StrEnum):
