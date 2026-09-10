@@ -1,0 +1,16 @@
+system,code,display,tier
+http://www.ama-assn.org/go/cpt,61518,Craniectomy for excision of brain tumor infratentorial or posterior fossa except meningioma cerebellopontine angle tumor or midline tumor at base of skull [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,61519,Craniectomy for excision of brain tumor infratentorial or posterior fossa meningioma [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,61520,Craniectomy for excision of brain tumor infratentorial or posterior fossa cerebellopontine angle tumor [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,61521,Craniectomy for excision of brain tumor infratentorial or posterior fossa midline tumor at base of skull [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,61524,Craniectomy infratentorial or posterior fossa for excision or fenestration of cyst [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,61510,Craniectomy trephination bone flap craniotomy for excision of brain tumor supratentorial except meningioma [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,61512,Craniectomy trephination bone flap craniotomy for excision of meningioma supratentorial [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,61526,Craniectomy bone flap craniotomy transtemporal for excision of cerebellopontine angle tumor [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,61304,Craniectomy or craniotomy exploration and/or decompression supratentorial [CANDIDATE - verify],3
+http://www.ama-assn.org/go/cpt,61305,Craniectomy or craniotomy exploration and/or decompression infratentorial posterior fossa [CANDIDATE - verify],3
+http://www.ama-assn.org/go/cpt,61140,Burr hole or trephine with biopsy of brain or intracranial lesion [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,61750,Stereotactic biopsy aspiration or excision including burr hole of intracranial lesion [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,61751,Stereotactic biopsy aspiration or excision including burr hole of intracranial lesion with CT and/or MRI guidance [CANDIDATE - verify],2
+http://snomed.info/sct,363680008,Excision of tumor of brain (procedure) [CANDIDATE - verify],1
+http://snomed.info/sct,25353009,Craniotomy (procedure) [CANDIDATE - verify],3

@@ -12,6 +12,9 @@ file = "dx_medulloblastoma.csv"
 [tables.valueset_dx_methotrexate_toxic]
 file = "dx_methotrexate_toxic.csv"
 
+[tables.valueset_dx_radiation]
+file = "dx_radiation.csv"
+
 [tables.valueset_lab_absolute_neutrophil_count]
 file = "lab_absolute_neutrophil_count.csv"
 
@@ -47,6 +50,12 @@ file = "lab_platelets.csv"
 
 [tables.valueset_lab_total_bilirubin]
 file = "lab_total_bilirubin.csv"
+
+[tables.valueset_proc_craniotomy]
+file = "proc_craniotomy.csv"
+
+[tables.valueset_proc_radiation]
+file = "proc_radiation.csv"
 
 [tables.valueset_rx_chemo_carboplatin]
 file = "rx_chemo_carboplatin.csv"

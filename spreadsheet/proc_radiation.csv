@@ -1,0 +1,19 @@
+system,code,display,tier
+http://www.ama-assn.org/go/cpt,77401,Radiation treatment delivery superficial and/or ortho voltage [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77402,Radiation treatment delivery simple [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77407,Radiation treatment delivery intermediate [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77412,Radiation treatment delivery complex [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77385,IMRT delivery simple [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77386,IMRT delivery complex [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77520,Proton treatment delivery simple without compensation [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77522,Proton treatment delivery simple with compensation [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77523,Proton treatment delivery intermediate [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77525,Proton treatment delivery complex [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77427,Radiation treatment management five treatments [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77295,3-dimensional radiotherapy plan [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,77301,IMRT treatment planning [CANDIDATE - verify],2
+http://www.ama-assn.org/go/cpt,77432,Stereotactic radiation treatment management of cranial lesion [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77371,Radiation treatment delivery stereotactic radiosurgery multi-source [CANDIDATE - verify],1
+http://www.ama-assn.org/go/cpt,77372,Radiation treatment delivery stereotactic radiosurgery linear accelerator [CANDIDATE - verify],1
+http://snomed.info/sct,108290001,Radiation oncology AND/OR radiotherapy (procedure) [CANDIDATE - verify],1
+http://snomed.info/sct,1287742003,Craniospinal irradiation (procedure) [CANDIDATE - verify],1
