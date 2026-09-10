@@ -16,33 +16,16 @@ def path_outcome(table_suffix: str | None) -> Path:
     return filetool.path_athena(f"{outcome_table}.sql")
 
 # -----------------------------------------------------------------------------
-# activity indexes
-
-def make_activity_index() -> list[Path]:
-    return [path_outcome('pucai_base'),
-            path_outcome('pcdai_base')]
-
-def make_remission_clinical() -> list[Path]:
-    return [path_outcome('remission_clinical_evidence'),
-            path_outcome('remission_clinical'),
-            path_outcome('remission_clinical_sustained')]
-
-# -----------------------------------------------------------------------------
 # surgery (first qualifying surgery outcome)
 
-def make_surgery() -> list[Path]:
-    return [path_outcome('surgery')]
+def make_outcomes() -> list[Path]:
+    return [path_outcome('death'),
+            path_outcome('event_type_placeholder'),
+            path_outcome('event_type_placeholder')]
 
 def make() -> list[Path]:
-    actions = [manifest.FileAction([f'../spreadsheet/file_upload_outcome.toml'], 'PUCAI + PCDAI definitions'),
-               manifest.SqlAction(make_activity_index(),
-                                  'IBD outcome activity index (PUCAI + PCDAI)',
-                                  'build:parallel'),
-               manifest.SqlAction(make_remission_clinical(),
-                                  'IBD outcome remission (remission_clinical)',
-                                  'build:serial'),
-               manifest.SqlAction(make_surgery(),
-                                  'IBD outcome surgery (first qualifying surgery)',
+    actions = [manifest.SqlAction(make_outcomes(),
+                                  'outcome_death (deceased)',
                                   'build:parallel')]
 
     return [manifest.save_actions_toml(actions, 'outcome.toml')]

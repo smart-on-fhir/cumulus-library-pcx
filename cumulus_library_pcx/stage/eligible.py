@@ -22,16 +22,15 @@ def make_dx() -> list[Path]:
     """
     :return: list Path to SQL file(s) with eligibility criteria for diagnosis
     """
-    return [path_eligible('dx_date')]
+    return [path_eligible('dx')]
 
-def make_rx() -> list[Path]:
+def make_treatment() -> list[Path]:
     """
-    :return: list Path to SQL file(s) with eligibility criteria for medications
+    :return: list Path to SQL file(s) with eligibility criteria for treatment
     """
-    return [path_eligible(target) for target in
-            ['rx_date',
-             'rx_date_evidence',
-             'rx_date_prior_class']]
+    return [path_eligible('rx'),
+            path_eligible('radiation'),
+            path_eligible('surgery')]
 
 def make_eligible() -> list[Path]:
     """
@@ -39,42 +38,18 @@ def make_eligible() -> list[Path]:
     """
     return [path_eligible(None)]
 
-# -----------------------------------------------------------------------------
-def make_bins(sample_table_name:str|None) -> list[Path]:
-    """
-    :param sample_table_name: table to COPY via CTAS into three BINS
-    :return: list Path to SQL file(s) with sample_table_name split into three BINS
-    """
-    if not sample_table_name:
-        out = list()
-        for gold in ['dx_date', 'rx_date']:
-            for sample_table_name in [tablespace.name_join('eligible', f"{gold}_minus_gold")]:
-                out.extend(make_bins(sample_table_name))
-        return out
-    else:
-        sample_table_file = filetool.path_athena(f"{sample_table_name}.sql")
-        sample_bin_file = filetool.path_athena(f"{sample_table_name}_bins.sql")
-
-        filetool.write_text(
-            template.load('sample_table_bins.sql', sample_table_name=sample_table_name),
-            sample_bin_file)
-
-        return [sample_table_file, sample_bin_file]
-
 def make() -> list[Path]:
     actions = [
         manifest.SqlAction(make_dx(),
                            'eligible criteria dx diagnosis',
                            'build:serial'),
-        manifest.SqlAction(make_rx(),
+        manifest.SqlAction(make_treatment(),
                            'eligible criteria rx medications',
                            'build:serial'),
         manifest.SqlAction(make_eligible(),
                            'eligible criteria intersection',
                            'build:serial'),
-        manifest.SqlAction(make_bins(None),
-                           'eligible criteria minus gold verification',
-                           'build:serial')]
+    ]
 
     return [manifest.save_actions_toml(actions, 'eligible.toml')]
 
