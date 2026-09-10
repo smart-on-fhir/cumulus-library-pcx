@@ -66,7 +66,7 @@ class SurgeryMention(SpanAugmentedMention):
     )
 
 
-class PcxSurgeryAnnotation(BaseModel):
+class SurgeryAnnotation(BaseModel):
     """Surgery annotations from a single clinical note (a list — surgeries repeat).
 
     """

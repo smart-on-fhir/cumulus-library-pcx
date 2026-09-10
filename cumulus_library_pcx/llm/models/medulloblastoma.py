@@ -70,7 +70,7 @@ class SurvivalEvidence(SpanAugmentedMention):
         return self
 
 
-class PcxMedulloblastomaAnnotation(BaseModel):
+class MedulloblastomaAnnotation(BaseModel):
     """One note's evidence for the PCX medulloblastoma comparison. Do not infer
     subgroup from age, treatment or histology. Any-dose flags do not identify the ACNS0334 high-dose induction regimen;
     use systemic_therapy.py for delivered dose, phase and backbone evidence. Preserve verbatim spans for all findings and conflicting evidence

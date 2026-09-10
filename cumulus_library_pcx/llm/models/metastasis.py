@@ -95,7 +95,7 @@ class MetastasisSiteMention(SpanAugmentedMention):
     )
 
 
-class PcxMetastasisAnnotation(BaseModel):
+class MetastasisAnnotation(BaseModel):
     """Metastasis / Chang-staging annotations from a single clinical note.
 
     """

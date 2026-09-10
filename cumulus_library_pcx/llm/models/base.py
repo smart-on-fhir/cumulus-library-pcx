@@ -26,6 +26,8 @@ class SpanAugmentedMention(BaseModel):
                 raise ValueError(f"{date_name} and {name} must both be present or both null")
             if value is not None:
                 parsed = date.fromisoformat(value) if isinstance(value, str) else value
+                if isinstance(value, str) and parsed.isoformat() != value:
+                    raise ValueError(f"{date_name} must use YYYY-MM-DD")
                 if precision == DatePrecision.MONTH and parsed.day != 1:
                     raise ValueError("Month-precision dates must use the first day of the month")
                 if precision == DatePrecision.YEAR and (parsed.month, parsed.day) != (1, 1):

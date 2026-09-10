@@ -163,7 +163,7 @@ class StemCellInfusionMention(SpanAugmentedMention):
     cd34_cells_per_kg: float | None = Field(default=None, ge=0, description="Explicit absolute CD34+ cells/kg; convert a stated multiplier such as 2 x 10^6 to 2000000. Never substitute collected dose for infused dose.")
 
 
-class PcxSystemicTherapyAnnotation(BaseModel):
+class SystemicTherapyAnnotation(BaseModel):
     """Systemic-therapy annotations from a single clinical note.
 
     """

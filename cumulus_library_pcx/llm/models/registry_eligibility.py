@@ -29,7 +29,7 @@ class TrialCriterionMention(SpanAugmentedMention):
     assessment_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessment_date; null if absent.")
 
 
-class PcxTrialEligibilityAnnotation(BaseModel):
+class TrialEligibilityAnnotation(BaseModel):
     age_under_36_months_at_definitive_surgery: TrialCriterionMention = Field(description="Strictly under 36 months AT DEFINITIVE SURGERY. Age at diagnosis alone does not establish this criterion.")
     newly_diagnosed_embryonal_tumor: TrialCriterionMention = Field(description="Newly diagnosed medulloblastoma or historical sPNET/related embryonal tumor; recurrence alone does not establish newly diagnosed disease.")
     high_risk_disease: TrialCriterionMention = Field(description="Documented high-risk MB evidence: residual disease, metastasis, anaplastic histology, or diagnosis under 8 months; historical sPNET any stage. Retain detailed histology/stage/residual measurements separately for stratum adjudication. Do not invent an area threshold from a resection label.")

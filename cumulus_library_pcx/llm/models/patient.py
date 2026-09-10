@@ -58,7 +58,7 @@ class EventFreeFollowUpMention(SpanAugmentedMention):
     assessment_method: str | None = Field(default=None, description="Clinical follow-up, imaging or other supporting evaluation as stated.")
 
 
-class PcxPatientTimelineAnnotation(BaseModel):
+class PatientTimelineAnnotation(BaseModel):
     anchors: list[TimelineAnchorMention] = Field(default_factory=list)
     vital_status: VitalStatusMention
     event_free_follow_up: list[EventFreeFollowUpMention] = Field(default_factory=list, description="Dated follow-up evidence for downstream EFS ascertainment; retain conflicts across notes.")

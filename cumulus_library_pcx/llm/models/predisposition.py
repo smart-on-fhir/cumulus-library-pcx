@@ -21,5 +21,5 @@ class CancerPredispositionMention(SpanAugmentedMention):
     report_date_precision: DatePrecision | None = Field(default=None, description="Precision for report_date; null if absent.")
 
 
-class PcxPredispositionAnnotation(BaseModel):
+class PredispositionAnnotation(BaseModel):
     findings: list[CancerPredispositionMention] = Field(default_factory=list)

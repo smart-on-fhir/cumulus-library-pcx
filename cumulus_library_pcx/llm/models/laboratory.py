@@ -46,6 +46,6 @@ class ToxicityMention(SpanAugmentedMention):
     attribution: str | None = Field(default=None, description="Clinician-attributed relationship to treatment, including treatment-related death only if explicitly stated.")
 
 
-class PcxLaboratoryAnnotation(BaseModel):
+class LaboratoryAnnotation(BaseModel):
     results: list[LaboratoryResultMention] = Field(default_factory=list)
     toxicities: list[ToxicityMention] = Field(default_factory=list)

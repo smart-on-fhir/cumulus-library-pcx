@@ -7,7 +7,7 @@ EHR diagnosis, surgery and treatment dates must remain separate candidate anchor
 """
 from enum import StrEnum
 from pydantic import BaseModel, Field
-from .base import SpanAugmentedMention, DatePrecision
+from cumulus_library_pcx.base import SpanAugmentedMention, DatePrecision
 
 
 class EventType(StrEnum):
@@ -32,15 +32,47 @@ class SourceOfEventDiagnosis(StrEnum):
 
 
 class EventMention(SpanAugmentedMention):
-    event_type: EventType = Field(default=EventType.NONE_OF_THE_ABOVE, description="Documented event. Use clinician-designated progression or relapse; progression can follow partial response. SECOND_MALIGNANCY does not require proven treatment causation. SECOND_PRIMARY requires explicit designation, not a time/site heuristic. Exclude suspected, negated or family-history events.")
-    source_of_event_diagnosis: SourceOfEventDiagnosis = Field(default=SourceOfEventDiagnosis.NONE_OF_THE_ABOVE, description="Evidence actually establishing this event; no arbitrary proximity window or surgery priority.")
-    event_date: str | None = Field(default=None, description="Earliest date explicitly establishing this event, ISO date at supported precision. Do not replace earlier confirmed progression with a later biopsy date. For death use actual death date, never the note date.")
-    event_date_precision: DatePrecision | None = Field(default=None, description="Precision for event_date; null if absent.")
-    date_of_progression_mri: str | None = Field(default=None, description="Explicit progression MRI date, retained separately from clinical confirmation; null for other events.")
-    date_of_progression_mri_precision: DatePrecision | None = Field(default=None, description="Precision for date_of_progression_mri; null if absent.")
-    confirmation_date: str | None = Field(default=None, description="Later confirmation date if explicitly distinct from first event evidence.")
-    confirmation_date_precision: DatePrecision | None = Field(default=None, description="Precision for confirmation_date; null if absent.")
+    event_type: EventType = Field(
+        default=EventType.NONE_OF_THE_ABOVE,
+        description=("Documented event. "
+                     "Use clinician-designated progression or relapse; progression can follow partial response. "
+                     "SECOND_MALIGNANCY does not require proven treatment causation. "
+                     "SECOND_PRIMARY requires explicit designation, not a time/site heuristic. "
+                     "Exclude suspected, negated or family-history events."))
+
+    source_of_event_diagnosis: SourceOfEventDiagnosis = Field(
+        default=SourceOfEventDiagnosis.NONE_OF_THE_ABOVE,
+        description=("Evidence actually establishing this event; "
+                     "no arbitrary proximity window or surgery priority."))
+
+    event_date: str | None = Field(
+        default=None,
+        description=("Earliest date explicitly establishing this event, ISO date at supported precision. "
+                     "Do not replace earlier confirmed progression with a later biopsy date. "
+                     "For death use actual death date, never the note date."))
+
+    event_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for event_date; null if absent.")
+
+    date_of_progression_mri: str | None = Field(
+        default=None,
+        description=("Explicit progression MRI date, retained separately from clinical confirmation; "
+                     "null for other events."))
+
+    date_of_progression_mri_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for date_of_progression_mri; "
+                    "null if absent.")
+
+    confirmation_date: str | None = Field(
+        default=None,
+        description="Later confirmation date if explicitly distinct from first event evidence.")
+
+    confirmation_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for confirmation_date; null if absent.")
 
 
-class PcxEventAnnotation(BaseModel):
+class EventAnnotation(BaseModel):
     events: list[EventMention] = Field(default_factory=list, description="Distinct documented events, including undated events. Deduplication and EFS adjudication occur downstream.")

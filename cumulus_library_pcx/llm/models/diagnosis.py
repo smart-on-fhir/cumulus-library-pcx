@@ -43,46 +43,20 @@ class DiseaseSubtypeMention(SpanAugmentedMention):
     disease_subtype: DiseaseSubtype = Field(
         default=DiseaseSubtype.NONE_OF_THE_ABOVE,
         description=(
-            "Documented diagnosis using only evidence from this note. Choose exactly one. "
-            "ATRT: atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the "
-            "CNS. Record ATRT as an exclusion/reclassification; do not infer it from a marker alone. "
-            "MEDULLOBLASTOMA: medulloblastoma of any histology or molecular group (WNT, SHH, "
-            "Group 3, Group 4), incl. medullomyoblastoma and MBEN. "
-            "ETMR: embryonal tumor with multilayered rosettes. PINEOBLASTOMA: pineoblastoma. "
+            "Documented diagnosis using only evidence from this note. "
+            "Choose exactly one. "
+            "ATRT: atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the CNS. "
+            "Record ATRT as an exclusion/reclassification; do not infer it from a marker alone. "
+            "MEDULLOBLASTOMA: medulloblastoma of any histology or molecular group (WNT, SHH, Group 3, Group 4), "
+            "include medullomyoblastoma and MBEN. "
+            "ETMR: embryonal tumor with multilayered rosettes. "
+            "PINEOBLASTOMA: pineoblastoma. "
             "LEGACY_SPNET: historical supratentorial PNET/CNS-PNET without a modern diagnosis. "
             "OTHER_CNS_EMBRYONAL: other embryonal CNS tumor or embryonal tumor NOS. "
             "NONE_OF_THE_ABOVE: no embryonal-tumor diagnosis is documented in this note."
         ),
     )
 
-
-class MedulloblastomaHistologyMention(SpanAugmentedMention):
-    """Histologic pattern when the diagnosis is medulloblastoma. Leave NONE_OF_THE_ABOVE if
-    the histologic pattern is not stated or the tumor is not a medulloblastoma."""
-    histology: MedulloblastomaHistology = Field(
-        default=MedulloblastomaHistology.NONE_OF_THE_ABOVE,
-        description=(
-            "CLASSIC: classic medulloblastoma. "
-            "DESMOPLASTIC_NODULAR: desmoplastic/nodular. "
-            "EXTENSIVE_NODULARITY_MBEN: medulloblastoma with extensive nodularity (MBEN). "
-            "LARGE_CELL_ANAPLASTIC: large-cell and/or anaplastic. "
-            "NONE_OF_THE_ABOVE: histologic pattern not stated or not a medulloblastoma."
-        ),
-    )
-
-
-class IntegratedDiagnosisMention(SpanAugmentedMention):
-    """The diagnosis exactly as the note words it: the WHO-CNS5 integrated diagnosis when
-    stated, and any deprecated pre-CNS5 term used for THIS tumor. Verbatim wording only; the
-    molecular classification itself is extracted by molecular.py, and no modern entity is to
-    be inferred from a legacy term."""
-    integrated_diagnosis_verbatim: str | None = Field(
-        default=None,
-        description=(
-            "The exact WHO-CNS5 integrated-diagnosis phrase as written in the note (e.g. "
-            "'Medulloblastoma, SHH-activated and TP53-mutant'). Null if not stated."
-        ),
-    )
     historical_diagnosis_term: str | None = Field(
         default=None,
         description=(
@@ -93,6 +67,22 @@ class IntegratedDiagnosisMention(SpanAugmentedMention):
             "modern entity from a legacy term. Null when the note uses only current "
             "integrated-diagnosis terminology, or no such term is stated. Do not record "
             "family-history, negated, or rule-out terms."
+        ),
+    )
+
+
+class MedulloblastomaHistologyMention(SpanAugmentedMention):
+    """Histologic pattern when the diagnosis is medulloblastoma. Leave NONE_OF_THE_ABOVE if
+    the histologic pattern is not stated or the tumor is not a medulloblastoma."""
+    histology: MedulloblastomaHistology = Field(
+        default=MedulloblastomaHistology.NONE_OF_THE_ABOVE,
+        description=(
+            "Choose exactly one. "
+            "CLASSIC: classic medulloblastoma. "
+            "DESMOPLASTIC_NODULAR: desmoplastic/nodular. "
+            "EXTENSIVE_NODULARITY_MBEN: medulloblastoma with extensive nodularity (MBEN). "
+            "LARGE_CELL_ANAPLASTIC: large-cell and/or anaplastic. "
+            "NONE_OF_THE_ABOVE: histologic pattern not stated or not a medulloblastoma."
         ),
     )
 
@@ -156,7 +146,7 @@ class DiagnosisDateGoldMention(SpanAugmentedMention):
     )
 
 
-class PcxDiagnosisAnnotation(BaseModel):
+class DiagnosisAnnotation(BaseModel):
     """Extract confirmed patient-specific diagnoses, including documented history.
     Exclude suspected, negated, rule-out, and family-history diagnoses. Preserve
     exact diagnosis/site wording and legacy terms without inferring modern entities.
@@ -170,7 +160,6 @@ class PcxDiagnosisAnnotation(BaseModel):
 
     disease_subtype: DiseaseSubtypeMention
     medulloblastoma_histology: MedulloblastomaHistologyMention
-    integrated_diagnosis: IntegratedDiagnosisMention
     tumor_location: TumorLocationMention
     chang_m_stage: ChangMStageMention
     age_at_diagnosis: AgeAtDiagnosisMention

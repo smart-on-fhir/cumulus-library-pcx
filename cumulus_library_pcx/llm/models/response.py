@@ -41,5 +41,5 @@ class ResponseAssessmentMention(SpanAugmentedMention):
     review_context: str | None = Field(default=None, description="Local versus central review if stated; preserve disagreements as separate assessments.")
 
 
-class PcxResponseAnnotation(BaseModel):
+class ResponseAnnotation(BaseModel):
     assessments: list[ResponseAssessmentMention] = Field(default_factory=list, description="All baseline and subsequent assessments. Empty means no assessment extracted, not no disease.")

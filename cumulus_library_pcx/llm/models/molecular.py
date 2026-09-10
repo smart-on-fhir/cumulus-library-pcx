@@ -64,6 +64,6 @@ class MolecularAlterationMention(SpanAugmentedMention):
     testing_method: MolecularMethod = Field(default=MolecularMethod.NOT_DOCUMENTED, description="Method supporting this alteration, if stated.")
 
 
-class PcxMolecularAnnotation(BaseModel):
+class MolecularAnnotation(BaseModel):
     reports: list[MolecularReportMention] = Field(default_factory=list, description="One entry per report/classification; retain conflicting reports separately.")
     alterations: list[MolecularAlterationMention] = Field(default_factory=list, description="Documented alterations or explicit negative results; empty is not a negative panel.")

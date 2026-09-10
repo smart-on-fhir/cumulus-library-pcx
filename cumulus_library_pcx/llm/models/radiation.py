@@ -116,7 +116,7 @@ class RadiationRoundMention(SpanAugmentedMention):
     )
 
 
-class PcxRadiationAnnotation(BaseModel):
+class RadiationAnnotation(BaseModel):
     """Radiation-therapy annotations from a single clinical note (a list — rounds repeat).
 
     """

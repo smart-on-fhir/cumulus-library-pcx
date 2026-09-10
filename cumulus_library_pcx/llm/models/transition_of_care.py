@@ -365,7 +365,7 @@ class PriorTherapyAtEntryMention(SpanAugmentedMention):
 # This is the top-level structure for the pydantic models used for PCX
 # transition-of-care annotations.
 ###############################################################################
-class PcxTransitionOfCareAnnotation(BaseModel):
+class TransitionOfCareAnnotation(BaseModel):
     """
     Patient-level transition-of-care annotations extracted from a single clinical note.
 
