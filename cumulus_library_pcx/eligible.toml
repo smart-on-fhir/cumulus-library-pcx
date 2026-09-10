@@ -1,32 +1,23 @@
 [[actions]]
-description = "eligible criteria dx diagnosis"
+description = "eligible diagnosis: time zero, age in months, ATRT"
 type = "build:serial"
 files = [
-    "athena/pcx__eligible_dx_date.sql",
+    "athena/pcx__eligible_dx.sql",
 ]
 
 [[actions]]
-description = "eligible criteria rx medications"
-type = "build:serial"
+description = "eligible treatment: definitive surgery, methotrexate and chemo, radiation"
+type = "build:parallel"
 files = [
-    "athena/pcx__eligible_rx_date.sql",
-    "athena/pcx__eligible_rx_date_evidence.sql",
-    "athena/pcx__eligible_rx_date_prior_class.sql",
+    "athena/pcx__eligible_surgery.sql",
+    "athena/pcx__eligible_rx.sql",
+    "athena/pcx__eligible_radiation.sql",
 ]
 
 [[actions]]
-description = "eligible criteria intersection"
+description = "eligible criteria per subject, then trial-like intersection"
 type = "build:serial"
 files = [
     "athena/pcx__eligible.sql",
-]
-
-[[actions]]
-description = "eligible criteria minus gold verification"
-type = "build:serial"
-files = [
-    "athena/pcx__eligible_dx_date_minus_gold.sql",
-    "athena/pcx__eligible_dx_date_minus_gold_bins.sql",
-    "athena/pcx__eligible_rx_date_minus_gold.sql",
-    "athena/pcx__eligible_rx_date_minus_gold_bins.sql",
+    "athena/pcx__eligible_trial.sql",
 ]
