@@ -1,7 +1,7 @@
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 from cumulus_library_pcx.tools import filetool, template, tablespace, manifest
-from cumulus_library_pcx.tools.study_variable import Aspect, list_aspect_names
+from cumulus_library_pcx.stage.study_variable import Aspect, list_aspect_names
 
 ########################################################################################################
 # Encounter timing relative to "1st casedef match"

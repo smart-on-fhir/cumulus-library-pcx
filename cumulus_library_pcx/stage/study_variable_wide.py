@@ -3,7 +3,7 @@ from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 from cumulus_library_pcx.tools import filetool, tablespace, manifest, template, fhir_reference
 from cumulus_library_pcx.tools.fhir_reference import Aspect
 from cumulus_library_pcx.tools.tablespace import name_trim, name_cohort
-from cumulus_library_pcx.tools.study_variable import (
+from cumulus_library_pcx.stage.study_variable import (
     list_variables,
     list_variables_as_str,
     list_aspects
