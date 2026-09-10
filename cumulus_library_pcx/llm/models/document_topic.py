@@ -45,9 +45,17 @@ class TopicRelevanceMention(SpanAugmentedMention):
 
 
 class TopicRelevanceAnnotation(BaseModel):
-    """Wide-friendly routing gate for the PCX extraction models."""
+    """Wide-friendly routing gate for the PCX extraction models.
 
-    response_assessment: TopicRelevanceMention = Field(..., description="Baseline measurable/evaluable disease, CR/PR/SD/PD, end-induction or end-consolidation assessment, including explicitly negative MRI/CSF findings.")
+    Each routing field matches its extraction module's filename without ``.py``.
+    """
+
+    response: TopicRelevanceMention = Field(
+        ...,
+        description=(
+            "Baseline measurable/evaluable disease, CR/PR/SD/PD, end-induction or end-consolidation assessment, "
+            "including explicitly negative MRI/CSF findings.")
+    )
     diagnosis: TopicRelevanceMention = Field(
         ...,
         description=(
@@ -55,7 +63,7 @@ class TopicRelevanceAnnotation(BaseModel):
             "integrated diagnosis, primary site, laterality, or diagnosis date."
         ),
     )
-    molecular_pathology: TopicRelevanceMention = Field(
+    molecular: TopicRelevanceMention = Field(
         ...,
         description=(
             "Medulloblastoma subgroup, MYC/MYCN, chromosome alterations, assay provenance, "
@@ -63,14 +71,14 @@ class TopicRelevanceAnnotation(BaseModel):
             "and molecular report."
         ),
     )
-    disease_event: TopicRelevanceMention = Field(
+    event: TopicRelevanceMention = Field(
         ...,
         description=(
             "Initial diagnosis, progression, recurrence, refractory disease, second "
             "malignancy, second primary, death, response, or current disease status."
         ),
     )
-    metastasis_staging: TopicRelevanceMention = Field(
+    metastasis: TopicRelevanceMention = Field(
         ...,
         description=(
             "Chang M stage, brain/spine metastatic imaging, CSF cytology, "
@@ -98,7 +106,7 @@ class TopicRelevanceAnnotation(BaseModel):
             "high-dose methotrexate, induction/consolidation, stem-cell rescue or prior treatment."
         ),
     )
-    organ_function_labs: TopicRelevanceMention = Field(
+    laboratory: TopicRelevanceMention = Field(
         ...,
         description=(
             "Hemoglobin, platelets, absolute neutrophils, creatinine, ALT, AST, "
@@ -112,14 +120,14 @@ class TopicRelevanceAnnotation(BaseModel):
             "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; include negative tests and VUS."
         ),
     )
-    patient_timeline: TopicRelevanceMention = Field(
+    patient: TopicRelevanceMention = Field(
         ...,
         description=(
             "Initial tumor-detecting MRI date, vital status, last known alive date, "
             "death date, event-free follow-up, definitive surgery, treatment initiation or actual trial enrollment."
         ),
     )
-    trial_eligibility: TopicRelevanceMention = Field(
+    registry_eligibility: TopicRelevanceMention = Field(
         ...,
         description=(
             "ACNS0334 comparability: age at definitive surgery, newly diagnosed high-risk "
