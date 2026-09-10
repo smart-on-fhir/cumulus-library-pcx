@@ -6,11 +6,12 @@ files = [
 ]
 
 [[actions]]
-description = "variable union ('dx', 'lab', 'rx')"
+description = "variable union ('dx', 'lab', 'proc', 'rx')"
 type = "build:parallel"
 files = [
     "athena/pcx__cohort_variable_union_dx.sql",
     "athena/pcx__cohort_variable_union_lab.sql",
+    "athena/pcx__cohort_variable_union_proc.sql",
     "athena/pcx__cohort_variable_union_rx.sql",
 ]
 
@@ -22,10 +23,11 @@ files = [
 ]
 
 [[actions]]
-description = "variable wide ('dx', 'lab', 'rx')"
+description = "variable wide ('dx', 'lab', 'proc', 'rx')"
 type = "build:parallel"
 files = [
     "athena/pcx__cohort_variable_wide_dx.sql",
     "athena/pcx__cohort_variable_wide_lab.sql",
+    "athena/pcx__cohort_variable_wide_proc.sql",
     "athena/pcx__cohort_variable_wide_rx.sql",
 ]

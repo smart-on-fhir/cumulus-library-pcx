@@ -22,17 +22,11 @@ type = "submanifest"
 files = ['sample.toml']
 
 # ------ <Elastic Search Tasks> ------
-# NOTE: These are commented out because leaving them 
-#       in the manifest will cause the build to fail if the user does not have the relevant 
-#       file to upload on their machine. 
-#       This is a bad AntiPattern. We should never do this again :/ 
-# Before running this, you should pip install
-# https://github.com/smart-on-fhir/rapid-elastic
-# Disabled by Default
-# [[stages.elastic_query]]
-# type = "submanifest"
-# files = ['elastic_query.toml']
-# skip_by_default=true
+
+#[[stages.elastic_query]]
+#type = "submanifest"
+#files = ['elastic_query.toml']
+#skip_by_default=true
 
 [[stages.elastic_output]]
 type = "submanifest"
@@ -41,14 +35,23 @@ skip_by_default=true
 
 # ------ </Elastic Search Tasks> ------
 
-#[[stages.eligible]]
+#[[stages.nlp_clinical_tasks]]
 #type = "submanifest"
-#files = ['eligible.toml']
-#
-#[[stages.outcome]]
-#type = "submanifest"
-#files = ['outcome.toml']
-#
+#files = ['nlp_clinical_tasks.toml']
+#skip_by_default = true
+
+[[stages.nlp_clinical_tasks_wide]]
+type = "submanifest"
+files = ['nlp_clinical_tasks_wide.toml']
+
+[[stages.eligible]]
+type = "submanifest"
+files = ['eligible.toml']
+
+[[stages.outcome]]
+type = "submanifest"
+files = ['outcome.toml']
+
 #[[stages.qa_athena]]
 #type = "submanifest"
 #files = ['qa_athena.toml']
@@ -62,7 +65,3 @@ skip_by_default=true
 #files = ['nlp_doc_type_tasks.toml']
 #skip_by_default = true
 #
-#[[stages.nlp_clinical_tasks]]
-#type = "submanifest"
-#files = ['nlp_clinical_tasks.toml']
-#skip_by_default = true

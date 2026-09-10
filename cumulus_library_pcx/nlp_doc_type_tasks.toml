@@ -50,9 +50,15 @@ select_by_table = "pcx__llm_document_task_document_topic"
 version = 1
 
 [tables.document_type]
-# Study-neutral document classification (DocType Annotation Guidelines, draft May 31, 2025).
-# Used to route operative reports, pathology, imaging and clinic notes to the tasks that read them.
+# PCX document classification: 15 mutually exclusive types defined by producing service and
+# purpose (operative note, pathology report, imaging report, genetics, treatment administration
+# record, radiation oncology note, tumor board, research/protocol document, transfer document,
+# discharge summary, end-of-life document, neurosurgery note, oncology note, other clinical note,
+# other). DOCUMENT_TASKS in llm/models/document_type.py maps each type to the extraction tasks
+# that read it; selection SQL for pcx__llm_document_task_<task> should be derived from it.
+# Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
+# Version 2 (2026-09-10): PCX task-selector types replace the CCDA-era list.
 response_schema = "llm/schemas/pcx-document-type-annotation.json"
 select_by_table = "pcx__llm_document_task_document_type"
-version = 1
+version = 2
 

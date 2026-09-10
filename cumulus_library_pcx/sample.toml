@@ -13,11 +13,12 @@ files = [
 ]
 
 [[actions]]
-description = "sample for aspects ('dx', 'lab', 'rx')"
+description = "sample for aspects ('dx', 'lab', 'proc', 'rx')"
 type = "build:parallel"
 files = [
     "athena/pcx__sample_casedef_dx.sql",
     "athena/pcx__sample_casedef_lab.sql",
+    "athena/pcx__sample_casedef_proc.sql",
     "athena/pcx__sample_casedef_rx.sql",
 ]
 

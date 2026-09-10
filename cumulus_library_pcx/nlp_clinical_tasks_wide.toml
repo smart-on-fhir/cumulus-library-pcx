@@ -1,0 +1,9 @@
+[[actions]]
+description = 'Flattened NLP results for PCX Clinical Tasks'
+type = "build:parallel"
+files = [
+     'llm/athena/pcx__llm_diagnosis_wide.sql',
+     'llm/athena/pcx__llm_surgery_wide.sql',
+     'llm/athena/pcx__llm_systemic_therapy_agent.sql',
+     'llm/athena/pcx__llm_radiation_wide.sql',
+]
