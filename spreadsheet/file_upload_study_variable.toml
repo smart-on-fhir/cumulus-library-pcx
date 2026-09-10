@@ -48,23 +48,23 @@ file = "lab_platelets.csv"
 [tables.valueset_lab_total_bilirubin]
 file = "lab_total_bilirubin.csv"
 
-[tables.valueset_rx_agent_carboplatin]
-file = "rx_agent_carboplatin.csv"
+[tables.valueset_rx_chemo_carboplatin]
+file = "rx_chemo_carboplatin.csv"
 
-[tables.valueset_rx_agent_cisplatin]
-file = "rx_agent_cisplatin.csv"
+[tables.valueset_rx_chemo_cisplatin]
+file = "rx_chemo_cisplatin.csv"
 
-[tables.valueset_rx_agent_cyclophosphamide]
-file = "rx_agent_cyclophosphamide.csv"
+[tables.valueset_rx_chemo_cyclophosphamide]
+file = "rx_chemo_cyclophosphamide.csv"
 
-[tables.valueset_rx_agent_etoposide]
-file = "rx_agent_etoposide.csv"
+[tables.valueset_rx_chemo_etoposide]
+file = "rx_chemo_etoposide.csv"
 
-[tables.valueset_rx_agent_methotrexate]
-file = "rx_agent_methotrexate.csv"
+[tables.valueset_rx_chemo_thiotepa]
+file = "rx_chemo_thiotepa.csv"
 
-[tables.valueset_rx_agent_thiotepa]
-file = "rx_agent_thiotepa.csv"
+[tables.valueset_rx_chemo_vincristine]
+file = "rx_chemo_vincristine.csv"
 
-[tables.valueset_rx_agent_vincristine]
-file = "rx_agent_vincristine.csv"
+[tables.valueset_rx_contrast_methotrexate]
+file = "rx_contrast_methotrexate.csv"
