@@ -1,10 +1,12 @@
 # PCX: medulloblastoma cohort and outcome study
 
+Repository documentation checked 2026-09-10 against local configuration, valuesets, generated SQL and model sources. Database builds and clinical results were not rerun.
+
 PCX is a Cumulus Library study under development for cross-network medulloblastoma analyses. The requirements below describe the intended scientific analysis; they are not a claim that survival estimation or treatment-effect analysis is implemented.
 
 ## Current repository state
 
-The [main manifest](cumulus_library_pcx/manifest.toml) enables `study_population`, `study_variable`, `study_variable_wide`, `casedef`, and `sample`. Elastic query/output, eligibility, outcome, client-view, QA, and cube stages are commented out. Existing SQL or model files for an inactive stage do not establish a working analysis or a completed database build.
+The [main manifest](cumulus_library_pcx/manifest.toml) enables `study_population`, `study_variable`, `study_variable_wide`, `casedef`, and `sample`. `elastic_output` is registered with `skip_by_default=true`; its upload manifest points to an external, dated results directory. Elastic query, eligibility, outcome, QA, cube and NLP stages are commented out; no client-view or diagnosis LLM-output stage is registered. Existing SQL or model files for an inactive stage do not establish a working analysis or a completed database build.
 
 Current population settings differ from the all-age research goal:
 
@@ -16,7 +18,9 @@ These settings require reconciliation with the analysis population before compar
 
 ## Data definitions and documentation
 
-There are 22 coded study variables: 3 diagnosis, 12 laboratory, and 7 medication CSVs. Codes match by `system` plus `code`; displays do not drive matching. Local codes and multi-site terminology coverage remain subject to validation.
+There are 23 coded study variables: 4 diagnosis, 12 laboratory, and 7 medication CSVs. Codes match by `system` plus `code`; displays do not drive matching. Local codes and multi-site terminology coverage remain subject to validation. The fourth diagnosis variable, [methotrexate toxicity evidence](dx_methotrexate_toxic.md), has 30 rows across four review tiers; a match is not confirmed methotrexate toxicity.
+
+See [chart-review outputs](chart_review.md), [deferred extraction work](deferred.md), and the [dated code review](reviews/code-review-2026-09-09/REVIEW.md) for integration details and open issues.
 
 | Laboratory valueset | Entries | Current scope or open issue |
 | --- | ---: | --- |
@@ -33,9 +37,9 @@ There are 22 coded study variables: 3 diagnosis, 12 laboratory, and 7 medication
 | Platelets | 9 | Includes manual, optical, estimated and EDTA-context counts |
 | Total bilirubin | 1 | Serum/plasma mass concentration; coverage not comprehensively audited |
 
-The seven medication valuesets contain 131 entries, including a single 71-code methotrexate set. MedicationRequest evidence is not proof of administration. The [RX review](reviews/rxnorm-2026-09-08/REVIEW.md) distinguishes current membership from historical findings.
+The seven medication valuesets contain 146 entries: six `rx_chemo_*` backbone sets (60 entries) and `rx_contrast_methotrexate` (86 entries: 76 RxNorm and 10 local/vendor codes). The `contrast` name identifies the study comparison variable; it does not establish route, dose, or indication. MedicationRequest evidence is not proof of administration. The [RX review](reviews/rxnorm-2026-09-08/REVIEW.md) distinguishes current membership from historical findings.
 
-The shared [data dictionary](spreadsheet/data_dictionary.csv) is registered in the main manifest. It has 166 actual column definitions using Cumulus `name,display,description,details,type` fields, including all current variable-wide projections and selected shared fields. It is not a complete dictionary of every SQL artifact or planned survival field. The earlier [valueset inventory](reviews/valueset_inventory.csv) is retained as a snapshot, not as the Cumulus dictionary.
+The shared [data dictionary](spreadsheet/data_dictionary.csv) is registered in the main manifest. It has 166 column definitions using Cumulus `name,display,description,details,type` fields. It is behind the current SQL: 35 medication columns still use the former `rx_agent_*` names, and the five `dx_methotrexate_toxic` columns are missing. Update the dictionary before relying on it for cross-network field assessment. It is not a complete dictionary of every SQL artifact or planned survival field. The earlier [valueset inventory](reviews/valueset_inventory.csv) is retained as a snapshot, not as the Cumulus dictionary.
 
 `lab_folate_interpretation` currently names both a boolean evidence flag in `pcx__cohort_variable_wide` and a serum/plasma interpretation code in `pcx__cohort_variable_wide_lab`. The dictionary describes the collision using a string display fallback; that does not resolve the SQL naming conflict. Folate narrative and coded results remain in the raw lab fields and are not carried by the numeric wide projection. See [folate review](folate_review.md).
 
@@ -46,13 +50,13 @@ Author valuesets in `spreadsheet/` and structural changes in study-owned templat
 From the repository root, with the project dependencies installed, regenerate the variable definitions and wide projections using the repository's module entry points:
 
 ```bash
-python -m cumulus_library_pcx.tools.study_variable
-python -m cumulus_library_pcx.tools.study_variable_wide
+python -m cumulus_library_pcx.stage.study_variable
+python -m cumulus_library_pcx.stage.study_variable_wide
 ```
 
-The broader `python -m cumulus_library_pcx.tools.study_builder` also regenerates population, case-definition, sample, eligibility and outcome artifacts. Generation does not activate commented manifest stages or execute Athena. Use the configured Cumulus Library environment for subsequent database materialization. This project does not declare its own `cumulus-study` console entry point in `pyproject.toml`.
+The stage generators now live under `cumulus_library_pcx.stage`; shared helpers remain under `tools`. The broader `python -m cumulus_library_pcx.tools.study_builder` also regenerates population, case-definition, sample, eligibility and outcome artifacts. Its eligibility/outcome generators still reference legacy or missing artifacts, so it is not a verified complete PCX build path. Generation does not activate commented manifest stages or execute Athena. Use the configured Cumulus Library environment for subsequent database materialization. This project does not declare its own `cumulus-study` console entry point in `pyproject.toml`.
 
-The LLM schema regression suite is in `tests/test_llm_models.py` and can be run with `python -m pytest tests/test_llm_models.py`. These tests do not validate clinical extraction accuracy. See [model documentation](llm.md) and [retrieval topics](query_topics.md).
+Run `python -m pytest tests` for the model, strict-mode and synthetic DuckDB diagnosis-output regression suites with the project and test dependencies installed. Runtime mention validation warns by default; set `CUMULUS_PCX_STRICT_MENTIONS=1` before importing models to reject shared evidence/date inconsistencies. These tests do not validate clinical extraction accuracy or an Athena deployment. See [model documentation](llm.md) and [retrieval topics](query_topics.md).
 
 Package metadata still contains PNOC030/ATRT wording, and older SQL artifacts remain. Active scope is determined by the manifest and current PCX definitions, not legacy filenames or package-description text. Deployment must preserve the manifest's relative access to the sibling `spreadsheet/` directory.
 
@@ -84,7 +88,7 @@ Chemotherapy in general (received versus not received) is not a required stratif
 
 Clinical team guidance, 2026-09-10: the prior-to-first-event rule for both treatments, the initial-therapy sequence stratifier, and protocol-name capture.
 
-Use `spreadsheet/rx_agent_methotrexate.csv` as the single methotrexate valueset across
+Use `spreadsheet/rx_contrast_methotrexate.csv` as the single methotrexate valueset across
 ingredients and formulations. It includes all codes formerly in the separate injectable
 subset. Determine administration, route, dose, timing, and treatment phase from treatment
 evidence. A valueset match alone does not establish receipt or high-dose intravenous therapy.
@@ -124,4 +128,4 @@ The EFS event list also defines the first event used by the treatment-exposure f
 
 ### Immediate next step
 
-Use the registered column-level data dictionary to assess field availability in both networks. Resolve the folate column-name collision and the age/utilization selection mismatch, then validate subtype, actual treatment receipt and dated outcomes on reviewed patient samples before enabling comparative survival outputs.
+Refresh the registered column-level data dictionary for renamed medication and new toxicity fields, then use it to assess field availability in both networks. Resolve the folate column-name collision and the age/utilization selection mismatch, then validate subtype, actual treatment receipt and dated outcomes on reviewed patient samples before enabling comparative survival outputs.

@@ -1,5 +1,7 @@
 # PCX LLM outputs
 
+Checked 2026-09-10. Annotation class names no longer carry the `Pcx` prefix; builder and table names retain it. Shared mention/date validation is warn-only by default; see [validation settings](llm.md). The wide projection preserves values and does not repair invalid dates or adjudicate conflicting sources.
+
 `create_schema.py` generates JSON schemas for the 14 clinical extraction tasks
 and the two document classification/routing tasks. From the repository root:
 
@@ -7,7 +9,7 @@ and the two document classification/routing tasks. From the repository root:
 python -m cumulus_library_pcx.llm.create_schema
 ```
 
-Schemas are written under `llm/schemas/`; this command does not run extraction.
+Schemas are written under `cumulus_library_pcx/llm/schemas/`; this command does not run extraction.
 
 ## Diagnosis wide table
 
@@ -25,7 +27,7 @@ NLP tables:
 These deployment suffixes are inherited from the copied builder; adjust the list
 in `pcx_base_mixin.py` if your imported table names differ. Tables must contain
 `note_ref`, `encounter_ref`, `subject_ref`, `generated_on`, `task_version`,
-`system_fingerprint`, and a structured `result` matching `PcxDiagnosisAnnotation`.
+`system_fingerprint`, and a structured `result` matching `DiagnosisAnnotation`.
 The discovery check verifies the result column, not model-version compatibility.
 Incompatible result schemas need migration before combining them.
 
@@ -35,7 +37,7 @@ histology, primary-site wording, Chang M-stage, age at diagnosis, diagnosis date
 and confirmatory tissue-diagnosis date. Mentions retain evidence spans in the
 source NLP results. The wide table projects ten clinical values plus seven source
 metadata columns, omitting spans and mention flags. Integrated-diagnosis wording
-is deferred as low-priority validation work in deferred.md.
+is deferred as low-priority validation work in [deferred work](deferred.md).
 
 Diagnosis fields retain their source types: the expected schema uses BIGINT for
 age and VARCHAR for other values, including diagnosis dates. Only generated_on and task_version are
@@ -49,8 +51,8 @@ under disease_subtype. Older output needs explicit conversion or re-extraction;
 a row filter alone cannot change the source table's result structure. With no
 available sources, the builder creates an empty table with matching columns/types.
 
-`template/pcx__llm_diagnosis_wide.sql.jinja` drives the builder.
-`athena/pcx__llm_diagnosis_wide.sql` is its standalone Athena example for the
+`cumulus_library_pcx/llm/template/pcx__llm_diagnosis_wide.sql.jinja` drives the builder.
+`cumulus_library_pcx/llm/athena/pcx__llm_diagnosis_wide.sql` is its standalone Athena example for the
 GPT-OSS source only. Use the builder to combine available deployments; do not run
 both creation routes against an existing destination without your normal rebuild
 procedure.

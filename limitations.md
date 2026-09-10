@@ -10,13 +10,13 @@ analysis. The scientific items below remain gaps and proposed resolutions. The r
 
 ## Current implementation findings
 
-- The active manifest runs population, variable, wide-variable, case-definition and sample stages. Outcome, eligibility and cube stages remain disabled.
+- The active manifest runs population, variable, wide-variable, case-definition and sample stages. Elastic output is available only by explicit stage selection (`skip_by_default=true`); query and NLP stages are commented out. Outcome, eligibility and cube stages remain disabled.
 - The population SQL applies ages 0–8 at visits, not all ages at diagnosis. It also requires at least two distinct encounter-period ordinals and a minimum 365-day observed encounter span. This filter is not censoring and can remove early deaths or short follow-up. Survival analyses should not inherit this restriction without a justified selection design.
-- The 166-row column dictionary is present and registered. Cross-network field availability and semantic validation remain incomplete. `lab_folate_interpretation` is a boolean flag in one table and an interpretation code in another; the dictionary cannot resolve that name conflict.
+- The 166-row column dictionary is present and registered, but has not caught up with the seven renamed medication variables or the new toxicity variable. Cross-network field availability and semantic validation remain incomplete. `lab_folate_interpretation` is a boolean flag in one table and an interpretation code in another; the dictionary cannot resolve that name conflict.
 - Lab valuesets now include expanded AST, ALT and platelet LOINCs and local AST/ALT/creatinine codes. Creatinine still contains only one LOINC; proposed multi-site additions remain unimplemented. Hemoglobin still includes local reticulocyte hemoglobin code 923. Estimated and special-context measurements need explicit pooling decisions.
 - Folate has five separate variables. Unspecified local folate specimens remain unresolved; the likely hematocrit component was removed pending verification. Qualitative/narrative values are not represented by the numeric wide quantity fields.
 - Boolean wide evidence fields are TRUE or NULL, not proof of clinical absence or treatment receipt. Typed wide tables retain distinct evidence rows rather than one adjudicated result per patient.
-- Medication valuesets comprise seven files and 131 entries. Full terminology-release/historical coverage, local mapping, administration ascertainment and clinical validation remain open.
+- Medication valuesets comprise seven files and 146 entries, including 86 methotrexate codes under `rx_contrast_methotrexate`. Full terminology-release/historical coverage, local mapping, administration ascertainment and clinical validation remain open.
 - Package metadata and inactive generated artifacts retain legacy terminology. They should not be mistaken for implemented PCX survival logic.
 
 ## Reference study
@@ -81,8 +81,7 @@ response state rather than automatically counting it as an adverse EFS event.
 
 ## 5. Radiation needs temporal context
 
-**Gap:** The paper allowed discretionary radiation after protocol treatment; the README
-uses any-radiation receipt.
+**Gap:** The paper allowed discretionary radiation after protocol treatment. The README now requires any-dose radiation received before the first EFS-qualifying event and initial chemotherapy/radiation sequence; those derived flags are not implemented.
 
 **Resolution:** Capture delivery dates, field, dose and indication, distinguishing
 initial management, post-chemotherapy treatment and salvage after relapse. A single
@@ -147,5 +146,5 @@ is not a sufficient success criterion.
 3. **Observational treatment-effect analysis:** explicit baseline treatment strategies,
    confounding assessment, timing controls and sensitivity analyses.
 
-The original scientific comparison was recorded on 2026-09-08 and has been supplemented with the current repository findings above. These limitations remain
+The repository status was refreshed on 2026-09-10. The original scientific comparison was recorded on 2026-09-08 and has been supplemented with the current repository findings above. These limitations remain
 open until their definitions, required data and validation evidence are documented.
