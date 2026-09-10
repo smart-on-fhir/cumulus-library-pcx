@@ -20,7 +20,7 @@ retain a one-edit fuzzy medulloblastoma spelling alternative. See the
 | transition_of_care_recall | General patient-transfer language: transfer of care, outside hospital/records/provider, referred from, previously treated at, establish care, second opinion, transport (transition_of_care.py) |
 | transition_of_care_ppv  | Brain-tumor-specific transfer settings: transferred/referred for neurosurgery, proton, stem-cell rescue or protocol; resected or induction started at an outside hospital; outside pathology or slides reviewed here; outside CT/MRI showing a posterior fossa mass; treatment-naive or newly diagnosed on arrival; or an outside-institution term with a tumor/surgery/oncology term in the same note (transition_of_care.py) |
 | rx_chemotherapy         | Backbone agents of ACNS0334 induction/consolidation (vincristine, carboplatin, cyclophosphamide, cisplatin, thiotepa, etoposide): generic and brand names, with context-gated abbreviations; methotrexate is a separate topic |
-| diagnosis_recall        | dx_medulloblastoma OR dx_atrt OR every other CNS tumor family in CnsDiagnosisCategory (ETMR, pineoblastoma, sPNET, embryonal NOS, glioma, ependymoma, craniopharyngioma, choroid plexus, germ cell, glioneuronal, CNS sarcoma) and generic brain-tumor terms; both dx_* rows are verbatim branches (diagnosis.py) |
+| diagnosis_recall        | dx_medulloblastoma OR dx_atrt OR the broader CNS tumor families retained for retrieval (the former CnsDiagnosisCategory enum has been removed from extraction) (ETMR, pineoblastoma, sPNET, embryonal NOS, glioma, ependymoma, craniopharyngioma, choroid plexus, germ cell, glioneuronal, CNS sarcoma) and generic brain-tumor terms; both dx_* rows are verbatim branches (diagnosis.py) |
 | diagnosis_ppv           | A named tumor entity or ICD-O code AND diagnosis-establishing language (final/integrated/pathologic diagnosis, patholog*, histolog*, biops*, resect*, WHO grade, consistent with, histology pattern, M-stage, primary site) in the same note (diagnosis.py) |
 | surgery_recall          | Tumor surgery, extent of resection, residual disease, second-look and dates (surgery.py); single words and abbreviations |
 | surgery_ppv             | Tumor surgery, extent of resection, residual disease, second-look and dates (surgery.py); multi-word phrases written when the fact is documented |
@@ -69,12 +69,75 @@ The queries contain no age or methotrexate-exposure requirement for cohort entry
 
 Added 2026-09-09; revised the same day for intersection use, then merged with a second
 independently written set (best-of-breed: wildcard stems and AND-structured PPV clauses from the
-second set; gated abbreviations, phrase lists, brand names and negative-evidence phrases from the first). Each LLM extraction module in
+second set; gated abbreviations, phrase lists, brand names and negative-evidence phrases from the first).
+A third pass on 2026-09-09 merged an external review draft: its expanded synonym lists (all
+methotrexate and backbone brand names in `systemic_therapy_*`, extra lab and toxicity terms,
+extra predisposition genes), its restructured `transition_of_care_ppv` (home-institution and
+treatment-naive AND clauses) and its tighter `registry_eligibility_recall` were adopted; the
+earlier merge's gated `RT`, its `progression/progressive/progressed` in place of `progress*`,
+`diagnosed` in place of `diagnos*`, the 9475–9477/3 MB codes, and its dated-event, dose-unit,
+trial-age and negative-evidence phrases were retained. `diagnosis_recall` keeps the broad
+CnsDiagnosisCategory scope decided earlier rather than the draft's embryonal-only scope.
+
+Two assumptions the file now makes: the `note` field analyzer splits on hyphens, so quoted
+hyphenated forms ("second-look", "post-operative") were dropped where the space form exists
+(keep both if the analyzer is not standard); and `transition_of_care_ppv` names the home
+institution ("at BCH", "Boston Children's") and must be edited per site. Each LLM extraction module in
 `cumulus_library_pcx/llm/models/` has queries named for the module file so routing is
 mechanical. Where a broad and a narrow form differ they are suffixed `_recall` and `_ppv`;
-where one query serves both purposes the bare module name is used (`document_topic`,
-`document_type`). `base.py` and `treatment.py` define shared classes and enums, not
-extraction tasks, and have no query.
+`base.py`, `treatment.py`, `document_topic.py` and `document_type.py` have no query:
+the first two define shared classes and enums, the last two run on every routed note.
+
+**Context rule (2026-09-09).** Several `_recall` queries on their own would match a large share
+of all notes (labs, follow-up, "surgery", "response"). Each task pair is therefore built as
+
+    ppv    = specific task evidence  OR (oncology context AND structured PPV evidence)
+    recall = ppv                     OR (oncology context AND broad task evidence)
+
+Specific evidence is phrasing that establishes the oncologic (or neuro-oncologic) context by
+itself — not merely phrasing relevant to the task — so an operative report that says
+"suboccipital craniotomy", a radiation record that says "craniospinal irradiation", or a cytology
+report that says "CSF cytology" is retrieved even when it never repeats the diagnosis. Phrases that
+describe patients across specialties ("operative report", "date of death", "vital status", "date of
+diagnosis", "inclusion criteria", "response assessment", "complete response", `germline`, "genetic
+counseling", `Gy`, `irradiat*`, "no radiation", methotrexate and cyclophosphamide by name) are NOT
+in the ungated arm; they need an oncology anchor in the same note: `tumor/tumour, cancer, oncolog*,
+malignan*, neoplasm*, carcinoma*, sarcoma*, blastoma*, chemotherap*, chemo, radiotherap*`,
+"radiation therapy/oncology/treatment", "malignant cells", the embryonal entity names, or ACNS0334.
+Bare `radiation` is not an anchor (imaging consents, "irradiated blood products"). The anchor list
+is deliberately selective; bare `mass`, `lesion`, `grade` and `treatment` are excluded because they
+would recreate the volume problem. Cancer evidence and task evidence are kept separate: "malignant
+cells" satisfies the anchor but establishes metastasis only together with CSF/cytology evidence in
+the gated arm.
+`surgery_*` uses a wider neuro/tumor anchor (the oncology block plus brain, cerebell*, posterior
+fossa, intracranial, cranial, neurosurg*, craniotom*, craniectom*). `transition_of_care_*` has no
+ungated arm: generic transfer and referral language is too common. `dx_*`, `rx_*` and
+`diagnosis_*` are unchanged. The complete parenthesized PPV expression is an OR branch of its recall row, so PPV ⊆ recall
+by construction (the builder also asserts the substring).
+
+**Response pair, 2026-09-10.** After a first run of `response_ppv` returned 509,882 documents,
+its generic branch — oncology term anywhere AND imaging anywhere AND a status word anywhere —
+was removed. `response_ppv` now has a small ungated arm ("tumor response", RANO, RAPNO, "no
+residual tumor", measurable/evaluable disease) and, under the oncology gate, explicit response
+phrases; residual enhancement and interval change count only as proximity phrases with a tumor
+noun, milestones only with an assessment term, cytology only with a milestone or assessment
+term. `response_recall` embeds that PPV and adds, under the gate, 80 noun×status proximity
+phrases (tumor/mass/lesion/enhancement/cavity/residual/metastases × stable/unchanged/resolved/
+decreased/increased/smaller/larger/progression/progressed/response, slop 5) in place of bare
+`MRI`, `stable`, `response`. The same audit is to be applied to the other pairs only after the
+response counts (documents and distinct patients, globally and within `dx_medulloblastoma OR
+dx_atrt`) show the change worked. The file is now split: `query_topics_ppv.tsv` (the
+`query_topics.tsv` symlink target) and `query_topics_recall.tsv`.
+
+Three cautions. Same-note co-occurrence is screening, not a relationship: a cancer follow-up note
+can mention an unrelated cataract operation, and the LLM must decide what a procedure treated.
+The rule can change the patient set, not only note volume: a patient whose only relevant note
+fails the context requirement drops out of that task's patient-level intersection. And the
+volume reduction is not yet an accuracy claim: measure distinct notes and distinct patients per
+query before and after, and review a sample of the notes the rule excludes.
+Query length and written clause counts do not establish safety against clause limits:
+Elasticsearch 8+ sets the limit dynamically, `indices.query.bool.max_clause_count` is deprecated,
+and wildcard rewriting changes the effective clause count, so the only test is running the query.
 
 **Intersection design.** These queries are meant to be joined at the patient level:
 `diagnosis_recall` (or the structured case definition) establishes that a patient is a
@@ -99,12 +162,10 @@ is the patient-level join key; `diagnosis_ppv` narrows it by requiring diagnosis
 language in the same note as the entity, since the entity is the task; `systemic_therapy_ppv` requires a
 drug or protocol name AND dosing/cycle language; `medulloblastoma_recall` is the union of the
 four evidence blocks the compact model summarizes (methotrexate, radiation, molecular group,
-vital status) and `medulloblastoma_ppv` the phrase forms of the same; `document_topic` is a
-single compact routing gate (entities, drugs, protocols and one anchor term per task) kept
-short to stay well under the query-string clause limit; `document_type` matches title and
-section cues only. Short abbreviations (CR/PR/SD/PD, CSI, RT, MTX, OSH, gene symbols) are always
+vital status) and `medulloblastoma_ppv` the phrase forms of the same. Short abbreviations (CR/PR/SD/PD, CSI, RT, MTX, OSH, gene symbols) are always
 gated by companion terms. Trailing wildcards (`resect*`, `chromosom*`) are used since the 2026-09-09
-merge; wildcard terms are never placed inside quoted phrases, `progress*` is avoided because it
+merge, and phrase slop (`"tumor stable"~5`) is used from 2026-09-10 where a finding and its
+status must be near each other rather than anywhere in the same note; wildcard terms are never placed inside quoted phrases, `progress*` is avoided because it
 matches every "Progress Note" title (progression/progressive/progressed are listed instead), and
 every slash, hyphen or caret is inside a quoted phrase so the query-string parser cannot read it
 as an operator or regex. Wildcard terms bypass the analyzer; confirm the index lowercases them.

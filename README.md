@@ -71,10 +71,18 @@ Package metadata still contains PNOC030/ATRT wording, and older SQL artifacts re
 | Characteristic          | Required distinction                       | Extraction requirement                                                                              |
 |-------------------------|--------------------------------------------|-----------------------------------------------------------------------------------------------------|
 | Medulloblastoma subtype | Group 3 and other subtypes, selectable     | Capture subtype, supporting evidence, and unknown or conflicting results.                           |
-| Methotrexate treatment  | Received versus not received, **any dose** | Identify actual administration and its date; distinguish planned treatment from treatment received. |
-| Radiation treatment     | Received versus not received, **any dose** | Identify delivered radiation and its date; distinguish planned treatment from treatment received.   |
+| Methotrexate treatment  | Received **prior to first event** versus not received, **any dose** | Identify actual administration and its date; distinguish planned treatment from treatment received. Count methotrexate as initial therapy only when the first administration precedes the first event. |
+| Radiation treatment     | Received **prior to first event** versus not received, **any dose** | Identify delivered radiation and its date; distinguish planned treatment from treatment received. Count radiation as initial therapy only when the first delivery precedes the first event. |
+| Initial-therapy sequence | Chemotherapy before radiation versus radiation before chemotherapy, within initial treatment | Compare the first delivered chemotherapy date with the first delivered radiation date, both prior to the first event. Patients with only one modality before the first event form their own strata. |
+| Protocol name           | Named treatment protocol whenever documented | Capture the protocol name verbatim (for example ACNS0334) with its source and date. A protocol name does not establish enrollment, randomization, or treatment received. |
 
 For both treatment variables, retain **unknown/not documented** separately from confirmed absence of treatment.
+
+**First event.** The first event that would count in an EFS calculation: progression, recurrence/relapse, secondary malignancy, or death (see section 5). Treatment delivered after the first event, such as salvage radiation after recurrence, is not initial therapy and must not set the received-prior-to-first-event flags. Many patients receive radiation after progression or recurrence; counting that radiation would obscure the effect of radiation as initial therapy. For patients with no documented event, all delivered treatment counts as prior to first event, so these flags depend on event ascertainment and are not final until the EFS event list is agreed.
+
+Chemotherapy in general (received versus not received) is not a required stratifier. Methotrexate receipt prior to first event is sufficient.
+
+Clinical team guidance, 2026-09-10: the prior-to-first-event rule for both treatments, the initial-therapy sequence stratifier, and protocol-name capture.
 
 Use `spreadsheet/rx_agent_methotrexate.csv` as the single methotrexate valueset across
 ingredients and formulations. It includes all codes formerly in the separate injectable
@@ -94,10 +102,10 @@ A deceased flag or last vital status alone is insufficient to calculate survival
 ### 4. Cross-network cube requirements
 
 - Apply shared definitions and extraction rules across Cumulus and CBTN.
-- Support filtering or stratification by network, age group, subtype, methotrexate exposure, and radiation exposure.
+- Support filtering or stratification by network, age group, subtype, methotrexate exposure prior to first event, radiation exposure prior to first event, initial-therapy sequence (chemotherapy before radiation versus radiation before chemotherapy), and protocol name.
 - Retain missingness and follow-up availability so Sarah can assess comparability.
 - Resolve potential patient overlap before pooling network results.
-- Define the treatment-exposure timing rule before comparing survival: grouping patients by treatment received at any later time can bias comparisons measured from diagnosis.
+- The treatment-exposure timing rule is receipt prior to first event (section 2). Grouping patients by treatment received at any later time would bias comparisons measured from diagnosis. The prior-to-first-event rule still classifies patients on information observed after T₀, so the analysis must address that (see [limitations](limitations.md)).
 
 ### 5. Reach goal — event-free survival (EFS)
 
@@ -111,6 +119,8 @@ Before calculating EFS, agree on:
 - How conflicting or uncertain event dates are handled.
 
 Remission should be captured as a disease-status transition; it should not automatically count as an adverse EFS event.
+
+The EFS event list also defines the first event used by the treatment-exposure flags and the initial-therapy sequence in section 2, so it must be agreed before those flags are computed, even if EFS itself is not calculated.
 
 ### Immediate next step
 
