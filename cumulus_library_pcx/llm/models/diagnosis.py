@@ -1,9 +1,8 @@
-"""Flat PCX diagnosis evidence from one note; eligibility is adjudicated downstream."""
-from datetime import date
+"""PCX diagnosis evidence from one note, with verbatim spans; eligibility is adjudicated downstream."""
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from cumulus_library_pcx.llm.models.base import DatePrecision
+from pydantic import BaseModel, ConfigDict, Field
+from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
 
 
 class DiseaseSubtype(StrEnum):
@@ -37,17 +36,10 @@ class ChangMStage(StrEnum):
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
-class PcxDiagnosisAnnotation(BaseModel):
-    """Extract confirmed patient-specific diagnoses, including documented history.
-    Exclude suspected, negated, rule-out, and family-history diagnoses. Preserve
-    exact diagnosis/site wording and legacy terms without inferring modern entities.
-    Molecular classification is handled separately. Unknown findings do not imply
-    eligibility or exclusion. Extract only explicitly documented M-stage; do not
-    derive it from imaging or cytology here. Histology is unknown when unstated or
-    not medulloblastoma. Prefer imaging impression for primary tumor-site wording.
-    """
-    model_config = ConfigDict(extra="forbid")
-
+class DiseaseSubtypeMention(SpanAugmentedMention):
+    """The patient's documented CNS embryonal tumor diagnosis. Choose the single best
+    subtype supported by pathology/molecular text in THIS note. Do not extract negated,
+    rule-out, suspected/probable, or family-history diagnoses."""
     disease_subtype: DiseaseSubtype = Field(
         default=DiseaseSubtype.NONE_OF_THE_ABOVE,
         description=(
@@ -63,7 +55,11 @@ class PcxDiagnosisAnnotation(BaseModel):
         ),
     )
 
-    medulloblastoma_histology: MedulloblastomaHistology = Field(
+
+class MedulloblastomaHistologyMention(SpanAugmentedMention):
+    """Histologic pattern when the diagnosis is medulloblastoma. Leave NONE_OF_THE_ABOVE if
+    the histologic pattern is not stated or the tumor is not a medulloblastoma."""
+    histology: MedulloblastomaHistology = Field(
         default=MedulloblastomaHistology.NONE_OF_THE_ABOVE,
         description=(
             "CLASSIC: classic medulloblastoma. "
@@ -74,6 +70,12 @@ class PcxDiagnosisAnnotation(BaseModel):
         ),
     )
 
+
+class IntegratedDiagnosisMention(SpanAugmentedMention):
+    """The diagnosis exactly as the note words it: the WHO-CNS5 integrated diagnosis when
+    stated, and any deprecated pre-CNS5 term used for THIS tumor. Verbatim wording only; the
+    molecular classification itself is extracted by molecular.py, and no modern entity is to
+    be inferred from a legacy term."""
     integrated_diagnosis_verbatim: str | None = Field(
         default=None,
         description=(
@@ -81,24 +83,33 @@ class PcxDiagnosisAnnotation(BaseModel):
             "'Medulloblastoma, SHH-activated and TP53-mutant'). Null if not stated."
         ),
     )
-
     historical_diagnosis_term: str | None = Field(
         default=None,
         description=(
             "A deprecated or legacy (pre-WHO-CNS5) diagnosis term the note uses for THIS tumor "
             "-- e.g. 'PNET', 'CNS-PNET', 'supratentorial PNET', 'cerebellar sarcoma', "
             "'medulloblastoma variant'. Capture the exact historical phrase verbatim so a "
-            "downstream crosswalk can review it against a current diagnosis; do not infer a modern entity from a legacy term. Null "
-            "when the note uses only current integrated-diagnosis terminology, or no such term "
-            "is stated. Do not record family-history, negated, or rule-out terms."
+            "downstream crosswalk can review it against a current diagnosis; do not infer a "
+            "modern entity from a legacy term. Null when the note uses only current "
+            "integrated-diagnosis terminology, or no such term is stated. Do not record "
+            "family-history, negated, or rule-out terms."
         ),
     )
 
+
+class TumorLocationMention(SpanAugmentedMention):
+    """Primary anatomic site of the tumor as the note words it. Prefer the imaging
+    impression, then the pathology gross description."""
     tumor_location_verbatim: str | None = Field(
         default=None,
         description="Exact site phrase from the note (e.g. 'left cerebellar hemisphere'). Null if not stated.",
     )
 
+
+class ChangMStageMention(SpanAugmentedMention):
+    """Documented Chang metastasis stage (M-stage) at diagnosis/staging, when stated
+    directly. Do not derive it from imaging or cytology here; the derived stage is
+    adjudicated downstream from the metastasis.py inputs."""
     chang_m_stage: ChangMStage = Field(
         default=ChangMStage.NONE_OF_THE_ABOVE,
         description=(
@@ -108,45 +119,60 @@ class PcxDiagnosisAnnotation(BaseModel):
         ),
     )
 
+
+class AgeAtDiagnosisMention(SpanAugmentedMention):
+    """Patient's age at initial diagnosis in completed months. Extract only if explicitly
+    stated. Preserve all ages; age at definitive surgery is a separate trial criterion."""
     age_at_diagnosis_months: int | None = Field(
         default=None, ge=0, le=1500,
         description="Explicit age at initial diagnosis in completed months (e.g. '2 years' -> 24); not age at definitive surgery. Null if unstated.",
     )
 
+
+class DiagnosisDateMention(SpanAugmentedMention):
+    """Date the patient was first diagnosed with this embryonal tumor. If several dates
+    appear, use the earliest diagnosis date."""
     diagnosis_date: str | None = Field(
         default=None,
         description="Earliest diagnosis date, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated.",
     )
-
     diagnosis_date_precision: DatePrecision | None = Field(
         default=None,
         description="Precision supported by the text for diagnosis_date. Null when diagnosis_date is null.",
     )
 
+
+class DiagnosisDateGoldMention(SpanAugmentedMention):
+    """Date of the confirmatory ('gold standard') tissue diagnosis: prefer the surgery /
+    biopsy procedure date that produced the diagnostic specimen over a later report date.
+    Not necessarily the definitive surgery."""
     diagnosis_date_gold: str | None = Field(
         default=None,
-        description="Confirmatory tissue-diagnosis date: prefer the biopsy/resection date producing the diagnostic specimen over the report date. ISO YYYY-MM-DD, first-of-period if coarse; null if unstated. Not necessarily definitive surgery.",
+        description="Confirmatory tissue-diagnosis date, ISO YYYY-MM-DD, first-of-period if coarse. Null if unstated.",
     )
-
     diagnosis_date_gold_precision: DatePrecision | None = Field(
         default=None,
         description="Precision for diagnosis_date_gold. Null when diagnosis_date_gold is null.",
     )
 
-    @model_validator(mode="after")
-    def validate_date_precision(self):
-        for name in ("diagnosis_date", "diagnosis_date_gold"):
-            value = getattr(self, name)
-            precision = getattr(self, f"{name}_precision")
-            if (value is None) != (precision is None):
-                raise ValueError(f"{name} and its precision must both be present or null")
-            if value is None:
-                continue
-            parsed = date.fromisoformat(value)
-            if parsed.isoformat() != value:
-                raise ValueError(f"{name} must use YYYY-MM-DD")
-            if precision == DatePrecision.MONTH and parsed.day != 1:
-                raise ValueError("Month-precision dates must use the first day of the month")
-            if precision == DatePrecision.YEAR and (parsed.month, parsed.day) != (1, 1):
-                raise ValueError("Year-precision dates must use January 1")
-        return self
+
+class PcxDiagnosisAnnotation(BaseModel):
+    """Extract confirmed patient-specific diagnoses, including documented history.
+    Exclude suspected, negated, rule-out, and family-history diagnoses. Preserve
+    exact diagnosis/site wording and legacy terms without inferring modern entities.
+    Molecular classification is handled separately. Unknown findings do not imply
+    eligibility or exclusion. Extract only explicitly documented M-stage; do not
+    derive it from imaging or cytology here. Histology is unknown when unstated or
+    not medulloblastoma. Every mention carries verbatim spans; has_mention must agree
+    with the spans.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    disease_subtype: DiseaseSubtypeMention
+    medulloblastoma_histology: MedulloblastomaHistologyMention
+    integrated_diagnosis: IntegratedDiagnosisMention
+    tumor_location: TumorLocationMention
+    chang_m_stage: ChangMStageMention
+    age_at_diagnosis: AgeAtDiagnosisMention
+    diagnosis_date: DiagnosisDateMention
+    diagnosis_date_gold: DiagnosisDateGoldMention
