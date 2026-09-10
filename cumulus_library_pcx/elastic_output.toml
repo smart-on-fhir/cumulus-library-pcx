@@ -2,7 +2,7 @@
 description = "elastic_output CSV uploads"
 type = "build:parallel"
 files = [
-    "../../../export/elastic/output/2026-09-09/file_upload_elastic.toml",
+    "../../../export/elastic/output/2026-09-10/file_upload_elastic.toml",
 ]
 
 [[actions]]
@@ -10,7 +10,4 @@ description = "elastic_output union tasks"
 type = "build:serial"
 files = [
     "athena/pcx__elastic_union.sql",
-    "athena/pcx__elastic_task.sql",
-    "athena/pcx__elastic_task_aspect.sql",
-    "athena/pcx__elastic_task_tier.sql",
 ]

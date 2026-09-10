@@ -50,12 +50,3 @@ files = [
     "athena/pcx__sample_casedef_peri_post_limit_note_50.sql",
     "athena/pcx__sample_casedef_post_limit_note_50.sql",
 ]
-
-[[actions]]
-description = "sample task"
-type = "build:serial"
-files = [
-    "athena/ibd__sample_task.sql",
-    "athena/ibd__sample_task_aspect.sql",
-    "athena/ibd__sample_task_tier.sql",
-]

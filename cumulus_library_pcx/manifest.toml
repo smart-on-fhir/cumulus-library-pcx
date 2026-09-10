@@ -49,10 +49,6 @@ skip_by_default=true
 #type = "submanifest"
 #files = ['outcome.toml']
 #
-#[[stages.client_views]]
-#type = "submanifest"
-#files = ['client_views.toml']
-#
 #[[stages.qa_athena]]
 #type = "submanifest"
 #files = ['qa_athena.toml']
@@ -60,3 +56,13 @@ skip_by_default=true
 #[[stages.cube]]
 #type = "submanifest"
 #files = ['cube.toml']
+
+#[[stages.nlp_doc_type_tasks]]
+#type = "submanifest"
+#files = ['nlp_doc_type_tasks.toml']
+#skip_by_default = true
+#
+#[[stages.nlp_clinical_tasks]]
+#type = "submanifest"
+#files = ['nlp_clinical_tasks.toml']
+#skip_by_default = true
