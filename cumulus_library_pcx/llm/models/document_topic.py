@@ -44,7 +44,7 @@ class TopicRelevanceMention(SpanAugmentedMention):
     )
 
 
-class TopicRelevanceAnnotation(BaseModel):
+class DocumentTopicAnnotation(BaseModel):
     """Wide-friendly routing gate for the PCX extraction models.
 
     Each routing field matches its extraction module's filename without ``.py``.
@@ -60,7 +60,7 @@ class TopicRelevanceAnnotation(BaseModel):
         ...,
         description=(
             "ATRT, medulloblastoma, other CNS embryonal diagnosis, WHO-CNS5 "
-            "integrated diagnosis, primary site, laterality, or diagnosis date."
+            "integrated diagnosis, primary site, or diagnosis date."
         ),
     )
     molecular: TopicRelevanceMention = Field(
@@ -74,8 +74,8 @@ class TopicRelevanceAnnotation(BaseModel):
     event: TopicRelevanceMention = Field(
         ...,
         description=(
-            "Initial diagnosis, progression, recurrence, refractory disease, second "
-            "malignancy, second primary, death, response, or current disease status."
+            "Initial diagnosis, progression, recurrence, refractory disease, "
+            "second malignancy, second primary, death, response, or current disease status."
         ),
     )
     metastasis: TopicRelevanceMention = Field(
@@ -88,15 +88,13 @@ class TopicRelevanceAnnotation(BaseModel):
     surgery: TopicRelevanceMention = Field(
         ...,
         description=(
-            "Tumor biopsy/resection, surgery date, procedure type, or extent of "
-            "resection."
+            "Tumor biopsy/resection, surgery date, procedure type, or extent of resection."
         ),
     )
     radiation: TopicRelevanceMention = Field(
         ...,
         description=(
-            "Radiation course, modality, field, start/stop date, craniospinal or "
-            "focal treatment, and dose."
+            "Radiation course, modality, field, start/stop date, craniospinal or focal treatment, and dose."
         ),
     )
     systemic_therapy: TopicRelevanceMention = Field(
@@ -117,7 +115,8 @@ class TopicRelevanceAnnotation(BaseModel):
     predisposition: TopicRelevanceMention = Field(
         ...,
         description=(
-            "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; include negative tests and VUS."
+            "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; "
+            "include negative tests and VUS."
         ),
     )
     patient: TopicRelevanceMention = Field(
@@ -131,10 +130,7 @@ class TopicRelevanceAnnotation(BaseModel):
         ...,
         description=(
             "ACNS0334 comparability: age at definitive surgery, newly diagnosed high-risk "
-            "embryonal disease, ATRT exclusion/reclassification, pretreatment history "
-            "or renal/hepatic/cardiac/pulmonary/marrow adequacy. Include explicit negatives."
+            "embryonal disease, ATRT exclusion/reclassification, pretreatment history or "
+            "renal/hepatic/cardiac/pulmonary/marrow adequacy. Include explicit negatives."
         ),
     )
-
-
-DocumentTopicAnnotation = TopicRelevanceAnnotation
