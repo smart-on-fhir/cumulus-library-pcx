@@ -28,7 +28,7 @@ def list_csv() -> list[Path]:
 # ElasticSearch task
 #-----------------------------------------------------------------------------
 def list_tasks() -> list[Path]:
-    tasks = ['task', 'task_aspect', 'task_tier']
+    tasks = ['casedef', 'task']
     tables = [tablespace.name_elastic(task) for task in tasks]
     return [filetool.path_athena(f"{table}.sql") for table in tables]
 
