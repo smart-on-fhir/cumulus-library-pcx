@@ -221,44 +221,7 @@
         "disease_subtype": {
           "$ref": "#/$defs/DiseaseSubtype",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Documented diagnosis using only evidence from this note. Choose exactly one. ATRT: atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the CNS. Record ATRT as an exclusion/reclassification; do not infer it from a marker alone. MEDULLOBLASTOMA: medulloblastoma of any histology or molecular group (WNT, SHH, Group 3, Group 4), incl. medullomyoblastoma and MBEN. ETMR: embryonal tumor with multilayered rosettes. PINEOBLASTOMA: pineoblastoma. LEGACY_SPNET: historical supratentorial PNET/CNS-PNET without a modern diagnosis. OTHER_CNS_EMBRYONAL: other embryonal CNS tumor or embryonal tumor NOS. NONE_OF_THE_ABOVE: no embryonal-tumor diagnosis is documented in this note."
-        }
-      },
-      "required": [
-        "has_mention",
-        "spans"
-      ],
-      "title": "DiseaseSubtypeMention",
-      "type": "object"
-    },
-    "IntegratedDiagnosisMention": {
-      "description": "The diagnosis exactly as the note words it: the WHO-CNS5 integrated diagnosis when\nstated, and any deprecated pre-CNS5 term used for THIS tumor. Verbatim wording only; the\nmolecular classification itself is extracted by molecular.py, and no modern entity is to\nbe inferred from a legacy term.",
-      "properties": {
-        "has_mention": {
-          "description": "Indicates whether the concept was mentioned in the text.",
-          "title": "Has Mention",
-          "type": "boolean"
-        },
-        "spans": {
-          "description": "The verbatim text where this concept was mentioned.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Spans",
-          "type": "array"
-        },
-        "integrated_diagnosis_verbatim": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The exact WHO-CNS5 integrated-diagnosis phrase as written in the note (e.g. 'Medulloblastoma, SHH-activated and TP53-mutant'). Null if not stated.",
-          "title": "Integrated Diagnosis Verbatim"
+          "description": "Documented diagnosis using only evidence from this note. Choose exactly one. ATRT: atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the CNS. Record ATRT as an exclusion/reclassification; do not infer it from a marker alone. MEDULLOBLASTOMA: medulloblastoma of any histology or molecular group (WNT, SHH, Group 3, Group 4), include medullomyoblastoma and MBEN. ETMR: embryonal tumor with multilayered rosettes. PINEOBLASTOMA: pineoblastoma. LEGACY_SPNET: historical supratentorial PNET/CNS-PNET without a modern diagnosis. OTHER_CNS_EMBRYONAL: other embryonal CNS tumor or embryonal tumor NOS. NONE_OF_THE_ABOVE: no embryonal-tumor diagnosis is documented in this note."
         },
         "historical_diagnosis_term": {
           "anyOf": [
@@ -278,7 +241,7 @@
         "has_mention",
         "spans"
       ],
-      "title": "IntegratedDiagnosisMention",
+      "title": "DiseaseSubtypeMention",
       "type": "object"
     },
     "MedulloblastomaHistology": {
@@ -312,7 +275,7 @@
         "histology": {
           "$ref": "#/$defs/MedulloblastomaHistology",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "CLASSIC: classic medulloblastoma. DESMOPLASTIC_NODULAR: desmoplastic/nodular. EXTENSIVE_NODULARITY_MBEN: medulloblastoma with extensive nodularity (MBEN). LARGE_CELL_ANAPLASTIC: large-cell and/or anaplastic. NONE_OF_THE_ABOVE: histologic pattern not stated or not a medulloblastoma."
+          "description": "Choose exactly one. CLASSIC: classic medulloblastoma. DESMOPLASTIC_NODULAR: desmoplastic/nodular. EXTENSIVE_NODULARITY_MBEN: medulloblastoma with extensive nodularity (MBEN). LARGE_CELL_ANAPLASTIC: large-cell and/or anaplastic. NONE_OF_THE_ABOVE: histologic pattern not stated or not a medulloblastoma."
         }
       },
       "required": [
@@ -369,9 +332,6 @@
     "medulloblastoma_histology": {
       "$ref": "#/$defs/MedulloblastomaHistologyMention"
     },
-    "integrated_diagnosis": {
-      "$ref": "#/$defs/IntegratedDiagnosisMention"
-    },
     "tumor_location": {
       "$ref": "#/$defs/TumorLocationMention"
     },
@@ -391,7 +351,6 @@
   "required": [
     "disease_subtype",
     "medulloblastoma_histology",
-    "integrated_diagnosis",
     "tumor_location",
     "chang_m_stage",
     "age_at_diagnosis",
