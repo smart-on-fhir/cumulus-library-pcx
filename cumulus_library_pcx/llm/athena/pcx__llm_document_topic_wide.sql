@@ -1,0 +1,51 @@
+CREATE TABLE pcx__llm_document_topic_wide AS
+SELECT  DISTINCT
+        nlp.note_ref,
+        nlp.encounter_ref,
+        nlp.subject_ref,
+        'pcx__nlp_document_topic_gpt_oss_120b' AS origin,
+        CAST(nlp.generated_on AS VARCHAR) AS generated_on,
+        CAST(nlp.task_version AS BIGINT) AS task_version,
+        nlp.system_fingerprint,
+        -- mention values only: spans and has_mention stay in the source nlp table
+        nlp.result.response.relevance                                AS response_relevance,
+        nlp.result.response.confidence                               AS response_confidence,
+        nlp.result.response.reasoning                                AS response_reasoning,
+        nlp.result.diagnosis.relevance                               AS diagnosis_relevance,
+        nlp.result.diagnosis.confidence                              AS diagnosis_confidence,
+        nlp.result.diagnosis.reasoning                               AS diagnosis_reasoning,
+        nlp.result.molecular.relevance                               AS molecular_relevance,
+        nlp.result.molecular.confidence                              AS molecular_confidence,
+        nlp.result.molecular.reasoning                               AS molecular_reasoning,
+        nlp.result.event.relevance                                   AS event_relevance,
+        nlp.result.event.confidence                                  AS event_confidence,
+        nlp.result.event.reasoning                                   AS event_reasoning,
+        nlp.result.metastasis.relevance                              AS metastasis_relevance,
+        nlp.result.metastasis.confidence                             AS metastasis_confidence,
+        nlp.result.metastasis.reasoning                              AS metastasis_reasoning,
+        nlp.result.surgery.relevance                                 AS surgery_relevance,
+        nlp.result.surgery.confidence                                AS surgery_confidence,
+        nlp.result.surgery.reasoning                                 AS surgery_reasoning,
+        nlp.result.radiation.relevance                               AS radiation_relevance,
+        nlp.result.radiation.confidence                              AS radiation_confidence,
+        nlp.result.radiation.reasoning                               AS radiation_reasoning,
+        nlp.result.systemic_therapy.relevance                        AS systemic_therapy_relevance,
+        nlp.result.systemic_therapy.confidence                       AS systemic_therapy_confidence,
+        nlp.result.systemic_therapy.reasoning                        AS systemic_therapy_reasoning,
+        nlp.result.laboratory.relevance                              AS laboratory_relevance,
+        nlp.result.laboratory.confidence                             AS laboratory_confidence,
+        nlp.result.laboratory.reasoning                              AS laboratory_reasoning,
+        nlp.result.predisposition.relevance                          AS predisposition_relevance,
+        nlp.result.predisposition.confidence                         AS predisposition_confidence,
+        nlp.result.predisposition.reasoning                          AS predisposition_reasoning,
+        nlp.result.patient.relevance                                 AS patient_relevance,
+        nlp.result.patient.confidence                                AS patient_confidence,
+        nlp.result.patient.reasoning                                 AS patient_reasoning,
+        nlp.result.registry_eligibility.relevance                    AS registry_eligibility_relevance,
+        nlp.result.registry_eligibility.confidence                   AS registry_eligibility_confidence,
+        nlp.result.registry_eligibility.reasoning                    AS registry_eligibility_reasoning
+FROM
+        pcx__nlp_document_topic_gpt_oss_120b AS nlp
+WHERE
+        nlp.result IS NOT NULL
+AND     nlp.task_version = 1

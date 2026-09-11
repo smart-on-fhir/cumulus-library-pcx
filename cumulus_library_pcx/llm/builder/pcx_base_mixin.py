@@ -3,8 +3,21 @@ from typing import Iterable
 import cumulus_library
 from cumulus_library import base_utils, databases
 from cumulus_library.template_sql import sql_utils
+from cumulus_library.template_sql.base_templates import get_ctas_empty_query
 
 from cumulus_library_pcx.tools import filetool
+
+# Source metadata columns every PCX wide table starts with, in projection order.
+# Types match the populated SQL: generated_on is cast to VARCHAR, task_version to BIGINT.
+SOURCE_COLS_TYPES = {
+    "note_ref": "varchar",
+    "encounter_ref": "varchar",
+    "subject_ref": "varchar",
+    "origin": "varchar",
+    "generated_on": "varchar",
+    "task_version": "bigint",
+    "system_fingerprint": "varchar",
+}
 
 
 class PcxLLMBaseMixin:
@@ -97,6 +110,21 @@ class PcxLLMBaseMixin:
         found so the destination table is still created with the correct schema.
         """
         raise NotImplementedError(f"{type(self).__name__} must implement _make_empty_query")
+
+    def _make_empty_query_from_types(
+        self, config: cumulus_library.StudyConfig, value_cols_types: dict[str, str]
+    ):
+        """Empty destination table: the shared source columns followed by this task's value columns.
+
+        value_cols_types maps column name -> SQL type, in the same order as the jinja template.
+        """
+        table_cols_types = SOURCE_COLS_TYPES | value_cols_types
+        return get_ctas_empty_query(
+            schema_name=config.schema,
+            table_name=self.dest_table,
+            table_cols=list(table_cols_types),
+            table_cols_types=list(table_cols_types.values()),
+        )
 
     def _make_query(self, config: cumulus_library.StudyConfig):
         valid_tables = self._get_valid_pcx_nlp_tables(config.db)
