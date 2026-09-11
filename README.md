@@ -6,13 +6,15 @@ PCX is a Cumulus Library study under development for cross-network medulloblasto
 
 ## Current repository state
 
-The [main manifest](cumulus_library_pcx/manifest.toml) enables `study_population`, `study_variable`, `study_variable_wide`, `casedef`, and `sample`. `elastic_output` is registered with `skip_by_default=true`; its upload manifest points to an external, dated results directory. Elastic query, eligibility, outcome, QA, cube and NLP stages are commented out; no client-view or diagnosis LLM-output stage is registered. Existing SQL or model files for an inactive stage do not establish a working analysis or a completed database build.
+The [main manifest](cumulus_library_pcx/manifest.toml) registers `study_population`, `study_variable`, `study_variable_wide`, `casedef`, `sample`, `nlp_clinical_tasks_wide`, `eligible`, and `outcome`. The NLP wide stage invokes eight Python builders with deployment discovery, nested-field validation, workflow-configured versions, and typed-empty fallback. Configure deployment suffixes in `tools/settings.py` or with `CUMULUS_PCX_NLP_DEPLOYMENTS`; see [builder contracts and SQL snapshots](chart_review.md). Clinical inference remains a separate, commented-out stage. `llm/athena/*.sql` are regression snapshots, not build inputs.
+
+`elastic_output` is registered with `skip_by_default=true` on its parent submanifest and references an external, dated upload manifest. The installed Cumulus 6.3.1 loader does not propagate that parent setting to child actions; default-build portability remains an open issue. The builder integration does not establish a successful full Athena build or validated clinical results.
 
 Current population settings differ from the all-age research goal:
 
 - [Age-at-visit configuration](spreadsheet/include_age_at_visit.csv): 0–8 inclusive, applied to encounter age rather than diagnosis age.
 - [Study period](spreadsheet/include_study_period.csv): starts 2008-01-01, blank end date, history enabled.
-- [Utilization](spreadsheet/include_utilization.csv): 2–100000 distinct encounter-period ordinals and a 365–365000 day span from earliest retained encounter start to latest non-null encounter end. The SQL applies these as patient-selection filters. This is not survival follow-up from diagnosis and can exclude patients with short observed histories, including early deaths.
+- [Utilization](spreadsheet/include_utilization.csv): 2–100000 distinct encounter-period ordinals and a 365–365000 day span from earliest retained encounter start to latest retained encounter end, using the encounter start when its end is missing. Encounters with missing end dates are retained, including pre-period history for patients with an in-window encounter; identical start/end pairs share one ordinal per patient. Raw missing end dates remain NULL in the output. The SQL applies these as patient-selection filters. This is not survival follow-up from diagnosis and can exclude patients with short observed histories, including early deaths.
 
 These settings require reconciliation with the analysis population before comparing survival. See [limitations](limitations.md).
 
@@ -21,21 +23,6 @@ These settings require reconciliation with the analysis population before compar
 There are 23 coded study variables: 4 diagnosis, 12 laboratory, and 7 medication CSVs. Codes match by `system` plus `code`; displays do not drive matching. Local codes and multi-site terminology coverage remain subject to validation. The fourth diagnosis variable, [methotrexate toxicity evidence](dx_methotrexate_toxic.md), has 30 rows across four review tiers; a match is not confirmed methotrexate toxicity.
 
 See [chart-review outputs](chart_review.md), [deferred extraction work](deferred.md), and the [dated code review](reviews/code-review-2026-09-09/REVIEW.md) for integration details and open issues.
-
-| Laboratory valueset | Entries | Current scope or open issue |
-| --- | ---: | --- |
-| Absolute neutrophil count | 2 | Blood count; coverage not comprehensively audited |
-| ALT | 9 | Five LOINCs and four local codes |
-| AST | 6 | Three LOINCs and three local codes |
-| Creatinine | 8 | One LOINC and seven local candidates; proposed additional LOINCs not yet added |
-| Serum/plasma folate | 3 | Concentrations only |
-| RBC folate | 3 | Separate from serum/plasma |
-| Whole-blood folate | 2 | Separate specimen variable |
-| Folate interpretation | 3 | Qualitative/interpretive evidence, not numeric concentrations |
-| Unspecified folate | 3 | Local specimen and result type unresolved |
-| Hemoglobin | 33 | Includes reticulocyte hemoglobin code 923, which remains a scope concern |
-| Platelets | 9 | Includes manual, optical, estimated and EDTA-context counts |
-| Total bilirubin | 1 | Serum/plasma mass concentration; coverage not comprehensively audited |
 
 The seven medication valuesets contain 146 entries: six `rx_chemo_*` backbone sets (60 entries) and `rx_contrast_methotrexate` (86 entries: 76 RxNorm and 10 local/vendor codes). The `contrast` name identifies the study comparison variable; it does not establish route, dose, or indication. MedicationRequest evidence is not proof of administration. The [RX review](reviews/rxnorm-2026-09-08/REVIEW.md) distinguishes current membership from historical findings.
 
