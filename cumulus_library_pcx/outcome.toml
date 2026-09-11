@@ -1,25 +1,15 @@
 [[actions]]
-description = "LLM wide tables required by outcomes (empty when NLP has not run)"
-type = "build:serial"
-files = [
-    "llm/athena/pcx__llm_patient_wide.sql",
-    "llm/athena/pcx__llm_patient_anchor.sql",
-    "llm/athena/pcx__llm_event_wide.sql",
-    "llm/athena/pcx__llm_systemic_therapy_regimen.sql",
-]
-
-[[actions]]
 description = "outcome vital status, then first event, then exposure prior to first event"
 type = "build:serial"
 files = [
-    "athena/pcx__outcome_vital_status.sql",
-    "athena/pcx__outcome_first_event.sql",
-    "athena/pcx__outcome_exposure.sql",
+    "custom/pcx__outcome_vital_status.sql",
+    "custom/pcx__outcome_first_event.sql",
+    "custom/pcx__outcome_exposure.sql",
 ]
 
 [[actions]]
 description = "outcome per subject: overall survival and provisional event-free survival"
 type = "build:serial"
 files = [
-    "athena/pcx__outcome.sql",
+    "custom/pcx__outcome.sql",
 ]
