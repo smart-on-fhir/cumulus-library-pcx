@@ -36,22 +36,22 @@ skip_by_default=true
 # ------ </Elastic Search Tasks> ------
 
 # [[stages.nlp_doc_type_tasks]]
-# type = "submanifest"
+# label = "NLP doc types"
 # files = ['nlp_doc_type_tasks.workflow']
 # skip_by_default = true
 
 [[stages.nlp_doc_type_tasks_50k]]
-type = "submanifest"
+label = "NLP doc types 50k only"
 files = ['nlp_doc_type_tasks_50k.workflow']
 skip_by_default = true
 
 # [[stages.nlp_clinical_tasks]]
-# type = "submanifest"
+# label = "NLP clinical tasks"
 # files = ['nlp_clinical_tasks.workflow']
 # skip_by_default = true
 
 [[stages.nlp_clinical_tasks_50k]]
-type = "submanifest"
+label = "NLP clinical tasks 50k only"
 files = ['nlp_clinical_tasks_50k.workflow']
 skip_by_default = true
 
