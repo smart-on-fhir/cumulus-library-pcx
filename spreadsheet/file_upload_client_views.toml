@@ -1,0 +1,20 @@
+config_type = "file_upload"
+
+# One authored dictionary for the whole client layer. Rows with a populated
+# `variable` describe a pcx__client_timeline variable; rows without one
+# describe a column of a client table. Every column is uploaded as STRING so
+# that the many legitimately-empty cells are not type-inferred.
+[tables.valueset_client_dictionary]
+file = "client_dictionary.csv"
+col_types = [
+    "STRING", #client_table
+    "STRING", #client_column
+    "STRING", #variable
+    "STRING", #description
+    "STRING", #analysis_role
+    "STRING", #data_type
+    "STRING", #section
+    "STRING", #aspect
+    "STRING", #preferred_date_rule
+    "STRING", #fallback_date_rule
+]

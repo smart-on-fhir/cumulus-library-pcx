@@ -1,0 +1,224 @@
+client_table,client_column,variable,description,analysis_role,data_type,section,aspect,preferred_date_rule,fallback_date_rule
+pcx__client_subject,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_subject,gender,,Administrative gender from core__patient,covariate,varchar,,,,
+pcx__client_subject,race_display,,Most recently documented patient-reported race display,covariate,varchar,,,,
+pcx__client_subject,ethnicity_display,,Most recently documented patient-reported ethnicity display,covariate,varchar,,,,
+pcx__client_subject,birthdate,,"Birth date from core__patient, used for month-level age",covariate_time,date,,,,
+pcx__client_subject,t0_day,,Time zero: first encounter with a tier 1 medulloblastoma casedef code,covariate_time,date,,,,
+pcx__client_subject,t0_source,,Rule that produced t0_day,provenance,varchar,,,,
+pcx__client_subject,age_months_at_t0,,Completed months from birthdate to t0_day,covariate,bigint,,,,
+pcx__client_subject,age_band_at_t0,,under_36_months or 36_months_or_older at t0_day,covariate,varchar,,,,
+pcx__client_subject,definitive_surgery_day,,"Date of the definitive tumor resection (LLM surgery_role, else first tier 1 craniotomy)",covariate_time,date,,,,
+pcx__client_subject,definitive_surgery_source,,Rule that produced definitive_surgery_day,provenance,varchar,,,,
+pcx__client_subject,age_months_at_definitive_surgery,,"Completed months from birthdate to definitive_surgery_day, the ACNS0334 age criterion",covariate,bigint,,,,
+pcx__client_subject,medulloblastoma_tier1_bool,,Any tier 1 medulloblastoma casedef code exists,eligibility,boolean,,,,
+pcx__client_subject,llm_medulloblastoma_bool,,Any diagnosis-task note gives disease_subtype MEDULLOBLASTOMA,eligibility,boolean,,,,
+pcx__client_subject,atrt_confirmed_bool,,ATRT named by tier 1 code or LLM diagnosis (ACNS0334 exclusion),eligibility,boolean,,,,
+pcx__client_subject,age_under_36_months_at_definitive_surgery,,"ACNS0334 inclusion: under 36 months at definitive surgery, NULL when not evaluable",eligibility,boolean,,,,
+pcx__client_subject,no_prior_chemotherapy_bool,,"ACNS0334 inclusion: no chemotherapy before t0_day, NULL when no chemotherapy evidence",eligibility,boolean,,,,
+pcx__client_subject,no_prior_radiation_bool,,"ACNS0334 inclusion: no radiation before t0_day, NULL when no radiation evidence",eligibility,boolean,,,,
+pcx__client_subject,trial_eligible_bool,,Subject is in pcx__eligible_trial (strict intersection of the evaluable criteria),eligibility,boolean,,,,
+pcx__client_subject,llm_metastatic_bool,,Any diagnosis-task note states Chang M1 to M4,covariate,boolean,,,,
+pcx__client_subject,llm_anaplastic_bool,,Any diagnosis-task note gives large-cell/anaplastic histology,covariate,boolean,,,,
+pcx__client_subject,llm_residual_disease_bool,,Any surgery-task note gives partial resection or biopsy only,covariate,boolean,,,,
+pcx__client_subject,llm_residual_tumor_area_cm2_max,,Largest explicit postoperative residual area in cm2,covariate,double,,,,
+pcx__client_subject,age_under_8_months_at_t0,,Age at t0_day below 8 months (ACNS0334 high-risk qualifier),covariate,boolean,,,,
+pcx__client_subject,methotrexate_any_bool,,"Any methotrexate order or documented administration, any dose, any time",treatment,boolean,,,,
+pcx__client_subject,methotrexate_prior_to_first_event_bool,,"Methotrexate received as initial therapy: first day before the first EFS-type event (TRUE), on or after it (FALSE), no dated evidence (NULL)",treatment,boolean,,,,
+pcx__client_subject,radiation_any_bool,,"Any radiation delivery, order or code, any dose, any time",treatment,boolean,,,,
+pcx__client_subject,radiation_prior_to_first_event_bool,,"Radiation received as initial therapy: first day before the first EFS-type event (TRUE), on or after it (FALSE), no dated evidence (NULL)",treatment,boolean,,,,
+pcx__client_subject,chemo_any_bool,,Any backbone chemotherapy order or documented administration,treatment,boolean,,,,
+pcx__client_subject,initial_therapy_sequence,,"CHEMOTHERAPY_BEFORE_RADIATION, RADIATION_BEFORE_CHEMOTHERAPY, SAME_DAY, CHEMOTHERAPY_ONLY, RADIATION_ONLY within initial treatment",treatment,varchar,,,,
+pcx__client_subject,protocol_names,,"Distinct treatment protocol names documented for the subject, pipe separated",treatment,varchar,,,,
+pcx__client_subject,os_event_bool,,Overall survival event: the patient died,outcome,boolean,,,,
+pcx__client_subject,death_day,,Earliest recorded death date across FHIR and LLM sources,outcome,date,,,,
+pcx__client_subject,last_known_alive_day,,Latest date the patient is documented alive,censoring,date,,,,
+pcx__client_subject,os_end_day,,"death_day for deceased patients, otherwise last_known_alive_day",outcome,date,,,,
+pcx__client_subject,os_days,,Days from t0_day to os_end_day,outcome,bigint,,,,
+pcx__client_subject,efs_event_bool,,"Provisional EFS event: a dated progression, recurrence, secondary malignancy or death exists",outcome,boolean,,,,
+pcx__client_subject,first_event_day,,Date of the first EFS-type event,outcome,date,,,,
+pcx__client_subject,first_event_type,,"Event type(s) on first_event_day, comma separated",outcome,varchar,,,,
+pcx__client_subject,efs_end_day,,"first_event_day when an event exists, otherwise last_known_alive_day (provisional censoring)",outcome,date,,,,
+pcx__client_subject,efs_days,,Days from t0_day to efs_end_day,outcome,bigint,,,,
+pcx__client_subject,efs_censor_source,,first_event or last_known_alive_provisional,censoring,varchar,,,,
+pcx__client_subject,observation_start_date,,Earliest study-window encounter start,censoring,date,,,,
+pcx__client_subject,observation_end_date,,Latest study-window encounter end,censoring,date,,,,
+pcx__client_subject,encounter_count,,Number of distinct study-population encounters,utilization,bigint,,,,
+pcx__client_diagnosis,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_diagnosis,t0_day,,Time zero used for the 90-day baseline window,covariate_time,date,,,,
+pcx__client_diagnosis,casedef_subtypes_tier1,,"Tier 1 case-definition subtypes with coded evidence, pipe separated",covariate,varchar,,,,
+pcx__client_diagnosis,medulloblastoma_tier1_bool,,Any tier 1 medulloblastoma casedef code exists,eligibility,boolean,,,,
+pcx__client_diagnosis,atrt_tier1_bool,,Any tier 1 ATRT casedef code exists,eligibility,boolean,,,,
+pcx__client_diagnosis,diagnosis_note_count,,Number of diagnosis-task notes for the subject,provenance,bigint,,,,
+pcx__client_diagnosis,disease_subtype_ever,,Latest documented CNS embryonal subtype across all notes,covariate,varchar,,,,
+pcx__client_diagnosis,disease_subtype_baseline,,Latest documented subtype within 90 days of t0_day,covariate,varchar,,,,
+pcx__client_diagnosis,disease_subtype_distinct_count,,Number of distinct documented subtypes (more than 1 = reclassification or conflict),provenance,bigint,,,,
+pcx__client_diagnosis,medulloblastoma_ever_bool,,Any note documents medulloblastoma,eligibility,boolean,,,,
+pcx__client_diagnosis,atrt_ever_bool,,Any note documents ATRT,eligibility,boolean,,,,
+pcx__client_diagnosis,histology_ever,,Latest documented medulloblastoma histologic pattern,covariate,varchar,,,,
+pcx__client_diagnosis,histology_baseline,,Latest documented histology within 90 days of t0_day,covariate,varchar,,,,
+pcx__client_diagnosis,anaplastic_ever_bool,,Any note documents large-cell/anaplastic histology,covariate,boolean,,,,
+pcx__client_diagnosis,chang_m_stage_ever,,Most severe explicitly documented Chang M-stage,covariate,varchar,,,,
+pcx__client_diagnosis,chang_m_stage_baseline,,Most severe explicitly documented M-stage within 90 days of t0_day,covariate,varchar,,,,
+pcx__client_diagnosis,metastatic_ever_bool,,Any note documents M1 to M4,covariate,boolean,,,,
+pcx__client_diagnosis,historical_diagnosis_term,,Latest legacy diagnosis term used for this tumor (PNET etc.),provenance,varchar,,,,
+pcx__client_diagnosis,tumor_location_verbatim,,Latest primary site wording from the notes,covariate,varchar,,,,
+pcx__client_diagnosis,age_at_diagnosis_months_stated,,Smallest explicitly stated age at diagnosis in months,covariate,bigint,,,,
+pcx__client_diagnosis,diagnosis_day_stated_min,,Earliest stated diagnosis date across notes,covariate_time,date,,,,
+pcx__client_diagnosis,diagnosis_gold_day_min,,Earliest confirmatory tissue-diagnosis date across notes,covariate_time,date,,,,
+pcx__client_diagnosis,age_months_at_diagnosis_gold,,Completed months from birthdate to diagnosis_gold_day_min,covariate,bigint,,,,
+pcx__client_diagnosis,molecular_group_ever,,"Latest documented medulloblastoma molecular group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, CONFLICTING, OTHER)",covariate,varchar,,,,
+pcx__client_diagnosis,molecular_group_baseline,,Latest documented molecular group within 90 days of t0_day,covariate,varchar,,,,
+pcx__client_diagnosis,molecular_group_method,,Documented classification method for the latest group (clinical summary is not methylation confirmation),provenance,varchar,,,,
+pcx__client_diagnosis,molecular_group_distinct_count,,Number of distinct documented groups excluding CONFLICTING,provenance,bigint,,,,
+pcx__client_diagnosis,group_3_ever_bool,,Any note documents Group 3,covariate,boolean,,,,
+pcx__client_encounter,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_encounter,encounter_ref,,FHIR Encounter reference,identifier,varchar,,,,
+pcx__client_encounter,enc_period_ordinal,,Encounter period ordinal used for utilization counting,utilization,bigint,,,,
+pcx__client_encounter,enc_period_start_day,,Encounter start date,covariate_time,date,,,,
+pcx__client_encounter,enc_period_end_day,,Encounter end date,covariate_time,date,,,,
+pcx__client_encounter,enc_period_end_day_filled,,"Encounter end date, falling back to start date when missing",covariate_time,date,,,,
+pcx__client_encounter,age_at_visit,,Age in years at the encounter,covariate,bigint,,,,
+pcx__client_encounter,days_since_t0,,Days from t0_day to encounter start (negative before time zero),covariate_time,bigint,,,,
+pcx__client_encounter,casedef_days_since,,Days since the first case-definition encounter,covariate_time,bigint,,,,
+pcx__client_encounter,casedef_period,,"pre, peri or post relative to the first case-definition encounter",covariate,varchar,,,,
+pcx__client_encounter,dx_medulloblastoma_bool,,Medulloblastoma diagnosis code on this encounter (TRUE or NULL),utilization,boolean,,,,
+pcx__client_encounter,dx_atrt_bool,,ATRT diagnosis code on this encounter (TRUE or NULL),utilization,boolean,,,,
+pcx__client_encounter,dx_brain_cancer_bool,,Broad brain-cancer code on this encounter (TRUE or NULL),utilization,boolean,,,,
+pcx__client_encounter,dx_radiation_bool,,Radiotherapy encounter or history code on this encounter (TRUE or NULL),utilization,boolean,,,,
+pcx__client_encounter,dx_methotrexate_toxic_bool,,Drug-harm code on this encounter (TRUE or NULL),utilization,boolean,,,,
+pcx__client_encounter,rx_methotrexate_bool,,Methotrexate MedicationRequest on this encounter (TRUE or NULL),treatment,boolean,,,,
+pcx__client_encounter,rx_chemo_bool,,Any backbone chemotherapy MedicationRequest on this encounter (TRUE or NULL),treatment,boolean,,,,
+pcx__client_encounter,proc_craniotomy_bool,,Craniotomy procedure code on this encounter (TRUE or NULL),treatment,boolean,,,,
+pcx__client_encounter,proc_radiation_bool,,Radiation procedure code on this encounter (TRUE or NULL),treatment,boolean,,,,
+pcx__client_encounter,lab_organ_function_bool,,"Any organ-function lab (ANC, ALT, AST, creatinine, hemoglobin, platelets, bilirubin) on this encounter",utilization,boolean,,,,
+pcx__client_encounter,lab_folate_bool,,Any folate lab on this encounter,utilization,boolean,,,,
+pcx__client_exposure,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_exposure,exposure,,"METHOTREXATE, CHEMOTHERAPY or RADIATION",treatment,varchar,,,,
+pcx__client_exposure,any_bool,,"Any evidence of the exposure (order, code or documented administration)",treatment,boolean,,,,
+pcx__client_exposure,administered_bool,,LLM-documented administration or delivery exists,treatment,boolean,,,,
+pcx__client_exposure,first_day,,Earliest date of the exposure from any source,treatment_time,date,,,,
+pcx__client_exposure,order_first_day,,Earliest structured order or procedure/encounter code date,treatment_time,date,,,,
+pcx__client_exposure,administered_first_day,,Earliest LLM-documented administration or delivery date,treatment_time,date,,,,
+pcx__client_exposure,days_t0_to_first,,Days from t0_day to first_day (negative = prior therapy),treatment_time,bigint,,,,
+pcx__client_exposure,prior_to_t0_bool,,first_day is before t0_day,eligibility,boolean,,,,
+pcx__client_exposure,prior_to_first_event_bool,,"Exposure counts as initial therapy: before the first EFS-type event (TRUE), on or after (FALSE), no dated evidence (NULL)",treatment,boolean,,,,
+pcx__client_timeline,event_id,,Deterministic identifier for one atomic timeline event,identifier,varchar,,,,
+pcx__client_timeline,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_timeline,encounter_ref,,Linked FHIR Encounter reference when available,identifier,varchar,,,,
+pcx__client_timeline,variable,,PCX source-variable name,covariate_selector,varchar,,,,
+pcx__client_timeline,event_date,,Best clinical date used to place the event on the patient timeline,covariate_time,date,,,,
+pcx__client_timeline,evidence_date,,Date on which the supporting evidence was documented,provenance,date,,,,
+pcx__client_timeline,date_type,,Semantic label describing the date selected as event_date,provenance,varchar,,,,
+pcx__client_timeline,date_precision,,"Precision of an extracted date when supplied (DAY, MONTH, YEAR)",provenance,varchar,,,,
+pcx__client_timeline,value_text,,Categorical or free-text payload,payload,varchar,,,,
+pcx__client_timeline,value_number,,Numeric payload,payload,double,,,,
+pcx__client_timeline,value_boolean,,Boolean payload,payload,boolean,,,,
+pcx__client_timeline,unit,,Unit for value_number when applicable,provenance,varchar,,,,
+pcx__client_timeline,interpretation,,"Secondary categorical payload (tier, method, phase, reason)",provenance,varchar,,,,
+pcx__client_timeline,status,,"Record status or secondary label (FHIR status, delivery status, role)",provenance,varchar,,,,
+pcx__client_timeline,code,,Source code for coded FHIR evidence,provenance,varchar,,,,
+pcx__client_timeline,code_system,,Coding system for code,provenance,varchar,,,,
+pcx__client_timeline,source_type,,"FHIR, LLM or DERIVED",provenance,varchar,,,,
+pcx__client_timeline,assertion_level,,evidence or derived,provenance,varchar,,,,
+pcx__client_timeline,source_ref,,Upstream resource or note reference,provenance,varchar,,,,
+pcx__client_timeline,therapy_line_number,,"Always NULL in PCX, kept for contract compatibility with IBD",treatment_linkage,bigint,,,,
+pcx__client_timeline,rx_class,,METHOTREXATE or CHEMOTHERAPY for medication rows,treatment_linkage,varchar,,,,
+pcx__client_outcome,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
+pcx__client_outcome,variable,,"Outcome variable: overall_survival, event_free_survival, death, last_known_alive, first_event, progression, recurrence, second_malignancy",outcome_selector,varchar,,,,
+pcx__client_outcome,outcome_date,,"Outcome event date, or the time-zero origin for survival rows",outcome,date,,,,
+pcx__client_outcome,outcome_end_date,,Survival end date (event or censor) when applicable,outcome,date,,,,
+pcx__client_outcome,value_text,,"Text outcome value: event type, end reason or censor source",outcome_payload,varchar,,,,
+pcx__client_outcome,value_number,,Numeric outcome value: survival days,outcome_payload,double,,,,
+pcx__client_outcome,value_boolean,,Boolean outcome value: event occurred,outcome_payload,boolean,,,,
+pcx__client_outcome,episode_number,,"Always NULL in PCX, kept for contract compatibility with IBD",outcome_payload,bigint,,,,
+pcx__client_outcome,source_table,,Upstream table supplying the outcome row,provenance,varchar,,,,
+pcx__client_dictionary_coverage,variable,,pcx__client_timeline variable observed at this site,covariate_selector,varchar,,,,
+pcx__client_dictionary_coverage,event_count,,Number of timeline rows for the variable,utilization,bigint,,,,
+pcx__client_dictionary_coverage,subject_count,,Number of distinct subjects with the variable,utilization,bigint,,,,
+pcx__client_dictionary_coverage,event_date_min,,Earliest event_date for the variable,provenance,date,,,,
+pcx__client_dictionary_coverage,event_date_max,,Latest event_date for the variable,provenance,date,,,,
+pcx__client_dictionary_coverage,value_type,,"Observed payload types, pipe separated",provenance,varchar,,,,
+pcx__client_dictionary_coverage,source_type,,"Observed source types, pipe separated",provenance,varchar,,,,
+pcx__client_dictionary_coverage,assertion_level,,"Observed assertion levels, pipe separated",provenance,varchar,,,,
+pcx__client_dictionary_coverage,allowed_values,,Observed enumeration for low-cardinality text payloads,provenance,varchar,,,,
+pcx__client_timeline,variable,dx_medulloblastoma,Medulloblastoma diagnosis code (interpretation = tier),covariate_source,,FHIR,dx,onset,"recorded,encounter"
+pcx__client_timeline,variable,dx_atrt,ATRT diagnosis code (interpretation = tier),covariate_source,,FHIR,dx,onset,"recorded,encounter"
+pcx__client_timeline,variable,dx_brain_cancer,Broad brain-cancer diagnosis code (interpretation = tier),covariate_source,,FHIR,dx,onset,"recorded,encounter"
+pcx__client_timeline,variable,dx_radiation,Radiotherapy encounter or history code (interpretation = tier),covariate_source,,FHIR,dx,onset,"recorded,encounter"
+pcx__client_timeline,variable,dx_methotrexate_toxic,Antineoplastic drug-harm code (interpretation = tier),covariate_source,,FHIR,dx,onset,"recorded,encounter"
+pcx__client_timeline,variable,rx_contrast_methotrexate,"Methotrexate MedicationRequest, the causal contrast (rx_class = METHOTREXATE)",covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_carboplatin,Carboplatin MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_cisplatin,Cisplatin MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_cyclophosphamide,Cyclophosphamide MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_etoposide,Etoposide MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_thiotepa,Thiotepa MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,rx_chemo_vincristine,Vincristine MedicationRequest (rx_class = CHEMOTHERAPY),covariate_source,,FHIR,rx,authored,encounter
+pcx__client_timeline,variable,proc_craniotomy,Craniotomy or cranial biopsy procedure (interpretation = tier),covariate_source,,FHIR,proc,performed,encounter
+pcx__client_timeline,variable,proc_radiation,"Radiation delivery, management or planning procedure (interpretation = tier)",covariate_source,,FHIR,proc,performed,encounter
+pcx__client_timeline,variable,lab_absolute_neutrophil_count,Absolute neutrophil count,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_alt,ALT,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_ast,AST,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_creatinine,Serum creatinine,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_hemoglobin,Hemoglobin,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_platelets,Platelet count,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_total_bilirubin,Total bilirubin,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_folate,Serum or plasma folate,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_folate_rbc,RBC folate,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_folate_whole_blood,Whole-blood folate,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_folate_unspecified,"Folate, unspecified specimen",covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,lab_folate_interpretation,Folate qualitative interpretation,covariate_source,,FHIR,lab,effective,encounter
+pcx__client_timeline,variable,casedef_subtype,"FHIR coded case-definition evidence with tumor subtype (interpretation = tier, status = pre/peri/post period)",covariate_source,,CASEDEF,,encounter,
+pcx__client_timeline,variable,llm_disease_subtype,LLM CNS embryonal subtype (interpretation = legacy term),covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_medulloblastoma_histology,LLM medulloblastoma histologic pattern,covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_chang_m_stage,LLM explicitly documented Chang M-stage,covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_tumor_location,LLM primary site wording,covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_age_at_diagnosis_months,"LLM explicitly stated age at diagnosis (value_number, months)",covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_diagnosis_date,"LLM earliest stated diagnosis date (event_date, with precision)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_diagnosis_date_gold,"LLM confirmatory tissue-diagnosis date (event_date, with precision)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_surgery,"LLM tumor surgery (value = type, interpretation = extent, status = role, value_number = age months)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_surgery_residual_area,LLM postoperative residual tumor area cm2 (value_text = verbatim measurement),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_radiation,"LLM radiation round (value = field, interpretation = method, status = delivery, value_number = total primary-site dose, value_boolean = administered)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_radiation_craniospinal_dose,LLM craniospinal-axis dose (interpretation = indication),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_event,"LLM disease event: progression, recurrence, remission, second malignancy, death (interpretation = evidence source)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_death,LLM documented death with actual death date,covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_last_known_alive,LLM latest date the note establishes the patient alive,covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_timeline_anchor,"LLM timeline anchor: original diagnosis, definitive surgery, enrollment, treatment initiation (interpretation = protocol)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_event_free_follow_up,LLM dated event-free follow-up assessment (value_boolean = event free),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_therapy_agent,"LLM systemic agent (value = agent, status = delivery status, rx_class = METHOTREXATE or CHEMOTHERAPY)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_therapy_regimen,"LLM regimen (value = protocol name, interpretation = phase, status = trial arm)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_therapy_administration,"LLM administration (value_number = dose, unit, value_text = route, interpretation = phase, value_boolean = explicit high-dose MTX)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_therapy_cycle,"LLM therapy cycle (value = cycle name, interpretation = phase, status = completion)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_stem_cell_infusion,"LLM stem-cell infusion (value = cell source, value_number = CD34 cells/kg)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_response,"LLM response assessment (value = CR/PR/SD/PD, interpretation = timepoint, value_boolean = radiologically evaluable)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_csf_cytology,LLM CSF cytology result (interpretation = collection site),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_spine_mri,LLM spine MRI metastatic finding,covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_brain_mri,LLM brain MRI metastatic finding,covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_extraneural_metastasis,LLM extraneural metastasis assessment,covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_metastatic_site,LLM documented metastatic site,covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_molecular_group,"LLM medulloblastoma molecular group (interpretation = method, status = source report)",covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_methotrexate_any_dose,LLM any-dose methotrexate receipt status (value_boolean = received),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_radiation_any_dose,LLM any-dose radiation receipt status (value_boolean = received),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_transfer_in,"LLM transfer of tumor care into this institution (value = timing, interpretation = reason)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_diagnosis_setting,LLM where the tissue diagnosis was established (value_boolean = imaging detected externally),covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_surgery_setting,LLM where the definitive surgery was performed,covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_prior_therapy_at_entry,LLM prior chemotherapy or radiation before care here (interpretation = modalities),covariate_source,,LLM,,documented,
+pcx__client_timeline,variable,llm_laboratory_result,"LLM narrative laboratory result (value = test, value_number, unit, interpretation = context)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_toxicity,"LLM documented toxicity (value_number = grade, interpretation = attribution)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_predisposition,"LLM germline finding (value = gene or syndrome, interpretation = status)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_age_under_36_months_at_definitive_surgery,"LLM ACNS0334 criterion age_under_36_months_at_definitive_surgery (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_newly_diagnosed_embryonal_tumor,"LLM ACNS0334 criterion newly_diagnosed_embryonal_tumor (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_high_risk_disease,"LLM ACNS0334 criterion high_risk_disease (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_atrt_excluded,"LLM ACNS0334 criterion atrt_excluded (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_no_prior_chemotherapy,"LLM ACNS0334 criterion no_prior_chemotherapy (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_no_prior_radiation,"LLM ACNS0334 criterion no_prior_radiation (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_renal_function,"LLM ACNS0334 criterion adequate_renal_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_hepatic_function,"LLM ACNS0334 criterion adequate_hepatic_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_cardiac_function,"LLM ACNS0334 criterion adequate_cardiac_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_pulmonary_function,"LLM ACNS0334 criterion adequate_pulmonary_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_marrow_function,"LLM ACNS0334 criterion adequate_marrow_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,t0,"Time zero milestone (value = source, value_number = age months)",covariate_source,,ELIGIBLE,,resolved,
+pcx__client_timeline,variable,definitive_surgery,"Definitive surgery milestone (value = source, value_number = age months)",covariate_source,,ELIGIBLE,,resolved,
+pcx__client_timeline,variable,first_event,"First EFS-type event milestone (value = type, value_number = days from t0)",covariate_source,,OUTCOME,,resolved,
+pcx__client_timeline,variable,death,Death milestone,covariate_source,,OUTCOME,,resolved,
+pcx__client_timeline,variable,last_known_alive,Last-known-alive milestone,covariate_source,,OUTCOME,,resolved,
