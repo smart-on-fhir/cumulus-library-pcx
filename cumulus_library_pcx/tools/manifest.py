@@ -48,7 +48,7 @@ class SqlAction:
 
     `manifest.py` owns the TOML details:
     * SqlAction.file_list becomes the TOML `files` key
-    * each file is written as `athena/<filename>`
+    * each file is written as `athena/<filename>`, or `custom/<filename>`
     * SqlAction.build_type becomes the TOML `type` key
     """
     file_list: list[Path] | list[str]
@@ -186,12 +186,23 @@ def _clean_description(description: str | None = None) -> str:
         return ""
     return description.replace("[", "(").replace("]", ")")
 
+def _sql_file_entry(file: Path | str) -> str:
+    """
+    TOML `files` entry for one SQL file, relative to the project directory.
+    Generated SQL lives in athena/, study-specific hand-written SQL lives in custom/.
+    """
+    path = Path(file)
+    if path.parent.resolve() == filetool.path_custom().resolve():
+        return f"custom/{path.name}"
+    return f"athena/{path.name}"
+
+
 def _action_to_dict(action: SqlAction | ExportAction | FileAction | dict) -> dict:
     if isinstance(action, SqlAction):
         return {
             "description": _clean_description(action.description),
             "type": action.build_type or "",
-            "files": [f"athena/{f.name}" for f in action.file_list],
+            "files": [_sql_file_entry(f) for f in action.file_list],
         }
 
     if isinstance(action, FileAction):
