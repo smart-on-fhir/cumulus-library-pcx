@@ -12,7 +12,7 @@ def path_elastic_output() -> Path:
     Workaround hack for
     https://github.com/smart-on-fhir/rapid-elastic/issues/29
     """
-    output_base = settings.ELASTIC_OUTPUT_DIR.resolve()
+    output_base = settings.get_elastic_output_dir().resolve()
     return output_base / filetool.date_str()
 
 def list_csv() -> list[Path]:
