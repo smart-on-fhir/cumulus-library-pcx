@@ -5,7 +5,7 @@ read about it here [PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC128335
 
 > "Phase 3 randomized trial of high-dose methotrexate for young children with high-risk embryonal brain tumors: A report from the Children's Oncology Group"
 
-The [eligibility criteria](eligible.md) describes how the EHR data is used to emulated the clinical trial. As a proof of concept study, not all 100% of the trial eligibility criteria will be met in this phase, this study will be refined with more stringent inclusion/exclusion rules as the study matures. 
+💡 [eligible.md](eligible.md) describes how the EHR data is used to emulated the clinical trial. As a proof of concept study, not all 100% of the trial eligibility criteria will be met in this phase, this study will be refined with more stringent inclusion/exclusion rules as the study matures. 
 
 The primary outcome is **patient survival**; the secondary outcomes are EFS (event free survival) where event here is defined as cancer **progression** or cancer **recurrence**.   
 

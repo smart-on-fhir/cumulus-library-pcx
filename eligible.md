@@ -6,7 +6,7 @@ retrospectively from EHR data. As of Sept 2026, there are some differences noted
 We attempt to implement the criteria defined in [PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/); 
 while understanding we may not have all the criteria available in the first pass of this PCX study.  
 
-## Inclusion criteria
+## Inclusion criteria ☑️
 
 ### Encounter
 
@@ -63,7 +63,7 @@ Required: Chemotherapy `+/-` Methotrexate (MTX) as the "casual contrast".
 
 ----
 
-## Exclusion criteria
+## Exclusion criteria 🚫
 
 ### ATRT Diagnosis
 | file                                                        | criteria                        | 
