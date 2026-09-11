@@ -41,19 +41,14 @@ files = ['sample.toml']
 # skip_by_default = true
 
 [[stages.nlp_doc_type_tasks_50k]]
-label = "NLP doc types 50k only"
-files = ['nlp_doc_type_tasks_50k.workflow']
+label = "NLP 50k only"
+files = ['nlp_all_50k.workflow']
 skip_by_default = true
 
 # [[stages.nlp_clinical_tasks]]
 # label = "NLP clinical tasks"
 # files = ['nlp_clinical_tasks.workflow']
 # skip_by_default = true
-
-[[stages.nlp_clinical_tasks_50k]]
-label = "NLP clinical tasks 50k only"
-files = ['nlp_clinical_tasks_50k.workflow']
-skip_by_default = true
 
 
 [[stages.nlp_clinical_tasks_wide]]
