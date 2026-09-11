@@ -35,6 +35,7 @@ first_day AS (
             MIN(CASE WHEN source = 'proc_radiation'   THEN exposure_day END)    AS radiation_proc_first_day,
             MIN(CASE WHEN source = 'dx_radiation'     THEN exposure_day END)    AS radiation_dx_first_day,
             MIN(CASE WHEN source = 'llm_administered' THEN exposure_day END)    AS radiation_administered_first_day,
+            (COUNT(*) > 0)                                                      AS radiation_any_bool,
             BOOL_OR(source = 'llm_administered')                                AS radiation_administered_bool
     FROM    candidate
     GROUP BY subject_ref
@@ -53,7 +54,7 @@ SELECT  dx.subject_ref,
         first_day.radiation_proc_first_day,
         first_day.radiation_dx_first_day,
         first_day.radiation_administered_first_day,
-        (first_day.subject_ref IS NOT NULL)                                 AS radiation_any_bool,
+        first_day.radiation_any_bool,
         first_day.radiation_administered_bool,
         llm_field.llm_craniospinal_bool,
         llm_field.llm_proton_bool,
