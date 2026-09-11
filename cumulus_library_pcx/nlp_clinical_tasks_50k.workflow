@@ -38,11 +38,9 @@ Clinical document:
 
 [tables.diagnosis]
 response_schema = "llm/schemas/pcx-diagnosis-annotation.json"
-select_by_table = "pcx__llm_document_task_diagnosis"
 # Version 2: Defer integrated diagnosis wording; retain historical terms under disease_subtype.
 version = 2
 
 [tables.surgery]
 response_schema = "llm/schemas/pcx-surgery-annotation.json"
-select_by_table = "pcx__llm_document_task_surgery"
 version = 1

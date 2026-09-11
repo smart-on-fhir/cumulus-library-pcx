@@ -46,7 +46,6 @@ Clinical document:
 # predisposition, registry_eligibility). transition_of_care and medulloblastoma are not yet
 # routed by this schema; select them directly from their query_topics rows.
 response_schema = "llm/schemas/pcx-document-topic-annotation.json"
-select_by_table = "pcx__llm_document_task_document_topic"
 version = 1
 
 
