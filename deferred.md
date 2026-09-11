@@ -1,7 +1,3 @@
-# Deferred PCX work
-
-Status checked 2026-09-10 against `cumulus_library_pcx/llm/models/diagnosis.py`. These items remain deferred, not implemented fields. Deferral of integrated-diagnosis wording applies only to the diagnosis task; `MolecularReportMention.integrated_diagnosis_verbatim` remains active in the molecular task. The active `DiagnosisAnnotation` has seven mention objects; its version-2 output is described in [chart review](chart_review.md). The proposed flat fields below are future design choices, not the current payload contract.
-
 ## Deferred tasks
 
 - [ ] Restore structured tumor laterality extraction if a future analysis needs
