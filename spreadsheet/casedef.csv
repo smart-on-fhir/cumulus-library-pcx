@@ -1,12 +1,57 @@
 subtype,system,code,display,tier
-medulloblastoma,urn:oid:2.16.840.1.113883.6.43.1,9470/3,Medulloblastoma NOS (ICD-O-3),1
-medulloblastoma,urn:oid:2.16.840.1.113883.6.43.1,9471/3,Desmoplastic nodular medulloblastoma (ICD-O-3),1
-medulloblastoma,urn:oid:2.16.840.1.113883.6.43.1,9474/3,Large cell medulloblastoma (ICD-O-3),1
-medulloblastoma,urn:oid:2.16.840.1.113883.6.43.1,9472/3,Medullomyoblastoma (ICD-O-3),1
-medulloblastoma,http://snomed.info/sct,443333004,Medulloblastoma (disorder) [CANDIDATE - verify],1
+medulloblastoma,http://snomed.info/sct,443333004,Medulloblastoma (disorder),1
+medulloblastoma,http://snomed.info/sct,277505007,Medulloblastoma of cerebellum (disorder),1
+medulloblastoma,http://snomed.info/sct,1156469001,Large cell medulloblastoma of brain (disorder),1
+medulloblastoma,http://snomed.info/sct,1269051002,Primary desmoplastic nodular medulloblastoma of brain (disorder),1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,35896,Medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,35897,Desmoplastic medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,356030,Childhood medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,356041,"Medulloblastoma, childhood (HCC) [LOCAL - Epic DX]",1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,682319,Medulloblastoma of cerebellum (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,24299061,Large cell medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,1493482537,Anaplastic large cell medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,1493482523,"Medulloblastoma, WNT activated (HCC) [LOCAL - Epic DX]",1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,1493482526,"Medulloblastoma, SHH activated with wildtype TP53 (HCC) [LOCAL - Epic DX]",1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,1493482549,"Medulloblastoma, non-SHH and non-WNT (HCC) [LOCAL - Epic DX]",1
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,1493482579,Group 3 medulloblastoma (HCC) [LOCAL - Epic DX],1
+medulloblastoma,http://snomed.info/sct,73861000119101,History of medulloblastoma of brain (situation),2
+medulloblastoma,http://hl7.org/fhir/sid/icd-9-cm,V10.85,History of medulloblastoma,2
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,63453698,History of medulloblastoma [LOCAL - Epic DX],2
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,63489091,Relapsed medulloblastoma (HCC) [LOCAL - Epic DX],2
 medulloblastoma,http://hl7.org/fhir/sid/icd-10-cm,C71.6,Malignant neoplasm of cerebellum,2
 medulloblastoma,http://hl7.org/fhir/sid/icd-9-cm,191.6,Malignant neoplasm of cerebellum NOS,2
-atrt,urn:oid:2.16.840.1.113883.6.43.1,9508/3,Atypical teratoid/rhabdoid tumor (ICD-O-3),1
+medulloblastoma,http://snomed.info/sct,449420002,Malignant neoplasm of cerebellum (disorder),2
+medulloblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,315022,Malignant neoplasm of cerebellum (HCC) [LOCAL - Epic DX],2
+etmr,http://snomed.info/sct,1356734004,Embryonal neoplasm with multilayered rosettes (disorder),1
+etmr,urn:oid:2.16.840.1.113883.3.247.1.1,1493483254,"Embryonal tumor of central nervous system with multilayered rosettes, C19MC-altered (HCC) [LOCAL - Epic DX]",1
+etmr,http://snomed.info/sct,715903004,Medulloepithelioma (disorder) [site unspecified - ocular medulloepithelioma excluded separately],2
+etmr,urn:oid:2.16.840.1.113883.3.247.1.1,35909,Medulloepithelioma (CMS/HCC) (HCC) [LOCAL - Epic DX] [site unspecified],2
+pineoblastoma,http://snomed.info/sct,767448007,Pineoblastoma (disorder),1
+pineoblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,35843,Pineoblastoma (HCC) [LOCAL - Epic DX],1
+pineoblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,29241078,Pineoblastoma in pediatric patient (HCC) [LOCAL - Epic DX],1
+pineoblastoma,http://hl7.org/fhir/sid/icd-10-cm,C75.3,Malignant neoplasm of pineal gland,2
+pineoblastoma,http://hl7.org/fhir/sid/icd-9-cm,194.4,Malignant neoplasm of pineal gland [shared with pineal germinoma],2
+pineoblastoma,http://snomed.info/sct,363483004,Malignant neoplasm of pineal gland (disorder),2
+pineoblastoma,http://snomed.info/sct,93962006,Primary malignant neoplasm of pineal gland (disorder),2
+pineoblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,29101,Malignant neoplasm of pineal gland (HCC) [LOCAL - Epic DX],2
+pineoblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,315216,Malignant tumor of pineal gland (HCC) [LOCAL - Epic DX],2
+pineoblastoma,urn:oid:2.16.840.1.113883.3.247.1.1,5722532,Pineal malignant neoplasm (HCC) [LOCAL - Epic DX],2
+cns_embryonal,http://snomed.info/sct,699318007,Supratentorial primitive neuroectodermal tumor (disorder),1
+cns_embryonal,http://snomed.info/sct,254945000,Embryonal tumor of brain (disorder),1
+cns_embryonal,http://snomed.info/sct,734065009,Embryonal neuroepithelial neoplasm of central nervous system (disorder),1
+cns_embryonal,urn:oid:2.16.840.1.113883.3.247.1.1,29239218,Embryonal neoplasm of brain (HCC) [LOCAL - Epic DX],1
+cns_embryonal,http://snomed.info/sct,699028006,Primitive neuroectodermal tumor (disorder) [site unspecified - may be peripheral PNET],2
+cns_embryonal,urn:oid:2.16.840.1.113883.3.247.1.1,35900,Primitive neuroectodermal tumor (HCC) [LOCAL - Epic DX] [site unspecified],2
+cns_embryonal,http://snomed.info/sct,699029003,History of primitive neuroectodermal tumor (situation),2
+cns_embryonal,http://hl7.org/fhir/sid/icd-9-cm,V10.89,H/O primitive neuroectodermal tumor (PNET) [code is history of other malignancy],2
+cns_embryonal,urn:oid:2.16.840.1.113883.3.247.1.1,2777956,H/O primitive neuroectodermal tumor (PNET) [LOCAL - Epic DX],2
 atrt,http://snomed.info/sct,715659006,Atypical teratoid/rhabdoid tumor [CANDIDATE - verify],1
-atrt,http://hl7.org/fhir/sid/icd-10-cm,C71.9,"Malignant neoplasm of brain, unspecified",3
-atrt,http://hl7.org/fhir/sid/icd-9-cm,191.9,Malignant neoplasm of brain NOS,3
+atrt,http://snomed.info/sct,93744007,Atypical teratoid rhabdoid tumor (disorder),1
+atrt,http://snomed.info/sct,428061005,Atypical teratoid rhabdoid tumor of brain (disorder),1
+atrt,http://snomed.info/sct,1196898000,Primary malignant atypical teratoid rhabdoid neoplasm of brain (disorder),1
+atrt,http://snomed.info/sct,112691000112107,Primary malignant atypical teratoid rhabdoid neoplasm of central nervous system (disorder),1
+atrt,urn:oid:2.16.840.1.113883.3.247.1.1,32929841,Atypical teratoid rhabdoid tumor (HCC) [LOCAL - Epic DX],1
+atrt,urn:oid:2.16.840.1.113883.3.247.1.1,7893911,Atypical teratoid rhabdoid tumor of brain (HCC) [LOCAL - Epic DX],1
+atrt,urn:oid:2.16.840.1.113883.3.247.1.1,848083,Malignant rhabdoid tumor of brain (HCC) [LOCAL - Epic DX],1
+atrt,urn:oid:2.16.840.1.113883.3.247.1.1,1507559795,Atypical teratoid-rhabdoid tumor (AT/RT) of brain (HCC) [LOCAL - Epic DX],1
+atrt,urn:oid:2.16.840.1.113883.3.247.1.1,1526633889,Primary malignant atypical teratoid-rhabdoid tumor of central nervous system (HCC) [LOCAL - Epic DX],1

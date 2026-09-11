@@ -9,6 +9,10 @@
 --  ACNS0334 criterion is under 36 months and integer years cannot express it.
 --  LLM diagnosis evidence comes from pcx__llm_diagnosis_wide and is
 --  reported beside the structured evidence, never merged into it.
+--  ATRT is an ACNS0334 exclusion, not a case. Its casedef rows exist only so
+--  the exclusion can be evaluated and a medulloblastoma later reclassified
+--  as ATRT stays visible (atrt_tier1_bool). A subject whose ONLY casedef
+--  evidence is ATRT is therefore not a case-definition subject here.
 --  =====================================================================
 CREATE  TABLE   pcx__eligible_dx AS
 WITH
@@ -16,6 +20,7 @@ casedef_subject AS (
     SELECT  DISTINCT subject_ref
     FROM    pcx__cohort_casedef
     WHERE   subtype IS NOT NULL
+    AND     subtype <> 'atrt'
 ),
 casedef_tier1 AS (
     SELECT  subject_ref,
