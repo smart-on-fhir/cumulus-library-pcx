@@ -1,5 +1,6 @@
 from enum import StrEnum
 from pydantic import BaseModel, Field
+from cumulus_library_pcx.tools import settings
 from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
 
 ###############################################################################
@@ -53,7 +54,7 @@ from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecis
 # extraction descriptions so the model can recognize it in the text. PCX is a
 # cross-network study: set HOME_INSTITUTION per site before generating schemas.
 ###############################################################################
-HOME_INSTITUTION = "Boston Children's Hospital (BCH)"
+HOME_INSTITUTION = settings.HOME_INSTITUTION
 
 ###############################################################################
 # Transfer in

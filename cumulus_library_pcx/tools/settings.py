@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+HOME_INSTITUTION = os.environ.get("HOME_INSTITUTION" or "Boston Children's Hospital (BCH)")
+
 # Cumulus data exports go here
 CUMULUS_LIBRARY_DATA_PATH = os.environ.get("CUMULUS_LIBRARY_DATA_PATH")
 
