@@ -24,6 +24,6 @@ FROM
         {{ table_name }} AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     task_version = 2
+AND     task_version = {{ task_version }}
 {{ syntax.union_all_delineate(loop) }}
 {%- endfor %}
