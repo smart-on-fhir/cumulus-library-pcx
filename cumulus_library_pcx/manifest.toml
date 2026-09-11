@@ -35,10 +35,26 @@ skip_by_default=true
 
 # ------ </Elastic Search Tasks> ------
 
-#[[stages.nlp_clinical_tasks]]
-#type = "submanifest"
-#files = ['nlp_clinical_tasks.toml']
-#skip_by_default = true
+# [[stages.nlp_clinical_tasks]]
+# type = "submanifest"
+# files = ['nlp_clinical_tasks.toml']
+# skip_by_default = true
+
+[[stages.nlp_clinical_tasks_50k]]
+type = "submanifest"
+files = ['nlp_clinical_tasks_50k.toml']
+skip_by_default = true
+
+# [[stages.nlp_doc_type_tasks]]
+# type = "submanifest"
+# files = ['nlp_doc_type_tasks.toml']
+# skip_by_default = true
+
+[[stages.nlp_doc_type_tasks_50k]]
+type = "submanifest"
+files = ['nlp_doc_type_tasks_50k.toml']
+skip_by_default = true
+
 
 [[stages.nlp_clinical_tasks_wide]]
 type = "submanifest"
