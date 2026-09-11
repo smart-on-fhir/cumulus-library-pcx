@@ -1,0 +1,33 @@
+[[actions]]
+description = "warn tables - nonzero rows are findings to eyeball, not failures"
+type = "build:parallel"
+files = [
+    "../tests/athena/pcx__warn_eligible_age_disagree.sql",
+    "../tests/athena/pcx__warn_eligible_age_near_36_month_boundary.sql",
+    "../tests/athena/pcx__warn_eligible_dx_date_disagree_fhir_before_llm.sql",
+    "../tests/athena/pcx__warn_eligible_dx_date_disagree_llm_before_fhir.sql",
+    "../tests/athena/pcx__warn_eligible_dx_subtype_conflict.sql",
+    "../tests/athena/pcx__warn_eligible_radiation_evidence_conflict.sql",
+    "../tests/athena/pcx__warn_eligible_rx_llm_agent_unrecognized.sql",
+    "../tests/athena/pcx__warn_eligible_subject_missing_patient.sql",
+    "../tests/athena/pcx__warn_eligible_surgery_evidence.sql",
+    "../tests/athena/pcx__warn_eligible_surgery_timing.sql",
+    "../tests/athena/pcx__warn_eligible_t0_after_condition_date.sql",
+    "../tests/athena/pcx__warn_eligible_t0_anchor_disagree.sql",
+    "../tests/athena/pcx__warn_eligible_t0_missing.sql",
+    "../tests/athena/pcx__warn_eligible_therapy_precedes_t0.sql",
+    "../tests/athena/pcx__warn_llm_date_after_note.sql",
+    "../tests/athena/pcx__warn_llm_date_coarse.sql",
+    "../tests/athena/pcx__warn_outcome_exposure_after_first_event.sql",
+    "../tests/athena/pcx__warn_outcome_exposure_order_only.sql",
+    "../tests/athena/pcx__warn_outcome_first_event_timing.sql",
+    "../tests/athena/pcx__warn_outcome_survival_days.sql",
+    "../tests/athena/pcx__warn_outcome_vital_status_conflict.sql",
+]
+
+[[actions]]
+description = "union qa"
+type = "build:parallel"
+files = [
+    "../tests/athena/pcx__warn_union.sql",
+]

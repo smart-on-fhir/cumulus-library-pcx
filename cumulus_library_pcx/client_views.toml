@@ -1,0 +1,69 @@
+[[actions]]
+description = "upload client_dictionary.csv"
+type = "build:serial"
+files = [
+    "../spreadsheet/file_upload_client_views.toml",
+]
+
+[[actions]]
+description = "client subject"
+type = "build:serial"
+files = [
+    "custom/pcx__client_subject.sql",
+]
+
+[[actions]]
+description = "client diagnosis"
+type = "build:serial"
+files = [
+    "custom/pcx__client_diagnosis.sql",
+]
+
+[[actions]]
+description = "client encounter"
+type = "build:serial"
+files = [
+    "custom/pcx__client_encounter.sql",
+]
+
+[[actions]]
+description = "client exposure"
+type = "build:serial"
+files = [
+    "custom/pcx__client_exposure.sql",
+]
+
+[[actions]]
+description = "client timeline"
+type = "build:serial"
+files = [
+    "custom/pcx__client_timeline.sql",
+    "custom/pcx__client_timeline_latest.sql",
+]
+
+[[actions]]
+description = "client outcome"
+type = "build:serial"
+files = [
+    "custom/pcx__client_outcome.sql",
+]
+
+[[actions]]
+description = "client dictionary coverage"
+type = "build:serial"
+files = [
+    "custom/pcx__client_dictionary_coverage.sql",
+]
+
+[[actions]]
+description = "client SQL views -> CSV files"
+type = "export:flat"
+tables = [
+    "pcx__client_subject",
+    "pcx__client_diagnosis",
+    "pcx__client_encounter",
+    "pcx__client_exposure",
+    "pcx__client_timeline",
+    "pcx__client_outcome",
+    "pcx__client_dictionary_coverage",
+]
