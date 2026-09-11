@@ -2,22 +2,22 @@
 description = "eligible diagnosis: time zero, age in months, ATRT"
 type = "build:serial"
 files = [
-    "athena/pcx__eligible_dx.sql",
+    "custom/pcx__eligible_dx.sql",
 ]
 
 [[actions]]
 description = "eligible treatment: definitive surgery, methotrexate and chemo, radiation"
 type = "build:parallel"
 files = [
-    "athena/pcx__eligible_surgery.sql",
-    "athena/pcx__eligible_rx.sql",
-    "athena/pcx__eligible_radiation.sql",
+    "custom/pcx__eligible_surgery.sql",
+    "custom/pcx__eligible_rx.sql",
+    "custom/pcx__eligible_radiation.sql",
 ]
 
 [[actions]]
 description = "eligible criteria per subject, then trial-like intersection"
 type = "build:serial"
 files = [
-    "athena/pcx__eligible.sql",
-    "athena/pcx__eligible_trial.sql",
+    "custom/pcx__eligible.sql",
+    "custom/pcx__eligible_trial.sql",
 ]
