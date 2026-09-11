@@ -1,7 +1,7 @@
 """PCX diagnosis evidence from one note, with verbatim spans; eligibility is adjudicated downstream."""
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
 
 
@@ -162,8 +162,6 @@ class DiagnosisAnnotation(BaseModel):
     not medulloblastoma. Every mention carries verbatim spans; has_mention must agree
     with the spans.
     """
-    model_config = ConfigDict(extra="forbid")
-
     disease_subtype: DiseaseSubtypeMention
     medulloblastoma_histology: MedulloblastomaHistologyMention
     tumor_location: TumorLocationMention
