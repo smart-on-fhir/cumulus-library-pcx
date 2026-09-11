@@ -115,7 +115,9 @@ class AgeAtDiagnosisMention(SpanAugmentedMention):
     stated. Preserve all ages; age at definitive surgery is a separate trial criterion."""
     age_at_diagnosis_months: int | None = Field(
         default=None, ge=0, le=1500,
-        description="Explicit age at initial diagnosis in completed months (e.g. '2 years' -> 24); not age at definitive surgery. Null if unstated.",
+        description=("Explicit age at initial diagnosis in completed months (e.g. '2 years' -> 24); "
+                    "not age at definitive surgery. "
+                     "Null if unstated."),
     )
 
 
@@ -124,11 +126,13 @@ class DiagnosisDateMention(SpanAugmentedMention):
     appear, use the earliest diagnosis date."""
     diagnosis_date: str | None = Field(
         default=None,
-        description="Earliest diagnosis date, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated.",
+        description=("Earliest diagnosis date, ISO YYYY-MM-DD (first-of-period if coarse). "
+                     "Null if not stated."),
     )
     diagnosis_date_precision: DatePrecision | None = Field(
         default=None,
-        description="Precision supported by the text for diagnosis_date. Null when diagnosis_date is null.",
+        description=("Precision supported by the text for diagnosis_date. "
+                     "Null when diagnosis_date is null."),
     )
 
 
@@ -138,11 +142,13 @@ class DiagnosisDateGoldMention(SpanAugmentedMention):
     Not necessarily the definitive surgery."""
     diagnosis_date_gold: str | None = Field(
         default=None,
-        description="Confirmatory tissue-diagnosis date, ISO YYYY-MM-DD, first-of-period if coarse. Null if unstated.",
+        description=("Confirmatory tissue-diagnosis date, ISO YYYY-MM-DD, first-of-period if coarse. "
+                     "Null if unstated."),
     )
     diagnosis_date_gold_precision: DatePrecision | None = Field(
         default=None,
-        description="Precision for diagnosis_date_gold. Null when diagnosis_date_gold is null.",
+        description=("Precision for diagnosis_date_gold. "
+                     "Null when diagnosis_date_gold is null."),
     )
 
 
