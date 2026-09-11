@@ -19,7 +19,8 @@ enc_range as (
             core__encounter as E,
             include
     WHERE   (E.period_start_day between date(include.period_start) and date(include.period_end))
-    AND     (E.period_end_day   between date(include.period_start) and date(include.period_end))
+    AND     (E.period_end_day IS NULL
+             OR E.period_end_day between date(include.period_start) and date(include.period_end))
     AND     (E.period_start_day < CURRENT_DATE)
 ),
 history as (
@@ -43,35 +44,17 @@ merged as (
     select  *  from enc_range
     UNION ALL
     select  *  from history
-),
-uniq as (
-    SELECT  distinct
-            subject_ref,
-            period_start_day,
-            period_end_day
-    from    merged
-),
-ordinal as (
-    SELECT  distinct
-            subject_ref,
-            period_start_day,
-            period_end_day,
-            ROW_NUMBER() OVER (
-                PARTITION   BY  subject_ref
-                ORDER       BY  period_start_day    NULLS LAST,
-                                period_end_day      NULLS LAST
-            )   AS period_ordinal
-    FROM    uniq
 )
+-- Encounters sharing a start/end pair share one utilization period, including NULL ends.
 select  distinct
-        ordinal.subject_ref,
-        ordinal.period_ordinal,
-        ordinal.period_start_day,
-        ordinal.period_end_day,
-        merged.encounter_ref
-from    merged,
-        ordinal
-where   merged.subject_ref       = ordinal.subject_ref
-and     merged.period_start_day  = ordinal.period_start_day
-and     merged.period_end_day    = ordinal.period_end_day
+        subject_ref,
+        DENSE_RANK() OVER (
+            PARTITION   BY  subject_ref
+            ORDER       BY  period_start_day    NULLS LAST,
+                            period_end_day      NULLS LAST
+        ) AS period_ordinal,
+        period_start_day,
+        period_end_day,
+        encounter_ref
+from    merged
 ;

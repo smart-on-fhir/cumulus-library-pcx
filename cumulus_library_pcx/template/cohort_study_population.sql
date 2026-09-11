@@ -33,7 +33,7 @@ utilization AS (
 ),
 duration AS (
     SELECT  MIN(enc_period_start_day)   AS min_start_day,
-            MAX(enc_period_end_day)     AS max_end_day,
+            MAX(enc_period_end_day_filled) AS max_end_day,
             subject_ref
     FROM    study_population
     GROUP BY subject_ref
