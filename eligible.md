@@ -81,6 +81,16 @@ Exclude patients who received ([chemo](#medication)) before t=0
 | [radiation.py](cumulus_library_pcx/llm/models/radiation.py) | LLM chart review confirmed radiation |
 | [proc_radiation.csv](spreadsheet/proc_radiation.csv)        | supporting evidence                  |
 
+---
+## pcx__eligible ❓
+
+| table                                                                                 | purpose                                       |
+|---------------------------------------------------------------------------------------|-----------------------------------------------|
+| [pcx__eligible.sql](cumulus_library_pcx/custom/pcx__eligible.sql)                     | inclusion/exclusion criteria intersection     |
+| [pcx__eligible_dx.sql](cumulus_library_pcx/custom/pcx__eligible_dx.sql)               | did patient match diagnosis criteria?         |
+| [pcx__eligible_rx.sql](cumulus_library_pcx/custom/pcx__eligible_rx.sql)               | did patient have 1+ chemo agent?              |
+| [pcx__eligible_surgery.sql](cumulus_library_pcx/custom/pcx__eligible_surgery.sql)     | did patient have surgery < 36 months age?     |
+| [pcx__eligible_radiation.sql](cumulus_library_pcx/custom/pcx__eligible_radiation.sql) | did patient have **prior** radiation therapy? |
 
 
  
