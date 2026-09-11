@@ -40,7 +40,7 @@ files = ['sample.toml']
 # files = ['nlp_doc_type_tasks.workflow']
 # skip_by_default = true
 
-[[stages.nlp_doc_type_tasks_50k]]
+[[stages.nlp_all_50k]]
 label = "NLP 50k only"
 files = ['nlp_all_50k.workflow']
 skip_by_default = true
