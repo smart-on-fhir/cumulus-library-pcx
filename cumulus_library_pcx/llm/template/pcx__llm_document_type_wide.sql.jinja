@@ -1,0 +1,21 @@
+{%- import 'syntax.sql.jinja' as syntax -%}
+CREATE TABLE pcx__llm_document_type_wide AS
+{%- for table_name in table_names %}
+SELECT  DISTINCT
+        nlp.note_ref,
+        nlp.encounter_ref,
+        nlp.subject_ref,
+        '{{ table_name }}' AS origin,
+        CAST(nlp.generated_on AS VARCHAR) AS generated_on,
+        CAST(nlp.task_version AS BIGINT) AS task_version,
+        nlp.system_fingerprint,
+        -- mention values only: spans and has_mention stay in the source nlp table
+        nlp.result.document_type.document_type                       AS document_type,
+        nlp.result.document_type.confidence                          AS confidence
+FROM
+        {{ table_name }} AS nlp
+WHERE
+        nlp.result IS NOT NULL
+AND     nlp.task_version = {{ task_version }}
+{{ syntax.union_all_delineate(loop) }}
+{%- endfor %}
