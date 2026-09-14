@@ -92,7 +92,6 @@ pcx__client_encounter,rx_chemo_bool,,Any backbone chemotherapy MedicationRequest
 pcx__client_encounter,proc_craniotomy_bool,,Craniotomy procedure code on this encounter (TRUE or NULL),treatment,boolean,,,,
 pcx__client_encounter,proc_radiation_bool,,Radiation procedure code on this encounter (TRUE or NULL),treatment,boolean,,,,
 pcx__client_encounter,lab_organ_function_bool,,"Any organ-function lab (ANC, ALT, AST, creatinine, hemoglobin, platelets, bilirubin) on this encounter",utilization,boolean,,,,
-pcx__client_encounter,lab_folate_bool,,Any folate lab on this encounter,utilization,boolean,,,,
 pcx__client_exposure,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
 pcx__client_exposure,exposure,,"METHOTREXATE, CHEMOTHERAPY or RADIATION",treatment,varchar,,,,
 pcx__client_exposure,any_bool,,"Any evidence of the exposure (order, code or documented administration)",treatment,boolean,,,,
@@ -163,11 +162,6 @@ pcx__client_timeline,variable,lab_creatinine,Serum creatinine,covariate_source,,
 pcx__client_timeline,variable,lab_hemoglobin,Hemoglobin,covariate_source,,FHIR,lab,effective,encounter
 pcx__client_timeline,variable,lab_platelets,Platelet count,covariate_source,,FHIR,lab,effective,encounter
 pcx__client_timeline,variable,lab_total_bilirubin,Total bilirubin,covariate_source,,FHIR,lab,effective,encounter
-pcx__client_timeline,variable,lab_folate,Serum or plasma folate,covariate_source,,FHIR,lab,effective,encounter
-pcx__client_timeline,variable,lab_folate_rbc,RBC folate,covariate_source,,FHIR,lab,effective,encounter
-pcx__client_timeline,variable,lab_folate_whole_blood,Whole-blood folate,covariate_source,,FHIR,lab,effective,encounter
-pcx__client_timeline,variable,lab_folate_unspecified,"Folate, unspecified specimen",covariate_source,,FHIR,lab,effective,encounter
-pcx__client_timeline,variable,lab_folate_interpretation,Folate qualitative interpretation,covariate_source,,FHIR,lab,effective,encounter
 pcx__client_timeline,variable,casedef_subtype,"FHIR coded case-definition evidence with tumor subtype (interpretation = tier, status = pre/peri/post period)",covariate_source,,CASEDEF,,encounter,
 pcx__client_timeline,variable,llm_disease_subtype,LLM CNS embryonal subtype (interpretation = legacy term),covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_medulloblastoma_histology,LLM medulloblastoma histologic pattern,covariate_source,,LLM,,documented,
