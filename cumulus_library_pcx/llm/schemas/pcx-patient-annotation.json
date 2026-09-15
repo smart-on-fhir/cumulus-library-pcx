@@ -1,6 +1,7 @@
 {
   "$defs": {
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -84,6 +85,7 @@
       "type": "object"
     },
     "TimelineAnchor": {
+      "description": "Timeline anchor.\nORIGINAL_DIAGNOSIS: original diagnosis.\nFIRST_LOCAL_DIAGNOSIS: first local diagnosis.\nINITIAL_TUMOR_MRI: initial tumor MRI.\nDEFINITIVE_SURGERY: definitive surgery.\nTRIAL_ENROLLMENT: trial enrollment.\nTREATMENT_INITIATION: treatment initiation.\nINDUCTION_COMPLETION: induction completion.\nCONSOLIDATION_COMPLETION: consolidation completion.",
       "enum": [
         "ORIGINAL_DIAGNOSIS",
         "FIRST_LOCAL_DIAGNOSIS",
@@ -163,6 +165,7 @@
       "type": "object"
     },
     "VitalStatus": {
+      "description": "Vital status.\nALIVE: alive.\nDECEASED: deceased.\nNONE_OF_THE_ABOVE: vital status not documented.",
       "enum": [
         "ALIVE",
         "DECEASED",

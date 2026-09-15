@@ -1,6 +1,7 @@
 {
   "$defs": {
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -120,6 +121,7 @@
       "type": "object"
     },
     "LaboratoryTest": {
+      "description": "Laboratory test.\nABSOLUTE_NEUTROPHIL_COUNT: absolute neutrophil count (ANC).\nPLATELET_COUNT: platelet count.\nHEMOGLOBIN: hemoglobin.\nCREATININE_CLEARANCE: creatinine clearance.\nMEASURED_GFR: measured glomerular filtration rate.\nSERUM_CREATININE: serum creatinine.\nTOTAL_BILIRUBIN: total bilirubin.\nAST: aspartate aminotransferase.\nALT: alanine aminotransferase.\nMETHOTREXATE_LEVEL: methotrexate level.\nOTHER: another laboratory test.",
       "enum": [
         "ABSOLUTE_NEUTROPHIL_COUNT",
         "PLATELET_COUNT",
@@ -236,6 +238,7 @@
       "type": "object"
     },
     "TreatmentPhase": {
+      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nOTHER: another documented phase.\nNOT_DOCUMENTED: phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",

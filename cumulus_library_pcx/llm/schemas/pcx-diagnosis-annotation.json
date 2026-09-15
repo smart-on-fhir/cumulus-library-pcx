@@ -82,6 +82,7 @@
       "type": "object"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -323,7 +324,6 @@
       "type": "object"
     }
   },
-  "additionalProperties": false,
   "description": "Extract confirmed patient-specific diagnoses, including documented history.\nExclude suspected, negated, rule-out, and family-history diagnoses. Preserve\nexact diagnosis/site wording and legacy terms without inferring modern entities.\nMolecular classification is handled separately. Unknown findings do not imply\neligibility or exclusion. Extract only explicitly documented M-stage; do not\nderive it from imaging or cytology here. Histology is unknown when unstated or\nnot medulloblastoma. Every mention carries verbatim spans; has_mention must agree\nwith the spans.",
   "properties": {
     "disease_subtype": {

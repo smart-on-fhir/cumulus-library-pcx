@@ -1,6 +1,7 @@
 {
   "$defs": {
     "CriterionStatus": {
+      "description": "Status of a trial criterion.\nMET: met.\nNOT_MET: not met.\nUNKNOWN: unknown.\nCONFLICTING: conflicting evidence.",
       "enum": [
         "MET",
         "NOT_MET",
@@ -11,6 +12,7 @@
       "type": "string"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -37,7 +39,7 @@
         "status": {
           "$ref": "#/$defs/CriterionStatus",
           "default": "UNKNOWN",
-          "description": "MET/NOT_MET only with direct evidence for the parent criterion. Missing information is UNKNOWN, never eligible or ineligible by default."
+          "description": "MET / NOT_MET: only with direct evidence for the parent criterion. UNKNOWN: missing information, never eligible or ineligible by default."
         },
         "assessment_date": {
           "anyOf": [

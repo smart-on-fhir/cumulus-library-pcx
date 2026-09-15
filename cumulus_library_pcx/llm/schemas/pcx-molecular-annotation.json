@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AlterationStatus": {
+      "description": "Status of a molecular alteration.\nPRESENT: present.\nABSENT: absent.\nINDETERMINATE: indeterminate.\nNOT_DOCUMENTED: not documented.",
       "enum": [
         "PRESENT",
         "ABSENT",
@@ -11,6 +12,7 @@
       "type": "string"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -20,6 +22,7 @@
       "type": "string"
     },
     "MbMolecularGroup": {
+      "description": "Medulloblastoma molecular group as reported.\nWNT: WNT.\nSHH: SHH.\nGROUP_3: Group 3.\nGROUP_4: Group 4.\nNON_WNT_NON_SHH: non-WNT/non-SHH.\nNOT_SUBGROUPED: not subgrouped.\nINDETERMINATE: indeterminate.\nCONFLICTING: conflicting group calls.\nNONE_OF_THE_ABOVE: no group documented.",
       "enum": [
         "WNT",
         "SHH",
@@ -70,7 +73,7 @@
         "status": {
           "$ref": "#/$defs/AlterationStatus",
           "default": "NOT_DOCUMENTED",
-          "description": "ABSENT requires explicitly negative testing; silence is NOT_DOCUMENTED."
+          "description": "Status of this alteration. ABSENT: requires explicitly negative testing. NOT_DOCUMENTED: silence."
         },
         "origin": {
           "anyOf": [
@@ -138,6 +141,7 @@
       "type": "object"
     },
     "MolecularMethod": {
+      "description": "Molecular testing method.\nDNA_METHYLATION: DNA methylation profiling.\nSEQUENCING: sequencing.\nIMMUNOHISTOCHEMISTRY: immunohistochemistry.\nFISH: fluorescence in situ hybridization.\nCOPY_NUMBER_ANALYSIS: copy number analysis.\nCLINICAL_SUMMARY: clinical summary quoting a result without the original method.\nOTHER: another method.\nNOT_DOCUMENTED: method not documented.",
       "enum": [
         "DNA_METHYLATION",
         "SEQUENCING",
@@ -169,7 +173,7 @@
         "molecular_group": {
           "$ref": "#/$defs/MbMolecularGroup",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Explicit medulloblastoma group. NON_WNT_NON_SHH does not distinguish Group 3 from 4. Preserve conflicting calls; never infer a group from a single alteration."
+          "description": "Explicit medulloblastoma group. Preserve conflicting calls; never infer a group from a single alteration. NON_WNT_NON_SHH: does not distinguish Group 3 from Group 4."
         },
         "integrated_diagnosis_verbatim": {
           "anyOf": [
@@ -213,7 +217,7 @@
           "title": "Calibrated Score"
         },
         "methods": {
-          "description": "Methods documented for this result. A note quoting a group without the original method is CLINICAL_SUMMARY.",
+          "description": "Methods documented for this result. CLINICAL_SUMMARY: a note quoting a group without the original method.",
           "items": {
             "$ref": "#/$defs/MolecularMethod"
           },

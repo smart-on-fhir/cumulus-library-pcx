@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AssessmentTimepoint": {
+      "description": "Treatment-relative assessment timepoint.\nBASELINE: baseline.\nDURING_INDUCTION: during induction.\nEND_INDUCTION: end of induction.\nDURING_CONSOLIDATION: during consolidation.\nEND_CONSOLIDATION: end of consolidation.\nFOLLOW_UP: follow-up.\nOTHER: another documented timepoint.\nNOT_DOCUMENTED: timepoint not documented.",
       "enum": [
         "BASELINE",
         "DURING_INDUCTION",
@@ -15,6 +16,7 @@
       "type": "string"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -134,6 +136,7 @@
       "type": "object"
     },
     "ResponseStatus": {
+      "description": "Response assessment result.\nCOMPLETE_RESPONSE: complete response (CR).\nPARTIAL_RESPONSE: partial response (PR).\nSTABLE_DISEASE: stable disease (SD).\nPROGRESSIVE_DISEASE: progressive disease (PD).\nNOT_EVALUABLE: not evaluable.\nINDETERMINATE: indeterminate.\nNOT_DOCUMENTED: response not documented.",
       "enum": [
         "COMPLETE_RESPONSE",
         "PARTIAL_RESPONSE",

@@ -1,6 +1,9 @@
+from typing import Iterable
+
 import cumulus_library
 from cumulus_library.template_sql.base_templates import get_ctas_empty_query
 from cumulus_library_pcx.llm.builder.pcx_base_mixin import PcxLLMBaseMixin
+from cumulus_library_pcx.tools import filetool
 
 class PcxNlpDiagnosisWideBuilder(
     PcxLLMBaseMixin,
@@ -9,6 +12,16 @@ class PcxNlpDiagnosisWideBuilder(
     task_tabular_display="diagnosis",
     task_table_suffix="wide",
 ):
+    task_version = 2
+
+    def _make_query_with_tables(self, tables: Iterable[str]):
+        return cumulus_library.get_template(
+            self.dest_table,
+            filetool.path_llm_template(),
+            table_names=sorted(tables),
+            task_version=self.task_version,
+        )
+
     def _make_empty_query(self, config: cumulus_library.StudyConfig):
         table_cols = [
             "note_ref",

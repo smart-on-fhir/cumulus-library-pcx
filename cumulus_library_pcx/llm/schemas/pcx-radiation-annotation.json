@@ -1,6 +1,7 @@
 {
   "$defs": {
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -10,6 +11,7 @@
       "type": "string"
     },
     "DeliveryStatus": {
+      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNOT_DOCUMENTED: delivery status not documented.",
       "enum": [
         "ADMINISTERED",
         "PLANNED",
@@ -72,7 +74,7 @@
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
           "default": "NOT_DOCUMENTED",
-          "description": "ADMINISTERED requires delivered RT; PLANNED or HELD is not exposure. Explicit non-receipt must be stated, not inferred from silence."
+          "description": "Delivery status of this radiation round. Explicit non-receipt must be stated, not inferred from silence. ADMINISTERED: delivered RT. PLANNED / HELD: not exposure."
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
@@ -132,7 +134,7 @@
         "radiation_method": {
           "$ref": "#/$defs/RadiationMethod",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Delivery method/energy. PHOTON / PROTON / COMBINATION_PROTONS_AND_PHOTONS / ELECTRONS by modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE. BRACHYTHERAPY. OTHER: another method. NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+          "description": "Delivery method/energy. PHOTON: photon modality. PROTON: proton modality. COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. ELECTRONS: electron modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE: Gamma Knife. BRACHYTHERAPY: brachytherapy. OTHER: another method. NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
         },
         "radiation_field": {
           "$ref": "#/$defs/RadiationField",
@@ -304,6 +306,7 @@
       "type": "string"
     },
     "TreatmentPhase": {
+      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nOTHER: another documented phase.\nNOT_DOCUMENTED: phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",

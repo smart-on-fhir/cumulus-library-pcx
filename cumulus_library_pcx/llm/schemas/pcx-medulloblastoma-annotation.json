@@ -53,7 +53,7 @@
         "group": {
           "$ref": "#/$defs/MedulloblastomaGroup",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Explicit molecular group: WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, CONFLICTING, OTHER. NONE_OF_THE_ABOVE for absent or indeterminate classification. Do not infer from treatment or histology."
+          "description": "Explicit molecular group. Do not infer from treatment or histology. NONE_OF_THE_ABOVE: absent or indeterminate classification."
         }
       },
       "required": [
@@ -64,6 +64,7 @@
       "type": "object"
     },
     "MedulloblastomaGroup": {
+      "description": "Medulloblastoma molecular group.\nWNT: WNT.\nSHH: SHH.\nGROUP_3: Group 3.\nGROUP_4: Group 4.\nNON_WNT_NON_SHH: non-WNT/non-SHH.\nCONFLICTING: conflicting group calls.\nOTHER: another documented group.\nNONE_OF_THE_ABOVE: no group documented.",
       "enum": [
         "WNT",
         "SHH",

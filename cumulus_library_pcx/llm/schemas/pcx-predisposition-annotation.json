@@ -23,7 +23,7 @@
         "status": {
           "$ref": "#/$defs/PredispositionStatus",
           "default": "UNEVALUATED",
-          "description": "PRESENT for pathogenic/likely pathogenic germline finding or diagnosed syndrome; ABSENT only for explicitly negative testing; UNCERTAIN for VUS, never PRESENT; UNEVALUATED for missing testing."
+          "description": "PRESENT: pathogenic/likely pathogenic germline finding or diagnosed syndrome. ABSENT: only for explicitly negative testing. UNCERTAIN: VUS, never PRESENT. UNEVALUATED: missing testing."
         },
         "variant_verbatim": {
           "anyOf": [
@@ -73,6 +73,7 @@
       "type": "object"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",

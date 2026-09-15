@@ -1,6 +1,7 @@
 {
   "$defs": {
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -10,6 +11,7 @@
       "type": "string"
     },
     "DeliveryStatus": {
+      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNOT_DOCUMENTED: delivery status not documented.",
       "enum": [
         "ADMINISTERED",
         "PLANNED",
@@ -379,7 +381,7 @@
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
           "default": "NOT_DOCUMENTED",
-          "description": "ADMINISTERED requires actual receipt. Planned protocol doses, held doses and cancelled orders remain separate."
+          "description": "Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt."
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
@@ -586,6 +588,7 @@
       "type": "object"
     },
     "TreatmentPhase": {
+      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nOTHER: another documented phase.\nNOT_DOCUMENTED: phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",
