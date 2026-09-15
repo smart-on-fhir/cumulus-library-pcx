@@ -1,3 +1,4 @@
+import tomllib
 import tomli_w
 from pathlib import Path
 from functools import lru_cache
@@ -129,8 +130,16 @@ def as_file_upload_toml(file_list: list[Path], prefix: str | None = None) -> dic
         "tables": tables,
     }
 #-----------------------------------------------------------------------------
-# TOML save helpers
+# TOML read/write helpers
 #-----------------------------------------------------------------------------
+def load_toml(toml_file: Path | str) -> dict:
+    """Read TOML; string filenames are relative to the study package."""
+    if not isinstance(toml_file, Path):
+        toml_file = filetool.path_project(toml_file)
+    with toml_file.open("rb") as source:
+        return tomllib.load(source)
+
+
 def save_actions_toml(
         actions: SqlAction | ExportAction | FileAction| list[SqlAction | ExportAction | FileAction],
         toml_file: Path | str) -> Path:

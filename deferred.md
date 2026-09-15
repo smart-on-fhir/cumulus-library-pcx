@@ -21,15 +21,24 @@
   - Restore the `tumor_location` classification as a flat diagnosis field only when needed; update the diagnosis schema, wide-table SQL/builder, task version, and regression checks together.
 
 - [ ] **Low priority — IntegratedDiagnosisMention: later validation.** Defer extraction
-  of `integrated_diagnosis_verbatim` until validating documented integrated
+  of `integrated_diagnosis_verbatim` from the **diagnosis** task until validating documented integrated
   diagnoses against the molecular task's classifications. It is not needed for
   the current eligibility pass. Historical terminology remains active in
-  `DiseaseSubtypeMention.historical_diagnosis_term`.
+  `DiseaseSubtypeMention.historical_diagnosis_term`. Note that
+  `MolecularReportMention.integrated_diagnosis_verbatim` in `molecular.py` is still active,
+  and the `document_topic.diagnosis` routing text still asks for the WHO-CNS5 integrated diagnosis;
+  the deferral applies to the diagnosis model only.
   - Previously returned an exact WHO-CNS5 diagnosis phrase (for example,
     "Medulloblastoma, SHH-activated and TP53-mutant"), or null when unstated,
     together with evidence spans and a mention flag.
   - Before restoring, establish the validation question and avoid duplicating
     molecular classification. Update schema, SQL, builder, version, and tests.
 
-The current diagnosis model uses mention wrappers with evidence spans. Integrated
-wording is deferred; historical diagnosis and primary-site wording remain active.
+The current diagnosis model (task version 2) uses mention wrappers with evidence spans. Integrated
+wording is deferred; historical diagnosis and primary-site wording remain active. When any of the
+items above is restored, bump the task version in `nlp_clinical_tasks.workflow`, regenerate the schema
+and the wide-table snapshot, and extend the tests together. 
+
+Model changes proposed by the reviews but not yet scheduled here are tracked in [workplan.md](workplan.md)
+(surgery role and radiation indication enums, protocol name naming, sentinel spellings, the compact
+medulloblastoma model's date contract).
