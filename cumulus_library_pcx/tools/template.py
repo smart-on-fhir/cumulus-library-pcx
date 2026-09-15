@@ -1,5 +1,6 @@
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from cumulus_library.template_sql import base_templates
 from cumulus_library_pcx.tools import filetool
 from cumulus_library_pcx.tools.manifest import PREFIX
 
@@ -16,6 +17,10 @@ def load(file_sql: str, **kwargs) -> str:
 def load_test(file_sql: str, **kwargs) -> str:
     """Render from tests/template/ -- keeps QA/test SQL out of the production template/ folder."""
     return _render(filetool.path_tests_template(), file_sql, **kwargs)
+
+def load_llm(file_sql: str, **kwargs) -> str:
+    """Render from llm/template/ with the shared Cumulus SQL macros."""
+    return _render(filetool.path_llm_template(), file_sql, **kwargs)
 
 #-----------------------------------------------------------------------------
 # Copy
@@ -34,8 +39,10 @@ def copy_test(file_sql: Path | str, **kwargs) -> Path:
 def _render(template_dir: Path, file_sql: str, **kwargs) -> str:
     """Render a Jinja SQL template found in `template_dir`."""
     kwargs.setdefault("prefix", PREFIX)
-    env = Environment(loader=FileSystemLoader(str(template_dir)),
+    macro_dir = Path(base_templates.__file__).parent / "shared_macros"
+    env = Environment(loader=FileSystemLoader([template_dir, macro_dir]),
                       undefined=StrictUndefined)
+    env.globals["db_type"] = "athena"
     return env.get_template(file_sql).render(**kwargs)
 
 def _copy(template_dir: Path, athena_path, file_sql: Path | str, **kwargs) -> Path:
