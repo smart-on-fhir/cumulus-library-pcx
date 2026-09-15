@@ -52,10 +52,7 @@ evidence AS (
             wide.proc_radiation                                         AS proc_radiation_bool,
             (wide.lab_absolute_neutrophil_count OR wide.lab_alt OR wide.lab_ast OR wide.lab_creatinine
              OR wide.lab_hemoglobin OR wide.lab_platelets OR wide.lab_total_bilirubin)
-                                                                        AS lab_organ_function_bool,
-            (wide.lab_folate OR wide.lab_folate_rbc OR wide.lab_folate_whole_blood
-             OR wide.lab_folate_unspecified OR wide.lab_folate_interpretation)
-                                                                        AS lab_folate_bool
+                                                                        AS lab_organ_function_bool
     FROM    pcx__cohort_variable_wide AS wide
 )
 
@@ -79,8 +76,7 @@ SELECT  encounter.subject_ref,
         evidence.rx_chemo_bool,
         evidence.proc_craniotomy_bool,
         evidence.proc_radiation_bool,
-        evidence.lab_organ_function_bool,
-        evidence.lab_folate_bool
+        evidence.lab_organ_function_bool
 FROM    encounter
 JOIN    pcx__client_subject AS subject
   ON    encounter.subject_ref = subject.subject_ref
