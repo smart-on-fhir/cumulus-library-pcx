@@ -21,12 +21,13 @@ class TopicRelevanceMention(SpanAugmentedMention):
     relevance: TopicRelevance = Field(
         default=TopicRelevance.NONE_OF_THE_ABOVE,
         description=(
-            "EXPLICIT when the topic is directly named or measured for this patient. "
-            "IMPLICIT only when the document contains the topic-specific supporting "
-            "facts in the parent field description. NONE_OF_THE_ABOVE when neither "
-            "level is supported. Explicit negative tests and non-receipt statements are "
+            "Explicit negative tests and non-receipt statements are "
             "relevant to staging, treatment, molecular testing and eligibility. "
-            "Exclude hypothetical/rule-out disease and family history unless requested."
+            "Exclude hypothetical/rule-out disease and family history unless requested. "
+            "EXPLICIT: the topic is directly named or measured for this patient. "
+            "IMPLICIT: only when the document contains the topic-specific supporting "
+            "facts in the parent field description. "
+            "NONE_OF_THE_ABOVE: neither level is supported."
         ),
     )
     confidence: float | None = Field(

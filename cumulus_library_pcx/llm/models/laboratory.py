@@ -12,6 +12,18 @@ from .treatment import TreatmentPhase
 
 
 class LaboratoryTest(StrEnum):
+    """Laboratory test.
+    ABSOLUTE_NEUTROPHIL_COUNT: absolute neutrophil count (ANC).
+    PLATELET_COUNT: platelet count.
+    HEMOGLOBIN: hemoglobin.
+    CREATININE_CLEARANCE: creatinine clearance.
+    MEASURED_GFR: measured glomerular filtration rate.
+    SERUM_CREATININE: serum creatinine.
+    TOTAL_BILIRUBIN: total bilirubin.
+    AST: aspartate aminotransferase.
+    ALT: alanine aminotransferase.
+    METHOTREXATE_LEVEL: methotrexate level.
+    OTHER: another laboratory test."""
     ABSOLUTE_NEUTROPHIL_COUNT = "ABSOLUTE_NEUTROPHIL_COUNT"
     PLATELET_COUNT = "PLATELET_COUNT"
     HEMOGLOBIN = "HEMOGLOBIN"

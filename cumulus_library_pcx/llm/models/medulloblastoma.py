@@ -12,6 +12,15 @@ class EvidenceStatus(StrEnum):
 
 
 class MedulloblastomaGroup(StrEnum):
+    """Medulloblastoma molecular group.
+    WNT: WNT.
+    SHH: SHH.
+    GROUP_3: Group 3.
+    GROUP_4: Group 4.
+    NON_WNT_NON_SHH: non-WNT/non-SHH.
+    CONFLICTING: conflicting group calls.
+    OTHER: another documented group.
+    NONE_OF_THE_ABOVE: no group documented."""
     WNT = 'WNT'
     SHH = 'SHH'
     GROUP_3 = 'GROUP_3'
@@ -45,7 +54,7 @@ class TreatmentEvidence(SpanAugmentedMention):
 class GroupEvidence(SpanAugmentedMention):
     classification_method: str | None = Field(default=None, description="Documented subgroup method; clinical summary is not automatically methylation confirmation.")
     source_report: str | None = Field(default=None, description="Source molecular report as stated; preserve conflicts in molecular.py reports.")
-    group: MedulloblastomaGroup = Field(default=MedulloblastomaGroup.NONE_OF_THE_ABOVE, description="Explicit molecular group: WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, CONFLICTING, OTHER. NONE_OF_THE_ABOVE for absent or indeterminate classification. Do not infer from treatment or histology.")
+    group: MedulloblastomaGroup = Field(default=MedulloblastomaGroup.NONE_OF_THE_ABOVE, description="Explicit molecular group. Do not infer from treatment or histology. NONE_OF_THE_ABOVE: absent or indeterminate classification.")
 
     @model_validator(mode='after')
     def evidence_contract(self):

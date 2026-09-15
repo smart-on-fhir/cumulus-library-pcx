@@ -10,6 +10,15 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class TimelineAnchor(StrEnum):
+    """Timeline anchor.
+    ORIGINAL_DIAGNOSIS: original diagnosis.
+    FIRST_LOCAL_DIAGNOSIS: first local diagnosis.
+    INITIAL_TUMOR_MRI: initial tumor MRI.
+    DEFINITIVE_SURGERY: definitive surgery.
+    TRIAL_ENROLLMENT: trial enrollment.
+    TREATMENT_INITIATION: treatment initiation.
+    INDUCTION_COMPLETION: induction completion.
+    CONSOLIDATION_COMPLETION: consolidation completion."""
     ORIGINAL_DIAGNOSIS = "ORIGINAL_DIAGNOSIS"
     FIRST_LOCAL_DIAGNOSIS = "FIRST_LOCAL_DIAGNOSIS"
     INITIAL_TUMOR_MRI = "INITIAL_TUMOR_MRI"
@@ -28,6 +37,10 @@ class TimelineAnchorMention(SpanAugmentedMention):
 
 
 class VitalStatus(StrEnum):
+    """Vital status.
+    ALIVE: alive.
+    DECEASED: deceased.
+    NONE_OF_THE_ABOVE: vital status not documented."""
     ALIVE = "ALIVE"
     DECEASED = "DECEASED"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"

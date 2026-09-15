@@ -10,6 +10,14 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class ResponseStatus(StrEnum):
+    """Response assessment result.
+    COMPLETE_RESPONSE: complete response (CR).
+    PARTIAL_RESPONSE: partial response (PR).
+    STABLE_DISEASE: stable disease (SD).
+    PROGRESSIVE_DISEASE: progressive disease (PD).
+    NOT_EVALUABLE: not evaluable.
+    INDETERMINATE: indeterminate.
+    NOT_DOCUMENTED: response not documented."""
     COMPLETE_RESPONSE = "COMPLETE_RESPONSE"
     PARTIAL_RESPONSE = "PARTIAL_RESPONSE"
     STABLE_DISEASE = "STABLE_DISEASE"
@@ -20,6 +28,15 @@ class ResponseStatus(StrEnum):
 
 
 class AssessmentTimepoint(StrEnum):
+    """Treatment-relative assessment timepoint.
+    BASELINE: baseline.
+    DURING_INDUCTION: during induction.
+    END_INDUCTION: end of induction.
+    DURING_CONSOLIDATION: during consolidation.
+    END_CONSOLIDATION: end of consolidation.
+    FOLLOW_UP: follow-up.
+    OTHER: another documented timepoint.
+    NOT_DOCUMENTED: timepoint not documented."""
     BASELINE = "BASELINE"
     DURING_INDUCTION = "DURING_INDUCTION"
     END_INDUCTION = "END_INDUCTION"

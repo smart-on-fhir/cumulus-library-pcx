@@ -10,6 +10,16 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class MbMolecularGroup(StrEnum):
+    """Medulloblastoma molecular group as reported.
+    WNT: WNT.
+    SHH: SHH.
+    GROUP_3: Group 3.
+    GROUP_4: Group 4.
+    NON_WNT_NON_SHH: non-WNT/non-SHH.
+    NOT_SUBGROUPED: not subgrouped.
+    INDETERMINATE: indeterminate.
+    CONFLICTING: conflicting group calls.
+    NONE_OF_THE_ABOVE: no group documented."""
     WNT = "WNT"
     SHH = "SHH"
     GROUP_3 = "GROUP_3"
@@ -22,6 +32,15 @@ class MbMolecularGroup(StrEnum):
 
 
 class MolecularMethod(StrEnum):
+    """Molecular testing method.
+    DNA_METHYLATION: DNA methylation profiling.
+    SEQUENCING: sequencing.
+    IMMUNOHISTOCHEMISTRY: immunohistochemistry.
+    FISH: fluorescence in situ hybridization.
+    COPY_NUMBER_ANALYSIS: copy number analysis.
+    CLINICAL_SUMMARY: clinical summary quoting a result without the original method.
+    OTHER: another method.
+    NOT_DOCUMENTED: method not documented."""
     DNA_METHYLATION = "DNA_METHYLATION"
     SEQUENCING = "SEQUENCING"
     IMMUNOHISTOCHEMISTRY = "IMMUNOHISTOCHEMISTRY"
@@ -33,11 +52,11 @@ class MolecularMethod(StrEnum):
 
 
 class MolecularReportMention(SpanAugmentedMention):
-    molecular_group: MbMolecularGroup = Field(default=MbMolecularGroup.NONE_OF_THE_ABOVE, description="Explicit medulloblastoma group. NON_WNT_NON_SHH does not distinguish Group 3 from 4. Preserve conflicting calls; never infer a group from a single alteration.")
+    molecular_group: MbMolecularGroup = Field(default=MbMolecularGroup.NONE_OF_THE_ABOVE, description="Explicit medulloblastoma group. Preserve conflicting calls; never infer a group from a single alteration. NON_WNT_NON_SHH: does not distinguish Group 3 from Group 4.")
     integrated_diagnosis_verbatim: str | None = Field(default=None, description="Exact diagnosis/classification, including ETMR, pineoblastoma or revised non-embryonal diagnoses. ATRT can be an exclusion/reclassification finding.")
     methylation_class: str | None = Field(default=None, description="Exact methylation class/subclass, including SHH-I/II or Group 3 subtype if reported.")
     calibrated_score: float | None = Field(default=None, ge=0, le=1, description="Explicit classifier score on a 0–1 scale; do not invent a confidence threshold.")
-    methods: list[MolecularMethod] = Field(default_factory=list, description="Methods documented for this result. A note quoting a group without the original method is CLINICAL_SUMMARY.")
+    methods: list[MolecularMethod] = Field(default_factory=list, description="Methods documented for this result. CLINICAL_SUMMARY: a note quoting a group without the original method.")
     report_date: str | None = Field(default=None, description="Date of this molecular report, ISO date at supported precision; distinct from original diagnosis.")
     report_date_precision: DatePrecision | None = Field(default=None, description="Precision for report_date; null if absent.")
     source_report: str | None = Field(default=None, description="Report identifier, laboratory or referenced report title as documented; do not invent identifiers.")
@@ -47,6 +66,11 @@ class MolecularReportMention(SpanAugmentedMention):
 
 
 class AlterationStatus(StrEnum):
+    """Status of a molecular alteration.
+    PRESENT: present.
+    ABSENT: absent.
+    INDETERMINATE: indeterminate.
+    NOT_DOCUMENTED: not documented."""
     PRESENT = "PRESENT"
     ABSENT = "ABSENT"
     INDETERMINATE = "INDETERMINATE"
@@ -56,7 +80,7 @@ class AlterationStatus(StrEnum):
 class MolecularAlterationMention(SpanAugmentedMention):
     target: str = Field(description="Exact gene/chromosome, e.g. MYC, MYCN, TP53, isochromosome 17q, chromosome 8, 10 or 11. Keep MYC and MYCN separate.")
     alteration: str | None = Field(default=None, description="Amplification, gain, loss, mutation or isochromosome as stated. Amplification and gain are distinct; preserve the reported term.")
-    status: AlterationStatus = Field(default=AlterationStatus.NOT_DOCUMENTED, description="ABSENT requires explicitly negative testing; silence is NOT_DOCUMENTED.")
+    status: AlterationStatus = Field(default=AlterationStatus.NOT_DOCUMENTED, description="Status of this alteration. ABSENT: requires explicitly negative testing. NOT_DOCUMENTED: silence.")
     origin: str | None = Field(default=None, description="Somatic, germline or unknown as documented; never infer germline from tumor-only testing.")
     report_date: str | None = Field(default=None, description="Date of the source result, ISO date at supported precision.")
     report_date_precision: DatePrecision | None = Field(default=None, description="Precision for report_date; null if absent.")

@@ -10,7 +10,11 @@ from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecis
 
 
 class MetastasisEvidence(StrEnum):
-    """Result of a single Chang-staging input assessment."""
+    """Result of a single Chang-staging input assessment.
+    POSITIVE: positive.
+    NEGATIVE: negative.
+    INDETERMINATE: indeterminate.
+    UNAVAILABLE: not done or not reported."""
     POSITIVE = "POSITIVE"
     NEGATIVE = "NEGATIVE"
     INDETERMINATE = "INDETERMINATE"

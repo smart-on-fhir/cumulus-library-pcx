@@ -11,6 +11,11 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class CriterionStatus(StrEnum):
+    """Status of a trial criterion.
+    MET: met.
+    NOT_MET: not met.
+    UNKNOWN: unknown.
+    CONFLICTING: conflicting evidence."""
     MET = "MET"
     NOT_MET = "NOT_MET"
     UNKNOWN = "UNKNOWN"
@@ -24,7 +29,7 @@ class TrialCriterionMention(SpanAugmentedMention):
             raise ValueError("A criterion finding requires supporting evidence")
         return self
 
-    status: CriterionStatus = Field(default=CriterionStatus.UNKNOWN, description="MET/NOT_MET only with direct evidence for the parent criterion. Missing information is UNKNOWN, never eligible or ineligible by default.")
+    status: CriterionStatus = Field(default=CriterionStatus.UNKNOWN, description="MET / NOT_MET: only with direct evidence for the parent criterion. UNKNOWN: missing information, never eligible or ineligible by default.")
     assessment_date: str | None = Field(default=None, description="Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.")
     assessment_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessment_date; null if absent.")
 

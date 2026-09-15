@@ -47,7 +47,7 @@ class RadiationRoundMention(SpanAugmentedMention):
     course of radiation documented in this note. Leave dose fields null when not stated or
     not applicable (metastatic-site doses require metastasis; whole-ventricular is only for
     germ-cell tumors)."""
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="ADMINISTERED requires delivered RT; PLANNED or HELD is not exposure. Explicit non-receipt must be stated, not inferred from silence.")
+    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="Delivery status of this radiation round. Explicit non-receipt must be stated, not inferred from silence. ADMINISTERED: delivered RT. PLANNED / HELD: not exposure.")
     phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
     indication: str | None = Field(default=None, description="Initial treatment, post-chemotherapy residual/metastatic disease, salvage after relapse or other documented indication. Do not infer from dose.")
     assessed_through_date: str | None = Field(default=None, description="Date through which explicit non-receipt or delivery is assessed.")
@@ -56,10 +56,13 @@ class RadiationRoundMention(SpanAugmentedMention):
     radiation_method: RadiationMethod = Field(
         default=RadiationMethod.NONE_OF_THE_ABOVE,
         description=(
-            "Delivery method/energy. PHOTON / PROTON / COMBINATION_PROTONS_AND_PHOTONS / "
-            "ELECTRONS by modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. "
-            "STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE. BRACHYTHERAPY. OTHER: another method. "
-            "NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+            "Delivery method/energy. "
+            "PHOTON: photon modality. PROTON: proton modality. "
+            "COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. "
+            "ELECTRONS: electron modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. "
+            "STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE: Gamma Knife. BRACHYTHERAPY: brachytherapy. "
+            "OTHER: another method. NOT_REPORTED: radiation given but method not stated. "
+            "NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
         ),
     )
     radiation_field: RadiationField = Field(

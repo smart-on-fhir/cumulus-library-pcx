@@ -23,7 +23,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
             raise ValueError("Dose unit requires a numeric dose")
         return self
 
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="ADMINISTERED requires actual receipt. Planned protocol doses, held doses and cancelled orders remain separate.")
+    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt.")
     phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED, description="Documented phase of this dose; never infer from drug name alone.")
     cycle_name: str | None = Field(default=None, description="Cycle linked to this administration, if stated.")
     administration_date: str | None = Field(
