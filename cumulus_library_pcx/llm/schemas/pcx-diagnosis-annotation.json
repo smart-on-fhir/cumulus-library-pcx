@@ -285,43 +285,6 @@
       ],
       "title": "MedulloblastomaHistologyMention",
       "type": "object"
-    },
-    "TumorLocationMention": {
-      "description": "Primary anatomic site of the tumor as the note words it. Prefer the imaging\nimpression, then the pathology gross description.",
-      "properties": {
-        "has_mention": {
-          "description": "Indicates whether the concept was mentioned in the text.",
-          "title": "Has Mention",
-          "type": "boolean"
-        },
-        "spans": {
-          "description": "The verbatim text where this concept was mentioned.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Spans",
-          "type": "array"
-        },
-        "tumor_location_verbatim": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Exact site phrase from the note (e.g. 'left cerebellar hemisphere'). Null if not stated.",
-          "title": "Tumor Location Verbatim"
-        }
-      },
-      "required": [
-        "has_mention",
-        "spans"
-      ],
-      "title": "TumorLocationMention",
-      "type": "object"
     }
   },
   "description": "Extract confirmed patient-specific diagnoses, including documented history.\nExclude suspected, negated, rule-out, and family-history diagnoses. Preserve\nexact diagnosis/site wording and legacy terms without inferring modern entities.\nMolecular classification is handled separately. Unknown findings do not imply\neligibility or exclusion. Extract only explicitly documented M-stage; do not\nderive it from imaging or cytology here. Histology is unknown when unstated or\nnot medulloblastoma. Every mention carries verbatim spans; has_mention must agree\nwith the spans.",
@@ -331,9 +294,6 @@
     },
     "medulloblastoma_histology": {
       "$ref": "#/$defs/MedulloblastomaHistologyMention"
-    },
-    "tumor_location": {
-      "$ref": "#/$defs/TumorLocationMention"
     },
     "chang_m_stage": {
       "$ref": "#/$defs/ChangMStageMention"
@@ -351,7 +311,6 @@
   "required": [
     "disease_subtype",
     "medulloblastoma_histology",
-    "tumor_location",
     "chang_m_stage",
     "age_at_diagnosis",
     "diagnosis_date",

@@ -27,4 +27,6 @@ class PcxNlpSystemicTherapyAgentBuilder(
             "therapy_start_date_precision": "varchar",
             "therapy_stop_date": "varchar",
             "therapy_stop_date_precision": "varchar",
+            "assessed_through_date": "varchar",
+            "assessed_through_date_precision": "varchar",
         })

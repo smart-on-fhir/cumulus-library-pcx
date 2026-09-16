@@ -11,14 +11,14 @@
       "type": "string"
     },
     "DeliveryStatus": {
-      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNOT_DOCUMENTED: delivery status not documented.",
+      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNONE_OF_THE_ABOVE: none of the above.",
       "enum": [
         "ADMINISTERED",
         "PLANNED",
         "HELD",
         "CANCELLED",
         "EXPLICITLY_NOT_RECEIVED",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "DeliveryStatus",
       "type": "string"
@@ -41,7 +41,7 @@
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Documented induction, consolidation or salvage phase."
         },
         "protocol_name_verbatim": {
@@ -172,7 +172,7 @@
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
-          "default": "NOT_DOCUMENTED"
+          "default": "NONE_OF_THE_ABOVE"
         },
         "documented_trial_arm": {
           "anyOf": [
@@ -283,11 +283,11 @@
         },
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
-          "default": "NOT_DOCUMENTED"
+          "default": "NONE_OF_THE_ABOVE"
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
-          "default": "NOT_DOCUMENTED"
+          "default": "NONE_OF_THE_ABOVE"
         },
         "infusion_date": {
           "anyOf": [
@@ -380,12 +380,12 @@
         },
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt."
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Documented phase of this dose; never infer from drug name alone."
         },
         "cycle_name": {
@@ -505,7 +505,7 @@
         },
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Receipt of this agent when individual doses are not detailed. Plans do not establish exposure."
         },
         "agent_name": {
@@ -571,6 +571,31 @@
           "default": null,
           "description": "Precision for therapy_stop_date. Null when it is null."
         },
+        "assessed_through_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date through which explicit non-receipt or delivery of this agent is assessed, ISO YYYY-MM-DD. Mainly for EXPLICITLY_NOT_RECEIVED: the note states the agent was not given as of this date. Never infer from the note date. Null if not stated.",
+          "title": "Assessed Through Date"
+        },
+        "assessed_through_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for assessed_through_date. Null when it is null."
+        },
         "administrations": {
           "description": "All distinct dated administrations or explicitly stated protocol doses for this agent in the document. Empty when no administration-level detail is stated.",
           "items": {
@@ -588,14 +613,13 @@
       "type": "object"
     },
     "TreatmentPhase": {
-      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nOTHER: another documented phase.\nNOT_DOCUMENTED: phase not documented.",
+      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nNONE_OF_THE_ABOVE: another documented phase, or phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",
         "POST_CONSOLIDATION",
         "SALVAGE",
-        "OTHER",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "TreatmentPhase",
       "type": "string"

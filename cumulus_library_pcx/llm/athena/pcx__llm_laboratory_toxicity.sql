@@ -22,4 +22,4 @@ FROM
 CROSS JOIN UNNEST(nlp.result.toxicities) WITH ORDINALITY AS toxicity_t (toxicity, toxicity_index)
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2

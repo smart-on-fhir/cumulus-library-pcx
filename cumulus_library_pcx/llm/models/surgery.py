@@ -56,8 +56,8 @@ class SurgeryMention(SpanAugmentedMention):
             "SPINAL_LAMINECTOMY: spinal laminectomy for tumor. "
             "ENDOSCOPIC_ENDONASAL: endoscopic endonasal tumor surgery. "
             "STEREOTACTIC_BIOPSY: stereotactic-guided biopsy. "
-            "LITT: laser interstitial thermal therapy. "            
-            "NONE_OF_THE_ABOVE: no tumor surgery documented in this note."
+            "LITT: laser interstitial thermal therapy. "
+            "NONE_OF_THE_ABOVE: a documented tumor surgery of a type not listed above, or the type is not stated."
         ),
     )
     extent_of_resection: ExtentOfResection = Field(

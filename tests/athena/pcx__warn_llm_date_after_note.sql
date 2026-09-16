@@ -33,14 +33,14 @@ WITH candidate AS (
     WHERE   event_date IS NOT NULL
     AND     event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY', 'DECEASED')
     UNION ALL
-    SELECT  'pcx__llm_patient_wide', 'death_date',
+    SELECT  'pcx__llm_survival_timeline_wide', 'death_date',
             subject_ref, note_ref, CAST(death_date AS DATE)
-    FROM    pcx__llm_patient_wide
+    FROM    pcx__llm_survival_timeline_wide
     WHERE   death_date IS NOT NULL
     UNION ALL
-    SELECT  'pcx__llm_patient_wide', 'last_known_alive_date',
+    SELECT  'pcx__llm_survival_timeline_wide', 'last_known_alive_date',
             subject_ref, note_ref, CAST(last_known_alive_date AS DATE)
-    FROM    pcx__llm_patient_wide
+    FROM    pcx__llm_survival_timeline_wide
     WHERE   last_known_alive_date IS NOT NULL
     UNION ALL
     SELECT  'pcx__llm_systemic_therapy_agent', 'therapy_start_date',

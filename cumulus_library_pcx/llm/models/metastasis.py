@@ -107,8 +107,8 @@ class MetastasisSiteMention(SpanAugmentedMention):
             "LEPTOMENINGEAL: leptomeningeal spread. "
             "BONE_MARROW: marrow involvement. "
             "KIDNEY: renal metastasis. "
-            "LIVER: hepatic metastasis. "            
-            "NONE_OF_THE_ABOVE: no metastatic site documented."
+            "LIVER: hepatic metastasis. "
+            "NONE_OF_THE_ABOVE: a documented metastatic site not listed above, or the site is not stated."
         ),
     )
 

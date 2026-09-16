@@ -17,7 +17,7 @@ protocol_candidate AS (
     WHERE   protocol_name_verbatim IS NOT NULL
     UNION
     SELECT  subject_ref, protocol_name
-    FROM    pcx__llm_patient_anchor
+    FROM    pcx__llm_survival_timeline_anchor
     WHERE   protocol_name IS NOT NULL
 ),
 protocol AS (

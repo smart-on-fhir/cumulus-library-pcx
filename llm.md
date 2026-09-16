@@ -10,14 +10,13 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 | `systemic_therapy`, `treatment`      | 1            | Regimens, induction/consolidation, delivered versus planned doses, cycles and stem-cell infusion                                                                                   |
 | `radiation`                          | 1            | Receipt, timing, field, dose and indication, including post-chemotherapy and salvage treatment                                                                                     |
 | `response`                           | 1            | Baseline imaging/cytology evaluability and end-induction/end-consolidation response                                                                                                |
-| `event`, `patient`                   | 1            | Dated disease events, distinct time anchors, death, last-known-alive and event-free follow-up                                                                                      |
-| `laboratory`                         | 1            | Optional organ-function results and documented toxicity; prefer structured labs                                                                                                    |
-| `predisposition`                     | 1            | Optional documented germline findings; not required cohort eligibility                                                                                                             |
+| `event`, `survival_timeline`         | 1, 2         | Dated disease events, distinct time anchors, death, last-known-alive and event-free follow-up                                                                                      |
+| `laboratory`                         | 2            | Optional organ-function results and documented toxicity; prefer structured labs                                                                                                    |
 | `medulloblastoma`                    | 1            | Broad any-dose discovery summary; insufficient alone for trial reproduction. Its `datetime.date` fields cannot be exported by cumulus-library 6.3.1 (see below)                    |
 | `transition_of_care`                 | 1            | Transfer-in timing/reason, diagnosis and surgery setting, and therapy before entry                                                                                                 |
-| `document_topic`, `document_type`    | 1, 2         | Routing to extraction topics and document classification                                                                                                                           |
+| `document_topic`, `document_type`    | 2, 2         | Routing to extraction topics and document classification                                                                                                                           |
 
-Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (14 clinical tasks) and [nlp_doc_type_tasks.workflow](cumulus_library_pcx/nlp_doc_type_tasks.workflow) (routing and classification). The `_50k` variants are strict subsets with identical prompts (diagnosis and surgery; document_topic only); nothing in them limits the note count. Bump a task's version whenever its model changes, and regenerate the schema and the wide-table snapshot together.
+Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (13 clinical tasks) and [nlp_doc_type_tasks.workflow](cumulus_library_pcx/nlp_doc_type_tasks.workflow) (routing and classification). The `_50k` variants are strict subsets with identical prompts (diagnosis and surgery; document_topic only); nothing in them limits the note count. Bump a task's version whenever its model changes, and regenerate the schema and the wide-table snapshot together.
 
 The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([limitations.md](limitations.md) §3–§4).
 
@@ -34,7 +33,7 @@ Routine lab names are informed by the associated trial's [eligibility listing](h
 
 ## Remaining integration gaps
 
-The document-topic model has 12 routing fields for 14 configured clinical tasks.
+The document-topic model has 11 routing fields for 13 configured clinical tasks.
 `medulloblastoma` and `transition_of_care` have retrieval queries but no router field;
 their `select_by_table` tables are not automatically supplied by query hits. More importantly,
 **no `pcx__llm_document_task_<task>` selection table is created by anything in the repository**,

@@ -11,14 +11,14 @@
       "type": "string"
     },
     "DeliveryStatus": {
-      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNOT_DOCUMENTED: delivery status not documented.",
+      "description": "Delivery status of a treatment.\nADMINISTERED: administered.\nPLANNED: planned.\nHELD: held.\nCANCELLED: cancelled.\nEXPLICITLY_NOT_RECEIVED: explicitly documented as not received.\nNONE_OF_THE_ABOVE: none of the above.",
       "enum": [
         "ADMINISTERED",
         "PLANNED",
         "HELD",
         "CANCELLED",
         "EXPLICITLY_NOT_RECEIVED",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "DeliveryStatus",
       "type": "string"
@@ -30,7 +30,6 @@
         "CRANIOSPINAL_WITH_FOCAL_BOOST",
         "FOCAL_TUMOR_BED",
         "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST",
-        "OTHER",
         "NONE_OF_THE_ABOVE"
       ],
       "title": "RadiationField",
@@ -48,8 +47,6 @@
         "STEREOTACTIC_RADIOSURGERY",
         "GAMMA_KNIFE",
         "BRACHYTHERAPY",
-        "OTHER",
-        "NOT_REPORTED",
         "NONE_OF_THE_ABOVE"
       ],
       "title": "RadiationMethod",
@@ -73,12 +70,12 @@
         },
         "delivery_status": {
           "$ref": "#/$defs/DeliveryStatus",
-          "default": "NOT_DOCUMENTED",
-          "description": "Delivery status of this radiation round. Explicit non-receipt must be stated, not inferred from silence. ADMINISTERED: delivered RT. PLANNED / HELD: not exposure."
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Whether this radiation course was actually delivered. Choose exactly one. A course counts as delivered once any fraction is given; plans, recommendations and simulations are not exposure. ADMINISTERED: at least one fraction was delivered, including a course stopped early. PLANNED: recommended, consented, simulated or scheduled, with no fraction delivered yet. HELD: a scheduled course paused or deferred before the first fraction, with intent to proceed. CANCELLED: a planned course explicitly cancelled before any fraction was delivered. EXPLICITLY_NOT_RECEIVED: the note states the patient did not receive radiation, for example declined, omitted by protocol, or never given. NONE_OF_THE_ABOVE: delivery cannot be determined from this note; not evidence of non-receipt."
         },
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
-          "default": "NOT_DOCUMENTED"
+          "default": "NONE_OF_THE_ABOVE"
         },
         "indication": {
           "anyOf": [
@@ -134,7 +131,7 @@
         "radiation_method": {
           "$ref": "#/$defs/RadiationMethod",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Delivery method/energy. PHOTON: photon modality. PROTON: proton modality. COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. ELECTRONS: electron modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE: Gamma Knife. BRACHYTHERAPY: brachytherapy. OTHER: another method. NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+          "description": "Delivery method/energy. PHOTON: photon modality. PROTON: proton modality. COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. ELECTRONS: electron modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE: Gamma Knife. BRACHYTHERAPY: brachytherapy. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt; or none of the above."
         },
         "radiation_field": {
           "$ref": "#/$defs/RadiationField",
@@ -306,14 +303,13 @@
       "type": "string"
     },
     "TreatmentPhase": {
-      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nOTHER: another documented phase.\nNOT_DOCUMENTED: phase not documented.",
+      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nNONE_OF_THE_ABOVE: another documented phase, or phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",
         "POST_CONSOLIDATION",
         "SALVAGE",
-        "OTHER",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "TreatmentPhase",
       "type": "string"

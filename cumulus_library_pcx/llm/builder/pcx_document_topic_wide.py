@@ -11,7 +11,7 @@ class PcxNlpDocumentTopicWideBuilder(
 ):
     """pcx__llm_document_topic_wide: one row per note, flattening the scalar mention(s)
     response, diagnosis, molecular, event, metastasis, surgery, radiation,
-    systemic_therapy, laboratory, predisposition, patient, registry_eligibility.
+    systemic_therapy, laboratory, survival_timeline, registry_eligibility.
     """
 
     def _make_empty_query(self, config: cumulus_library.StudyConfig):
@@ -44,12 +44,9 @@ class PcxNlpDocumentTopicWideBuilder(
             "laboratory_relevance": "varchar",
             "laboratory_confidence": "double",
             "laboratory_reasoning": "varchar",
-            "predisposition_relevance": "varchar",
-            "predisposition_confidence": "double",
-            "predisposition_reasoning": "varchar",
-            "patient_relevance": "varchar",
-            "patient_confidence": "double",
-            "patient_reasoning": "varchar",
+            "survival_timeline_relevance": "varchar",
+            "survival_timeline_confidence": "double",
+            "survival_timeline_reasoning": "varchar",
             "registry_eligibility_relevance": "varchar",
             "registry_eligibility_confidence": "double",
             "registry_eligibility_reasoning": "varchar",

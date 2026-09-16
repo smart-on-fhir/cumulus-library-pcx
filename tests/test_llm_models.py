@@ -5,11 +5,10 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel, ValidationError
 from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
-from cumulus_library_pcx.llm.models.medulloblastoma import TreatmentEvidence, SurvivalEvidence
 from cumulus_library_pcx.llm.models.molecular import MolecularReportMention, MolecularAlterationMention
-from cumulus_library_pcx.llm.models.registry_eligibility import PcxTrialEligibilityAnnotation
+from cumulus_library_pcx.llm.models.registry_eligibility import TrialEligibilityAnnotation
 from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministrationMention, TherapyAgentMention
-from cumulus_library_pcx.llm.models.patient import EventFreeFollowUpMention, TimelineAnchorMention
+from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
 from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
 from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
 
@@ -33,12 +32,12 @@ def test_evidence_spans_required(payload):
 
 
 def test_unknown_is_not_absent_or_received():
-    assert TreatmentEvidence(**EMPTY).status == 'NOT_DOCUMENTED'
-    assert SurvivalEvidence(**EMPTY).patient_deceased is None
+    assert VitalStatusMention(**EMPTY).vital_status == 'NONE_OF_THE_ABOVE'
     assert TherapyAdministrationMention(**EMPTY).high_dose_methotrexate_explicit_bool is None
-    assert TherapyAgentMention(**EMPTY).delivery_status == 'NOT_DOCUMENTED'
-    assert MolecularAlterationMention(**EMPTY, target='MYC').status == 'NOT_DOCUMENTED'
-    assert MetastaticStagingInputsMention(**EMPTY).csf_cytology == 'UNAVAILABLE'
+    assert TherapyAgentMention(**EMPTY).delivery_status == 'NONE_OF_THE_ABOVE'
+    assert TherapyAgentMention(**EMPTY).assessed_through_date is None
+    assert MolecularAlterationMention(**EMPTY, target='MYC').status == 'NONE_OF_THE_ABOVE'
+    assert MetastaticStagingInputsMention(**EMPTY).csf_cytology == 'NONE_OF_THE_ABOVE'
 
 
 def test_planned_mtx_does_not_establish_receipt():
@@ -46,27 +45,29 @@ def test_planned_mtx_does_not_establish_receipt():
     assert planned.delivery_status != 'ADMINISTERED'
     assert planned.administration_date is None
     with pytest.raises(ValidationError):
-        TreatmentEvidence(**EVIDENCE, status='EXPLICITLY_NOT_RECEIVED', first_received_date='2020-01-01')
+        TherapyAdministrationMention(**EVIDENCE, delivery_status='EXPLICITLY_NOT_RECEIVED', administration_date='2020-01-01', administration_date_precision='DAY')
 
 
 def test_molecular_calls_preserve_conflicts_and_distinct_alterations():
-    assert MolecularReportMention(**EVIDENCE, molecular_group='CONFLICTING').molecular_group == 'CONFLICTING'
+    # conflicting calls are kept as separate reports, not collapsed into one value
+    reports = [MolecularReportMention(**EVIDENCE, molecular_group=g) for g in ('GROUP_3', 'GROUP_4')]
+    assert {r.molecular_group for r in reports} == {'GROUP_3', 'GROUP_4'}
     myc = MolecularAlterationMention(**EVIDENCE, target='MYC', alteration='gain', status='PRESENT')
     mycn = MolecularAlterationMention(**EVIDENCE, target='MYCN', alteration='amplification', status='ABSENT')
     assert myc.target != mycn.target and myc.alteration != mycn.alteration
 
 
 def test_trial_criteria_default_unknown_and_have_no_registry_pathway():
-    result = PcxTrialEligibilityAnnotation(**{name: EMPTY for name in PcxTrialEligibilityAnnotation.model_fields})
-    assert all(v.status == 'UNKNOWN' for v in result.__dict__.values())
+    result = TrialEligibilityAnnotation(**{name: EMPTY for name in TrialEligibilityAnnotation.model_fields})
+    assert all(v.status == 'NONE_OF_THE_ABOVE' for v in result.__dict__.values())
     assert 'atrt_diagnosis' not in type(result).model_fields
     assert 'consent' not in type(result).model_fields
 
 
 def test_missing_response_and_alive_are_not_event_free():
-    assert ResponseAssessmentMention(**EMPTY).response == 'NOT_DOCUMENTED'
+    assert ResponseAssessmentMention(**EMPTY).response == 'NONE_OF_THE_ABOVE'
     assert ResponseAssessmentMention(**EMPTY).radiologically_evaluable is None
-    assert SurvivalEvidence(**EVIDENCE, patient_deceased=False).patient_deceased is False
+    assert VitalStatusMention(**EVIDENCE, vital_status='ALIVE').vital_status == 'ALIVE'
     assert EventFreeFollowUpMention(**EMPTY).event_free is None
 
 
@@ -79,7 +80,7 @@ def test_invalid_or_unpaired_dates_rejected(day, precision):
 def test_partial_date_and_undated_death_preserved():
     anchor = TimelineAnchorMention(**EVIDENCE, anchor='ORIGINAL_DIAGNOSIS', anchor_date='2020-02-01', anchor_date_precision='MONTH')
     assert anchor.anchor_date_precision == 'MONTH'
-    assert SurvivalEvidence(**EVIDENCE, patient_deceased=True).death_date is None
+    assert VitalStatusMention(**EVIDENCE, vital_status='DECEASED').death_date is None
 
 
 def test_unsupported_eligibility_and_false_administration_rejected():
@@ -91,7 +92,7 @@ def test_unsupported_eligibility_and_false_administration_rejected():
 
 
 def test_vital_timeline_contradictions_rejected():
-    from cumulus_library_pcx.llm.models.patient import VitalStatusMention
+    from cumulus_library_pcx.llm.models.survival_timeline import VitalStatusMention
     with pytest.raises(ValidationError):
         VitalStatusMention(**EVIDENCE, vital_status='ALIVE', death_date='2020-01-01', death_date_precision='DAY')
     with pytest.raises(ValidationError):

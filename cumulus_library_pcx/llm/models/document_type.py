@@ -54,7 +54,7 @@ DOCUMENT_TASKS: dict[DocumentType, list[str]] = {
     DocumentType.END_OF_LIFE_DOCUMENT: ["event", "survival_timeline"],
     DocumentType.NEUROSURGERY_NOTE: ["surgery", "diagnosis", "event", "transition_of_care"],
     DocumentType.ONCOLOGY_NOTE: ["systemic_therapy", "radiation", "response", "event", "survival_timeline", "laboratory",
-                                 "registry_eligibility", "medulloblastoma", "transition_of_care"],
+                                 "registry_eligibility", "transition_of_care"],
     DocumentType.NONE_OF_THE_ABOVE: ["survival_timeline", "event"],
 }
 

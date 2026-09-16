@@ -5,7 +5,7 @@
 --  and the latest alive evidence:
 --    raw FHIR patient   deceasedBoolean / deceasedDateTime (site ETL must expose them)
 --    study population   latest encounter end day
---    LLM patient task   pcx__llm_patient_wide vital_status, death_date, last_known_alive_date
+--    LLM survival_timeline task pcx__llm_survival_timeline_wide vital_status, death_date, last_known_alive_date
 --  A deceased flag without a date gives deceased_bool TRUE and death_day NULL,
 --  which the OS table treats as not computable (README section 3).
 --  =====================================================================
@@ -28,7 +28,7 @@ llm AS (
             BOOL_OR(vital_status = 'DECEASED')                              AS llm_deceased_bool,
             MIN(CAST(death_date AS DATE))                                   AS llm_death_day,
             MAX(CAST(last_known_alive_date AS DATE))                        AS llm_last_known_alive_day
-    FROM    pcx__llm_patient_wide
+    FROM    pcx__llm_survival_timeline_wide
     GROUP BY subject_ref
 ),
 death_candidate AS (

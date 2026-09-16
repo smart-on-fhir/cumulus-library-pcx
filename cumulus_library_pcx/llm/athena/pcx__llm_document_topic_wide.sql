@@ -35,12 +35,9 @@ SELECT  DISTINCT
         nlp.result.laboratory.relevance                              AS laboratory_relevance,
         nlp.result.laboratory.confidence                             AS laboratory_confidence,
         nlp.result.laboratory.reasoning                              AS laboratory_reasoning,
-        nlp.result.predisposition.relevance                          AS predisposition_relevance,
-        nlp.result.predisposition.confidence                         AS predisposition_confidence,
-        nlp.result.predisposition.reasoning                          AS predisposition_reasoning,
-        nlp.result.patient.relevance                                 AS patient_relevance,
-        nlp.result.patient.confidence                                AS patient_confidence,
-        nlp.result.patient.reasoning                                 AS patient_reasoning,
+        nlp.result.survival_timeline.relevance                       AS survival_timeline_relevance,
+        nlp.result.survival_timeline.confidence                      AS survival_timeline_confidence,
+        nlp.result.survival_timeline.reasoning                       AS survival_timeline_reasoning,
         nlp.result.registry_eligibility.relevance                    AS registry_eligibility_relevance,
         nlp.result.registry_eligibility.confidence                   AS registry_eligibility_confidence,
         nlp.result.registry_eligibility.reasoning                    AS registry_eligibility_reasoning
@@ -48,4 +45,4 @@ FROM
         pcx__nlp_document_topic_gpt_oss_120b AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2

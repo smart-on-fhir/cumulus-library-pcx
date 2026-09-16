@@ -46,4 +46,5 @@ version = 3
 [tables.surgery]
 response_schema = "llm/schemas/pcx-surgery-annotation.json"
 select_by_table = "pcx__llm_document_task_surgery"
-version = 1
+# Version 2 (2026-09-16): surgery_type NONE_OF_THE_ABOVE now means an unlisted or unstated type of a documented operation.
+version = 2

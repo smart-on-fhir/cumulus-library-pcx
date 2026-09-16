@@ -45,12 +45,14 @@ version = 2
 [tables.surgery]
 response_schema = "llm/schemas/pcx-surgery-annotation.json"
 select_by_table = "pcx__llm_document_task_surgery"
-version = 1
+# Version 2 (2026-09-16): surgery_type NONE_OF_THE_ABOVE now means an unlisted or unstated type of a documented operation.
+version = 2
 
 [tables.radiation]
 response_schema = "llm/schemas/pcx-radiation-annotation.json"
 select_by_table = "pcx__llm_document_task_radiation"
-version = 1
+# Version 2 (2026-09-16): radiation_field NONE_OF_THE_ABOVE covers documented unlisted fields; stale OTHER clause removed.
+version = 2
 
 [tables.systemic_therapy]
 response_schema = "llm/schemas/pcx-systemic-therapy-annotation.json"
@@ -60,12 +62,14 @@ version = 1
 [tables.metastasis]
 response_schema = "llm/schemas/pcx-metastasis-annotation.json"
 select_by_table = "pcx__llm_document_task_metastasis"
-version = 1
+# Version 2 (2026-09-16): site NONE_OF_THE_ABOVE covers documented unlisted sites; MetastasisEvidence collapsed to POSITIVE/NEGATIVE/NONE_OF_THE_ABOVE.
+version = 2
 
 [tables.molecular]
 response_schema = "llm/schemas/pcx-molecular-annotation.json"
 select_by_table = "pcx__llm_document_task_molecular"
-version = 1
+# Version 2 (2026-09-16): methods is select-all-that-apply; residual members collapsed to NONE_OF_THE_ABOVE.
+version = 2
 
 [tables.response]
 response_schema = "llm/schemas/pcx-response-annotation.json"
@@ -77,29 +81,19 @@ response_schema = "llm/schemas/pcx-event-annotation.json"
 select_by_table = "pcx__llm_document_task_event"
 version = 1
 
-[tables.patient]
-response_schema = "llm/schemas/pcx-patient-annotation.json"
-select_by_table = "pcx__llm_document_task_patient"
-version = 1
+[tables.survival_timeline]
+response_schema = "llm/schemas/pcx-survival-timeline-annotation.json"
+select_by_table = "pcx__llm_document_task_survival_timeline"
+version = 2
 
 [tables.laboratory]
 response_schema = "llm/schemas/pcx-laboratory-annotation.json"
 select_by_table = "pcx__llm_document_task_laboratory"
-version = 1
-
-[tables.predisposition]
-response_schema = "llm/schemas/pcx-predisposition-annotation.json"
-select_by_table = "pcx__llm_document_task_predisposition"
-version = 1
+version = 2
 
 [tables.registry_eligibility]
 response_schema = "llm/schemas/pcx-registry-eligibility-annotation.json"
 select_by_table = "pcx__llm_document_task_registry_eligibility"
-version = 1
-
-[tables.medulloblastoma]
-response_schema = "llm/schemas/pcx-medulloblastoma-annotation.json"
-select_by_table = "pcx__llm_document_task_medulloblastoma"
 version = 1
 
 [tables.transition_of_care]

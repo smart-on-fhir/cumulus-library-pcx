@@ -88,6 +88,17 @@ class TherapyAgentMention(SpanAugmentedMention):
     therapy_stop_date_precision: DatePrecision | None = Field(
         default=None, description="Precision for therapy_stop_date. Null when it is null.",
     )
+    assessed_through_date: str | None = Field(
+        default=None,
+        description=(
+            "Date through which explicit non-receipt or delivery of this agent is assessed, "
+            "ISO YYYY-MM-DD. Mainly for EXPLICITLY_NOT_RECEIVED: the note states the agent "
+            "was not given as of this date. Never infer from the note date. Null if not stated."
+        ),
+    )
+    assessed_through_date_precision: DatePrecision | None = Field(
+        default=None, description="Precision for assessed_through_date. Null when it is null.",
+    )
     administrations: list[TherapyAdministrationMention] = Field(
         default_factory=list,
         description=(

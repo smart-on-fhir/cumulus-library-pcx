@@ -86,7 +86,7 @@ class RadiationRoundMention(SpanAugmentedMention):
             "Treated field. CRANIOSPINAL: CSI without a documented boost. CRANIOSPINAL_WITH_FOCAL_BOOST: craniospinal irradiation plus a "
             "tumor-bed boost. FOCAL_TUMOR_BED: focal/involved-field only. "
             "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST: whole-ventricular plus boost (germ-cell). "
-            "OTHER: another field. NONE_OF_THE_ABOVE: field not stated."
+            "NONE_OF_THE_ABOVE: a documented field not listed above, or the field is not stated."
         ),
     )
     radiation_start_date: str | None = Field(

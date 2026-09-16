@@ -60,8 +60,9 @@ class MolecularReportMention(SpanAugmentedMention):
     methods: list[MolecularMethod] = Field(
         default_factory=list,
         description=(
-            "Methods this report documents for molecular classification." 
-            "Pick one: "
+            "Methods this report documents for molecular classification. "
+            "Select every method the report documents; several may apply to one report. "
+            "NONE_OF_THE_ABOVE is only valid on its own, never alongside a named method. "
             "DNA_METHYLATION: methylation array or methylation-based classifier. "
             "SEQUENCING: DNA or RNA sequencing, including expression-based subgrouping such as NanoString. "
             "IMMUNOHISTOCHEMISTRY: surrogate markers such as beta-catenin, GAB1, YAP1 or filamin A. "

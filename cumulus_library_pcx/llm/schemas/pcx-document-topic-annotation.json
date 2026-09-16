@@ -106,11 +106,7 @@
       "$ref": "#/$defs/TopicRelevanceMention",
       "description": "Hemoglobin, platelets, absolute neutrophils, creatinine, ALT, AST, bilirubin, creatinine clearance/measured GFR, MTX level, or documented toxicity. Include explicit normal and abnormal results; absent testing is not a negative result."
     },
-    "predisposition": {
-      "$ref": "#/$defs/TopicRelevanceMention",
-      "description": "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; include negative tests and VUS."
-    },
-    "patient": {
+    "survival_timeline": {
       "$ref": "#/$defs/TopicRelevanceMention",
       "description": "Initial tumor-detecting MRI date, vital status, last known alive date, death date, event-free follow-up, definitive surgery, treatment initiation or actual trial enrollment."
     },
@@ -129,8 +125,7 @@
     "radiation",
     "systemic_therapy",
     "laboratory",
-    "predisposition",
-    "patient",
+    "survival_timeline",
     "registry_eligibility"
   ],
   "title": "DocumentTopicAnnotation",

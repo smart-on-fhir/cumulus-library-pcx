@@ -27,13 +27,13 @@ WITH candidate AS (
     FROM    pcx__llm_event_wide
     WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY', 'DECEASED')
     UNION ALL
-    SELECT  'pcx__llm_patient_wide', 'death_date',
+    SELECT  'pcx__llm_survival_timeline_wide', 'death_date',
             subject_ref, note_ref, death_date, death_date_precision
-    FROM    pcx__llm_patient_wide
+    FROM    pcx__llm_survival_timeline_wide
     UNION ALL
-    SELECT  'pcx__llm_patient_wide', 'last_known_alive_date',
+    SELECT  'pcx__llm_survival_timeline_wide', 'last_known_alive_date',
             subject_ref, note_ref, last_known_alive_date, last_known_alive_date_precision
-    FROM    pcx__llm_patient_wide
+    FROM    pcx__llm_survival_timeline_wide
     UNION ALL
     SELECT  'pcx__llm_systemic_therapy_agent', 'therapy_start_date',
             subject_ref, note_ref, therapy_start_date, therapy_start_date_precision

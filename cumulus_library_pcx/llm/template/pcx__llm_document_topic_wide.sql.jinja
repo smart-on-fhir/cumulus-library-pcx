@@ -37,11 +37,8 @@ SELECT  DISTINCT
         nlp.result.laboratory.relevance                              AS laboratory_relevance,
         nlp.result.laboratory.confidence                             AS laboratory_confidence,
 
-        nlp.result.predisposition.relevance                          AS predisposition_relevance,
-        nlp.result.predisposition.confidence                         AS predisposition_confidence,
-
-        nlp.result.patient.relevance                                 AS patient_relevance,
-        nlp.result.patient.confidence                                AS patient_confidence,
+        nlp.result.survival_timeline.relevance                       AS survival_timeline_relevance,
+        nlp.result.survival_timeline.confidence                      AS survival_timeline_confidence,
 
         nlp.result.registry_eligibility.relevance                    AS registry_eligibility_relevance,
         nlp.result.registry_eligibility.confidence                   AS registry_eligibility_confidence

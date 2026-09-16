@@ -1,12 +1,11 @@
 {
   "$defs": {
     "CriterionStatus": {
-      "description": "Status of a trial criterion.\nMET: met.\nNOT_MET: not met.\nUNKNOWN: unknown.\nCONFLICTING: conflicting evidence.",
+      "description": "Status of a trial criterion.\nMET: met.\nNOT_MET: not met.\nNONE_OF_THE_ABOVE: unknown, or conflicting evidence.",
       "enum": [
         "MET",
         "NOT_MET",
-        "UNKNOWN",
-        "CONFLICTING"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "CriterionStatus",
       "type": "string"
@@ -38,8 +37,8 @@
         },
         "status": {
           "$ref": "#/$defs/CriterionStatus",
-          "default": "UNKNOWN",
-          "description": "MET / NOT_MET: only with direct evidence for the parent criterion. UNKNOWN: missing information, never eligible or ineligible by default."
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default."
         },
         "assessment_date": {
           "anyOf": [
@@ -90,7 +89,7 @@
     },
     "atrt_excluded": {
       "$ref": "#/$defs/TrialCriterionMention",
-      "description": "MET when diagnosis/pathology explicitly excludes ATRT; NOT_MET when ATRT is confirmed; UNKNOWN when unaddressed. Marker loss alone does not diagnose ATRT."
+      "description": "MET when diagnosis/pathology explicitly excludes ATRT; NOT_MET when ATRT is confirmed; NONE_OF_THE_ABOVE when unaddressed. Marker loss alone does not diagnose ATRT."
     },
     "no_prior_chemotherapy": {
       "$ref": "#/$defs/TrialCriterionMention",

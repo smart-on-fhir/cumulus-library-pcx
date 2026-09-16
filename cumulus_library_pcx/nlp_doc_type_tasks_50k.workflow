@@ -41,12 +41,12 @@ Clinical document:
 # Versions are PCX-specific; the copied IBD version numbers do not apply.
 
 [tables.document_topic]
-# Topic-relevance gate over the twelve PCX extraction tasks (diagnosis, surgery, metastasis,
-# molecular, systemic_therapy, radiation, response, event, patient, laboratory,
-# predisposition, registry_eligibility). transition_of_care and medulloblastoma are not yet
+# Topic-relevance gate over the eleven PCX extraction tasks (diagnosis, surgery, metastasis,
+# molecular, systemic_therapy, radiation, response, event, survival_timeline, laboratory,
+# registry_eligibility). transition_of_care and medulloblastoma are not yet
 # routed by this schema; select them directly from their query_topics rows.
 response_schema = "llm/schemas/pcx-document-topic-annotation.json"
 select_by_table = "pcx__llm_document_task_document_topic"
-version = 1
+version = 2
 
 

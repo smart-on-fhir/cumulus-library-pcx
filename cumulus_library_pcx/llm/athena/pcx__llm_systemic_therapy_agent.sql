@@ -16,7 +16,9 @@ SELECT  DISTINCT
         agent.therapy_start_date                                     AS therapy_start_date,
         agent.therapy_start_date_precision                           AS therapy_start_date_precision,
         agent.therapy_stop_date                                      AS therapy_stop_date,
-        agent.therapy_stop_date_precision                            AS therapy_stop_date_precision
+        agent.therapy_stop_date_precision                            AS therapy_stop_date_precision,
+        agent.assessed_through_date                                  AS assessed_through_date,
+        agent.assessed_through_date_precision                        AS assessed_through_date_precision
 FROM
         pcx__nlp_systemic_therapy_gpt_oss_120b AS nlp
 CROSS JOIN UNNEST(nlp.result.regimens) WITH ORDINALITY AS regimen_t (regimen, regimen_index)

@@ -33,7 +33,7 @@
         "source_of_event_diagnosis": {
           "$ref": "#/$defs/SourceOfEventDiagnosis",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Evidence actually establishing this event; no arbitrary proximity window or surgery priority. PATHOLOGY: tissue or biopsy diagnosis. IMAGING: MRI, CT or other imaging read documenting the event. CSF_CYTOLOGY: cerebrospinal fluid cytology. CLINICAL: clinician assessment or examination without a confirmatory test cited. DEATH_RECORD: death note, pronouncement or death summary. OTHER: another documented source of evidence. NONE_OF_THE_ABOVE: the source of evidence is not documented."
+          "description": "Evidence actually establishing this event; no arbitrary proximity window or surgery priority. PATHOLOGY: tissue or biopsy diagnosis. IMAGING: MRI, CT or other imaging read documenting the event. CSF_CYTOLOGY: cerebrospinal fluid cytology. CLINICAL: clinician assessment or examination without a confirmatory test cited. DEATH_RECORD: death note, pronouncement or death summary. NONE_OF_THE_ABOVE: another documented source of evidence, or the source is not documented."
         },
         "event_date": {
           "anyOf": [
@@ -139,7 +139,6 @@
         "CSF_CYTOLOGY",
         "CLINICAL",
         "DEATH_RECORD",
-        "OTHER",
         "NONE_OF_THE_ABOVE"
       ],
       "title": "SourceOfEventDiagnosis",

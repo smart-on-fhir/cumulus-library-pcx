@@ -43,13 +43,12 @@ alone do not identify which query revision generated them.
 | `radiation` | Planned/delivered radiation, fields, doses, timing and explicit omission |
 | `response` | Response assessments, evaluable disease and treatment milestones |
 | `event` | Progression, recurrence, remission, secondary malignancy and death |
-| `patient` | Timeline anchors, vital status and follow-up |
+| `survival_timeline` | Timeline anchors, vital status and follow-up |
 | `laboratory` | Organ function, methotrexate levels/clearance and toxicity evidence |
-| `predisposition` | Germline testing and reported findings |
 | `registry_eligibility` | Evidence relevant to a separate ACNS0334-like eligibility assessment |
 | `medulloblastoma` | Compact discovery summary: treatment, molecular group and survival evidence |
 
-The 14 task names correspond to extraction modules. `base.py` and `treatment.py`
+The 13 task names correspond to extraction modules. `base.py` and `treatment.py`
 provide shared definitions; `document_topic.py` and `document_type.py` provide routing
 and classification rather than dedicated retrieval pairs. Retrieval labels do not
 populate annotation fields automatically. Old `pcx_*`, `pnoc30_*`, `enc_transfer`,

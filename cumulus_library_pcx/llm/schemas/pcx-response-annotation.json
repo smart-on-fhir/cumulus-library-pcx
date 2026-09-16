@@ -1,7 +1,7 @@
 {
   "$defs": {
     "AssessmentTimepoint": {
-      "description": "Treatment-relative assessment timepoint.\nBASELINE: baseline.\nDURING_INDUCTION: during induction.\nEND_INDUCTION: end of induction.\nDURING_CONSOLIDATION: during consolidation.\nEND_CONSOLIDATION: end of consolidation.\nFOLLOW_UP: follow-up.\nOTHER: another documented timepoint.\nNOT_DOCUMENTED: timepoint not documented.",
+      "description": "Treatment-relative timepoint of a response assessment as documented.\nBASELINE: before treatment starts.\nDURING_INDUCTION: during induction.\nEND_INDUCTION: at end of induction.\nDURING_CONSOLIDATION: during consolidation.\nEND_CONSOLIDATION: at end of consolidation.\nFOLLOW_UP: after treatment completion.\nNONE_OF_THE_ABOVE: another timepoint, or timepoint not documented.",
       "enum": [
         "BASELINE",
         "DURING_INDUCTION",
@@ -9,8 +9,7 @@
         "DURING_CONSOLIDATION",
         "END_CONSOLIDATION",
         "FOLLOW_UP",
-        "OTHER",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "AssessmentTimepoint",
       "type": "string"
@@ -42,12 +41,12 @@
         },
         "timepoint": {
           "$ref": "#/$defs/AssessmentTimepoint",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Documented treatment-relative timepoint; do not infer end-consolidation from a remission statement."
         },
         "response": {
           "$ref": "#/$defs/ResponseStatus",
-          "default": "NOT_DOCUMENTED",
+          "default": "NONE_OF_THE_ABOVE",
           "description": "Explicit CR/PR/SD/PD or assessment result. Missing imaging is not CR; do not assign CR from resection alone."
         },
         "radiologically_evaluable": {
@@ -100,32 +99,6 @@
           ],
           "default": null,
           "description": "Precision for assessment_date; null if absent."
-        },
-        "assessment_method": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "MRI, CSF cytology or clinical assessment as documented.",
-          "title": "Assessment Method"
-        },
-        "review_context": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Local versus central review if stated; preserve disagreements as separate assessments.",
-          "title": "Review Context"
         }
       },
       "required": [
@@ -136,15 +109,13 @@
       "type": "object"
     },
     "ResponseStatus": {
-      "description": "Response assessment result.\nCOMPLETE_RESPONSE: complete response (CR).\nPARTIAL_RESPONSE: partial response (PR).\nSTABLE_DISEASE: stable disease (SD).\nPROGRESSIVE_DISEASE: progressive disease (PD).\nNOT_EVALUABLE: not evaluable.\nINDETERMINATE: indeterminate.\nNOT_DOCUMENTED: response not documented.",
+      "description": "Response assessment result as explicitly documented.\nCOMPLETE_RESPONSE: complete response (CR).\nPARTIAL_RESPONSE: partial response (PR).\nSTABLE_DISEASE: stable disease (SD).\nPROGRESSIVE_DISEASE: progressive disease (PD).\nNONE_OF_THE_ABOVE: not evaluable, indeterminate, or no response documented.",
       "enum": [
         "COMPLETE_RESPONSE",
         "PARTIAL_RESPONSE",
         "STABLE_DISEASE",
         "PROGRESSIVE_DISEASE",
-        "NOT_EVALUABLE",
-        "INDETERMINATE",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "ResponseStatus",
       "type": "string"

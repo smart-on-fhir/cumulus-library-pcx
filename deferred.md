@@ -1,5 +1,10 @@
 ## Deferred tasks
 
+- [ ] Germline predisposition (`predisposition.py`, `PredispositionAnnotation`) was
+  removed 2026-09-16. It is not an ACNS0334 criterion, exposure, stratum or outcome, and
+  its clinical relevance (SUFU/PTCH1, TP53) travels with SHH rather than Group 3. Restore
+  a small germline model only if an SHH-specific analysis needs radiation-avoidance or
+  second-malignancy covariates.
 - [ ] Restore structured tumor laterality extraction if a future analysis needs
   surgical approach, neurologic outcomes, or anatomical comparisons. Deferred
   2026-09-10 because a separate laterality classification is not needed for the
