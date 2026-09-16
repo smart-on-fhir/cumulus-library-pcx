@@ -1,8 +1,10 @@
 from pathlib import Path
-from cumulus_library_pcx.tools import (
-    manifest,
-    template,
-    fhir_reference
+from cumulus_library_pcx.tools import template, fhir_reference
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    FileAction,
+    SqlAction,
+    save_actions_toml
 )
 
 #-----------------------------------------------------------------------------
@@ -21,14 +23,14 @@ OBS_TABLES = ['cohort_study_population_obs_base', 'cohort_study_population_lab_b
 ###############################################################################
 # Make
 ###############################################################################
-def make_study_population(table_list:list) -> list[Path]:
+def make_template(table_list:list) -> list[Path]:
     """
     :param table_list: list of tables to make with a template
     :return: list of files.sql
     """
     return [template.copy(f"{table}.sql") for table in table_list]
 
-def make() -> list[Path]:
+def make_actions() -> list[Action]:
     """
     Study Population is built from "template/" dir.
     Study Population contains all Patient encounters matching criteria and all FHIR resources below.
@@ -51,29 +53,31 @@ def make() -> list[Path]:
     * cohort_study_population_proc.sql  -> FHIR Procedure
     * cohort_study_population_diag.sql  -> FHIR DiagnosticReport
 
-    :return: list of TOML outputs
+    :return: list of manifest actions, in build order
     """
-    file_upload = manifest.FileAction(
-        file_list=['../spreadsheet/file_upload_population.toml'],
-        label='inclusion/exclusion criteria for study population',
-        build_type='build:parallel')
-
-    study_period = make_study_population([STUDY_PERIOD])
-    study_population = make_study_population([STUDY_POPULATION])
-    obs_tables = make_study_population(OBS_TABLES)
     aspect_list = fhir_reference.list_aspect()
     aspect_tables = [f"{STUDY_POPULATION}_{aspect}" for aspect in aspect_list]
-    aspect_tables = make_study_population(aspect_tables)
+    aspect_tables = make_template(aspect_tables)
 
-    actions = [
-        file_upload,
-        manifest.SqlAction(study_period, 'study_period'),
-        manifest.SqlAction(study_population, 'study_population'),
-        manifest.SqlAction(obs_tables, 'obs_base, lab_base', build_type='build:serial'),
-        manifest.SqlAction(aspect_tables, f'study_population aspects {str(aspect_list)}'),
+    return [
+        FileAction(
+            file_list=['../spreadsheet/file_upload_population.toml'],
+            label='inclusion/exclusion criteria for study population'),
+        SqlAction(make_template([STUDY_PERIOD]),
+                  'study_period'),
+        SqlAction(make_template([STUDY_POPULATION]),
+                  'study_population'),
+        SqlAction(make_template(OBS_TABLES),
+                  'obs_base, lab_base'),
+        SqlAction(aspect_tables,
+                  f'study_population aspects {str(aspect_list)}'),
     ]
 
-    return [manifest.save_actions_toml(actions, 'study_population.toml')]
+def make() -> list[Path]:
+    """
+    :return: list of TOML outputs
+    """
+    return [save_actions_toml(make_actions(), 'study_population.toml')]
 
 if __name__ == '__main__':
     for manifest_toml in make():
