@@ -20,10 +20,7 @@ class RadiationMethod(StrEnum):
     STEREOTACTIC_RADIOSURGERY = "STEREOTACTIC_RADIOSURGERY"
     GAMMA_KNIFE = "GAMMA_KNIFE"
     BRACHYTHERAPY = "BRACHYTHERAPY"
-    OTHER = "OTHER"
-    NOT_REPORTED = "NOT_REPORTED"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
-
 
 class RadiationField(StrEnum):
     """Radiation field used by PCX chart review."""
@@ -31,7 +28,6 @@ class RadiationField(StrEnum):
     CRANIOSPINAL_WITH_FOCAL_BOOST = "CRANIOSPINAL_WITH_FOCAL_BOOST"
     FOCAL_TUMOR_BED = "FOCAL_TUMOR_BED"
     WHOLE_VENTRICULAR_WITH_FOCAL_BOOST = "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -58,11 +54,11 @@ class RadiationRoundMention(SpanAugmentedMention):
             "CANCELLED: a planned course explicitly cancelled before any fraction was delivered. "
             "EXPLICITLY_NOT_RECEIVED: the note states the patient did not receive radiation, "
             "for example declined, omitted by protocol, or never given. "
-            "NOT_DOCUMENTED: delivery cannot be determined from this note; not evidence of non-receipt."
+            "NONE_OF_THE_ABOVE: delivery cannot be determined from this note; not evidence of non-receipt."
         ),
     )
     phase: TreatmentPhase = Field(
-        default=TreatmentPhase.NOT_DOCUMENTED
+        default=TreatmentPhase.NONE_OF_THE_ABOVE
     )
     indication: str | None = Field(default=None, description="Initial treatment, post-chemotherapy residual/metastatic disease, salvage after relapse or other documented indication. Do not infer from dose.")
     assessed_through_date: str | None = Field(default=None, description="Date through which explicit non-receipt or delivery is assessed.")
@@ -72,12 +68,16 @@ class RadiationRoundMention(SpanAugmentedMention):
         default=RadiationMethod.NONE_OF_THE_ABOVE,
         description=(
             "Delivery method/energy. "
-            "PHOTON: photon modality. PROTON: proton modality. "
+            "PHOTON: photon modality. "
+            "PROTON: proton modality. "
             "COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. "
-            "ELECTRONS: electron modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. "
-            "STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE: Gamma Knife. BRACHYTHERAPY: brachytherapy. "
-            "OTHER: another method. NOT_REPORTED: radiation given but method not stated. "
-            "NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+            "ELECTRONS: electron modality. "
+            "THREE_D_CONFORMAL: 3D conformal. "
+            "IMRT: intensity-modulated. "
+            "STEREOTACTIC_RADIOSURGERY: SRS. "
+            "GAMMA_KNIFE: Gamma Knife. "
+            "BRACHYTHERAPY: brachytherapy. "                        
+            "NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt; or none of the above."
         ),
     )
     radiation_field: RadiationField = Field(

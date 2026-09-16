@@ -18,16 +18,12 @@ class MedulloblastomaGroup(StrEnum):
     GROUP_3: Group 3.
     GROUP_4: Group 4.
     NON_WNT_NON_SHH: non-WNT/non-SHH.
-    CONFLICTING: conflicting group calls.
-    OTHER: another documented group.
     NONE_OF_THE_ABOVE: no group documented."""
     WNT = 'WNT'
     SHH = 'SHH'
     GROUP_3 = 'GROUP_3'
     GROUP_4 = 'GROUP_4'
     NON_WNT_NON_SHH = 'NON_WNT_NON_SHH'
-    CONFLICTING = 'CONFLICTING'
-    OTHER = 'OTHER'
     NONE_OF_THE_ABOVE = 'NONE_OF_THE_ABOVE'
 
 

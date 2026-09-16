@@ -8,8 +8,7 @@ class TreatmentPhase(StrEnum):
     CONSOLIDATION: consolidation.
     POST_CONSOLIDATION: post-consolidation.
     SALVAGE: salvage.
-    OTHER: another documented phase.
-    NONE_OF_THE_ABOVE: None of the above."""
+    NONE_OF_THE_ABOVE: another documented phase, or phase not documented."""
     INDUCTION = "INDUCTION"
     CONSOLIDATION = "CONSOLIDATION"
     POST_CONSOLIDATION = "POST_CONSOLIDATION"

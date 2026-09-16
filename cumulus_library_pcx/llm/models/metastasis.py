@@ -22,7 +22,6 @@ class MetastaticSite(StrEnum):
     BONE_MARROW = "BONE_MARROW"
     KIDNEY = "KIDNEY"
     LIVER = "LIVER"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -89,7 +88,8 @@ class MetastaticStagingInputsMention(SpanAugmentedMention):
         default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Metastasis outside the CNS (bone marrow, bone, viscera). "
-            "POSITIVE: extraneural metastasis present. NEGATIVE: worked up, none. "
+            "POSITIVE: extraneural metastasis present. "
+            "NEGATIVE: worked up, none. "
             "NONE_OF_THE_ABOVE: no extraneural workup, indeterminate, or not reported."
         ),
     )
@@ -107,8 +107,7 @@ class MetastasisSiteMention(SpanAugmentedMention):
             "LEPTOMENINGEAL: leptomeningeal spread. "
             "BONE_MARROW: marrow involvement. "
             "KIDNEY: renal metastasis. "
-            "LIVER: hepatic metastasis. "
-            "OTHER: another site. "
+            "LIVER: hepatic metastasis. "            
             "NONE_OF_THE_ABOVE: no metastatic site documented."
         ),
     )

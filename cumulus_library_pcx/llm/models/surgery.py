@@ -14,7 +14,6 @@ class SurgeryType(StrEnum):
     ENDOSCOPIC_ENDONASAL = "ENDOSCOPIC_ENDONASAL"
     STEREOTACTIC_BIOPSY = "STEREOTACTIC_BIOPSY"
     LITT = "LITT"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -57,7 +56,7 @@ class SurgeryMention(SpanAugmentedMention):
             "SPINAL_LAMINECTOMY: spinal laminectomy for tumor. "
             "ENDOSCOPIC_ENDONASAL: endoscopic endonasal tumor surgery. "
             "STEREOTACTIC_BIOPSY: stereotactic-guided biopsy. "
-            "LITT: laser interstitial thermal therapy. OTHER: other tumor-directed surgery. "
+            "LITT: laser interstitial thermal therapy. "            
             "NONE_OF_THE_ABOVE: no tumor surgery documented in this note."
         ),
     )
@@ -67,7 +66,7 @@ class SurgeryMention(SpanAugmentedMention):
             "GROSS_TOTAL_RESECTION: GTR / complete / no residual. "
             "NEAR_TOTAL_RESECTION: NTR / >90% with minimal residual. "
             "PARTIAL_RESECTION: subtotal / partial / debulking with residual. "
-            "BIOPSY: biopsy only. NOT_AVAILABLE: extent not stated (default)."
+            "BIOPSY: biopsy only. NONE_OF_THE_ABOVE: extent not stated (default)."
         ),
     )
     surgery_date: str | None = Field(

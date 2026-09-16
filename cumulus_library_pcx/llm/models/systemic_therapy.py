@@ -24,7 +24,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
         return self
 
     delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE, description="Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt.")
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED, description="Documented phase of this dose; never infer from drug name alone.")
+    phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE, description="Documented phase of this dose; never infer from drug name alone.")
     cycle_name: str | None = Field(default=None, description="Cycle linked to this administration, if stated.")
     administration_date: str | None = Field(
         default=None,
@@ -100,7 +100,7 @@ class TherapyAgentMention(SpanAugmentedMention):
 
 class MedicalTherapyCycleMention(SpanAugmentedMention):
     """A named or numbered chemotherapy cycle (for protocols that use cycles)."""
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED, description="Documented induction, consolidation or salvage phase.")
+    phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE, description="Documented induction, consolidation or salvage phase.")
     protocol_name_verbatim: str | None = Field(default=None, description="Protocol linking this cycle to its regimen if stated.")
     completion_status: str | None = Field(default=None, description="Explicit planned, started, completed, interrupted or discontinued cycle status.")
     interruption_reason: str | None = Field(default=None, description="Reason for interruption/discontinuation only if stated; do not infer toxicity or progression.")
@@ -126,7 +126,7 @@ class MedicalTherapyRegimenMention(SpanAugmentedMention):
     """A medical-therapy (chemotherapy) regimen: the protocol the patient is treated on or
     in accordance with, its start/stop, and the agents it comprises. Emit one per distinct
     regimen documented in this note."""
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
+    phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE)
     documented_trial_arm: str | None = Field(default=None, description="Explicit randomized arm assignment, if any. Do not infer randomization from observed treatment.")
     protocol_name_verbatim: str | None = Field(
         default=None,
@@ -155,7 +155,7 @@ class MedicalTherapyRegimenMention(SpanAugmentedMention):
 
 class StemCellInfusionMention(SpanAugmentedMention):
     delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE)
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
+    phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE)
     infusion_date: str | None = Field(default=None, description="Actual stem-cell infusion date, not collection date.")
     infusion_date_precision: DatePrecision | None = Field(default=None, description="Precision for infusion_date; null if absent.")
     cycle_name: str | None = Field(default=None, description="Associated consolidation cycle, only when documented.")

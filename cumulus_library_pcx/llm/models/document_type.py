@@ -89,7 +89,7 @@ list wins.
 4. DISCHARGE_SUMMARY: a synopsis of a completed admission written at discharge: reason for
    admission, hospital course, procedures and treatment given, condition and disposition,
    follow-up. Includes chemotherapy-admission discharge summaries authored by oncology.
-   Excludes ED discharge notes and nursing discharge instructions (OTHER_CLINICAL_NOTE).
+   Excludes ED discharge notes and nursing discharge instructions (NONE_OF_THE_ABOVE).
 
 5. OPERATIVE_NOTE: the surgeon's report of an operation: operative report, brief operative
    note, procedure note for a tumor resection, biopsy, shunt, EVD, or second-look surgery.
@@ -135,16 +135,15 @@ list wins.
     interval history, off-therapy or survivorship visit, telephone or nurse-practitioner
     oncology note. This is the default for the treating team's own documentation.
 
-14. OTHER_CLINICAL_NOTE: a clinical encounter note from any other service or setting:
-    emergency department, PICU or critical care, general pediatrics or hospitalist,
-    rehabilitation, physical or occupational or speech therapy, nutrition, endocrinology,
-    ophthalmology, neurology, nursing, social work, psychology, anesthesia, ED discharge
-    note, nursing discharge instructions.
-
-15. OTHER: not a clinical document, or unclassifiable: administrative or billing note,
-    consent unrelated to research, patient education, immunization record, medication
-    list without administration data, telephone encounter with no clinical content,
-    fax cover, records request, empty or unreadable document.
+14. NONE_OF_THE_ABOVE: none of the types above. Either a clinical encounter note from
+    any other service or setting (emergency department, PICU or critical care, general
+    pediatrics or hospitalist, rehabilitation, physical or occupational or speech therapy,
+    nutrition, endocrinology, ophthalmology, neurology, nursing, social work, psychology,
+    anesthesia, ED discharge note, nursing discharge instructions), or not a clinical
+    document at all or unclassifiable (administrative or billing note, consent unrelated
+    to research, patient education, immunization record, medication list without
+    administration data, telephone encounter with no clinical content, fax cover, records
+    request, empty or unreadable document).
 """
 
 
@@ -153,7 +152,7 @@ class DocumentTypeMention(SpanAugmentedMention):
 
     Set ``has_mention`` to true when the title, headings, author or service, or body
     provides classification evidence, and put the shortest verbatim title, header, or
-    signature cue in ``spans``. Set ``has_mention`` to false, use ``OTHER``, and return an
+    signature cue in ``spans``. Set ``has_mention`` to false, use ``NONE_OF_THE_ABOVE``, and return an
     empty span list only when the document is empty, unreadable, or too ambiguous to
     classify.
 
@@ -162,7 +161,7 @@ class DocumentTypeMention(SpanAugmentedMention):
     """
 
     document_type: DocumentType = Field(
-        default=DocumentType.OTHER,
+        default=DocumentType.NONE_OF_THE_ABOVE,
         description=DOCUMENT_TYPE_DESCRIPTION,
     )
     confidence: float | None = Field(

@@ -296,7 +296,6 @@ class PriorTherapyModality(StrEnum):
     TUMOR_SURGERY = "TUMOR_SURGERY"
     STEM_CELL_RESCUE = "STEM_CELL_RESCUE"
     STEROIDS_ONLY = "STEROIDS_ONLY"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -353,9 +352,8 @@ class PriorTherapyAtEntryMention(SpanAugmentedMention):
             "RADIATION: any radiation, focal or craniospinal, photon or proton; "
             "TUMOR_SURGERY: resection or biopsy of the tumor; "
             "STEM_CELL_RESCUE: high-dose chemotherapy with autologous stem-cell infusion; "
-            "STEROIDS_ONLY: the note states steroids were the only treatment before arrival; "
-            "OTHER: a tumor-directed treatment not listed, such as a targeted agent or trial drug; "
-            "NONE_OF_THE_ABOVE: no prior modality is documented. "
+            "STEROIDS_ONLY: the note states steroids were the only treatment before arrival; "            
+            "NONE_OF_THE_ABOVE: no prior modality is documented; none of the above. "
             "Emit an empty list when prior_therapy_exposure is NONE_OF_THE_ABOVE and nothing is stated."
         ),
     )

@@ -49,7 +49,7 @@ class ToxicityMention(SpanAugmentedMention):
     toxicity: str = Field(description="Documented adverse event; do not infer toxicity from a lab without clinical interpretation.")
     grade: int | None = Field(default=None, ge=1, le=5, description="Explicit CTCAE grade; never infer from a value alone.")
     grading_system: str | None = Field(default=None, description="Named grading system/version if stated; do not assume CTCAE v4 because the paper used it.")
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
+    phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE)
     event_date: str | None = Field(default=None, description="Documented toxicity date, ISO date at supported precision.")
     event_date_precision: DatePrecision | None = Field(default=None, description="Precision for event_date; null if absent.")
     attribution: str | None = Field(default=None, description="Clinician-attributed relationship to treatment, including treatment-related death only if explicitly stated.")

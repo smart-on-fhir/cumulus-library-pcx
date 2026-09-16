@@ -27,7 +27,6 @@ class SourceOfEventDiagnosis(StrEnum):
     CSF_CYTOLOGY = "CSF_CYTOLOGY"
     CLINICAL = "CLINICAL"
     DEATH_RECORD = "DEATH_RECORD"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -62,8 +61,7 @@ class EventMention(SpanAugmentedMention):
                      "CSF_CYTOLOGY: cerebrospinal fluid cytology. "
                      "CLINICAL: clinician assessment or examination without a confirmatory test cited. "
                      "DEATH_RECORD: death note, pronouncement or death summary. "
-                     "OTHER: another documented source of evidence. "
-                     "NONE_OF_THE_ABOVE: the source of evidence is not documented."))
+                     "NONE_OF_THE_ABOVE: another documented source of evidence, or the source is not documented."))
 
     event_date: str | None = Field(
         default=None,
