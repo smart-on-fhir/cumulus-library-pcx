@@ -43,7 +43,7 @@ class Action:
       (Cumulus Library deprecated `description` on actions in favor of `label`)
     """
     file_list: list[Path] | list[str]
-    description: str = ""
+    label: str = ""
 
 @dataclass(frozen=True)
 class FileAction(Action):
@@ -211,21 +211,21 @@ def _upload_table_name(filename: str, prefix: str | None = None) -> str:
 def _action_to_dict(action: Action | dict) -> dict:
     if isinstance(action, SqlAction):
         return {
-            "label": _clean_label(action.description),
+            "label": _clean_label(action.label),
             "type": action.build_type or "",
             "files": [_sql_file_entry(f) for f in action.file_list],
         }
 
     if isinstance(action, FileAction):
         return {
-            "label": _clean_label(action.description),
+            "label": _clean_label(action.label),
             "type": action.build_type or "",
             "files": [f for f in action.file_list],
         }
 
     if isinstance(action, ExportAction):
         return {
-            "label": _clean_label(action.description),
+            "label": _clean_label(action.label),
             "type": action.export_type or "",
             "tables": [
                 item.stem if isinstance(item, Path) else item
