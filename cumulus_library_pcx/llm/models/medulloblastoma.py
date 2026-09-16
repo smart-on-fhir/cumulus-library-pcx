@@ -36,9 +36,20 @@ class TreatmentEvidence(SpanAugmentedMention):
     including historical delivery. Exclude treatment for unrelated diseases or tumors. Orders, plans, held doses and discussion alone do not establish receipt.
     An explicit negative applies only through the documented assessment date.
     """
-    status: EvidenceStatus = Field(default=EvidenceStatus.NOT_DOCUMENTED, description="RECEIVED: explicitly administered or delivered, any dose, including historical treatment. EXPLICITLY_NOT_RECEIVED: explicit non-receipt through assessment. NOT_DOCUMENTED: silence, plans, hypothetical or uncertain receipt.")
-    first_received_date: date | None = Field(default=None, description='Earliest explicitly dated administration. Exact day only; null for partial or missing dates.')
-    assessed_through_date: date | None = Field(default=None, description='Date through which receipt or explicit non-receipt is documented. Never infer from the extraction date.')
+    status: EvidenceStatus = Field(
+        default=EvidenceStatus.NOT_DOCUMENTED,
+        description="RECEIVED: explicitly administered or delivered, any dose, including historical treatment. "
+                    "EXPLICITLY_NOT_RECEIVED: explicit non-receipt through assessment. "
+                    "NOT_DOCUMENTED: silence, plans, hypothetical or uncertain receipt."
+    )
+    first_received_date: date | None = Field(
+        default=None,
+        description='Earliest explicitly dated administration. Exact day only; null for partial or missing dates.'
+    )
+    assessed_through_date: date | None = Field(
+        default=None,
+        description='Date through which receipt or explicit non-receipt is documented. '
+                    'Never infer from the extraction date.')
 
     @model_validator(mode='after')
     def evidence_contract(self):
@@ -52,9 +63,19 @@ class TreatmentEvidence(SpanAugmentedMention):
 
 
 class GroupEvidence(SpanAugmentedMention):
-    classification_method: str | None = Field(default=None, description="Documented subgroup method; clinical summary is not automatically methylation confirmation.")
-    source_report: str | None = Field(default=None, description="Source molecular report as stated; preserve conflicts in molecular.py reports.")
-    group: MedulloblastomaGroup = Field(default=MedulloblastomaGroup.NONE_OF_THE_ABOVE, description="Explicit molecular group. Do not infer from treatment or histology. NONE_OF_THE_ABOVE: absent or indeterminate classification.")
+    classification_method: str | None = Field(
+        default=None,
+        description="Documented subgroup method; clinical summary is not automatically methylation confirmation."
+    )
+    source_report: str | None = Field(
+        default=None,
+        description="Source molecular report as stated; preserve conflicts in molecular.py reports."
+    )
+    group: MedulloblastomaGroup = Field(
+        default=MedulloblastomaGroup.NONE_OF_THE_ABOVE,
+        description="Explicit molecular group. Do not infer from treatment or histology. "
+                    "NONE_OF_THE_ABOVE: absent or indeterminate classification."
+    )
 
     @model_validator(mode='after')
     def evidence_contract(self):
@@ -64,9 +85,19 @@ class GroupEvidence(SpanAugmentedMention):
 
 
 class SurvivalEvidence(SpanAugmentedMention):
-    patient_deceased: bool | None = Field(default=None, description='True only for explicit death, false only for explicit alive status, null when undocumented.')
-    death_date: date | None = Field(default=None, description='Actual date of death, exact day only. Never substitute the note date.')
-    last_known_alive_date: date | None = Field(default=None, description='Exact day the patient was documented alive. A note mentioning a deceased patient is not alive evidence.')
+    patient_deceased: bool | None = Field(
+        default=None,
+        description='True only for explicit death, false only for explicit alive status, null when undocumented.'
+    )
+    death_date: date | None = Field(
+        default=None,
+        description='Actual date of death, exact day only. Never substitute the note date.'
+    )
+    last_known_alive_date: date | None = Field(
+        default=None,
+        description='Exact day the patient was documented alive. '
+                    'A note mentioning a deceased patient is not alive evidence.'
+    )
 
     @model_validator(mode='after')
     def evidence_contract(self):
