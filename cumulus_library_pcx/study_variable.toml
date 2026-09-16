@@ -1,13 +1,13 @@
 [[actions]]
-description = "CSV valueset definitions for variables"
+label = "CSV valueset definitions for variables"
 type = "build:parallel"
 files = [
     "../spreadsheet/file_upload_study_variable.toml",
 ]
 
 [[actions]]
-description = "variable cohorts"
-type = "build:parallel"
+label = "variable cohorts"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_dx_atrt.sql",
     "athena/pcx__cohort_dx_brain_cancer.sql",

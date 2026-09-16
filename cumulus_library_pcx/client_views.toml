@@ -1,40 +1,40 @@
 [[actions]]
-description = "upload client_dictionary.csv"
+label = "upload client_dictionary.csv"
 type = "build:serial"
 files = [
     "../spreadsheet/file_upload_client_views.toml",
 ]
 
 [[actions]]
-description = "client subject"
+label = "client subject"
 type = "build:serial"
 files = [
     "custom/pcx__client_subject.sql",
 ]
 
 [[actions]]
-description = "client diagnosis"
+label = "client diagnosis"
 type = "build:serial"
 files = [
     "custom/pcx__client_diagnosis.sql",
 ]
 
 [[actions]]
-description = "client encounter"
+label = "client encounter"
 type = "build:serial"
 files = [
     "custom/pcx__client_encounter.sql",
 ]
 
 [[actions]]
-description = "client exposure"
+label = "client exposure"
 type = "build:serial"
 files = [
     "custom/pcx__client_exposure.sql",
 ]
 
 [[actions]]
-description = "client timeline"
+label = "client timeline"
 type = "build:serial"
 files = [
     "custom/pcx__client_timeline.sql",
@@ -42,21 +42,21 @@ files = [
 ]
 
 [[actions]]
-description = "client outcome"
+label = "client outcome"
 type = "build:serial"
 files = [
     "custom/pcx__client_outcome.sql",
 ]
 
 [[actions]]
-description = "client dictionary coverage"
+label = "client dictionary coverage"
 type = "build:serial"
 files = [
     "custom/pcx__client_dictionary_coverage.sql",
 ]
 
 [[actions]]
-description = "client SQL views -> CSV files"
+label = "client SQL views -> CSV files"
 type = "export:flat"
 tables = [
     "pcx__client_subject",

@@ -1,26 +1,26 @@
 [[actions]]
-description = "inclusion/exclusion criteria for study population"
+label = "inclusion/exclusion criteria for study population"
 type = "build:parallel"
 files = [
     "../spreadsheet/file_upload_population.toml",
 ]
 
 [[actions]]
-description = "study_period"
-type = "build:parallel"
+label = "study_period"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_study_period.sql",
 ]
 
 [[actions]]
-description = "study_population"
-type = "build:parallel"
+label = "study_population"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_study_population.sql",
 ]
 
 [[actions]]
-description = "obs_base, lab_base"
+label = "obs_base, lab_base"
 type = "build:serial"
 files = [
     "athena/pcx__cohort_study_population_obs_base.sql",
@@ -28,8 +28,8 @@ files = [
 ]
 
 [[actions]]
-description = "study_population aspects ('enc', 'dx', 'rx', 'lab', 'proc', 'doc', 'diag', 'allergy')"
-type = "build:parallel"
+label = "study_population aspects ('enc', 'dx', 'rx', 'lab', 'proc', 'doc', 'diag', 'allergy')"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_study_population_enc.sql",
     "athena/pcx__cohort_study_population_dx.sql",

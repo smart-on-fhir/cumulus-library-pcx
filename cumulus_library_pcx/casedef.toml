@@ -1,12 +1,12 @@
 [[actions]]
-description = ""
+label = ""
 type = "build:serial"
 files = [
     "../spreadsheet/file_upload_casedef.toml",
 ]
 
 [[actions]]
-description = "filter include/exclude"
+label = "filter include/exclude"
 type = "build:serial"
 files = [
     "athena/pcx__cohort_casedef_candidate.sql",
@@ -15,15 +15,15 @@ files = [
 ]
 
 [[actions]]
-description = "cohort from case definition (valueset_casedef)"
-type = "build:parallel"
+label = "cohort from case definition (valueset_casedef)"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_casedef.sql",
 ]
 
 [[actions]]
-description = "cohort for case definition aspects (dx, rx, lab, proc)"
-type = "build:parallel"
+label = "cohort for case definition aspects (dx, rx, lab, proc)"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_casedef_dx.sql",
     "athena/pcx__cohort_casedef_lab.sql",
@@ -32,8 +32,8 @@ files = [
 ]
 
 [[actions]]
-description = "timeline for casedef with variables"
-type = "build:parallel"
+label = "timeline for casedef with variables"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_timeline.sql",
 ]

@@ -1,13 +1,13 @@
 [[actions]]
-description = "variable union (bool)"
-type = "build:parallel"
+label = "variable union (bool)"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_variable_union.sql",
 ]
 
 [[actions]]
-description = "variable union ('dx', 'lab', 'proc', 'rx')"
-type = "build:parallel"
+label = "variable union ('dx', 'lab', 'proc', 'rx')"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_variable_union_dx.sql",
     "athena/pcx__cohort_variable_union_lab.sql",
@@ -16,15 +16,15 @@ files = [
 ]
 
 [[actions]]
-description = "variable wide (bool)"
-type = "build:parallel"
+label = "variable wide (bool)"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_variable_wide.sql",
 ]
 
 [[actions]]
-description = "variable wide ('dx', 'lab', 'proc', 'rx')"
-type = "build:parallel"
+label = "variable wide ('dx', 'lab', 'proc', 'rx')"
+type = "build:serial"
 files = [
     "athena/pcx__cohort_variable_wide_dx.sql",
     "athena/pcx__cohort_variable_wide_lab.sql",
