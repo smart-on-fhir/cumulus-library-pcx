@@ -428,7 +428,6 @@ FROM    pcx__llm_surgery_wide                AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.surgery_type <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -560,7 +559,7 @@ WHERE   src.event_type <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_patient_wide (death)
+-- pcx__llm_survival_timeline_wide (death)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -583,7 +582,7 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_patient_wide                AS src
+FROM    pcx__llm_survival_timeline_wide                AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
@@ -592,7 +591,7 @@ WHERE   src.vital_status = 'DECEASED'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_patient_wide (last known alive)
+-- pcx__llm_survival_timeline_wide (last known alive)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -615,7 +614,7 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_patient_wide                AS src
+FROM    pcx__llm_survival_timeline_wide                AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
@@ -624,7 +623,7 @@ WHERE   src.last_known_alive_date IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_patient_anchor
+-- pcx__llm_survival_timeline_anchor
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -647,7 +646,7 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_patient_anchor              AS src
+FROM    pcx__llm_survival_timeline_anchor              AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
@@ -655,7 +654,7 @@ LEFT JOIN pcx__sample_casedef_author AS note_day
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_patient_follow_up
+-- pcx__llm_survival_timeline_follow_up
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -678,7 +677,7 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_patient_follow_up           AS src
+FROM    pcx__llm_survival_timeline_follow_up           AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
@@ -868,7 +867,7 @@ FROM    pcx__llm_response_wide               AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.response <> 'NOT_DOCUMENTED' OR src.radiologically_evaluable IS NOT NULL OR src.cytologically_evaluable IS NOT NULL
+WHERE   src.response <> 'NONE_OF_THE_ABOVE' OR src.radiologically_evaluable IS NOT NULL OR src.cytologically_evaluable IS NOT NULL
 
 UNION ALL
 
@@ -900,7 +899,7 @@ FROM    pcx__llm_metastasis_wide             AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.csf_cytology <> 'UNAVAILABLE'
+WHERE   src.csf_cytology <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -932,7 +931,7 @@ FROM    pcx__llm_metastasis_wide             AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.spine_mri_findings <> 'UNAVAILABLE'
+WHERE   src.spine_mri_findings <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -964,7 +963,7 @@ FROM    pcx__llm_metastasis_wide             AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.brain_mri_findings <> 'UNAVAILABLE'
+WHERE   src.brain_mri_findings <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -996,7 +995,7 @@ FROM    pcx__llm_metastasis_wide             AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.extraneural_metastasis <> 'UNAVAILABLE'
+WHERE   src.extraneural_metastasis <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1033,22 +1032,22 @@ WHERE   src.site <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_medulloblastoma_wide.molecular_group
+-- pcx__llm_molecular_report.molecular_group
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_molecular_group'                                        AS variable,
-        note_day.note_author_date                                    AS event_date,
+        CASE WHEN src.report_date IS NOT NULL THEN CAST(src.report_date AS DATE) ELSE note_day.note_author_date END AS event_date,
         note_day.note_author_date                                    AS evidence_date,
-        'documented'                                                 AS date_type,
-        CAST(NULL AS VARCHAR)                                        AS date_precision,
+        CASE WHEN src.report_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.report_date_precision                                    AS date_precision,
         src.molecular_group                                          AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        src.molecular_group_classification_method                    AS interpretation,
-        src.molecular_group_source_report                            AS status,
+        src.methods                                                  AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
         'LLM'                                                        AS source_type,
@@ -1056,7 +1055,7 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_medulloblastoma_wide        AS src
+FROM    pcx__llm_molecular_report            AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
@@ -1065,19 +1064,19 @@ WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_medulloblastoma_wide.methotrexate_status
+-- pcx__llm_systemic_therapy_agent (methotrexate, any dose)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_methotrexate_any_dose'                                  AS variable,
-        CASE WHEN src.methotrexate_first_received_date IS NOT NULL THEN src.methotrexate_first_received_date ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.methotrexate_first_received_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        CAST(NULL AS VARCHAR)                                        AS date_precision,
-        src.methotrexate_status                                      AS value_text,
+        CASE WHEN src.therapy_start_date IS NOT NULL THEN CAST(src.therapy_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
+        CASE WHEN src.assessed_through_date IS NOT NULL THEN CAST(src.assessed_through_date AS DATE) ELSE note_day.note_author_date END AS evidence_date,
+        CASE WHEN src.therapy_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.therapy_start_date_precision                             AS date_precision,
+        src.delivery_status                                          AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
-        (src.methotrexate_status = 'RECEIVED')                       AS value_boolean,
+        (src.delivery_status = 'ADMINISTERED')                       AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
         CAST(NULL AS VARCHAR)                                        AS interpretation,
         CAST(NULL AS VARCHAR)                                        AS status,
@@ -1088,43 +1087,12 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         'METHOTREXATE'                                               AS rx_class
-FROM    pcx__llm_medulloblastoma_wide        AS src
+FROM    pcx__llm_systemic_therapy_agent      AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.methotrexate_status <> 'NOT_DOCUMENTED'
-
-UNION ALL
-
--- ----------------------------------------------------------------------
--- pcx__llm_medulloblastoma_wide.radiation_status
--- ----------------------------------------------------------------------
-SELECT  DISTINCT
-        src.subject_ref                                              AS subject_ref,
-        src.encounter_ref                                            AS encounter_ref,
-        'llm_radiation_any_dose'                                     AS variable,
-        CASE WHEN src.radiation_first_received_date IS NOT NULL THEN src.radiation_first_received_date ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.radiation_first_received_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        CAST(NULL AS VARCHAR)                                        AS date_precision,
-        src.radiation_status                                         AS value_text,
-        CAST(NULL AS DOUBLE)                                         AS value_number,
-        (src.radiation_status = 'RECEIVED')                          AS value_boolean,
-        CAST(NULL AS VARCHAR)                                        AS unit,
-        CAST(NULL AS VARCHAR)                                        AS interpretation,
-        CAST(NULL AS VARCHAR)                                        AS status,
-        CAST(NULL AS VARCHAR)                                        AS code,
-        CAST(NULL AS VARCHAR)                                        AS code_system,
-        'LLM'                                                        AS source_type,
-        'evidence'                                                   AS assertion_level,
-        src.note_ref                                                 AS source_ref,
-        CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_medulloblastoma_wide        AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
-  ON    src.subject_ref = note_day.subject_ref
- AND    src.note_ref    = note_day.note_ref
-WHERE   src.radiation_status <> 'NOT_DOCUMENTED'
+WHERE   (LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%')
+AND     src.delivery_status IN ('ADMINISTERED', 'EXPLICITLY_NOT_RECEIVED')
 
 UNION ALL
 
@@ -1156,7 +1124,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.age_under_36_months_at_definitive_surgery_status <> 'UNKNOWN'
+WHERE   src.age_under_36_months_at_definitive_surgery_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1188,7 +1156,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.newly_diagnosed_embryonal_tumor_status <> 'UNKNOWN'
+WHERE   src.newly_diagnosed_embryonal_tumor_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1220,7 +1188,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.high_risk_disease_status <> 'UNKNOWN'
+WHERE   src.high_risk_disease_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1252,7 +1220,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.atrt_excluded_status <> 'UNKNOWN'
+WHERE   src.atrt_excluded_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1284,7 +1252,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.no_prior_chemotherapy_status <> 'UNKNOWN'
+WHERE   src.no_prior_chemotherapy_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1316,7 +1284,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.no_prior_radiation_status <> 'UNKNOWN'
+WHERE   src.no_prior_radiation_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1348,7 +1316,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.adequate_renal_function_status <> 'UNKNOWN'
+WHERE   src.adequate_renal_function_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1380,7 +1348,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.adequate_hepatic_function_status <> 'UNKNOWN'
+WHERE   src.adequate_hepatic_function_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1412,7 +1380,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.adequate_cardiac_function_status <> 'UNKNOWN'
+WHERE   src.adequate_cardiac_function_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1444,7 +1412,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.adequate_pulmonary_function_status <> 'UNKNOWN'
+WHERE   src.adequate_pulmonary_function_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1476,7 +1444,7 @@ FROM    pcx__llm_registry_eligibility_wide   AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.adequate_marrow_function_status <> 'UNKNOWN'
+WHERE   src.adequate_marrow_function_status <> 'NONE_OF_THE_ABOVE'
 
 UNION ALL
 
@@ -1620,9 +1588,9 @@ SELECT  DISTINCT
         CASE WHEN src.collection_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
         src.collection_date_precision                                AS date_precision,
         CAST(src.test AS VARCHAR)                                    AS value_text,
-        src.value                                                    AS value_number,
+        src.value_numeric                                            AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
-        src.units                                                    AS unit,
+        src.value_unit                                               AS unit,
         src.context                                                  AS interpretation,
         src.reference_range                                          AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
@@ -1664,37 +1632,6 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_laboratory_toxicity         AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
-  ON    src.subject_ref = note_day.subject_ref
- AND    src.note_ref    = note_day.note_ref
-
-UNION ALL
-
--- ----------------------------------------------------------------------
--- pcx__llm_predisposition_wide
--- ----------------------------------------------------------------------
-SELECT  DISTINCT
-        src.subject_ref                                              AS subject_ref,
-        src.encounter_ref                                            AS encounter_ref,
-        'llm_predisposition'                                         AS variable,
-        CASE WHEN src.report_date IS NOT NULL THEN CAST(src.report_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.report_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.report_date_precision                                    AS date_precision,
-        src.gene_or_syndrome                                         AS value_text,
-        CAST(NULL AS DOUBLE)                                         AS value_number,
-        CAST(NULL AS BOOLEAN)                                        AS value_boolean,
-        CAST(NULL AS VARCHAR)                                        AS unit,
-        src.status                                                   AS interpretation,
-        src.variant_verbatim                                         AS status,
-        CAST(NULL AS VARCHAR)                                        AS code,
-        CAST(NULL AS VARCHAR)                                        AS code_system,
-        'LLM'                                                        AS source_type,
-        'evidence'                                                   AS assertion_level,
-        src.note_ref                                                 AS source_ref,
-        CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_predisposition_wide         AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref

@@ -4,6 +4,8 @@
 --  ACNS0334 anchors age on the date of DEFINITIVE surgery. Two sources:
 --    structured  pcx__cohort_proc_craniotomy (tier 1 tumor resection codes)
 --    LLM         pcx__llm_surgery_wide (surgery_role names the definitive operation)
+--  Every LLM surgery row is a documented operation, so surgery_type
+--  NONE_OF_THE_ABOVE (type not listed or not stated) is kept, not filtered.
 --  definitive_surgery_day prefers the LLM-designated definitive operation and
 --  falls back to the first structured tier 1 resection. Both inputs stay
 --  visible as their own columns so the choice can be audited.
@@ -29,7 +31,6 @@ llm AS (
             MAX(residual_tumor_area_cm2)                                AS llm_residual_tumor_area_cm2_max,
             BOOL_OR(extent_of_resection IN ('PARTIAL_RESECTION', 'BIOPSY')) AS llm_residual_disease_bool
     FROM    pcx__llm_surgery_wide
-    WHERE   surgery_type <> 'NONE_OF_THE_ABOVE'
     GROUP BY subject_ref
 ),
 combined AS (

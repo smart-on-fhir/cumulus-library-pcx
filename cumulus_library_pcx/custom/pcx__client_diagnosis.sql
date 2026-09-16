@@ -78,8 +78,8 @@ diagnosis AS (
     GROUP BY subject_ref
 ),
 
--- Molecular group from the compact medulloblastoma task. A clinical-summary
--- mention is not methylation confirmation, so the method rides along.
+-- Molecular group from the molecular task, one row per documented report.
+-- A CLINICAL_SUMMARY method is not methylation confirmation, so the methods ride along.
 molecular_note AS (
     SELECT  src.subject_ref,
             src.note_ref,
@@ -87,8 +87,8 @@ molecular_note AS (
             (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_author_date)) <= 90)
                                                         AS in_baseline,
             src.molecular_group,
-            src.molecular_group_classification_method
-    FROM    pcx__llm_medulloblastoma_wide   AS src
+            src.methods
+    FROM    pcx__llm_molecular_report       AS src
     JOIN    pcx__sample_casedef_author      AS note_day
       ON    src.subject_ref = note_day.subject_ref
      AND    src.note_ref    = note_day.note_ref
@@ -102,11 +102,12 @@ molecular AS (
             MAX_BY(molecular_group, ROW(note_author_date, note_ref))    AS molecular_group_ever,
             MAX_BY(molecular_group, ROW(note_author_date, note_ref))
                 FILTER (WHERE in_baseline)                              AS molecular_group_baseline,
-            MAX_BY(molecular_group_classification_method, ROW(note_author_date, note_ref))
-                FILTER (WHERE molecular_group_classification_method IS NOT NULL)
-                                                                        AS molecular_group_method,
+            MAX_BY(methods, ROW(note_author_date, note_ref))
+                FILTER (WHERE methods <> '')                            AS molecular_group_method,
+            -- NOT_SUBGROUPED and INDETERMINATE are absence of a result, not groups
             COUNT(DISTINCT molecular_group)
-                FILTER (WHERE molecular_group <> 'CONFLICTING')         AS molecular_group_distinct_count,
+                FILTER (WHERE molecular_group IN ('WNT', 'SHH', 'GROUP_3', 'GROUP_4', 'NON_WNT_NON_SHH'))
+                                                                        AS molecular_group_distinct_count,
             BOOL_OR(molecular_group = 'GROUP_3')                        AS group_3_ever_bool
     FROM    molecular_note
     GROUP BY subject_ref
