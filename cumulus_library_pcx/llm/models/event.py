@@ -35,9 +35,12 @@ class EventMention(SpanAugmentedMention):
     event_type: EventType = Field(
         default=EventType.NONE_OF_THE_ABOVE,
         description=("Documented event. Choose exactly one. "
-                     "Use clinician-designated progression or relapse; progression can follow partial response. "
+                     "Use clinician-designated progression or relapse; "
+                     "progression can follow partial response. "
                      "Exclude suspected, negated or family-history events. "
-                     "INITIAL_DIAGNOSIS: the first diagnosis of this embryonal tumor, when this note records it as a dated event. "
+                     
+                     "INITIAL_DIAGNOSIS: the first diagnosis of this embryonal tumor, "
+                     "when this note records it as a dated event. "
                      "RECURRENCE: relapse or recurrence of the tumor after a documented remission or complete response. "
                      "PROGRESSION: growth of known disease or new lesions without an intervening remission, "
                      "as designated by the clinician. "
