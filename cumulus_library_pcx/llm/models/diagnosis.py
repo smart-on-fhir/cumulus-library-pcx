@@ -87,15 +87,6 @@ class MedulloblastomaHistologyMention(SpanAugmentedMention):
     )
 
 
-class TumorLocationMention(SpanAugmentedMention):
-    """Primary anatomic site of the tumor as the note words it. Prefer the imaging
-    impression, then the pathology gross description."""
-    tumor_location_verbatim: str | None = Field(
-        default=None,
-        description="Exact site phrase from the note (e.g. 'left cerebellar hemisphere'). Null if not stated.",
-    )
-
-
 class ChangMStageMention(SpanAugmentedMention):
     """Documented Chang metastasis stage (M-stage) at diagnosis/staging, when stated
     directly. Do not derive it from imaging or cytology here; the derived stage is
@@ -164,7 +155,6 @@ class DiagnosisAnnotation(BaseModel):
     """
     disease_subtype: DiseaseSubtypeMention
     medulloblastoma_histology: MedulloblastomaHistologyMention
-    tumor_location: TumorLocationMention
     chang_m_stage: ChangMStageMention
     age_at_diagnosis: AgeAtDiagnosisMention
     diagnosis_date: DiagnosisDateMention
