@@ -40,7 +40,8 @@ Clinical document:
 response_schema = "llm/schemas/pcx-diagnosis-annotation.json"
 select_by_table = "pcx__llm_document_task_diagnosis"
 # Version 2: Defer integrated diagnosis wording; retain historical terms under disease_subtype.
-version = 2
+# Version 3: removed tumor_location_verbatim
+version = 3
 
 [tables.surgery]
 response_schema = "llm/schemas/pcx-surgery-annotation.json"
