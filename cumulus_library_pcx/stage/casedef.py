@@ -1,64 +1,78 @@
-import csv
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
-from cumulus_library_pcx.tools import manifest, template, filetool
+from cumulus_library_pcx.tools import tablespace, filetool, template
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    FileAction,
+    SqlAction,
+    save_actions_toml
+)
 
-def make_cohort() -> list[Path]:
-    return [copy_template('cohort_casedef.sql')]
-
-def make_cohort_candidate() -> list[Path]:
-    criteria_list = ['candidate', 'exclude', 'include']
-    return [copy_template(f'cohort_casedef_{rule}.sql') for rule in criteria_list]
-
-def make_cohort_aspects() -> list[Path]:
-    aspect_list = ['dx', 'lab', 'proc', 'rx']
-    return [copy_template(f'cohort_casedef_{aspect}.sql') for aspect in aspect_list]
-
-def make_timeline() -> list[Path]:
-    """
-    Make a timeline with ALL variables represented in WIDE (tabular) format *with*
-    the Case Definition and rich study population encounter metadata.
-
-    see also:
-    * cohort_casedef.sql
-    * cohort_variable_wide.sql
-    * cohort_study_population_enc.sql
-    """
-    return [copy_template(f'cohort_timeline.sql')]
+#-----------------------------------------------------------------------------
+# Upload casedef.csv file(s)
+# Common: users add custom spreadsheet/casedef*.csv files
+# Rare: change the UPLOAD_FILE path; file contents are generated
+#-----------------------------------------------------------------------------
+UPLOAD_FILE = 'file_upload_casedef.toml'
 
 #-----------------------------------------------------------------------------
 # Template Helpers
 #-----------------------------------------------------------------------------
+def make_template(table_suffix: str | None) -> Path:
+    if table_suffix:
+        table_name = f'cohort_casedef_{table_suffix}'
+    else:
+        table_name = 'cohort_casedef'
+    return copy_template(f'{table_name}.sql')
+
 def casedef_columns() -> list[str]:
     """
     :return: ['subtype','system','code','display','tier']
     """
-    with open(filetool.path_spreadsheet('casedef.csv'), newline='', encoding='utf-8-sig') as f:
-        return next(csv.reader(f), [])
+    return filetool.csv_columns('casedef.csv')
 
 def copy_template(template_sql:str) -> Path:
     return template.copy(template_sql,
                          casedef_columns=casedef_columns(),
                          encounter_ref=ENCOUNTER_REF)
+#-----------------------------------------------------------------------------
+# Template
+#-----------------------------------------------------------------------------
+def make_template_candidate() -> list[Path]:
+    return [make_template(c)
+            for c in ['candidate', 'exclude', 'include']]
+
+def make_template_casedef() -> list[Path]:
+    return [copy_template('cohort_casedef.sql')]
+
+def make_template_aspects() -> list[Path]:
+    return [make_template(a)
+            for a in ['dx', 'lab', 'proc', 'rx']]
+
+def make_template_timeline() -> list[Path]:
+    return [copy_template('cohort_timeline.sql')]
+
+#-----------------------------------------------------------------------------
+# Actions
+#-----------------------------------------------------------------------------
+def make_actions() -> list[Action]:
+    return [FileAction(['../spreadsheet/file_upload_casedef.toml'],
+                       'case definition CSV upload'),
+            SqlAction(make_template_candidate(),
+                      'filter include/exclude'),
+            SqlAction(make_template_casedef(),
+                      'cohort from case definition (valueset_casedef)'),
+            SqlAction(make_template_aspects(),
+                      'cohort for case definition aspects (dx, rx, lab, proc)'),
+            SqlAction(make_template_timeline(),
+                      'timeline for casedef with variables'),
+    ]
 
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
 def make() -> list[Path]:
-    rules_files = make_cohort_candidate()
-    cohort_files = make_cohort()
-    aspect_files = make_cohort_aspects()
-    timeline_files = make_timeline()
-
-    actions = [
-        manifest.FileAction([f'../spreadsheet/file_upload_casedef.toml']),
-        manifest.SqlAction(rules_files, 'filter include/exclude', 'build:serial'),
-        manifest.SqlAction(cohort_files, 'cohort from case definition (valueset_casedef)'),
-        manifest.SqlAction(aspect_files, 'cohort for case definition aspects (dx, rx, lab, proc)'),
-        manifest.SqlAction(timeline_files, 'timeline for casedef with variables'),
-    ]
-
-    return [manifest.save_actions_toml(actions, 'casedef.toml')]
+    return [save_actions_toml(make_actions(), 'casedef.toml')]
 
 if __name__ == '__main__':
     for target in make():
