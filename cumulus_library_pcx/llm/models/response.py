@@ -10,14 +10,6 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class ResponseStatus(StrEnum):
-    """Response assessment result.
-    COMPLETE_RESPONSE: complete response (CR).
-    PARTIAL_RESPONSE: partial response (PR).
-    STABLE_DISEASE: stable disease (SD).
-    PROGRESSIVE_DISEASE: progressive disease (PD).
-    NOT_EVALUABLE: not evaluable.
-    INDETERMINATE: indeterminate.
-    NOT_DOCUMENTED: response not documented."""
     COMPLETE_RESPONSE = "COMPLETE_RESPONSE"
     PARTIAL_RESPONSE = "PARTIAL_RESPONSE"
     STABLE_DISEASE = "STABLE_DISEASE"
@@ -28,15 +20,6 @@ class ResponseStatus(StrEnum):
 
 
 class AssessmentTimepoint(StrEnum):
-    """Treatment-relative assessment timepoint.
-    BASELINE: baseline.
-    DURING_INDUCTION: during induction.
-    END_INDUCTION: end of induction.
-    DURING_CONSOLIDATION: during consolidation.
-    END_CONSOLIDATION: end of consolidation.
-    FOLLOW_UP: follow-up.
-    OTHER: another documented timepoint.
-    NOT_DOCUMENTED: timepoint not documented."""
     BASELINE = "BASELINE"
     DURING_INDUCTION = "DURING_INDUCTION"
     END_INDUCTION = "END_INDUCTION"
@@ -48,15 +31,39 @@ class AssessmentTimepoint(StrEnum):
 
 
 class ResponseAssessmentMention(SpanAugmentedMention):
-    timepoint: AssessmentTimepoint = Field(default=AssessmentTimepoint.NOT_DOCUMENTED, description="Documented treatment-relative timepoint; do not infer end-consolidation from a remission statement.")
-    response: ResponseStatus = Field(default=ResponseStatus.NOT_DOCUMENTED, description="Explicit CR/PR/SD/PD or assessment result. Missing imaging is not CR; do not assign CR from resection alone.")
-    radiologically_evaluable: bool | None = Field(default=None, description="Explicit evaluable/measurable disease on imaging at this assessment; null if unknown. Baseline evaluability determines the primary-response denominator.")
-    cytologically_evaluable: bool | None = Field(default=None, description="Explicit cytologically evaluable disease at this assessment; null if unknown.")
-    assessment_date: str | None = Field(default=None, description="Actual response assessment date, ISO date at supported precision.")
-    assessment_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessment_date; null if absent.")
-    assessment_method: str | None = Field(default=None, description="MRI, CSF cytology or clinical assessment as documented.")
-    review_context: str | None = Field(default=None, description="Local versus central review if stated; preserve disagreements as separate assessments.")
+    timepoint: AssessmentTimepoint = Field(
+        default=AssessmentTimepoint.NOT_DOCUMENTED,
+        description="Documented treatment-relative timepoint; "
+                    "do not infer end-consolidation from a remission statement."
+    )
+    response: ResponseStatus = Field(
+        default=ResponseStatus.NOT_DOCUMENTED,
+        description="Explicit CR/PR/SD/PD or assessment result. "
+                    "Missing imaging is not CR; do not assign CR from resection alone."
+    )
+    radiologically_evaluable: bool | None = Field(
+        default=None,
+        description="Explicit evaluable/measurable disease on imaging at this assessment; "
+                    "null if unknown. Baseline evaluability determines the primary-response denominator."
+    )
+    cytologically_evaluable: bool | None = Field(
+        default=None,
+        description="Explicit cytologically evaluable disease at this assessment; null if unknown."
+    )
+    assessment_date: str | None = Field(
+        default=None,
+        description="Actual response assessment date, ISO date at supported precision."
+    )
+    assessment_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for assessment_date; "
+                    "null if absent."
+    )
 
 
 class ResponseAnnotation(BaseModel):
-    assessments: list[ResponseAssessmentMention] = Field(default_factory=list, description="All baseline and subsequent assessments. Empty means no assessment extracted, not no disease.")
+    assessments: list[ResponseAssessmentMention] = Field(
+        default_factory=list,
+        description="All baseline and subsequent assessments. "
+                      "Empty means no assessment extracted, not no disease."
+    )
