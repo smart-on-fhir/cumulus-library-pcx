@@ -55,7 +55,7 @@ def make() -> list[Path]:
     """
     file_upload = manifest.FileAction(
         file_list=['../spreadsheet/file_upload_population.toml'],
-        description='inclusion/exclusion criteria for study population',
+        label='inclusion/exclusion criteria for study population',
         build_type='build:parallel')
 
     study_period = make_study_population([STUDY_PERIOD])

@@ -61,8 +61,13 @@ def select_union(table_list: list[str]) -> str:
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
+def make_upload() -> manifest.UploadAction:
+    return manifest.UploadAction(file_list=list_csv(),
+                                 label='elastic_output CSV uploads',
+                                 prefix='elastic_')
+
 def make_file_upload_toml() -> list[Path]:
-    return [manifest.save_file_upload_toml(list_csv(), path_upload_toml(), prefix="elastic_")]
+    return [manifest.save_upload_toml(make_upload(), path_upload_toml())]
 
 def make_union(aspect:Aspect=None) -> Path:
     cohort = f'union_{aspect.name}' if aspect else f'union'
@@ -80,14 +85,15 @@ def make() -> list[Path]:
         upload_file = os.path.relpath(path_upload_toml(), start=filetool.path_project())
         task_list = [make_union()]
 
+        upload = make_upload()
         action_list = [manifest.FileAction(file_list=[upload_file],
-                                           description='elastic_output CSV uploads',
+                                           label=upload.label,
                                            build_type='build:parallel'),
                        manifest.SqlAction(file_list=task_list,
-                                          description='elastic_output union tasks',
+                                          label='elastic_output union tasks',
                                           build_type='build:serial')]
 
-        upload_toml = manifest.save_file_upload_toml(list_csv(), path_upload_toml(), prefix="elastic_")
+        upload_toml = manifest.save_upload_toml(upload, path_upload_toml())
         return [upload_toml, manifest.save_actions_toml(action_list, 'elastic_output.toml')]
     return list()
 

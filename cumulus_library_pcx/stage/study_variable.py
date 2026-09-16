@@ -126,13 +126,16 @@ def make() -> list[Path]:
     upload_list = list_variable_uploads()
     variable_list = [make_cohort(variable) for variable in list_variables()]
 
+    upload = manifest.UploadAction(file_list=upload_list,
+                                   label='CSV valueset definitions for variables')
+
     actions_list = [manifest.FileAction(file_list=[f'../spreadsheet/{upload_file}'],
-                                        description='CSV valueset definitions for variables',
+                                        label=upload.label,
                                         build_type='build:parallel'),
                     manifest.SqlAction(file_list=variable_list,
-                                       description='variable cohorts')]
+                                       label='variable cohorts')]
 
-    return [manifest.save_file_upload_toml(upload_list, upload_file),
+    return [manifest.save_upload_toml(upload, upload_file),
             manifest.save_actions_toml(actions_list, 'study_variable.toml')]
 
 if __name__ == '__main__':

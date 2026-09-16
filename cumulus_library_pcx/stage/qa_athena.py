@@ -51,19 +51,19 @@ def make() -> list[Path]:
     actions = [
         manifest.FileAction(
             relative_to_athena(list_qa()),
-            description="all *qa* tables should have zero rows",
+            label="all *qa* tables should have zero rows",
             build_type='build:parallel'),
         manifest.FileAction(
             relative_to_athena(list_warn()),
-            description="warn tables - nonzero rows are findings to eyeball, not failures",
+            label="warn tables - nonzero rows are findings to eyeball, not failures",
             build_type='build:parallel'),
         manifest.FileAction(
             relative_to_athena(list_example()),
-            description="example tables for client users",
+            label="example tables for client users",
             build_type='build:parallel'),
         manifest.FileAction(
             relative_to_athena(make_union()),
-            description="union qa",
+            label="union qa",
             build_type='build:parallel')
     ]
     return [manifest.save_actions_toml(actions, 'qa_athena.toml')]

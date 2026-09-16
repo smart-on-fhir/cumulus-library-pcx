@@ -53,7 +53,7 @@ def prepare_resources(
 
     action = manifest.FileAction(
         file_list=[path.relative_to(filetool.path_project()).as_posix() for path in resources],
-        description="Flattened NLP results for PCX Clinical Tasks",
+        label="Flattened NLP results for PCX Clinical Tasks",
         build_type="build:parallel",
     )
     directory = Path(output_dir) if output_dir is not None else filetool.path_project()
