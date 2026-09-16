@@ -90,8 +90,7 @@ def make() -> list[Path]:
                                            label=upload.label,
                                            build_type='build:parallel'),
                        manifest.SqlAction(file_list=task_list,
-                                          label='elastic_output union tasks',
-                                          build_type='build:serial')]
+                                          label='elastic_output union tasks')]
 
         upload_toml = manifest.save_upload_toml(upload, path_upload_toml())
         return [upload_toml, manifest.save_actions_toml(action_list, 'elastic_output.toml')]

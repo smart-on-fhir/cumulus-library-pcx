@@ -10,12 +10,16 @@ Depends on the eligible stage and on the LLM wide tables for patient, event, and
 systemic-therapy regimens and anchors (built empty when NLP has not run).
 """
 from pathlib import Path
-from cumulus_library_pcx.tools import manifest, tablespace, filetool
+from cumulus_library_pcx.tools import tablespace, filetool
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    save_actions_toml
+)
 
 # -----------------------------------------------------------------------------
-# helper paths to "outcome" SQL files
+# helper path to custom "outcome" SQL files
 # -----------------------------------------------------------------------------
-
 def path_outcome(table_suffix: str | None) -> Path:
     """
     :param table_suffix: table name without prefix or "outcome"
@@ -28,7 +32,7 @@ def path_outcome(table_suffix: str | None) -> Path:
     return filetool.path_custom(f"{outcome_table}.sql")
 
 # -----------------------------------------------------------------------------
-# make targets
+# actions
 # -----------------------------------------------------------------------------
 def make_vital_status() -> list[Path]:
     return [path_outcome('vital_status')]
@@ -42,16 +46,18 @@ def make_exposure() -> list[Path]:
 def make_outcome() -> list[Path]:
     return [path_outcome(None)]
 
-def make() -> list[Path]:
-    actions = [
-        manifest.SqlAction(make_vital_status() + make_first_event() + make_exposure(),
-                           'outcome vital status, then first event, then exposure prior to first event',
-                           'build:serial'),
-        manifest.SqlAction(make_outcome(),
-                           'outcome per subject: overall survival and provisional event-free survival',
-                           'build:serial'),
+def make_actions() -> list[Action]:
+    return [SqlAction([path_outcome(t) for t in ['vital_status', 'first_event', 'exposure']],
+                      'outcome vital status, then first event, then exposure prior to first event'),
+            SqlAction(make_outcome(),
+                      'outcome per subject: overall survival and provisional event-free survival'),
     ]
-    return [manifest.save_actions_toml(actions, 'outcome.toml')]
+
+# -----------------------------------------------------------------------------
+# make
+# -----------------------------------------------------------------------------
+def make() -> list[Path]:
+    return [save_actions_toml(make_actions(), 'outcome.toml')]
 
 if __name__ == '__main__':
     for target in make():

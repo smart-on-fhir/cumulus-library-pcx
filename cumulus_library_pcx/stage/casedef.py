@@ -1,6 +1,6 @@
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
-from cumulus_library_pcx.tools import tablespace, filetool, template
+from cumulus_library_pcx.tools import filetool, template
 from cumulus_library_pcx.tools.manifest import (
     Action,
     FileAction,
@@ -25,15 +25,9 @@ def make_template(table_suffix: str | None) -> Path:
         table_name = 'cohort_casedef'
     return copy_template(f'{table_name}.sql')
 
-def casedef_columns() -> list[str]:
-    """
-    :return: ['subtype','system','code','display','tier']
-    """
-    return filetool.csv_columns('casedef.csv')
-
 def copy_template(template_sql:str) -> Path:
     return template.copy(template_sql,
-                         casedef_columns=casedef_columns(),
+                         casedef_columns=filetool.csv_columns('casedef.csv'),
                          encounter_ref=ENCOUNTER_REF)
 #-----------------------------------------------------------------------------
 # Template

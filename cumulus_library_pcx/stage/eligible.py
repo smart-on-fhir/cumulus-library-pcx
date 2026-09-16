@@ -14,12 +14,17 @@ llm_systemic_therapy_agent, llm_radiation_wide. The LLM wide tables are built fi
 opening action (empty tables when no NLP output exists yet, see llm/builder).
 """
 from pathlib import Path
-from cumulus_library_pcx.tools import manifest, tablespace, filetool
+from cumulus_library_pcx.tools import tablespace, filetool
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    SqlParallelAction,
+    save_actions_toml
+)
 
 # -----------------------------------------------------------------------------
-# helper paths to "eligible" SQL files
+# helper paths to custom "eligible" SQL files
 # -----------------------------------------------------------------------------
-
 def path_eligible(table_suffix: str | None) -> Path:
     """
     :param table_suffix: table name without prefix or "eligible"
@@ -46,19 +51,23 @@ def make_eligible() -> list[Path]:
     return [path_eligible(None),
             path_eligible('trial')]
 
-def make() -> list[Path]:
-    actions = [
-        manifest.SqlAction(make_dx(),
-                           'eligible diagnosis: time zero, age in months, ATRT',
-                           'build:serial'),
-        manifest.SqlAction(make_treatment(),
-                           'eligible treatment: definitive surgery, methotrexate and chemo, radiation',
-                           'build:parallel'),
-        manifest.SqlAction(make_eligible(),
-                           'eligible criteria per subject, then trial-like intersection',
-                           'build:serial'),
+#-----------------------------------------------------------------------------
+# actions
+#-----------------------------------------------------------------------------
+def make_actions() -> list[Action]:
+    return [SqlAction(make_dx(),
+                      'eligible diagnosis: time zero, age in months, ATRT'),
+            SqlParallelAction(make_treatment(),
+                              'eligible treatment: definitive surgery, methotrexate and chemo, radiation'),
+            SqlAction(make_eligible(),
+                           'eligible criteria per subject, then trial-like intersection'),
     ]
-    return [manifest.save_actions_toml(actions, 'eligible.toml')]
+
+#-----------------------------------------------------------------------------
+# make
+#-----------------------------------------------------------------------------
+def make() -> list[Path]:
+    return [save_actions_toml(make_actions(), 'eligible.toml')]
 
 if __name__ == '__main__':
     for target in make():

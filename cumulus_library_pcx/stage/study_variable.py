@@ -128,6 +128,12 @@ def make_cohort(variable: str) -> Path:
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
+def make_upload(variable_list:list[str] | None) -> UploadAction:
+    if not variable_list:
+        variable_list = list_variables()
+    return UploadAction(file_list=variable_list,
+                        label='upload spreadsheet/*.csv valuesets')
+
 def make_actions() -> list[Action]:
     """
     1. Make cohort for each variable
@@ -136,17 +142,13 @@ def make_actions() -> list[Action]:
 
     :return: list of TOML outputs
     """
-    upload_list = list_variable_uploads()
     variable_list = [make_cohort(variable) for variable in list_variables()]
 
-    return [
-        UploadAction(file_list=upload_list,
-                     label='upload spreadsheet/*.csv valuesets'),
-        FileAction(file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
-                   label=UPLOAD_FILE,
-                   build_type='build:parallel'),
-        SqlAction(file_list=variable_list,
-                  label='variable cohorts')]
+    return [FileAction(file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
+                       label=UPLOAD_FILE,
+                       build_type='build:parallel'),
+            SqlAction(file_list=variable_list,
+                      label='variable cohorts')]
 
 #-----------------------------------------------------------------------------
 # Make
