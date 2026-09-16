@@ -34,16 +34,22 @@ PREFIX = get_manifest().get_study_prefix()
 # TOML action declarations
 #-----------------------------------------------------------------------------
 @dataclass(frozen=True)
-class FileAction:
+class Action:
     """
-    Cumulus Library FILE build action type.
+    Cumulus Library basic build action type.
     """
     file_list: list[Path] | list[str]
     description: str = ""
+
+@dataclass(frozen=True)
+class FileAction(Action):
+    """
+    Cumulus Library FILE build action type.
+    """
     build_type: str = "build:serial"
 
 @dataclass(frozen=True)
-class SqlAction:
+class SqlAction(Action):
     """
     Cumulus Library SQL build action.
 
@@ -52,13 +58,22 @@ class SqlAction:
     * each file is written as `athena/<filename>`, or `custom/<filename>`
     * SqlAction.build_type becomes the TOML `type` key
     """
-    file_list: list[Path] | list[str]
-    description: str = ""
-    build_type: str = "build:parallel"
-
+    build_type: str = "build:serial"
 
 @dataclass(frozen=True)
-class ExportAction:
+class SqlParallelAction(Action):
+    """
+    Cumulus Library SQL build action in "parallel".
+
+    `manifest.py` owns the TOML details:
+    * SqlAction.file_list becomes the TOML `files` key
+    * each file is written as `athena/<filename>`, or `custom/<filename>`
+    * SqlAction.build_type becomes the TOML `type` key
+    """
+    build_type: str = "build:parallel"
+
+@dataclass(frozen=True)
+class ExportAction(Action):
     """
     Cumulus Library export action.
 
@@ -94,7 +109,7 @@ def as_export_toml(actions: ExportAction | list[ExportAction]) -> dict:
     return as_actions_toml(_as_list(actions))
 
 
-def as_actions_toml(actions: SqlAction | ExportAction | list[SqlAction | ExportAction | dict]) -> dict:
+def as_actions_toml(actions: Action| list[ Action | dict]) -> dict:
     """
     Build a Python dict for a mixed list of SQL and export actions.
 
