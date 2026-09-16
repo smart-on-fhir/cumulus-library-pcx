@@ -67,10 +67,10 @@ pcx__client_diagnosis,age_at_diagnosis_months_stated,,Smallest explicitly stated
 pcx__client_diagnosis,diagnosis_day_stated_min,,Earliest stated diagnosis date across notes,covariate_time,date,,,,
 pcx__client_diagnosis,diagnosis_gold_day_min,,Earliest confirmatory tissue-diagnosis date across notes,covariate_time,date,,,,
 pcx__client_diagnosis,age_months_at_diagnosis_gold,,Completed months from birthdate to diagnosis_gold_day_min,covariate,bigint,,,,
-pcx__client_diagnosis,molecular_group_ever,,"Latest documented medulloblastoma molecular group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, CONFLICTING, OTHER)",covariate,varchar,,,,
+pcx__client_diagnosis,molecular_group_ever,,"Latest documented medulloblastoma molecular group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH, NOT_SUBGROUPED, INDETERMINATE)",covariate,varchar,,,,
 pcx__client_diagnosis,molecular_group_baseline,,Latest documented molecular group within 90 days of t0_day,covariate,varchar,,,,
-pcx__client_diagnosis,molecular_group_method,,Documented classification method for the latest group (clinical summary is not methylation confirmation),provenance,varchar,,,,
-pcx__client_diagnosis,molecular_group_distinct_count,,Number of distinct documented groups excluding CONFLICTING,provenance,bigint,,,,
+pcx__client_diagnosis,molecular_group_method,,Comma-joined MolecularMethod list for the latest report (CLINICAL_SUMMARY is not methylation confirmation),provenance,varchar,,,,
+pcx__client_diagnosis,molecular_group_distinct_count,,"Number of distinct documented groups among WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH",provenance,bigint,,,,
 pcx__client_diagnosis,group_3_ever_bool,,Any note documents Group 3,covariate,boolean,,,,
 pcx__client_encounter,subject_ref,,FHIR Patient reference,identifier,varchar,,,,
 pcx__client_encounter,encounter_ref,,FHIR Encounter reference,identifier,varchar,,,,
@@ -190,27 +190,25 @@ pcx__client_timeline,variable,llm_spine_mri,LLM spine MRI metastatic finding,cov
 pcx__client_timeline,variable,llm_brain_mri,LLM brain MRI metastatic finding,covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,llm_extraneural_metastasis,LLM extraneural metastasis assessment,covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_metastatic_site,LLM documented metastatic site,covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_molecular_group,"LLM medulloblastoma molecular group (interpretation = method, status = source report)",covariate_source,,LLM,,documented,
-pcx__client_timeline,variable,llm_methotrexate_any_dose,LLM any-dose methotrexate receipt status (value_boolean = received),covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_radiation_any_dose,LLM any-dose radiation receipt status (value_boolean = received),covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_molecular_group,"LLM medulloblastoma molecular group per report (interpretation = comma-joined methods)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_methotrexate_any_dose,"LLM any-dose methotrexate receipt from the systemic agent table (value = delivery status, value_boolean = administered, evidence_date = assessed-through date when stated)",covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,llm_transfer_in,"LLM transfer of tumor care into this institution (value = timing, interpretation = reason)",covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,llm_diagnosis_setting,LLM where the tissue diagnosis was established (value_boolean = imaging detected externally),covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_surgery_setting,LLM where the definitive surgery was performed,covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_prior_therapy_at_entry,LLM prior chemotherapy or radiation before care here (interpretation = modalities),covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_laboratory_result,"LLM narrative laboratory result (value = test, value_number, unit, interpretation = context)",covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,llm_toxicity,"LLM documented toxicity (value_number = grade, interpretation = attribution)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_predisposition,"LLM germline finding (value = gene or syndrome, interpretation = status)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_age_under_36_months_at_definitive_surgery,"LLM ACNS0334 criterion age_under_36_months_at_definitive_surgery (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_newly_diagnosed_embryonal_tumor,"LLM ACNS0334 criterion newly_diagnosed_embryonal_tumor (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_high_risk_disease,"LLM ACNS0334 criterion high_risk_disease (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_atrt_excluded,"LLM ACNS0334 criterion atrt_excluded (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_no_prior_chemotherapy,"LLM ACNS0334 criterion no_prior_chemotherapy (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_no_prior_radiation,"LLM ACNS0334 criterion no_prior_radiation (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_adequate_renal_function,"LLM ACNS0334 criterion adequate_renal_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_adequate_hepatic_function,"LLM ACNS0334 criterion adequate_hepatic_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_adequate_cardiac_function,"LLM ACNS0334 criterion adequate_cardiac_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_adequate_pulmonary_function,"LLM ACNS0334 criterion adequate_pulmonary_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
-pcx__client_timeline,variable,llm_trial_adequate_marrow_function,"LLM ACNS0334 criterion adequate_marrow_function (value = MET/NOT_MET/CONFLICTING, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_age_under_36_months_at_definitive_surgery,"LLM ACNS0334 criterion age_under_36_months_at_definitive_surgery (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_newly_diagnosed_embryonal_tumor,"LLM ACNS0334 criterion newly_diagnosed_embryonal_tumor (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_high_risk_disease,"LLM ACNS0334 criterion high_risk_disease (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_atrt_excluded,"LLM ACNS0334 criterion atrt_excluded (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_no_prior_chemotherapy,"LLM ACNS0334 criterion no_prior_chemotherapy (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_no_prior_radiation,"LLM ACNS0334 criterion no_prior_radiation (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_renal_function,"LLM ACNS0334 criterion adequate_renal_function (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_hepatic_function,"LLM ACNS0334 criterion adequate_hepatic_function (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_cardiac_function,"LLM ACNS0334 criterion adequate_cardiac_function (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_pulmonary_function,"LLM ACNS0334 criterion adequate_pulmonary_function (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
+pcx__client_timeline,variable,llm_trial_adequate_marrow_function,"LLM ACNS0334 criterion adequate_marrow_function (value = MET/NOT_MET, value_boolean = met)",covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,t0,"Time zero milestone (value = source, value_number = age months)",covariate_source,,ELIGIBLE,,resolved,
 pcx__client_timeline,variable,definitive_surgery,"Definitive surgery milestone (value = source, value_number = age months)",covariate_source,,ELIGIBLE,,resolved,
 pcx__client_timeline,variable,first_event,"First EFS-type event milestone (value = type, value_number = days from t0)",covariate_source,,OUTCOME,,resolved,
