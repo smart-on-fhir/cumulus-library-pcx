@@ -1,8 +1,13 @@
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
-from cumulus_library_pcx.tools import filetool, tablespace, manifest, template, fhir_reference
+from cumulus_library_pcx.tools import filetool, tablespace, template, fhir_reference
 from cumulus_library_pcx.tools.fhir_reference import Aspect
 from cumulus_library_pcx.tools.tablespace import name_trim, name_cohort
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    save_actions_toml
+)
 from cumulus_library_pcx.stage.study_variable import (
     list_variables,
     list_variables_as_str,
@@ -10,18 +15,18 @@ from cumulus_library_pcx.stage.study_variable import (
 )
 
 #-----------------------------------------------------------------------------
-# Step 1) UNION ALL
+# Template UNION
 #-----------------------------------------------------------------------------
-def make_variable_union_bool() -> list[Path]:
+def make_template_union_bool() -> list[Path]:
     """
     1.1 Create table of all variable cohorts together (UNION ALL) having a single column
         `variable` which denotes the cohort source.
 
     :return: path to cohort_variable_union.sql
     """
-    return [_make_variable_union(aspect=None)]
+    return [_make_template_union(aspect=None)]
 
-def make_variable_union_aspect() -> list[Path]:
+def make_template_union_aspect() -> list[Path]:
     """
     1.2 Create tables of variables grouped by Aspect
 
@@ -30,9 +35,9 @@ def make_variable_union_aspect() -> list[Path]:
              cohort_variable_union_doc.sql,
              cohort_variable_union_rx.sql]
     """
-    return [_make_variable_union(aspect=aspect) for aspect in list_aspects()]
+    return [_make_template_union(aspect=aspect) for aspect in list_aspects()]
 
-def _make_variable_union(aspect:Aspect=None) -> Path:
+def _make_template_union(aspect:Aspect=None) -> Path:
     """
     :param aspect: variable types to union, or None= all variables
     :return: Path to SQL file
@@ -64,9 +69,9 @@ def select_union(variable_list: list[str]) -> str:
     return ' UNION ALL\n'.join(sql)
 
 #-----------------------------------------------------------------------------
-# Step 2) WIDE table with all variables
+# Template WIDE
 #-----------------------------------------------------------------------------
-def make_variable_wide_bool(aspect:Aspect=None) -> Path:
+def make_template_wide_bool(aspect:Aspect=None) -> Path:
     """
     All study variable cohorts in one table in WIDE format.
     each variable has a single column denoting
@@ -121,9 +126,9 @@ def select_wide_any(variable_list: list[str]) -> str:
     return '\t' + ',\n'.join(sql).strip()
 
 #-----------------------------------------------------------------------------
-# (3) WIDE table for each aspect
+# Template WIDE for each aspect
 #-----------------------------------------------------------------------------
-def make_variable_wide() -> list[Path]:
+def make_template_wide() -> list[Path]:
     """
     :return: list of SQL files for each aspect
             * cohort_variable_wide_lab
@@ -131,9 +136,9 @@ def make_variable_wide() -> list[Path]:
             * cohort_variable_wide_dx
             * cohort_variable_wide_rx
     """
-    return [_make_variable_wide(aspect) for aspect in list_aspects()]
+    return [_make_template_wide(aspect) for aspect in list_aspects()]
 
-def _make_variable_wide(aspect:Aspect, generator=None) -> Path:
+def _make_template_wide(aspect:Aspect, generator=None) -> Path:
     """
     :param aspect: aspect to make variable wide for
     :param generator: select_wide_*** function
@@ -141,19 +146,19 @@ def _make_variable_wide(aspect:Aspect, generator=None) -> Path:
     """
     if not generator:
         if aspect == Aspect.dx:
-            return _make_variable_wide(aspect, select_wide_dx)
+            return _make_template_wide(aspect, select_wide_dx)
         elif aspect == Aspect.lab:
-            return _make_variable_wide(aspect, select_wide_lab)
+            return _make_template_wide(aspect, select_wide_lab)
         elif aspect == Aspect.diag:
-            return _make_variable_wide(aspect, select_wide_diag)
+            return _make_template_wide(aspect, select_wide_diag)
         elif aspect == Aspect.doc:
-            return _make_variable_wide(aspect, select_wide_doc)
+            return _make_template_wide(aspect, select_wide_doc)
         elif aspect == Aspect.rx:
-            return _make_variable_wide(aspect, select_wide_rx)
+            return _make_template_wide(aspect, select_wide_rx)
         elif aspect == Aspect.proc:
-            return _make_variable_wide(aspect, select_wide_proc)
+            return _make_template_wide(aspect, select_wide_proc)
         elif aspect == Aspect.enc:
-            return _make_variable_wide(aspect, select_wide_enc)
+            return _make_template_wide(aspect, select_wide_enc)
         else:
             raise NotImplementedError(f"'{aspect}' aspect type not yet supported.")
     else:
@@ -313,9 +318,9 @@ def select_wide_proc(variable_list: list[str] = None, columns: dict = None) -> s
     return select_wide_dict(variable_list, columns)
 
 #-----------------------------------------------------------------------------
-# Make
+# Actions
 #-----------------------------------------------------------------------------
-def make() -> list[Path]:
+def make_actions() -> list[Action]:
     """
     Make cohort UNION variables as one big table
     Make cohort WIDE variables as one big table (tabular with each column is a variable)
@@ -323,14 +328,17 @@ def make() -> list[Path]:
     """
     aspect_list = [aspect.name for aspect in list_aspects()]
 
-    actions = [
-        manifest.SqlAction(make_variable_union_bool(), 'variable union (bool)'),
-        manifest.SqlAction(make_variable_union_aspect(), f'variable union {aspect_list}'),
-        manifest.SqlAction([make_variable_wide_bool()], 'variable wide (bool)'),
-        manifest.SqlAction(make_variable_wide(), f'variable wide {aspect_list}'),
+    return [SqlAction(make_template_union_bool(), 'variable union (bool)'),
+            SqlAction(make_template_union_aspect(), f'variable union {aspect_list}'),
+            SqlAction([make_template_wide_bool()], 'variable wide (bool)'),
+            SqlAction(make_template_wide(), f'variable wide {aspect_list}'),
     ]
 
-    return [manifest.save_actions_toml(actions, 'study_variable_wide.toml')]
+#-----------------------------------------------------------------------------
+# Make
+#-----------------------------------------------------------------------------
+def make() -> list[Path]:
+    return [save_actions_toml(make_actions(), 'study_variable_wide.toml')]
 
 if __name__ == '__main__':
     for output_toml in make():

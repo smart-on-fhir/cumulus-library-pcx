@@ -1,6 +1,20 @@
 from pathlib import Path
-from cumulus_library_pcx.tools import filetool, tablespace, manifest, fhir_reference
+from cumulus_library_pcx.tools import filetool, tablespace, fhir_reference
 from cumulus_library_pcx.tools.fhir_reference import Aspect, get_aspect
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    UploadAction,
+    FileAction,
+    SqlAction,
+    save_actions_toml
+)
+
+#-----------------------------------------------------------------------------
+# Upload include_*.csv files
+# Common: users add custom spreadsheet/*.csv files
+# Rare: change the UPLOAD_FILE path; file contents are generated
+#-----------------------------------------------------------------------------
+UPLOAD_FILE = 'file_upload_study_variable.toml'
 
 #-----------------------------------------------------------------------------
 # List variables
@@ -112,9 +126,9 @@ def make_cohort(variable: str) -> Path:
     return filetool.save_athena_view(cohort_name, sql)
 
 #-----------------------------------------------------------------------------
-# Make
+# Actions
 #-----------------------------------------------------------------------------
-def make() -> list[Path]:
+def make_actions() -> list[Action]:
     """
     1. Make cohort for each variable
     2. Make cohort UNION variables as one big table
@@ -122,21 +136,23 @@ def make() -> list[Path]:
 
     :return: list of TOML outputs
     """
-    upload_file = 'file_upload_study_variable.toml'
     upload_list = list_variable_uploads()
     variable_list = [make_cohort(variable) for variable in list_variables()]
 
-    upload = manifest.UploadAction(file_list=upload_list,
-                                   label='CSV valueset definitions for variables')
+    return [
+        UploadAction(file_list=upload_list,
+                     label='upload spreadsheet/*.csv valuesets'),
+        FileAction(file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
+                   label=UPLOAD_FILE,
+                   build_type='build:parallel'),
+        SqlAction(file_list=variable_list,
+                  label='variable cohorts')]
 
-    actions_list = [manifest.FileAction(file_list=[f'../spreadsheet/{upload_file}'],
-                                        label=upload.label,
-                                        build_type='build:parallel'),
-                    manifest.SqlAction(file_list=variable_list,
-                                       label='variable cohorts')]
-
-    return [manifest.save_upload_toml(upload, upload_file),
-            manifest.save_actions_toml(actions_list, 'study_variable.toml')]
+#-----------------------------------------------------------------------------
+# Make
+#-----------------------------------------------------------------------------
+def make() -> list[Path]:
+    return [save_actions_toml(make_actions(), 'study_variable.toml')]
 
 if __name__ == '__main__':
     for output_toml in make():

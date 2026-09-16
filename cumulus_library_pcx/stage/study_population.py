@@ -8,7 +8,14 @@ from cumulus_library_pcx.tools.manifest import (
 )
 
 #-----------------------------------------------------------------------------
-# List of study population tables.
+# Upload include_*.csv files
+# Common: edit the values of spreadsheet/include_*.csv
+# Rare: change the UPLOAD_FILE path or contents
+#-----------------------------------------------------------------------------
+UPLOAD_FILE = 'file_upload_population.toml'
+
+#-----------------------------------------------------------------------------
+# Templates
 #
 # cohort_study_period = patient encounters specified by "include_study_period"
 #
@@ -20,9 +27,6 @@ STUDY_PERIOD = 'cohort_study_period'
 STUDY_POPULATION = 'cohort_study_population'
 OBS_TABLES = ['cohort_study_population_obs_base', 'cohort_study_population_lab_base']
 
-###############################################################################
-# Make
-###############################################################################
 def make_template(table_list:list) -> list[Path]:
     """
     :param table_list: list of tables to make with a template
@@ -30,6 +34,9 @@ def make_template(table_list:list) -> list[Path]:
     """
     return [template.copy(f"{table}.sql") for table in table_list]
 
+#-----------------------------------------------------------------------------
+#  Actions
+#-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
     """
     Study Population is built from "template/" dir.
@@ -61,8 +68,8 @@ def make_actions() -> list[Action]:
 
     return [
         FileAction(
-            file_list=['../spreadsheet/file_upload_population.toml'],
-            label='inclusion/exclusion criteria for study population'),
+            file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
+            label='inclusion criteria for study population'),
         SqlAction(make_template([STUDY_PERIOD]),
                   'study_period'),
         SqlAction(make_template([STUDY_POPULATION]),
