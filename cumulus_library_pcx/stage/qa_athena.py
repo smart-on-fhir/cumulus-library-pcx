@@ -1,9 +1,14 @@
 from pathlib import Path
-from cumulus_library_pcx.tools import filetool, manifest, template, tablespace
+from cumulus_library_pcx.tools import filetool, template, tablespace
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    FileAction,
+    save_actions_toml
+)
 
-## ----------------------------------------------------------------------------
-## helpers
-
+# ----------------------------------------------------------------------------
+# LIST SQL files
+# ----------------------------------------------------------------------------
 def list_templates() -> list[Path]:
     return sorted(list(filetool.path_tests_template().glob("*.sql")))
 
@@ -25,7 +30,10 @@ def list_example() -> list[Path]:
 def list_tables(file_list:list[Path]) -> list[str]:
     return [file.stem for file in file_list]
 
-def _make_union(table_part, file_list:list[Path]) -> Path:
+# ----------------------------------------------------------------------------
+# UNION
+# ----------------------------------------------------------------------------
+def _ctas_union(table_part, file_list:list[Path]) -> Path:
     table = tablespace.name_prefix(table_part)
     ctas = f'CREATE TABLE {table} AS '
     text = [f"SELECT COUNT(*) as cnt, '{table}' as test \n FROM {table}"
@@ -33,40 +41,47 @@ def _make_union(table_part, file_list:list[Path]) -> Path:
     text = ctas + '\n' + '\n UNION ALL \n'.join(text)
     return filetool.write_text(text, filetool.path_tests_athena(f"{table}.sql"))
 
-## ----------------------------------------------------------------------------
-## make
+# ----------------------------------------------------------------------------
+# make
 
 def make_union() -> list[Path]:
-    return [_make_union('qa_union', list_qa()),
-            _make_union('warn_union', list_warn()),
-            _make_union('example_union', list_example())]
+    return [_ctas_union('qa_union', list_qa()),
+            _ctas_union('warn_union', list_warn()),
+            _ctas_union('example_union', list_example())]
 
 def relative_to_athena(path_list:list[Path])->list[str]:
     return [f'../tests/athena/{file.name}' for file in path_list]
 
-def make() -> list[Path]:
+# ----------------------------------------------------------------------------
+# actions
+# ----------------------------------------------------------------------------
+def make_actions() -> list[Action]:
     for t in list_templates():
         template.copy_test(t)
 
-    actions = [
-        manifest.FileAction(
-            relative_to_athena(list_qa()),
-            label="all *qa* tables should have zero rows",
-            build_type='build:parallel'),
-        manifest.FileAction(
-            relative_to_athena(list_warn()),
-            label="warn tables - nonzero rows are findings to eyeball, not failures",
-            build_type='build:parallel'),
-        manifest.FileAction(
-            relative_to_athena(list_example()),
-            label="example tables for client users",
-            build_type='build:parallel'),
-        manifest.FileAction(
-            relative_to_athena(make_union()),
-            label="union qa",
-            build_type='build:parallel')
+    return [FileAction(
+                relative_to_athena(list_qa()),
+                label="all *qa* tables should have zero rows",
+                build_type='build:parallel'),
+            FileAction(
+                relative_to_athena(list_warn()),
+                label="warn tables - nonzero rows are findings to eyeball, not failures",
+                build_type='build:parallel'),
+            FileAction(
+                relative_to_athena(list_example()),
+                label="example tables for client users",
+                build_type='build:parallel'),
+            FileAction(
+                relative_to_athena(make_union()),
+                label="union qa",
+                build_type='build:parallel')
     ]
-    return [manifest.save_actions_toml(actions, 'qa_athena.toml')]
+
+# ----------------------------------------------------------------------------
+# make
+# ----------------------------------------------------------------------------
+def make() -> list[Path]:
+    return [save_actions_toml(make_actions(), 'qa_athena.toml')]
 
 if __name__ == '__main__':
     print(make())
