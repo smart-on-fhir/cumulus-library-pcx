@@ -10,15 +10,6 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class TimelineAnchor(StrEnum):
-    """Timeline anchor.
-    ORIGINAL_DIAGNOSIS: original diagnosis.
-    FIRST_LOCAL_DIAGNOSIS: first local diagnosis.
-    INITIAL_TUMOR_MRI: initial tumor MRI.
-    DEFINITIVE_SURGERY: definitive surgery.
-    TRIAL_ENROLLMENT: trial enrollment.
-    TREATMENT_INITIATION: treatment initiation.
-    INDUCTION_COMPLETION: induction completion.
-    CONSOLIDATION_COMPLETION: consolidation completion."""
     ORIGINAL_DIAGNOSIS = "ORIGINAL_DIAGNOSIS"
     FIRST_LOCAL_DIAGNOSIS = "FIRST_LOCAL_DIAGNOSIS"
     INITIAL_TUMOR_MRI = "INITIAL_TUMOR_MRI"
@@ -31,9 +22,18 @@ class TimelineAnchor(StrEnum):
 
 class TimelineAnchorMention(SpanAugmentedMention):
     anchor: TimelineAnchor
-    anchor_date: str | None = Field(default=None, description="Date explicitly supporting this anchor, ISO date at supported precision. No proxy substitutions.")
-    anchor_date_precision: DatePrecision | None = Field(default=None, description="Precision for anchor_date; null if absent.")
-    protocol_name: str | None = Field(default=None, description="Named trial/protocol for enrollment or treatment dates. Enrollment requires explicit documentation.")
+    anchor_date: str | None = Field(
+        default=None,
+        description="Date explicitly supporting this anchor, ISO date at supported precision. No proxy substitutions."
+    )
+    anchor_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for anchor_date; null if absent."
+    )
+    protocol_name: str | None = Field(
+        default=None,
+        description="Named trial/protocol for enrollment or treatment dates. Enrollment requires explicit documentation."
+    )
 
 
 class VitalStatus(StrEnum):
@@ -57,21 +57,53 @@ class VitalStatusMention(SpanAugmentedMention):
             raise ValueError("Alive date cannot follow death")
         return self
 
-    vital_status: VitalStatus = Field(default=VitalStatus.NONE_OF_THE_ABOVE, description="Explicit patient status; administrative records alone do not establish alive status.")
-    death_date: str | None = Field(default=None, description="Actual death date, never a later note date. Preserve partial dates with precision.")
-    death_date_precision: DatePrecision | None = Field(default=None, description="Precision for death_date; null if absent.")
-    last_known_alive_date: str | None = Field(default=None, description="Latest date this document establishes the patient was alive; not automatically the latest encounter or note date.")
-    last_known_alive_date_precision: DatePrecision | None = Field(default=None, description="Precision for last_known_alive_date; null if absent.")
+    vital_status: VitalStatus = Field(
+        default=VitalStatus.NONE_OF_THE_ABOVE,
+        description="Explicit patient status; administrative records alone do not establish alive status."
+    )
+    death_date: str | None = Field(
+        default=None, description="Actual death date, never a later note date. "
+                                  "Preserve partial dates with precision."
+    )
+    death_date_precision: DatePrecision | None = Field(
+        default=None, description="Precision for death_date; null if absent."
+    )
+    last_known_alive_date: str | None = Field(
+        default=None,
+        description="Latest date this document establishes the patient was alive; "
+                    "not automatically the latest encounter or note date."
+    )
+    last_known_alive_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for last_known_alive_date; null if absent."
+    )
 
 
 class EventFreeFollowUpMention(SpanAugmentedMention):
-    event_free: bool | None = Field(default=None, description="True only for explicit follow-up without progression/relapse, secondary malignancy or death; false if such an event is documented. Alive alone is insufficient; null if unknown.")
-    assessment_date: str | None = Field(default=None, description="Date of documented event-free status assessment, not extraction date; candidate EFS censoring evidence only.")
-    assessment_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessment_date; null if absent.")
-    assessment_method: str | None = Field(default=None, description="Clinical follow-up, imaging or other supporting evaluation as stated.")
+    event_free: bool | None = Field(
+        default=None,
+        description="True only for explicit follow-up without progression/relapse, secondary malignancy or death; "
+                    "false if such an event is documented. Alive alone is insufficient; null if unknown."
+    )
+    assessment_date: str | None = Field(
+        default=None,
+        description="Date of documented event-free status assessment, not extraction date; "
+                    "candidate EFS censoring evidence only."
+    )
+    assessment_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision for assessment_date; null if absent."
+    )
+    assessment_method: str | None = Field(
+        default=None,
+        description="Clinical follow-up, imaging or other supporting evaluation as stated."
+    )
 
 
 class PatientTimelineAnnotation(BaseModel):
     anchors: list[TimelineAnchorMention] = Field(default_factory=list)
     vital_status: VitalStatusMention
-    event_free_follow_up: list[EventFreeFollowUpMention] = Field(default_factory=list, description="Dated follow-up evidence for downstream EFS ascertainment; retain conflicts across notes.")
+    event_free_follow_up: list[EventFreeFollowUpMention] = Field(
+        default_factory=list,
+        description="Dated follow-up evidence for downstream EFS ascertainment; retain conflicts across notes."
+    )
