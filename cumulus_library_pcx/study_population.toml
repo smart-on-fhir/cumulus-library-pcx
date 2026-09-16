@@ -1,5 +1,5 @@
 [[actions]]
-label = "inclusion/exclusion criteria for study population"
+label = "inclusion criteria for study population"
 type = "build:parallel"
 files = [
     "../spreadsheet/file_upload_population.toml",

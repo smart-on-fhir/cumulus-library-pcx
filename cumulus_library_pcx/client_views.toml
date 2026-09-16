@@ -1,6 +1,6 @@
 [[actions]]
 label = "upload client_dictionary.csv"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "../spreadsheet/file_upload_client_views.toml",
 ]

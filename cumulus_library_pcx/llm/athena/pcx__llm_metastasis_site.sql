@@ -18,4 +18,4 @@ FROM
 CROSS JOIN UNNEST(nlp.result.metastasis_sites) WITH ORDINALITY AS metastasis_site_t (metastasis_site, metastasis_site_index)
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2

@@ -15,8 +15,18 @@ paris, exposure replaces therapy_line. The SQL is study-specific and lives in cu
 Depends on the eligible and outcome stages and on every LLM wide table in llm/athena.
 """
 from pathlib import Path
-from cumulus_library_pcx.tools import manifest, filetool, tablespace
+from cumulus_library_pcx.tools import filetool, tablespace
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    FileAction,
+    ExportAction,
+    save_actions_toml
+)
 
+# -----------------------------------------------------------------------------
+# Views
+# -----------------------------------------------------------------------------
 VIEW_LIST = (
     "subject",
     "diagnosis",
@@ -27,15 +37,12 @@ VIEW_LIST = (
     "dictionary_coverage",
 )
 
-# -----------------------------------------------------------------------------
-# Views
-# -----------------------------------------------------------------------------
-def list_views() -> list[str]:
+def list_client_views() -> list[str]:
     """Return every flat view exported as CSV."""
     return [tablespace.name_join("client", suffix) for suffix in VIEW_LIST]
 
 # -----------------------------------------------------------------------------
-# helper paths to "client" SQL files
+# helper paths to custom "client" SQL files
 # -----------------------------------------------------------------------------
 def path_client(table_suffix: str | None) -> Path:
     """
@@ -49,55 +56,34 @@ def path_client(table_suffix: str | None) -> Path:
     return filetool.path_custom(f"{client_table}.sql")
 
 # -----------------------------------------------------------------------------
-# make targets
+# actions
 # -----------------------------------------------------------------------------
-def make_subject() -> list[Path]:
-    return [path_client('subject')]
-
-def make_diagnosis() -> list[Path]:
-    return [path_client('diagnosis')]
-
-def make_encounter() -> list[Path]:
-    return [path_client('encounter')]
-
-def make_exposure() -> list[Path]:
-    return [path_client('exposure')]
-
-def make_timeline() -> list[Path]:
-    return [path_client('timeline'),
-            path_client('timeline_latest')]
-
-def make_outcome() -> list[Path]:
-    return [path_client('outcome')]
-
-def make_dictionary_coverage() -> list[Path]:
-    return [path_client('dictionary_coverage')]
-
-
-def make() -> list[Path]:
-    actions = [manifest.FileAction([f'../spreadsheet/file_upload_client_views.toml'],
-                                   'upload client_dictionary.csv'),
-               manifest.SqlAction(make_subject(),
-                                  'client subject'),
-               manifest.SqlAction(make_diagnosis(),
-                                  'client diagnosis'),
-               manifest.SqlAction(make_encounter(),
-                                  'client encounter'),
-               manifest.SqlAction(make_exposure(),
-                                  'client exposure'),
-               manifest.SqlAction(make_timeline(),
-                                  'client timeline'),
-               manifest.SqlAction(make_outcome(),
-                                  'client outcome'),
-               manifest.SqlAction(make_dictionary_coverage(),
-                                  'client dictionary coverage'),
-               manifest.ExportAction(list_views(),
-                                     "client SQL views -> CSV files",
-                                     export_type="export:flat"),
-               ]
-
-    return [manifest.save_actions_toml(actions, 'client_views.toml')]
+def make_actions() -> list[Action]:
+    return [FileAction([f'../spreadsheet/file_upload_client_views.toml'],
+                       'upload client_dictionary.csv'),
+            SqlAction([path_client('subject')],
+                      'client subject'),
+            SqlAction([path_client('diagnosis')],
+                      'client diagnosis'),
+            SqlAction([path_client('encounter')],
+                      'client encounter'),
+            SqlAction([path_client('exposure')],
+                      'client exposure'),
+            SqlAction([path_client('timeline'), path_client('timeline_latest')],
+                      'client timeline'),
+            SqlAction([path_client('outcome')],
+                      'client outcome'),
+            SqlAction([path_client('dictionary_coverage')],
+                      'client dictionary coverage'),
+            ExportAction(list_client_views(),
+                         "client SQL views -> CSV files",
+                         export_type="export:flat")
+    ]
+# -----------------------------------------------------------------------------
+# make
+# -----------------------------------------------------------------------------
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'client_views.toml')
 
 if __name__ == '__main__':
-    for target in make():
-        print(target)
+    print(make())

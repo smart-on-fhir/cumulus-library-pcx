@@ -1,5 +1,5 @@
 [[actions]]
-label = "samples from union FHIR DocumentReference + FHIR DiagnosticReport"
+label = "casedef FHIR DocumentReference + FHIR DiagnosticReport"
 type = "build:serial"
 files = [
     "athena/pcx__sample_casedef.sql",
@@ -14,7 +14,7 @@ files = [
 
 [[actions]]
 label = "sample for aspects ('dx', 'lab', 'proc', 'rx')"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "athena/pcx__sample_casedef_dx.sql",
     "athena/pcx__sample_casedef_lab.sql",
@@ -24,7 +24,7 @@ files = [
 
 [[actions]]
 label = "sample temporality ('pre', 'peri', 'peri_post', 'post')"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "athena/pcx__sample_casedef_pre.sql",
     "athena/pcx__sample_casedef_peri.sql",
@@ -34,7 +34,7 @@ files = [
 
 [[actions]]
 label = "sample size limit patients"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "athena/pcx__sample_casedef_pre_limit_patient_10.sql",
     "athena/pcx__sample_casedef_peri_limit_patient_10.sql",
@@ -44,7 +44,7 @@ files = [
 
 [[actions]]
 label = "sample size limit notes"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "athena/pcx__sample_casedef_pre_limit_note_50.sql",
     "athena/pcx__sample_casedef_peri_limit_note_50.sql",

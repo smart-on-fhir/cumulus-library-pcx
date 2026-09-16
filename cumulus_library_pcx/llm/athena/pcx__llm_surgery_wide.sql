@@ -25,4 +25,4 @@ FROM
 CROSS JOIN UNNEST(nlp.result.surgeries) WITH ORDINALITY AS surgery_t (surgery, surgery_index)
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2

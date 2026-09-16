@@ -35,11 +35,9 @@ def make_resources(resource_list: list[str]) -> list[Path]:
 def make() -> list[Path]:
 
     actions = [manifest.SqlAction(make_resources(MEDICATION_REQUEST),
-                                  'FHIR MedicationRequest',
-                                  'build:serial'),
+                                  'FHIR MedicationRequest'),
                manifest.SqlAction(make_resources(MEDICATION_DISPENSE),
-                                  'FHIR MedicationDispense',
-                                  'build:serial')]
+                                  'FHIR MedicationDispense')]
 
     return [manifest.save_actions_toml(actions, 'fhir_resource.toml')]
 

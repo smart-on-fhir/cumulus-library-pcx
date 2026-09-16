@@ -10,7 +10,7 @@ def make_study_meta_sql(data_package_version:int = DATA_PACKAGE_VERSION) -> list
     return [template.copy(f"meta_date.sql"),
             template.copy(f"meta_version.sql", data_package_version=str(data_package_version))]
 
-def make_actions() -> list[manifest.SqlAction | manifest.ExportAction]:
+def make_actions() -> list[manifest.Action]:
     """
     Make SQL study metadata and export metadata actions.
     """

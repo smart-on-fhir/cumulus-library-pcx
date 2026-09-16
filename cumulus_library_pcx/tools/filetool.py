@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 from pathlib import Path
 from typing import Dict, Any
@@ -43,6 +44,20 @@ def filter_spreadsheet(file_list:list[Path]) -> list[Path]:
     """
     accept = ['.csv', '.tsv', '.bsv']
     return [f for f in file_list if f.suffix.lower() in accept]
+
+def csv_columns(csv_file: Path | str) -> list[str]:
+    """
+    Header row of a CSV; string filenames are relative to the spreadsheet directory.
+    :param csv_file: Path, or spreadsheet filename like 'casedef.csv'
+    :return: column names, e.g. ['subtype', 'system', 'code', 'display', 'tier']
+    """
+    if not isinstance(csv_file, Path):
+        csv_file = path_spreadsheet(csv_file)
+    with open(csv_file, newline='', encoding='utf-8-sig') as f:
+        header = next(csv.reader(f), None)
+    if not header:
+        raise ValueError(f"{csv_file} has no header row")
+    return header
 
 def filter_aspect(file_list:list[Path]) -> list[Path]:
     """

@@ -2,7 +2,7 @@ from pathlib import Path
 from cumulus_library_pcx.tools import filetool, template, tablespace
 from cumulus_library_pcx.tools.manifest import (
     Action,
-    FileAction,
+    SqlParallelAction,
     save_actions_toml
 )
 
@@ -33,6 +33,11 @@ def list_tables(file_list:list[Path]) -> list[str]:
 # ----------------------------------------------------------------------------
 # UNION
 # ----------------------------------------------------------------------------
+def make_union() -> list[Path]:
+    return [_ctas_union('qa_union', list_qa()),
+            _ctas_union('warn_union', list_warn()),
+            _ctas_union('example_union', list_example())]
+
 def _ctas_union(table_part, file_list:list[Path]) -> Path:
     table = tablespace.name_prefix(table_part)
     ctas = f'CREATE TABLE {table} AS '
@@ -42,46 +47,22 @@ def _ctas_union(table_part, file_list:list[Path]) -> Path:
     return filetool.write_text(text, filetool.path_tests_athena(f"{table}.sql"))
 
 # ----------------------------------------------------------------------------
-# make
-
-def make_union() -> list[Path]:
-    return [_ctas_union('qa_union', list_qa()),
-            _ctas_union('warn_union', list_warn()),
-            _ctas_union('example_union', list_example())]
-
-def relative_to_athena(path_list:list[Path])->list[str]:
-    return [f'../tests/athena/{file.name}' for file in path_list]
-
-# ----------------------------------------------------------------------------
 # actions
 # ----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
     for t in list_templates():
         template.copy_test(t)
 
-    return [FileAction(
-                relative_to_athena(list_qa()),
-                label="all *qa* tables should have zero rows",
-                build_type='build:parallel'),
-            FileAction(
-                relative_to_athena(list_warn()),
-                label="warn tables - nonzero rows are findings to eyeball, not failures",
-                build_type='build:parallel'),
-            FileAction(
-                relative_to_athena(list_example()),
-                label="example tables for client users",
-                build_type='build:parallel'),
-            FileAction(
-                relative_to_athena(make_union()),
-                label="union qa",
-                build_type='build:parallel')
-    ]
+    return [SqlParallelAction(list_qa(), 'all *qa* tables should have zero rows'),
+            SqlParallelAction(list_warn(), 'warn tables - nonzero rows are findings to eyeball, not failures'),
+            SqlParallelAction(list_example(), 'example tables for client users'),
+            SqlParallelAction(make_union(), 'union qa')]
 
 # ----------------------------------------------------------------------------
 # make
 # ----------------------------------------------------------------------------
-def make() -> list[Path]:
-    return [save_actions_toml(make_actions(), 'qa_athena.toml')]
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'qa_athena.toml')
 
 if __name__ == '__main__':
     print(make())

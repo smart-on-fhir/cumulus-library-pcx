@@ -53,12 +53,12 @@ def make_actions() -> list[Action]:
                       'outcome per subject: overall survival and provisional event-free survival'),
     ]
 
-# -----------------------------------------------------------------------------
-# make
-# -----------------------------------------------------------------------------
-def make() -> list[Path]:
-    return [save_actions_toml(make_actions(), 'outcome.toml')]
+#-----------------------------------------------------------------------------
+# Make
+#-----------------------------------------------------------------------------
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'outcome.toml')
 
 if __name__ == '__main__':
-    for target in make():
-        print(target)
+    print(make)
+

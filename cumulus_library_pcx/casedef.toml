@@ -1,6 +1,6 @@
 [[actions]]
-label = ""
-type = "build:serial"
+label = "case definition CSV upload"
+type = "build:parallel"
 files = [
     "../spreadsheet/file_upload_casedef.toml",
 ]

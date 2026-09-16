@@ -80,12 +80,11 @@ def make_actions() -> list[Action]:
                   f'study_population aspects {str(aspect_list)}'),
     ]
 
-def make() -> list[Path]:
-    """
-    :return: list of TOML outputs
-    """
-    return [save_actions_toml(make_actions(), 'study_population.toml')]
+#-----------------------------------------------------------------------------
+#  make
+#-----------------------------------------------------------------------------
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'study_population.toml')
 
 if __name__ == '__main__':
-    for manifest_toml in make():
-        print(manifest_toml)
+    print(make)

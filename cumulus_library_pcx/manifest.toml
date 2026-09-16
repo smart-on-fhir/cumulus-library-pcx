@@ -65,16 +65,10 @@ files = ['eligible.toml']
 type = "submanifest"
 files = ['outcome.toml']
 
-#[[stages.qa_athena]]
-#type = "submanifest"
-#files = ['qa_athena.toml']
-#
-#[[stages.cube]]
-#type = "submanifest"
-#files = ['cube.toml']
+[[stages.qa_athena]]
+type = "submanifest"
+files = ['qa_athena.toml']
 
-#[[stages.nlp_doc_type_tasks]]
-#type = "submanifest"
-#files = ['nlp_doc_type_tasks.toml']
-#skip_by_default = true
-#
+[[stages.cube]]
+type = "submanifest"
+files = ['cube.toml']

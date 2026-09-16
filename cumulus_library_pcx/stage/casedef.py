@@ -65,9 +65,8 @@ def make_actions() -> list[Action]:
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
-def make() -> list[Path]:
-    return [save_actions_toml(make_actions(), 'casedef.toml')]
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'casedef.toml')
 
 if __name__ == '__main__':
-    for target in make():
-        print(target)
+    print(make)

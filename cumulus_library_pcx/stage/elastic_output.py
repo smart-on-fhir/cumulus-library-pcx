@@ -87,8 +87,7 @@ def make() -> list[Path]:
 
         upload = make_upload()
         action_list = [manifest.FileAction(file_list=[upload_file],
-                                           label=upload.label,
-                                           build_type='build:parallel'),
+                                           label=upload.label),
                        manifest.SqlAction(file_list=task_list,
                                           label='elastic_output union tasks')]
 

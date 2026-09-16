@@ -39,7 +39,7 @@ class Action:
     Cumulus Library basic build action type.
 
     `manifest.py` owns the TOML details:
-    * Action.description becomes the TOML `label` key
+    * Action.label becomes the TOML `label` key
       (Cumulus Library deprecated `description` on actions in favor of `label`)
     """
     file_list: list[Path] | list[str]
@@ -50,7 +50,7 @@ class FileAction(Action):
     """
     Cumulus Library FILE build action type.
     """
-    build_type: str = "build:serial"
+    build_type: str = "build:parallel"
 
 @dataclass(frozen=True)
 class SqlAction(Action):
@@ -100,7 +100,7 @@ class UploadAction(Action):
     * UploadAction.file_list becomes one `[tables.<table_name>]` block per file
     * table_name is `<prefix><simplename>` when prefix is given
     * otherwise `include_*` files keep their simplename, all others get `valueset_<simplename>`
-    * UploadAction.description is NOT written: Cumulus Library rejects unknown keys in file_upload TOML
+    * UploadAction.label is NOT written: Cumulus Library rejects unknown keys in file_upload TOML
     """
     prefix: str | None = None
 
@@ -189,11 +189,15 @@ def _clean_label(description: str | None = None) -> str:
 def _sql_file_entry(file: Path | str) -> str:
     """
     TOML `files` entry for one SQL file, relative to the project directory.
-    Generated SQL lives in athena/, study-specific hand-written SQL lives in custom/.
+    Generated SQL lives in athena/, study-specific hand-written SQL lives in custom/,
+    QA and example tables live in ../tests/athena/.
     """
     path = Path(file)
-    if path.parent.resolve() == filetool.path_custom().resolve():
+    parent = path.parent.resolve()
+    if parent == filetool.path_custom().resolve():
         return f"custom/{path.name}"
+    if parent == filetool.path_tests_athena().resolve():
+        return f"../tests/athena/{path.name}"
     return f"athena/{path.name}"
 
 

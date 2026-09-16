@@ -1,5 +1,10 @@
 [[actions]]
-description = "warn tables - nonzero rows are findings to eyeball, not failures"
+label = "all *qa* tables should have zero rows"
+type = "build:parallel"
+files = []
+
+[[actions]]
+label = "warn tables - nonzero rows are findings to eyeball, not failures"
 type = "build:parallel"
 files = [
     "../tests/athena/pcx__warn_eligible_age_disagree.sql",
@@ -26,8 +31,15 @@ files = [
 ]
 
 [[actions]]
-description = "union qa"
+label = "example tables for client users"
+type = "build:parallel"
+files = []
+
+[[actions]]
+label = "union qa"
 type = "build:parallel"
 files = [
+    "../tests/athena/pcx__qa_union.sql",
     "../tests/athena/pcx__warn_union.sql",
+    "../tests/athena/pcx__example_union.sql",
 ]

@@ -34,4 +34,4 @@ FROM
 CROSS JOIN UNNEST(nlp.result.radiation_rounds) WITH ORDINALITY AS radiation_round_t (radiation_round, radiation_round_index)
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2

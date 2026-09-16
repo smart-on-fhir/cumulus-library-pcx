@@ -64,11 +64,10 @@ def make_actions() -> list[Action]:
     ]
 
 #-----------------------------------------------------------------------------
-# make
+# Make
 #-----------------------------------------------------------------------------
-def make() -> list[Path]:
-    return [save_actions_toml(make_actions(), 'eligible.toml')]
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'eligible.toml')
 
 if __name__ == '__main__':
-    for target in make():
-        print(target)
+    print(make)

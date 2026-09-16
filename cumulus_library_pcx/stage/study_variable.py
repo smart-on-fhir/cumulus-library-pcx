@@ -145,17 +145,15 @@ def make_actions() -> list[Action]:
     variable_list = [make_cohort(variable) for variable in list_variables()]
 
     return [FileAction(file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
-                       label=UPLOAD_FILE,
-                       build_type='build:parallel'),
+                       label=UPLOAD_FILE),
             SqlAction(file_list=variable_list,
                       label='variable cohorts')]
 
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
-def make() -> list[Path]:
-    return [save_actions_toml(make_actions(), 'study_variable.toml')]
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'study_variable.toml')
 
 if __name__ == '__main__':
-    for output_toml in make():
-        print(output_toml)
+    print(make)

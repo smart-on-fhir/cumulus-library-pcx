@@ -23,4 +23,4 @@ FROM
         pcx__nlp_metastasis_gpt_oss_120b AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version = 2
