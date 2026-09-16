@@ -33,9 +33,7 @@ class DocumentType(StrEnum):
     END_OF_LIFE_DOCUMENT = "END_OF_LIFE_DOCUMENT"
     NEUROSURGERY_NOTE = "NEUROSURGERY_NOTE"
     ONCOLOGY_NOTE = "ONCOLOGY_NOTE"
-    OTHER_CLINICAL_NOTE = "OTHER_CLINICAL_NOTE"
-    OTHER = "OTHER"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 # Which extraction modules (llm/models/<task>.py) read each document type. Selection SQL
 # builds pcx__llm_document_task_<task> from this mapping. A task absent from a type's list
@@ -46,19 +44,18 @@ DOCUMENT_TASKS: dict[DocumentType, list[str]] = {
     DocumentType.OPERATIVE_NOTE: ["surgery", "diagnosis"],
     DocumentType.PATHOLOGY_REPORT: ["diagnosis", "molecular", "metastasis"],
     DocumentType.IMAGING_REPORT: ["metastasis", "response", "event"],
-    DocumentType.GENETICS_DOCUMENT: ["predisposition", "molecular"],
+    DocumentType.GENETICS_DOCUMENT: ["molecular"],
     DocumentType.TREATMENT_ADMINISTRATION_RECORD: ["systemic_therapy"],
     DocumentType.RADIATION_ONCOLOGY_NOTE: ["radiation", "response", "event"],
     DocumentType.TUMOR_BOARD_NOTE: ["diagnosis", "molecular", "metastasis", "response", "registry_eligibility"],
-    DocumentType.RESEARCH_PROTOCOL_DOCUMENT: ["registry_eligibility", "systemic_therapy", "patient"],
+    DocumentType.RESEARCH_PROTOCOL_DOCUMENT: ["registry_eligibility", "systemic_therapy", "survival_timeline"],
     DocumentType.TRANSFER_DOCUMENT: ["transition_of_care", "diagnosis", "surgery", "systemic_therapy", "radiation"],
-    DocumentType.DISCHARGE_SUMMARY: ["systemic_therapy", "surgery", "event", "patient", "laboratory", "transition_of_care"],
-    DocumentType.END_OF_LIFE_DOCUMENT: ["event", "patient"],
+    DocumentType.DISCHARGE_SUMMARY: ["systemic_therapy", "surgery", "event", "survival_timeline", "laboratory", "transition_of_care"],
+    DocumentType.END_OF_LIFE_DOCUMENT: ["event", "survival_timeline"],
     DocumentType.NEUROSURGERY_NOTE: ["surgery", "diagnosis", "event", "transition_of_care"],
-    DocumentType.ONCOLOGY_NOTE: ["systemic_therapy", "radiation", "response", "event", "patient", "laboratory",
+    DocumentType.ONCOLOGY_NOTE: ["systemic_therapy", "radiation", "response", "event", "survival_timeline", "laboratory",
                                  "registry_eligibility", "medulloblastoma", "transition_of_care"],
-    DocumentType.OTHER_CLINICAL_NOTE: ["patient", "event"],
-    DocumentType.OTHER: [],
+    DocumentType.NONE_OF_THE_ABOVE: ["survival_timeline", "event"],
 }
 
 

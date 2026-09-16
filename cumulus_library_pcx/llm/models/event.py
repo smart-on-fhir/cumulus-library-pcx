@@ -94,4 +94,8 @@ class EventMention(SpanAugmentedMention):
 
 
 class EventAnnotation(BaseModel):
-    events: list[EventMention] = Field(default_factory=list, description="Distinct documented events, including undated events. Deduplication and EFS adjudication occur downstream.")
+    events: list[EventMention] = Field(
+        default_factory=list,
+        description="Distinct documented events, including undated events. "
+                    "Deduplication and EFS adjudication occur downstream."
+    )

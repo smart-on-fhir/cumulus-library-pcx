@@ -15,7 +15,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
 
     @model_validator(mode="after")
     def validate_administration(self):
-        if self.delivery_status != DeliveryStatus.NOT_DOCUMENTED and not self.has_mention:
+        if self.delivery_status != DeliveryStatus.NONE_OF_THE_ABOVE and not self.has_mention:
             raise ValueError("Delivery status requires supporting evidence")
         if self.administration_date is not None and self.delivery_status != DeliveryStatus.ADMINISTERED:
             raise ValueError("Actual administration date requires administered status")
@@ -23,7 +23,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
             raise ValueError("Dose unit requires a numeric dose")
         return self
 
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt.")
+    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE, description="Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt.")
     phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED, description="Documented phase of this dose; never infer from drug name alone.")
     cycle_name: str | None = Field(default=None, description="Cycle linked to this administration, if stated.")
     administration_date: str | None = Field(
@@ -71,7 +71,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
 class TherapyAgentMention(SpanAugmentedMention):
     """A single systemic agent documented in treatment planning or delivery. Emit one per distinct
     agent (e.g. vincristine, cisplatin, cyclophosphamide, methotrexate)."""
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="Receipt of this agent when individual doses are not detailed. Plans do not establish exposure.")
+    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE, description="Receipt of this agent when individual doses are not detailed. Plans do not establish exposure.")
     agent_name: str | None = Field(
         default=None,
         description="Therapeutic agent name as written (generic preferred). Null if none documented.",
@@ -154,7 +154,7 @@ class MedicalTherapyRegimenMention(SpanAugmentedMention):
 
 
 class StemCellInfusionMention(SpanAugmentedMention):
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED)
+    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE)
     phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
     infusion_date: str | None = Field(default=None, description="Actual stem-cell infusion date, not collection date.")
     infusion_date_precision: DatePrecision | None = Field(default=None, description="Precision for infusion_date; null if absent.")

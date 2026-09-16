@@ -13,29 +13,26 @@ class CriterionStatus(StrEnum):
     """Status of a trial criterion.
     MET: met.
     NOT_MET: not met.
-    UNKNOWN: unknown.
-    CONFLICTING: conflicting evidence."""
+    NONE_OF_THE_ABOVE: unknown, or conflicting evidence."""
     MET = "MET"
     NOT_MET = "NOT_MET"
-    UNKNOWN = "UNKNOWN"
-    CONFLICTING = "CONFLICTING"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 class TrialCriterionMention(SpanAugmentedMention):
     @model_validator(mode="after")
     def validate_criterion(self):
-        if self.status != CriterionStatus.UNKNOWN and not self.has_mention:
+        if self.status != CriterionStatus.NONE_OF_THE_ABOVE and not self.has_mention:
             raise ValueError("A criterion finding requires supporting evidence")
         return self
 
     status: CriterionStatus = Field(
-        default=CriterionStatus.UNKNOWN,
+        default=CriterionStatus.NONE_OF_THE_ABOVE,
         description=(
             "Evidence for the parent criterion in this note only. "
             "MET: direct evidence the criterion is satisfied. "
             "NOT_MET: direct evidence the criterion is not satisfied. "
-            "UNKNOWN: missing information; never eligible or ineligible by default. "
-            "CONFLICTING: direct evidence both for and against."
+            "NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; "
+            "never eligible or ineligible by default."
         )
     )
     assessment_date: str | None = Field(
@@ -64,7 +61,7 @@ class TrialEligibilityAnnotation(BaseModel):
     )
     atrt_excluded: TrialCriterionMention = Field(
         description="MET when diagnosis/pathology explicitly excludes ATRT; "
-                    "NOT_MET when ATRT is confirmed; UNKNOWN when unaddressed. "
+                    "NOT_MET when ATRT is confirmed; NONE_OF_THE_ABOVE when unaddressed. "
                     "Marker loss alone does not diagnose ATRT."
     )
     no_prior_chemotherapy: TrialCriterionMention = Field(

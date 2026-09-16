@@ -9,13 +9,12 @@ class TreatmentPhase(StrEnum):
     POST_CONSOLIDATION: post-consolidation.
     SALVAGE: salvage.
     OTHER: another documented phase.
-    NOT_DOCUMENTED: phase not documented."""
+    NONE_OF_THE_ABOVE: None of the above."""
     INDUCTION = "INDUCTION"
     CONSOLIDATION = "CONSOLIDATION"
     POST_CONSOLIDATION = "POST_CONSOLIDATION"
     SALVAGE = "SALVAGE"
-    OTHER = "OTHER"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class DeliveryStatus(StrEnum):
@@ -25,10 +24,10 @@ class DeliveryStatus(StrEnum):
     HELD: held.
     CANCELLED: cancelled.
     EXPLICITLY_NOT_RECEIVED: explicitly documented as not received.
-    NOT_DOCUMENTED: delivery status not documented."""
+    NONE_OF_THE_ABOVE: none of the above."""
     ADMINISTERED = "ADMINISTERED"
     PLANNED = "PLANNED"
     HELD = "HELD"
     CANCELLED = "CANCELLED"
     EXPLICITLY_NOT_RECEIVED = "EXPLICITLY_NOT_RECEIVED"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"

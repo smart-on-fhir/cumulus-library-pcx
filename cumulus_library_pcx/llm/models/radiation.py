@@ -47,8 +47,23 @@ class RadiationRoundMention(SpanAugmentedMention):
     course of radiation documented in this note. Leave dose fields null when not stated or
     not applicable (metastatic-site doses require metastasis; whole-ventricular is only for
     germ-cell tumors)."""
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="Delivery status of this radiation round. Explicit non-receipt must be stated, not inferred from silence. ADMINISTERED: delivered RT. PLANNED / HELD: not exposure.")
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
+    delivery_status: DeliveryStatus = Field(
+        default=DeliveryStatus.NONE_OF_THE_ABOVE,
+        description=(
+            "Whether this radiation course was actually delivered. Choose exactly one. "
+            "A course counts as delivered once any fraction is given; plans, recommendations and simulations are not exposure. "
+            "ADMINISTERED: at least one fraction was delivered, including a course stopped early. "
+            "PLANNED: recommended, consented, simulated or scheduled, with no fraction delivered yet. "
+            "HELD: a scheduled course paused or deferred before the first fraction, with intent to proceed. "
+            "CANCELLED: a planned course explicitly cancelled before any fraction was delivered. "
+            "EXPLICITLY_NOT_RECEIVED: the note states the patient did not receive radiation, "
+            "for example declined, omitted by protocol, or never given. "
+            "NOT_DOCUMENTED: delivery cannot be determined from this note; not evidence of non-receipt."
+        ),
+    )
+    phase: TreatmentPhase = Field(
+        default=TreatmentPhase.NOT_DOCUMENTED
+    )
     indication: str | None = Field(default=None, description="Initial treatment, post-chemotherapy residual/metastatic disease, salvage after relapse or other documented indication. Do not infer from dose.")
     assessed_through_date: str | None = Field(default=None, description="Date through which explicit non-receipt or delivery is assessed.")
     assessed_through_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessed_through_date; null if absent.")

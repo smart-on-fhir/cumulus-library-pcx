@@ -8,11 +8,13 @@ Prefer structured lab results; extract narrative results only when documented.
 from enum import StrEnum
 from pydantic import BaseModel, Field
 from .base import SpanAugmentedMention, DatePrecision
+from .lab_base import LabBaseMention
 from .treatment import TreatmentPhase
 
 
 class LaboratoryTest(StrEnum):
-    """Laboratory test.
+    """Study-specific laboratory test. Closed list: a result for any test not listed
+    here is not extracted at all (no mention is produced for it).
     ABSOLUTE_NEUTROPHIL_COUNT: absolute neutrophil count (ANC).
     PLATELET_COUNT: platelet count.
     HEMOGLOBIN: hemoglobin.
@@ -22,8 +24,7 @@ class LaboratoryTest(StrEnum):
     TOTAL_BILIRUBIN: total bilirubin.
     AST: aspartate aminotransferase.
     ALT: alanine aminotransferase.
-    METHOTREXATE_LEVEL: methotrexate level.
-    OTHER: another laboratory test."""
+    METHOTREXATE_LEVEL: methotrexate level."""
     ABSOLUTE_NEUTROPHIL_COUNT = "ABSOLUTE_NEUTROPHIL_COUNT"
     PLATELET_COUNT = "PLATELET_COUNT"
     HEMOGLOBIN = "HEMOGLOBIN"
@@ -34,19 +35,15 @@ class LaboratoryTest(StrEnum):
     AST = "AST"
     ALT = "ALT"
     METHOTREXATE_LEVEL = "METHOTREXATE_LEVEL"
-    OTHER = "OTHER"
 
 
-class LaboratoryResultMention(SpanAugmentedMention):
-    test: LaboratoryTest
-    result_verbatim: str = Field(description="Exact value, comparator and units. Preserve age-specific normal ranges and whether GFR is indexed. Serum creatinine is not interchangeable with measured GFR/clearance.")
-    value: float | None = Field(default=None, description="Numeric reported result; null for qualitative results. Retain inequalities in result_verbatim.")
-    units: str | None = Field(default=None, description="Exact documented units; do not invent or convert units.")
+class LaboratoryResultMention(LabBaseMention):
+    """One documented laboratory result. Value, unit, trend and the three interpretation
+    fields come from LabBaseMention. A qualitative result keeps value_numeric null."""
+    test: LaboratoryTest = Field(description="Which study-specific test this result is. Only tests in LaboratoryTest are extracted; omit results for any other test.")
     reference_range: str | None = Field(default=None, description="Documented normal range or upper limit of normal, including age context.")
     collection_date: str | None = Field(default=None, description="Specimen/measurement date, ISO date at supported precision.")
     collection_date_precision: DatePrecision | None = Field(default=None, description="Precision for collection_date; null if absent.")
-    context: str | None = Field(default=None, description="Baseline eligibility, on-treatment toxicity or MTX clearance; include hours after MTX and transfusion context only if stated.")
-
 
 class ToxicityMention(SpanAugmentedMention):
     toxicity: str = Field(description="Documented adverse event; do not infer toxicity from a lab without clinical interpretation.")
@@ -59,5 +56,5 @@ class ToxicityMention(SpanAugmentedMention):
 
 
 class LaboratoryAnnotation(BaseModel):
-    results: list[LaboratoryResultMention] = Field(default_factory=list)
+    results: list[LaboratoryResultMention] = Field(default_factory=list, description="Results for the study-specific tests in LaboratoryTest only. Do not include a result for any other laboratory test; leave the list empty if none of the listed tests are documented.")
     toxicities: list[ToxicityMention] = Field(default_factory=list)

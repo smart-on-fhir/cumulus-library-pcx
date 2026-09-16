@@ -18,7 +18,6 @@ class MedulloblastomaMolecularGroup(StrEnum):
     NON_WNT_NON_SHH: non-WNT/non-SHH.
     NOT_SUBGROUPED: not subgrouped.
     INDETERMINATE: indeterminate.
-    CONFLICTING: conflicting group calls.
     NONE_OF_THE_ABOVE: no group documented."""
     WNT = "WNT"
     SHH = "SHH"
@@ -37,8 +36,7 @@ class MolecularMethod(StrEnum):
     FISH = "FISH"
     COPY_NUMBER_ANALYSIS = "COPY_NUMBER_ANALYSIS"
     CLINICAL_SUMMARY = "CLINICAL_SUMMARY"
-    OTHER = "OTHER"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class MolecularReportMention(SpanAugmentedMention):
@@ -70,8 +68,7 @@ class MolecularReportMention(SpanAugmentedMention):
             "FISH: fluorescence in situ hybridization. "
             "COPY_NUMBER_ANALYSIS: array or sequencing-derived copy number. "
             "CLINICAL_SUMMARY: the note quotes a group without the original report or method. "
-            "OTHER: another named method. "
-            "NOT_DOCUMENTED: a result is stated but no method is given."
+            "NONE_OF_THE_ABOVE: another named method, or a result is stated but no method is given."
         ),
     )
 
@@ -88,8 +85,7 @@ class MolecularReportMention(SpanAugmentedMention):
 class AlterationStatus(StrEnum):
     PRESENT = "PRESENT"
     ABSENT = "ABSENT"
-    INDETERMINATE = "INDETERMINATE"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class MolecularAlterationMention(SpanAugmentedMention):
@@ -103,9 +99,11 @@ class MolecularAlterationMention(SpanAugmentedMention):
                     "Amplification and gain are distinct; preserve the reported term."
     )
     status: AlterationStatus = Field(
-        default=AlterationStatus.NOT_DOCUMENTED,
+        default=AlterationStatus.NONE_OF_THE_ABOVE,
         description="Status of this alteration. "
-                    "ABSENT: requires explicitly negative testing. NOT_DOCUMENTED: silence."
+                    "PRESENT: explicitly reported as present. "
+                    "ABSENT: requires explicitly negative testing. "
+                    "NONE_OF_THE_ABOVE: tested but indeterminate, or status not documented."
     )
     report_date: str | None = Field(
         default=None,
@@ -116,10 +114,18 @@ class MolecularAlterationMention(SpanAugmentedMention):
         description="Precision for report_date; null if absent."
     )
     testing_method: MolecularMethod = Field(
-        default=MolecularMethod.NOT_DOCUMENTED,
-        description="Method supporting this alteration, if stated."
+        default=MolecularMethod.NONE_OF_THE_ABOVE,
+        description="Method supporting this alteration, if stated. NONE_OF_THE_ABOVE: another named method, or no method given."
     )
 
 class MolecularAnnotation(BaseModel):
-    reports: list[MolecularReportMention] = Field(default_factory=list, description="One entry per report/classification; retain conflicting reports separately.")
-    alterations: list[MolecularAlterationMention] = Field(default_factory=list, description="Documented alterations or explicit negative results; empty is not a negative panel.")
+    reports: list[MolecularReportMention] = Field(
+        default_factory=list,
+        description="One entry per report/classification; "
+                    "retain conflicting reports separately."
+    )
+    alterations: list[MolecularAlterationMention] = Field(
+        default_factory=list,
+        description="Documented alterations or explicit negative results; "
+                    "empty is not a negative panel."
+    )

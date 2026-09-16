@@ -24,18 +24,32 @@ class ExtentOfResection(StrEnum):
     NEAR_TOTAL_RESECTION = "NEAR_TOTAL_RESECTION"
     PARTIAL_RESECTION = "PARTIAL_RESECTION"
     BIOPSY = "BIOPSY"
-    NOT_AVAILABLE = "NOT_AVAILABLE"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class SurgeryMention(SpanAugmentedMention):
     """A single neurosurgical procedure for the tumor, with its type, resection extent, and
     date. Emit one SurgeryMention per distinct operation documented in this note."""
-    surgery_role: str | None = Field(default=None, description="Documented role: definitive initial surgery, second-look after induction, or recurrence/salvage. Null if unstated.")
-    age_at_surgery_months: float | None = Field(default=None, ge=0, description="Explicit age at this operation in months. Do not substitute age at diagnosis or restrict to under 36 months.")
-    residual_tumor_area_cm2: float | None = Field(default=None, ge=0, description="Explicit postoperative residual tumor AREA in cm2. Do not convert a length or volume to area, or infer from GTR/NTR/STR.")
-    residual_measurement_verbatim: str | None = Field(default=None, description="Exact residual dimensions and units, including inequalities. Preserve even when area cannot be extracted.")
-    residual_assessment_date: str | None = Field(default=None, description="Postoperative imaging assessment date, ISO date at supported precision; not automatically surgery date.")
-    residual_assessment_date_precision: DatePrecision | None = Field(default=None, description="Precision of residual_assessment_date; null when absent.")
+    age_at_surgery_months: float | None = Field(
+        default=None, ge=0,
+        description="Explicit age at this operation in months. "
+                    "Do not substitute age at diagnosis or restrict to under 36 months."
+    )
+    residual_tumor_area_cm2: float | None = Field(
+        default=None, ge=0,
+        description="Explicit postoperative residual tumor AREA in cm2. "
+                    "Do not convert a length or volume to area, or infer from GTR/NTR/STR."
+    )
+    residual_assessment_date: str | None = Field(
+        default=None,
+        description="Postoperative imaging assessment date, ISO date at supported precision; "
+                    "not automatically surgery date."
+    )
+    residual_assessment_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision of residual_assessment_date; "
+                    "null when absent."
+    )
     surgery_type: SurgeryType = Field(
         default=SurgeryType.NONE_OF_THE_ABOVE,
         description=(
@@ -48,7 +62,7 @@ class SurgeryMention(SpanAugmentedMention):
         ),
     )
     extent_of_resection: ExtentOfResection = Field(
-        default=ExtentOfResection.NOT_AVAILABLE,
+        default=ExtentOfResection.NONE_OF_THE_ABOVE,
         description=(
             "GROSS_TOTAL_RESECTION: GTR / complete / no residual. "
             "NEAR_TOTAL_RESECTION: NTR / >90% with minimal residual. "

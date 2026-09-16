@@ -18,7 +18,7 @@ class TimelineAnchor(StrEnum):
     TREATMENT_INITIATION = "TREATMENT_INITIATION"
     INDUCTION_COMPLETION = "INDUCTION_COMPLETION"
     CONSOLIDATION_COMPLETION = "CONSOLIDATION_COMPLETION"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 class TimelineAnchorMention(SpanAugmentedMention):
     anchor: TimelineAnchor
@@ -94,11 +94,6 @@ class EventFreeFollowUpMention(SpanAugmentedMention):
         default=None,
         description="Precision for assessment_date; null if absent."
     )
-    assessment_method: str | None = Field(
-        default=None,
-        description="Clinical follow-up, imaging or other supporting evaluation as stated."
-    )
-
 
 class PatientTimelineAnnotation(BaseModel):
     anchors: list[TimelineAnchorMention] = Field(default_factory=list)

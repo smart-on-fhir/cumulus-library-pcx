@@ -10,19 +10,11 @@ from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecis
 
 
 class MetastasisEvidence(StrEnum):
-    """Result of a single Chang-staging input assessment.
-    POSITIVE: positive.
-    NEGATIVE: negative.
-    INDETERMINATE: indeterminate.
-    UNAVAILABLE: not done or not reported."""
     POSITIVE = "POSITIVE"
     NEGATIVE = "NEGATIVE"
-    INDETERMINATE = "INDETERMINATE"
-    UNAVAILABLE = "UNAVAILABLE"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 class MetastaticSite(StrEnum):
-    """Anatomic site of metastatic dissemination."""
     CSF = "CSF"
     SPINE = "SPINE"
     BRAIN = "BRAIN"
@@ -64,41 +56,41 @@ class MetastaticStagingInputsMention(SpanAugmentedMention):
     )
 
     spine_mri_findings: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Spine MRI for drop metastases / spinal leptomeningeal seeding. "
             "POSITIVE: seeding present. "
             "NEGATIVE: spine MRI done, no seeding. "
-            "UNAVAILABLE: spine MRI not done or not reported."
+            "NONE_OF_THE_ABOVE: spine MRI not done, indeterminate, or not reported."
         ),
     )
 
     brain_mri_findings: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Brain MRI for intracranial metastasis/seeding beyond the primary. "
             "POSITIVE: intracranial seeding present. "
             "NEGATIVE: done, none. "
-            "UNAVAILABLE: not done or not reported."
+            "NONE_OF_THE_ABOVE: not done, indeterminate, or not reported."
         ),
     )
 
     csf_cytology: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "CSF cytology; record lumbar versus ventricular source and collection date separately. "
             "POSITIVE: malignant cells present. "
             "NEGATIVE: cytology negative. "
-            "UNAVAILABLE: not performed or not reported."
+            "NONE_OF_THE_ABOVE: not performed, indeterminate, or not reported."
         ),
     )
 
     extraneural_metastasis: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Metastasis outside the CNS (bone marrow, bone, viscera). "
             "POSITIVE: extraneural metastasis present. NEGATIVE: worked up, none. "
-            "UNAVAILABLE: no extraneural workup or not reported."
+            "NONE_OF_THE_ABOVE: no extraneural workup, indeterminate, or not reported."
         ),
     )
 
@@ -132,8 +124,8 @@ class MetastasisSiteMention(SpanAugmentedMention):
 
 
 class MetastasisAnnotation(BaseModel):
-    """Metastasis / Chang-staging annotations from a single clinical note.
-
+    """
+    Metastasis / Chang-staging annotations from a single clinical note.
     """
     staging_inputs: MetastaticStagingInputsMention
     metastasis_sites: list[MetastasisSiteMention] = Field(

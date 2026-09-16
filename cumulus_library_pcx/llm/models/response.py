@@ -10,34 +10,44 @@ from .base import SpanAugmentedMention, DatePrecision
 
 
 class ResponseStatus(StrEnum):
+    """Response assessment result as explicitly documented.
+    COMPLETE_RESPONSE: complete response (CR).
+    PARTIAL_RESPONSE: partial response (PR).
+    STABLE_DISEASE: stable disease (SD).
+    PROGRESSIVE_DISEASE: progressive disease (PD).
+    NONE_OF_THE_ABOVE: not evaluable, indeterminate, or no response documented."""
     COMPLETE_RESPONSE = "COMPLETE_RESPONSE"
     PARTIAL_RESPONSE = "PARTIAL_RESPONSE"
     STABLE_DISEASE = "STABLE_DISEASE"
     PROGRESSIVE_DISEASE = "PROGRESSIVE_DISEASE"
-    NOT_EVALUABLE = "NOT_EVALUABLE"
-    INDETERMINATE = "INDETERMINATE"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class AssessmentTimepoint(StrEnum):
+    """Treatment-relative timepoint of a response assessment as documented.
+    BASELINE: before treatment starts.
+    DURING_INDUCTION: during induction.
+    END_INDUCTION: at end of induction.
+    DURING_CONSOLIDATION: during consolidation.
+    END_CONSOLIDATION: at end of consolidation.
+    FOLLOW_UP: after treatment completion.
+    NONE_OF_THE_ABOVE: another timepoint, or timepoint not documented."""
     BASELINE = "BASELINE"
     DURING_INDUCTION = "DURING_INDUCTION"
     END_INDUCTION = "END_INDUCTION"
     DURING_CONSOLIDATION = "DURING_CONSOLIDATION"
     END_CONSOLIDATION = "END_CONSOLIDATION"
     FOLLOW_UP = "FOLLOW_UP"
-    OTHER = "OTHER"
-    NOT_DOCUMENTED = "NOT_DOCUMENTED"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 class ResponseAssessmentMention(SpanAugmentedMention):
     timepoint: AssessmentTimepoint = Field(
-        default=AssessmentTimepoint.NOT_DOCUMENTED,
+        default=AssessmentTimepoint.NONE_OF_THE_ABOVE,
         description="Documented treatment-relative timepoint; "
                     "do not infer end-consolidation from a remission statement."
     )
     response: ResponseStatus = Field(
-        default=ResponseStatus.NOT_DOCUMENTED,
+        default=ResponseStatus.NONE_OF_THE_ABOVE,
         description="Explicit CR/PR/SD/PD or assessment result. "
                     "Missing imaging is not CR; do not assign CR from resection alone."
     )
