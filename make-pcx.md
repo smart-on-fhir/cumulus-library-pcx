@@ -85,23 +85,28 @@ Each entry is a
 
 * **hand-written**  submanifest `.toml` or `.workflow`.  
 
-| Stage                                                                   | Kind                                                                | `--stage all` | Purpose                                                                         |
-|-------------------------------------------------------------------------|---------------------------------------------------------------------|---------------|---------------------------------------------------------------------------------|
-| [study_population](cumulus_library_pcx/stage/study_population.py)       | [made](cumulus_library_pcx/study_population.toml)                   | on            | encounters for the study population (age, utilization, study period)            |
-| [study_variable](cumulus_library_pcx/stage/study_variable.py)           | [made](cumulus_library_pcx/study_variable.toml)                     | on            | upload [spreadsheet/](spreadsheet) valuesets, one `pcx__cohort_<variable>` each |
-| [study_variable_wide](cumulus_library_pcx/stage/study_variable_wide.py) | [made](cumulus_library_pcx/study_variable_wide.toml)                | on            | union and wide tables over the variable cohorts, by aspect                      |
-| [casedef](cumulus_library_pcx/stage/casedef.py)                         | [made](cumulus_library_pcx/casedef.toml)                            | on            | case-definition cohort from [casedef.csv](spreadsheet/casedef.csv)              |
-| [sample](cumulus_library_pcx/stage/sample.py)                           | [made](cumulus_library_pcx/sample.toml)                             | on            | clinical-note samples for the casedef cohort                                    |
-| [elastic_query](cumulus_library_pcx/tools/elastic_query.py)             | [hand-written](cumulus_library_pcx/elastic_query.toml)              | skip          | full-text search via `tools/elastic_query.py` (optional, needs rapid-elastic)   |
-| [elastic_upload](cumulus_library_pcx/stage/elastic_upload.py)           | [made](cumulus_library_pcx/elastic_upload.toml)                     | on            | load Elastic results into SQL; makes an empty stage when no results exist       |
-| `nlp_doc_type_tasks_50k`                                                | [hand-written](cumulus_library_pcx/nlp_doc_type_tasks_50k.workflow) | skip          | notes → LLM document-topic routing                                              |
-| `nlp_clinical_tasks_50k`                                                | [hand-written](cumulus_library_pcx/nlp_clinical_tasks_50k.workflow) | skip          | notes → LLM clinical tasks                                                      |
-| `nlp_clinical_tasks_wide`                                               | [hand-written](cumulus_library_pcx/nlp_clinical_tasks_wide.toml)    | on            | LLM output → wide SQL projections                                               |
-| [eligible](cumulus_library_pcx/stage/eligible.py)                       | [made](cumulus_library_pcx/eligible.toml)                           | on            | trial inclusion/exclusion, see [eligible.md](eligible.md)                       |
-| [outcome](cumulus_library_pcx/stage/outcome.py)                         | [made](cumulus_library_pcx/outcome.toml)                            | on            | vital status, first event, OS and provisional EFS                               |
-| [client_views](cumulus_library_pcx/stage/client_views.py)               | [made](cumulus_library_pcx/client_views.toml)                       | on            | `pcx__client_*` tables for timeline and survival analysis                       |
-| [qa_athena](cumulus_library_pcx/stage/qa_athena.py)                     | [made](cumulus_library_pcx/qa_athena.toml)                          | on            | `pcx__qa_*` / `pcx__warn_*` data-quality tables                                 |
-| [cube](cumulus_library_pcx/stage/cube.py)                               | [made](cumulus_library_pcx/cube.toml)                               | on            | patient-count cubes                                                             |
+Kind links to the stage's file: an **action** is a `.toml` submanifest of `[[actions]]` entries
+(`type = "submanifest"` in `manifest.toml`); a **workflow** is a `.workflow` file with a
+`config_type`, which cumulus-library runs through the matching builder.
+
+| Stage                                                                   | Kind                                                            | `--stage all` | Purpose                                                                         |
+|-------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|---------------------------------------------------------------------------------|
+| [study_population](cumulus_library_pcx/stage/study_population.py)       | [action](cumulus_library_pcx/study_population.toml)             | on            | encounters for the study population (age, utilization, study period)            |
+| [study_variable](cumulus_library_pcx/stage/study_variable.py)           | [action](cumulus_library_pcx/study_variable.toml)               | on            | upload [spreadsheet/](spreadsheet) valuesets, one `pcx__cohort_<variable>` each |
+| [study_variable_wide](cumulus_library_pcx/stage/study_variable_wide.py) | [action](cumulus_library_pcx/study_variable_wide.toml)          | on            | union and wide tables over the variable cohorts, by aspect                      |
+| [casedef](cumulus_library_pcx/stage/casedef.py)                         | [action](cumulus_library_pcx/casedef.toml)                      | on            | case-definition cohort from [casedef.csv](spreadsheet/casedef.csv)              |
+| [sample](cumulus_library_pcx/stage/sample.py)                           | [action](cumulus_library_pcx/sample.toml)                       | on            | clinical-note samples for the casedef cohort                                    |
+| [elastic_query](cumulus_library_pcx/tools/elastic_query.py)             | [action](cumulus_library_pcx/elastic_query.toml)                | skip          | full-text search via `tools/elastic_query.py` (optional, needs rapid-elastic)   |
+| [elastic_upload](cumulus_library_pcx/stage/elastic_upload.py)           | [action](cumulus_library_pcx/elastic_upload.toml)               | on            | load Elastic results into SQL; makes an empty stage when no results exist       |
+| `nlp_document_tasks_50k`                                                | [workflow](cumulus_library_pcx/nlp_document_tasks_50k.workflow) | skip          | notes → LLM document-topic routing                                              |
+| `nlp_clinical_tasks_50k`                                                | [workflow](cumulus_library_pcx/nlp_clinical_tasks_50k.workflow) | skip          | notes → LLM clinical tasks                                                      |
+| [nlp_wide_document](cumulus_library_pcx/stage/nlp_wide_document.py) | [action](cumulus_library_pcx/nlp_wide_document.toml)      | on            | LLM document type and topic → wide SQL                                               |
+| [nlp_wide_clinical](cumulus_library_pcx/stage/nlp_wide_clinical.py) | [action](cumulus_library_pcx/nlp_wide_clinical.toml)      | on            | LLM output → wide SQL projections                                               |
+| [eligible](cumulus_library_pcx/stage/eligible.py)                       | [action](cumulus_library_pcx/eligible.toml)                     | on            | trial inclusion/exclusion, see [eligible.md](eligible.md)                       |
+| [outcome](cumulus_library_pcx/stage/outcome.py)                         | [action](cumulus_library_pcx/outcome.toml)                      | on            | vital status, first event, OS and provisional EFS                               |
+| [client_views](cumulus_library_pcx/stage/client_views.py)               | [action](cumulus_library_pcx/client_views.toml)                 | on            | `pcx__client_*` tables for timeline and survival analysis                       |
+| [qa_athena](cumulus_library_pcx/stage/qa_athena.py)                     | [action](cumulus_library_pcx/qa_athena.toml)                    | on            | `pcx__qa_*` / `pcx__warn_*` data-quality tables                                 |
+| [cube](cumulus_library_pcx/stage/cube.py)                               | [action](cumulus_library_pcx/cube.toml)                         | on            | patient-count cubes                                                             |
 
 **Adding a stage**: write `stage/<name>.py` with `make_actions() -> list[Action]` and
 `make() -> Path` (`save_actions_toml(make_actions(), '<name>.toml')`), then insert
@@ -149,7 +154,8 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 | `tests/template/*.sql`                                                                         | qa_athena                                 |
 | `cumulus_library_pcx/custom/*.sql`                                                             | eligible, outcome, client_views (hand-written SQL, referenced as `custom/`) |
 | `spreadsheet/file_upload_population.toml`, `file_upload_casedef.toml`, `file_upload_client_views.toml` | hand-written upload workflows: they declare per-column `col_types`, which the generator does not |
-| `cumulus_library_pcx/elastic_query.toml`, `nlp_*.workflow`, `nlp_clinical_tasks_wide.toml`     | hand-written stages, listed only          |
+| `cumulus_library_pcx/elastic_query.toml`, `nlp_*.workflow`                                     | hand-written stages, listed only          |
+| `cumulus_library_pcx/llm/template/pcx__llm_*.sql.jinja`, `nlp_*_tasks.workflow` (task versions) | nlp_wide_document, nlp_wide_clinical |
 | `cumulus_library_pcx/manifest.toml` → `study_prefix`                                           | read at import for the `pcx__` prefix     |
 
 ## Output
@@ -158,6 +164,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 |--------------------------------------------------------------|-------------------------------------------|
 | `cumulus_library_pcx/athena/*.sql`                           | each made stage, from templates and CSVs  |
 | `tests/athena/*.sql`                                         | qa_athena                                 |
+| `cumulus_library_pcx/llm/athena/pcx__llm_*.sql`              | nlp_wide_document, nlp_wide_clinical |
 | `cumulus_library_pcx/<stage>.toml`                           | each made stage                           |
 | `spreadsheet/file_upload_study_variable.toml`                | study_variable (`UploadWorkflow`, all columns strings) |
 | `$ELASTIC_OUTPUT_DIR/<date>/file_upload_elastic.toml`        | elastic_upload, when results exist        |
@@ -172,12 +179,13 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 - [tools/manifest.py](cumulus_library_pcx/tools/manifest.py): dataclasses → TOML (`save_actions_toml`, `save_upload_toml`, `save_manifest_toml`), study prefix
 - [tools/filetool.py](cumulus_library_pcx/tools/filetool.py): project paths, spreadsheet listing, `csv_columns`
 - [tools/template.py](cumulus_library_pcx/tools/template.py): Jinja rendering into `athena/` and `tests/athena/`
+- [tools/nlp_wide.py](cumulus_library_pcx/tools/nlp_wide.py): renders `llm/template/` against a `.workflow`'s tasks and deployments, shared by the two NLP wide stages
 - [stage/*.py](cumulus_library_pcx/stage): one module per made stage, each with `make_actions()` and `make()`
 
 ## Known issues
 
-- **`nlp_clinical_tasks_wide.toml` is listed, not generated.** The generator module was removed;
-  the file must stay on disk until the NLP stages get a generator, or `make-pcx` fails at import.
+- **The NLP wide stages render against a fixed deployment list** (`DEFAULT_DEPLOYMENTS` in
+  `tools/nlp_wide.py`); there is no command-line way to choose NLP deployments yet.
 - **`--build` only knows the venv's `cumulus-library`.** There is no option to point at another
   install, change `-s`/`-t`, or drop `--force-upload`.
 - **Hand-written upload workflows are not checked** against the CSVs they name; a renamed

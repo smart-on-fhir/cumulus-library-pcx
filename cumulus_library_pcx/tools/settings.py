@@ -1,11 +1,11 @@
 import os
-from pathlib import Path
 
 HOME_INSTITUTION = os.environ.get("HOME_INSTITUTION" or "Boston Children's Hospital (BCH)")
 
 # Cumulus data exports go here
 CUMULUS_LIBRARY_DATA_PATH = os.environ.get("CUMULUS_LIBRARY_DATA_PATH")
 
+# Elastic search results go here
 ELASTIC_OUTPUT_DIR = os.environ.get('ELASTIC_OUTPUT_DIR')
 
 # FHIR Encounter (only) or with date linekd "encounter_ref_link"

@@ -3,7 +3,7 @@ NLP document wide stage: pcx__llm_document_type_wide and pcx__llm_document_topic
 the document classification and topic-routing results that the clinical extraction
 tasks are selected from.
 
-Task versions come from nlp_doc_type_tasks.workflow; see tools/nlp_wide.py.
+Task versions come from nlp_document_tasks.workflow; see tools/nlp_wide.py.
 """
 from pathlib import Path
 from typing import Iterable
@@ -11,9 +11,9 @@ from cumulus_library_pcx.tools import nlp_wide
 from cumulus_library_pcx.tools.nlp_wide import DEFAULT_DEPLOYMENTS
 from cumulus_library_pcx.tools.manifest import Action, save_actions_toml
 
-WORKFLOW = 'nlp_doc_type_tasks.workflow'
+WORKFLOW = 'nlp_document_tasks.workflow'
 LABEL = 'Flattened NLP results for PCX document type and topic'
-TOML = 'nlp_doc_type_tasks_wide.toml'
+TOML = 'nlp_wide_document.toml'
 
 #-----------------------------------------------------------------------------
 # actions

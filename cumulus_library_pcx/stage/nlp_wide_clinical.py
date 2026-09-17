@@ -13,7 +13,7 @@ from cumulus_library_pcx.tools.manifest import Action, save_actions_toml
 
 WORKFLOW = 'nlp_clinical_tasks.workflow'
 LABEL = 'Flattened NLP results for Clinical Tasks'
-TOML = 'nlp_clinical_tasks_wide.toml'
+TOML = 'nlp_wide_clinical.toml'
 
 #-----------------------------------------------------------------------------
 # actions

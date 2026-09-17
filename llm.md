@@ -16,7 +16,7 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 | `transition_of_care`                 | 1            | Transfer-in timing/reason, diagnosis and surgery setting, and therapy before entry                                                                                                 |
 | `document_topic`, `document_type`    | 2, 2         | Routing to extraction topics and document classification                                                                                                                           |
 
-Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (13 clinical tasks) and [nlp_doc_type_tasks.workflow](cumulus_library_pcx/nlp_doc_type_tasks.workflow) (routing and classification). The `_50k` variants are strict subsets with identical prompts (diagnosis and surgery; document_topic only); nothing in them limits the note count. Bump a task's version whenever its model changes, and regenerate the schema and the wide-table snapshot together.
+Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (13 clinical tasks) and [nlp_document_tasks.workflow](cumulus_library_pcx/nlp_document_tasks.workflow) (routing and classification). The `_50k` variants are strict subsets with identical prompts (diagnosis and surgery; document_topic only); nothing in them limits the note count. Bump a task's version whenever its model changes, and regenerate the schema and the wide-table snapshot together.
 
 The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([limitations.md](limitations.md) §3–§4).
 
@@ -86,14 +86,14 @@ Wide builders project values without repairing dates or adjudicating evidence:
   BIGINT, DOUBLE, BOOLEAN or VARCHAR; diagnosis dates remain VARCHAR with precision.
 - Diagnosis wide output omits mention flags and evidence spans. Retrieve those from
   the source NLP result; a projected value alone is not the full evidence record.
-- The [wide-stage manifest](cumulus_library_pcx/nlp_clinical_tasks_wide.toml) runs all
+- The [wide-stage manifest](cumulus_library_pcx/nlp_wide_clinical.toml) runs all
   21 available clinical SQL projections. Document type/topic use a separate workflow.
   Molecular has no wide template.
 
 Generate the SQL resources and manifest with:
 
 ```sh
-python -m cumulus_library_pcx.stage.nlp_clinical_tasks_wide
+make-pcx nlp_wide_clinical
 ```
 
 Versions come from `nlp_clinical_tasks.workflow`. The default deployment is
@@ -128,7 +128,7 @@ or clinical validation (workplan 1.5).
 ### Regression snapshots and validation
 
 The 21 clinical files in `llm/athena/*.sql` are generated manifest inputs.
-Regenerate them with `python -m cumulus_library_pcx.stage.nlp_clinical_tasks_wide`.
+Regenerate them with `make-pcx nlp_wide_clinical` (and `make-pcx nlp_wide_document` for the document tables).
 The older builder-based snapshot utility also renders document-routing examples:
 
 ```sh
