@@ -1,8 +1,9 @@
 """
-NLP wide tables: pcx__llm_<projection> from the raw pcx__nlp_<task>_<deployment> tables.
+NLP wide tables: <prefix>__llm_<projection> from the raw <prefix>__nlp_<task>_<deployment> tables,
+where <prefix> is the study prefix from manifest.toml (manifest.PREFIX).
 
-Each llm/template/pcx__llm_<projection>.sql.jinja is rendered once against the selected
-deployments (UNION ALL of pcx__nlp_<task>_<deployment>) at the task version declared in a
+Each llm/template/<prefix>__llm_<projection>.sql.jinja is rendered once against the selected
+deployments (UNION ALL of <prefix>__nlp_<task>_<deployment>) at the task version declared in a
 `.workflow` file, and written to llm/athena/. A workflow's tasks select which templates
 belong to it: projection `<task>` or `<task>_<suffix>`.
 
@@ -13,10 +14,12 @@ from pathlib import Path
 from typing import Iterable
 from cumulus_library_pcx.tools import settings
 from cumulus_library_pcx.tools import filetool, manifest, template
+from cumulus_library_pcx.tools.manifest import PREFIX
 from cumulus_library_pcx.tools.staging import Action, SqlParallelAction
 
 DEFAULT_DEPLOYMENTS = settings.NLP_DEPLOYMENTS
 DEPLOYMENT_SUFFIX = re.compile(r'^[a-z0-9_]+$')   # becomes part of an Athena table name
+TEMPLATE_GLOB = f'{PREFIX}__llm_*.sql.jinja'      # llm/template/<prefix>__llm_<projection>.sql.jinja
 
 #-----------------------------------------------------------------------------
 # List
@@ -36,7 +39,7 @@ def list_tasks(workflow: str) -> dict[str, int]:
 
 def list_deployments(deployments: Iterable[str]) -> list[str]:
     """
-    :return: sorted, de-duplicated NLP deployment suffixes (pcx__nlp_<task>_<deployment>)
+    :return: sorted, de-duplicated NLP deployment suffixes (<prefix>__nlp_<task>_<deployment>)
     """
     out = sorted(set(deployments))
     bad = [d for d in out if not DEPLOYMENT_SUFFIX.match(d)]
@@ -45,7 +48,7 @@ def list_deployments(deployments: Iterable[str]) -> list[str]:
     return out
 
 def projection(template_path: Path) -> str:
-    return template_path.name.removeprefix('pcx__llm_').removesuffix('.sql.jinja')
+    return template_path.name.removeprefix(f'{PREFIX}__llm_').removesuffix('.sql.jinja')
 
 def task_of(template_path: Path, tasks: dict[str, int]) -> str | None:
     """
@@ -57,10 +60,11 @@ def task_of(template_path: Path, tasks: dict[str, int]) -> str | None:
 
 def list_templates(tasks: dict[str, int]) -> dict[Path, str]:
     """
-    :return: llm/template/pcx__llm_*.sql.jinja -> task, for the templates these tasks own
+    :return: llm/template/<prefix>__llm_*.sql.jinja -> task, for the templates these tasks own
     """
     out = dict()
-    for path in sorted(filetool.path_llm_template().glob('pcx__llm_*.sql.jinja')):
+    template_glob = f'{PREFIX}__llm_*.sql.jinja'
+    for path in sorted(filetool.path_llm_template().glob(template_glob)):
         task = task_of(path, tasks)
         if task:
             out[path] = task
@@ -79,7 +83,7 @@ def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> d
     out = dict()
     for template_path, task in list_templates(tasks).items():
         sql = template.load_llm(template_path.name,
-                                table_names=[f'pcx__nlp_{task}_{deployment}' for deployment in deployments],
+                                table_names=[f'{PREFIX}__nlp_{task}_{deployment}' for deployment in deployments],
                                 task_version=tasks[task])
         out[template_path.name.removesuffix('.jinja')] = sql.strip() + '\n'
     if not out:
@@ -88,7 +92,7 @@ def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> d
 
 def make_wide(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Path]:
     """
-    :return: llm/athena/pcx__llm_*.sql written for the workflow and deployments
+    :return: llm/athena/<prefix>__llm_*.sql written for the workflow and deployments
     """
     return [filetool.save_llm_athena(file_sql, sql) for file_sql, sql in render(workflow, deployments).items()]
 

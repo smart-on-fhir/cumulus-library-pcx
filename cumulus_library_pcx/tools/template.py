@@ -11,6 +11,8 @@ def load(file_sql: str, **kwargs) -> str:
     """
     sql = load("meta_version.sql", data_package_version="1.0.0")
     sql = load("sample_casedef_temporality.sql", temporality="pre")
+
+    `file_sql` names the SQL to produce; the template is `<file_sql>.jinja`.
     """
     return _render(filetool.path_template(), file_sql, **kwargs)
 
@@ -36,18 +38,25 @@ def copy_test(file_sql: Path | str, **kwargs) -> Path:
 #-----------------------------------------------------------------------------
 # Helpers
 #-----------------------------------------------------------------------------
-def _render(template_dir: Path, file_sql: str, **kwargs) -> str:
+def _template_name(file_sql: Path | str) -> str:
+    """
+    Templates are `<name>.sql.jinja`; callers may pass either that or the `<name>.sql` they want.
+    """
+    name = file_sql.name if isinstance(file_sql, Path) else file_sql
+    return name if name.endswith('.jinja') else f'{name}.jinja'
+
+def _render(template_dir: Path, file_sql: Path | str, **kwargs) -> str:
     """Render a Jinja SQL template found in `template_dir`."""
     kwargs.setdefault("prefix", PREFIX)
     macro_dir = Path(base_templates.__file__).parent / "shared_macros"
     env = Environment(loader=FileSystemLoader([template_dir, macro_dir]),
                       undefined=StrictUndefined)
     env.globals["db_type"] = "athena"
-    return env.get_template(file_sql).render(**kwargs)
+    return env.get_template(_template_name(file_sql)).render(**kwargs)
 
 def _copy(template_dir: Path, athena_path, file_sql: Path | str, **kwargs) -> Path:
     """Render `file_sql` from `template_dir` and write it under `athena_path` as
-    `{PREFIX}__<file_name>`."""
-    file_name = file_sql.name if isinstance(file_sql, Path) else file_sql
+    `{PREFIX}__<name>.sql`."""
+    file_name = _template_name(file_sql).removesuffix('.jinja')
     text = _render(template_dir, file_name, **kwargs)
     return filetool.write_text(text, athena_path(f"{PREFIX}__{file_name}"))

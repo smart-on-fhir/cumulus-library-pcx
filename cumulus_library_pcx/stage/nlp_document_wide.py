@@ -11,8 +11,8 @@ from cumulus_library_pcx.tools import nlp_wide
 from cumulus_library_pcx.tools.nlp_wide import DEFAULT_DEPLOYMENTS
 from cumulus_library_pcx.tools.manifest import Action, save_actions_toml
 
+LABEL = 'Flatten NLP results for PCX document type and topic'
 WORKFLOW = 'nlp_document_tasks.workflow'
-LABEL = 'Flattened NLP results for PCX document type and topic'
 TOML = 'nlp_document_wide.toml'
 
 #-----------------------------------------------------------------------------
