@@ -1,0 +1,101 @@
+[[actions]]
+label = "SQL cube study population"
+type = "build:serial"
+files = [
+    "athena/pcx__cube_encounter_study_population_enc.sql",
+    "athena/pcx__cube_patient_study_population.sql",
+    "athena/pcx__cube_patient_study_population_dx.sql",
+    "athena/pcx__cube_patient_study_population_allergy.sql",
+    "athena/pcx__cube_patient_study_population_rx.sql",
+    "athena/pcx__cube_patient_study_population_proc.sql",
+    "athena/pcx__cube_patient_study_population_lab.sql",
+    "athena/pcx__cube_patient_study_population_doc.sql",
+    "athena/pcx__cube_documentreference_study_population_doc.sql",
+    "athena/pcx__cube_patient_study_population_diag.sql",
+    "athena/pcx__cube_diagnosticreport_study_population_diag.sql",
+]
+
+[[actions]]
+label = "export cube tables study populations"
+type = "export:counts"
+tables = [
+    "pcx__cube_encounter_study_population_enc",
+    "pcx__cube_patient_study_population",
+    "pcx__cube_patient_study_population_dx",
+    "pcx__cube_patient_study_population_allergy",
+    "pcx__cube_patient_study_population_rx",
+    "pcx__cube_patient_study_population_proc",
+    "pcx__cube_patient_study_population_lab",
+    "pcx__cube_patient_study_population_doc",
+    "pcx__cube_documentreference_study_population_doc",
+    "pcx__cube_patient_study_population_diag",
+    "pcx__cube_diagnosticreport_study_population_diag",
+]
+
+[[actions]]
+label = "SQL cube variable union"
+type = "build:serial"
+files = [
+    "athena/pcx__cube_patient_variable_union.sql",
+]
+
+[[actions]]
+label = "export cube tables variable union"
+type = "export:counts"
+tables = [
+    "pcx__cube_patient_variable_union",
+]
+
+[[actions]]
+label = "SQL cube casedef"
+type = "build:serial"
+files = [
+    "athena/pcx__cube_patient_casedef.sql",
+    "athena/pcx__cube_patient_casedef_dx.sql",
+    "athena/pcx__cube_patient_casedef_rx.sql",
+    "athena/pcx__cube_patient_casedef_lab.sql",
+    "athena/pcx__cube_patient_casedef_proc.sql",
+]
+
+[[actions]]
+label = "export cube tables casedef"
+type = "export:counts"
+tables = [
+    "pcx__cube_patient_casedef",
+    "pcx__cube_patient_casedef_dx",
+    "pcx__cube_patient_casedef_rx",
+    "pcx__cube_patient_casedef_lab",
+    "pcx__cube_patient_casedef_proc",
+]
+
+[[actions]]
+label = "SQL cube casedef sample"
+type = "build:serial"
+files = [
+    "athena/pcx__cube_patient_sample_casedef.sql",
+    "athena/pcx__cube_patient_sample_casedef_pre.sql",
+    "athena/pcx__cube_patient_sample_casedef_peri.sql",
+    "athena/pcx__cube_patient_sample_casedef_peri_post.sql",
+    "athena/pcx__cube_patient_sample_casedef_post.sql",
+    "athena/pcx__cube_note_sample_casedef.sql",
+    "athena/pcx__cube_note_sample_casedef_pre.sql",
+    "athena/pcx__cube_note_sample_casedef_peri.sql",
+    "athena/pcx__cube_note_sample_casedef_peri_post.sql",
+    "athena/pcx__cube_note_sample_casedef_post.sql",
+]
+
+[[actions]]
+label = "export cube tables casedef sample"
+type = "export:counts"
+tables = [
+    "pcx__cube_patient_sample_casedef",
+    "pcx__cube_patient_sample_casedef_pre",
+    "pcx__cube_patient_sample_casedef_peri",
+    "pcx__cube_patient_sample_casedef_peri_post",
+    "pcx__cube_patient_sample_casedef_post",
+    "pcx__cube_note_sample_casedef",
+    "pcx__cube_note_sample_casedef_pre",
+    "pcx__cube_note_sample_casedef_peri",
+    "pcx__cube_note_sample_casedef_peri_post",
+    "pcx__cube_note_sample_casedef_post",
+]
