@@ -7,13 +7,22 @@ from cumulus_library_pcx.tools import settings, manifest, tablespace, filetool, 
 #-----------------------------------------------------------------------------
 # ElasticSearch output
 #-----------------------------------------------------------------------------
+def path_output_base() -> Path:
+    """
+    :return: $ELASTIC_OUTPUT_DIR if set, else $CUMULUS_LIBRARY_DATA_PATH/elastic/output
+    """
+    if settings.ELASTIC_OUTPUT_DIR:
+        return Path(settings.ELASTIC_OUTPUT_DIR)
+    if settings.CUMULUS_LIBRARY_DATA_PATH:
+        return Path(settings.CUMULUS_LIBRARY_DATA_PATH) / 'elastic' / 'output'
+    raise EnvironmentError("elastic output needs ELASTIC_OUTPUT_DIR or CUMULUS_LIBRARY_DATA_PATH to be set")
+
 def path_output() -> Path:
     """
     Workaround hack for
     https://github.com/smart-on-fhir/rapid-elastic/issues/29
     """
-    output_base = settings.get_elastic_output_dir().resolve()
-    return output_base / filetool.date_str()
+    return path_output_base().resolve() / filetool.date_str()
 
 def list_csv() -> list[Path]:
     output_path = path_output()
@@ -36,7 +45,7 @@ def path_upload_toml() -> Path:
     return path_output() / 'file_upload_elastic.toml'
 
 def path_stage_toml() -> Path:
-     return filetool.path_project() / 'elastic_output.toml'
+     return filetool.path_project() / 'elastic_upload.toml'
 
 #-----------------------------------------------------------------------------
 # Helpers

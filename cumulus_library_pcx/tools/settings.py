@@ -6,8 +6,7 @@ HOME_INSTITUTION = os.environ.get("HOME_INSTITUTION" or "Boston Children's Hospi
 # Cumulus data exports go here
 CUMULUS_LIBRARY_DATA_PATH = os.environ.get("CUMULUS_LIBRARY_DATA_PATH")
 
-# Elastic specific data exports
-ELASTIC_OUTPUT_DIR = Path(CUMULUS_LIBRARY_DATA_PATH) / 'elastic' / 'output'
+ELASTIC_OUTPUT_DIR = os.environ.get('ELASTIC_OUTPUT_DIR')
 
 # FHIR Encounter (only) or with date linekd "encounter_ref_link"
 ENCOUNTER_REF = os.environ.get("CUMULUS_ENCOUNTER_REF", "encounter_ref_link")
