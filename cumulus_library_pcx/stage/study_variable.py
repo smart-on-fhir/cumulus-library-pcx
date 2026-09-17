@@ -14,7 +14,7 @@ from cumulus_library_pcx.tools.manifest import (
 # Common: users add custom spreadsheet/*.csv files
 # Rare: change the UPLOAD_FILE path; file contents are generated
 #-----------------------------------------------------------------------------
-UPLOAD_FILE = 'file_upload_study_variable.toml'
+UPLOAD_TOML = 'file_upload_study_variable.toml'
 
 #-----------------------------------------------------------------------------
 # List variables
@@ -144,8 +144,8 @@ def make_actions() -> list[Action]:
     """
     variable_list = [make_cohort(variable) for variable in list_variables()]
 
-    return [FileAction(file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
-                       label=UPLOAD_FILE),
+    return [FileAction(file_list=[f'../spreadsheet/{UPLOAD_TOML}'],
+                       label=UPLOAD_TOML),
             SqlAction(file_list=variable_list,
                       label='variable cohorts')]
 

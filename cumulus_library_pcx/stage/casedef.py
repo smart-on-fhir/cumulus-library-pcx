@@ -13,7 +13,7 @@ from cumulus_library_pcx.tools.manifest import (
 # Common: users add custom spreadsheet/casedef*.csv files
 # Rare: change the UPLOAD_FILE path; file contents are generated
 #-----------------------------------------------------------------------------
-UPLOAD_FILE = 'file_upload_casedef.toml'
+UPLOAD_TOML = 'file_upload_casedef.toml'
 
 #-----------------------------------------------------------------------------
 # Template Helpers

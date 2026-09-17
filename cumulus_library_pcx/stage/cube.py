@@ -1,5 +1,4 @@
 from pathlib import Path
-from cumulus_library_pcx.tools import study_meta
 from cumulus_library_pcx.tools.manifest import (
     Action,
     ExportAction,

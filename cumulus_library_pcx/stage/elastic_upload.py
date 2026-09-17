@@ -2,12 +2,17 @@ import os
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 from cumulus_library_pcx.tools.fhir_reference import Aspect
-from cumulus_library_pcx.tools import settings, manifest, tablespace, filetool, template, settings
+from cumulus_library_pcx.tools import settings, manifest, tablespace, filetool, template
 
 #-----------------------------------------------------------------------------
-# ElasticSearch output
+# Paths
 #-----------------------------------------------------------------------------
-def path_output_base() -> Path:
+UPLOAD_TOML = 'file_upload_elastic.toml'
+
+def path_upload_toml() -> Path:
+    return path_output() / UPLOAD_TOML
+
+def path_output() -> Path:
     """
     :return: $ELASTIC_OUTPUT_DIR if set, else $CUMULUS_LIBRARY_DATA_PATH/elastic/output
     """
@@ -15,15 +20,11 @@ def path_output_base() -> Path:
         return Path(settings.ELASTIC_OUTPUT_DIR)
     if settings.CUMULUS_LIBRARY_DATA_PATH:
         return Path(settings.CUMULUS_LIBRARY_DATA_PATH) / 'elastic' / 'output'
-    raise EnvironmentError("elastic output needs ELASTIC_OUTPUT_DIR or CUMULUS_LIBRARY_DATA_PATH to be set")
+    raise EnvironmentError("ELASTIC_OUTPUT_DIR or CUMULUS_LIBRARY_DATA_PATH must be set")
 
-def path_output() -> Path:
-    """
-    Workaround hack for
-    https://github.com/smart-on-fhir/rapid-elastic/issues/29
-    """
-    return path_output_base().resolve() / filetool.date_str()
-
+#-----------------------------------------------------------------------------
+# List results
+#-----------------------------------------------------------------------------
 def list_csv() -> list[Path]:
     output_path = path_output()
     if output_path and output_path.exists():
@@ -34,18 +35,9 @@ def list_csv() -> list[Path]:
 # ElasticSearch task
 #-----------------------------------------------------------------------------
 def list_tasks() -> list[Path]:
-    tasks = ['casedef', 'task']
+    tasks = ['casedef']
     tables = [tablespace.name_elastic(task) for task in tasks]
     return [filetool.path_athena(f"{table}.sql") for table in tables]
-
-#-----------------------------------------------------------------------------
-# TOML files
-#-----------------------------------------------------------------------------
-def path_upload_toml() -> Path:
-    return path_output() / 'file_upload_elastic.toml'
-
-def path_stage_toml() -> Path:
-     return filetool.path_project() / 'elastic_upload.toml'
 
 #-----------------------------------------------------------------------------
 # Helpers

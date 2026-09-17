@@ -55,12 +55,15 @@ def make_eligible() -> list[Path]:
 # actions
 #-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
-    return [SqlAction(make_dx(),
-                      'eligible diagnosis: time zero, age in months, ATRT'),
-            SqlParallelAction(make_treatment(),
-                              'eligible treatment: definitive surgery, methotrexate and chemo, radiation'),
-            SqlAction(make_eligible(),
-                           'eligible criteria per subject, then trial-like intersection'),
+    return [SqlAction(
+                make_dx(),
+                'eligible diagnosis: time zero, age in months, ATRT'),
+            SqlParallelAction(
+                make_treatment(),
+                'eligible treatment: definitive surgery, methotrexate and chemo, radiation'),
+            SqlAction(
+                make_eligible(),
+                'eligible criteria per subject, then trial-like intersection')
     ]
 
 #-----------------------------------------------------------------------------

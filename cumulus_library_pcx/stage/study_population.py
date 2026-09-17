@@ -12,7 +12,7 @@ from cumulus_library_pcx.tools.manifest import (
 # Common: edit the values of spreadsheet/include_*.csv
 # Rare: change the UPLOAD_FILE path or contents
 #-----------------------------------------------------------------------------
-UPLOAD_FILE = 'file_upload_population.toml'
+UPLOAD_TOML = 'file_upload_population.toml'
 
 #-----------------------------------------------------------------------------
 # Templates
@@ -68,7 +68,7 @@ def make_actions() -> list[Action]:
 
     return [
         FileAction(
-            file_list=[f'../spreadsheet/{UPLOAD_FILE}'],
+            file_list=[f'../spreadsheet/{UPLOAD_TOML}'],
             label='inclusion criteria for study population'),
         SqlAction(make_template([STUDY_PERIOD]),
                   'study_period'),
