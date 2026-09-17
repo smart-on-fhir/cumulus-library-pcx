@@ -48,7 +48,6 @@ cns_embryonal,urn:oid:2.16.840.1.113883.3.247.1.1,35900,Primitive neuroectoderma
 atrt,http://snomed.info/sct,112691000112107,Primary malignant atypical teratoid rhabdoid neoplasm of central nervous system (disorder),1
 atrt,http://snomed.info/sct,1196898000,Primary malignant atypical teratoid rhabdoid neoplasm of brain (disorder),1
 atrt,http://snomed.info/sct,428061005,Atypical teratoid rhabdoid tumor of brain (disorder),1
-atrt,http://snomed.info/sct,715659006,Atypical teratoid/rhabdoid tumor [CANDIDATE - verify],1
 atrt,http://snomed.info/sct,93744007,Atypical teratoid rhabdoid tumor (disorder),1
 atrt,urn:oid:2.16.840.1.113883.3.247.1.1,1507559795,Atypical teratoid-rhabdoid tumor (AT/RT) of brain (HCC) [LOCAL - Epic DX],1
 atrt,urn:oid:2.16.840.1.113883.3.247.1.1,1526633889,Primary malignant atypical teratoid-rhabdoid tumor of central nervous system (HCC) [LOCAL - Epic DX],1
