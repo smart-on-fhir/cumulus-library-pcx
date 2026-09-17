@@ -8,7 +8,10 @@ CUMULUS_LIBRARY_DATA_PATH = os.environ.get("CUMULUS_LIBRARY_DATA_PATH")
 # Elastic search results go here
 ELASTIC_OUTPUT_DIR = os.environ.get('ELASTIC_OUTPUT_DIR')
 
-# FHIR Encounter (only) or with date linekd "encounter_ref_link"
+# NLP deployments, list of models to check if data exists
+NLP_DEPLOYMENTS = ('gpt_oss_120b',)
+
+# FHIR Encounter (only) or with date linked "encounter_ref_link"
 ENCOUNTER_REF = os.environ.get("CUMULUS_ENCOUNTER_REF", "encounter_ref_link")
 
 # CREATE VIEW AS instead of CREATE TABLE AS for patient count "cubes"

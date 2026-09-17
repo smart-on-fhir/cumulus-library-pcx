@@ -11,10 +11,11 @@ The generated queries require the selected deployments' NLP source tables.
 import re
 from pathlib import Path
 from typing import Iterable
+from cumulus_library_pcx.tools import settings
 from cumulus_library_pcx.tools import filetool, manifest, template
 from cumulus_library_pcx.tools.staging import Action, SqlParallelAction
 
-DEFAULT_DEPLOYMENTS = ('gpt_oss_120b',)
+DEFAULT_DEPLOYMENTS = settings.NLP_DEPLOYMENTS
 DEPLOYMENT_SUFFIX = re.compile(r'^[a-z0-9_]+$')   # becomes part of an Athena table name
 
 #-----------------------------------------------------------------------------
