@@ -3,7 +3,7 @@ from cumulus_library_pcx.tools import filetool, tablespace, fhir_reference
 from cumulus_library_pcx.tools.fhir_reference import Aspect, get_aspect
 from cumulus_library_pcx.tools.manifest import (
     Action,
-    UploadAction,
+    UploadWorkflow,
     FileAction,
     SqlAction,
     save_actions_toml
@@ -128,11 +128,10 @@ def make_cohort(variable: str) -> Path:
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
-def make_upload(variable_list:list[str] | None) -> UploadAction:
+def make_upload(variable_list:list[str] | None) -> UploadWorkflow:
     if not variable_list:
         variable_list = list_variables()
-    return UploadAction(file_list=variable_list,
-                        label='upload spreadsheet/*.csv valuesets')
+    return UploadWorkflow(file_list=variable_list)
 
 def make_actions() -> list[Action]:
     """

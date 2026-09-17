@@ -3,16 +3,19 @@ from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 from cumulus_library_pcx.tools.fhir_reference import Aspect
 from cumulus_library_pcx.tools import settings, manifest, tablespace, filetool, template
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    FileAction,
+    UploadWorkflow
+)
 
 #-----------------------------------------------------------------------------
 # Paths
 #-----------------------------------------------------------------------------
 UPLOAD_TOML = 'file_upload_elastic.toml'
 
-def path_upload_toml() -> Path:
-    return path_output() / UPLOAD_TOML
-
-def path_output() -> Path:
+def path_output() -> Path | None:
     """
     :return: $ELASTIC_OUTPUT_DIR if set, else $CUMULUS_LIBRARY_DATA_PATH/elastic/output
     """
@@ -20,10 +23,23 @@ def path_output() -> Path:
         return Path(settings.ELASTIC_OUTPUT_DIR)
     if settings.CUMULUS_LIBRARY_DATA_PATH:
         return Path(settings.CUMULUS_LIBRARY_DATA_PATH) / 'elastic' / 'output'
-    raise EnvironmentError("ELASTIC_OUTPUT_DIR or CUMULUS_LIBRARY_DATA_PATH must be set")
+    print('skipping optional elastic_upload stage, ELASTIC_OUTPUT_DIR not set')
+    return None
 
 #-----------------------------------------------------------------------------
-# List results
+# Template
+#-----------------------------------------------------------------------------
+def make_template_union(aspect:Aspect=None) -> Path:
+    cohort = f'union_{aspect.name}' if aspect else f'union'
+    table_list = list_tables()
+    return filetool.save_athena_view(
+        tablespace.name_elastic(cohort),
+        template.load(f"elastic_{cohort}.sql",
+                      encounter_ref=ENCOUNTER_REF,
+                      select_union=select_union(table_list)))
+
+#-----------------------------------------------------------------------------
+# Helpers
 #-----------------------------------------------------------------------------
 def list_csv() -> list[Path]:
     output_path = path_output()
@@ -31,17 +47,6 @@ def list_csv() -> list[Path]:
         return list(output_path.glob('*.csv'))
     return list()
 
-#-----------------------------------------------------------------------------
-# ElasticSearch task
-#-----------------------------------------------------------------------------
-def list_tasks() -> list[Path]:
-    tasks = ['casedef']
-    tables = [tablespace.name_elastic(task) for task in tasks]
-    return [filetool.path_athena(f"{table}.sql") for table in tables]
-
-#-----------------------------------------------------------------------------
-# Helpers
-#-----------------------------------------------------------------------------
 def list_tables() -> list[str]:
     return [table_for_file(file) for file in list_csv()]
 
@@ -57,41 +62,34 @@ def select_union(table_list: list[str]) -> str:
     return ' UNION ALL\n'.join(sql)
 
 #-----------------------------------------------------------------------------
+# UploadWorkflow
+#-----------------------------------------------------------------------------
+def make_upload_toml() -> Path:
+    return manifest.save_upload_toml(
+        workflow=UploadWorkflow(file_list=list_csv(), prefix='elastic_'),
+        toml_file=path_output() / UPLOAD_TOML)
+
+#-----------------------------------------------------------------------------
+# Actions
+#-----------------------------------------------------------------------------
+def make_actions() -> list[Action]:
+    if len(list_csv()) == 0:
+        return list()
+
+    upload_toml = path_output() / UPLOAD_TOML
+    upload_toml = os.path.relpath(upload_toml, start=filetool.path_project())
+    task_list = [make_template_union()]
+
+    return  [FileAction(file_list=[upload_toml],
+                        label='elastic_output CSV uploads'),
+             SqlAction(file_list=task_list,
+                       label='elastic_output union tasks')]
+
+#-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
-def make_upload() -> manifest.UploadAction:
-    return manifest.UploadAction(file_list=list_csv(),
-                                 label='elastic_output CSV uploads',
-                                 prefix='elastic_')
-
-def make_file_upload_toml() -> list[Path]:
-    return [manifest.save_upload_toml(make_upload(), path_upload_toml())]
-
-def make_union(aspect:Aspect=None) -> Path:
-    cohort = f'union_{aspect.name}' if aspect else f'union'
-    table_list = list_tables()
-    return filetool.save_athena_view(
-        tablespace.name_elastic(cohort),
-        template.load(f"elastic_{cohort}.sql",
-                      encounter_ref=ENCOUNTER_REF,
-                      select_union=select_union(table_list)))
-
-def make() -> list[Path]:
-    if len(list_csv()) > 0:
-        # Cumulus Library 6.3.1 prepends the study directory to action filenames.
-        upload_file = os.path.relpath(path_upload_toml(), start=filetool.path_project())
-        task_list = [make_union()]
-
-        upload = make_upload()
-        action_list = [manifest.FileAction(file_list=[upload_file],
-                                           label=upload.label),
-                       manifest.SqlAction(file_list=task_list,
-                                          label='elastic_output union tasks')]
-
-        upload_toml = manifest.save_upload_toml(upload, path_upload_toml())
-        return [upload_toml, manifest.save_actions_toml(action_list, 'elastic_output.toml')]
-    return list()
+def make() -> Path:
+    return manifest.save_actions_toml(make_actions(), 'elastic_upload.toml')
 
 if __name__ == '__main__':
-    for output_toml in make():
-        print(output_toml)
+    print(make())

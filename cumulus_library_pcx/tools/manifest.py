@@ -4,11 +4,11 @@ from pathlib import Path
 from functools import lru_cache
 from cumulus_library import StudyManifest
 from cumulus_library_pcx.tools import filetool
-from tools.staging import (
+from cumulus_library_pcx.tools.staging import (
     Stage,
     Action,
     FileAction,
-    UploadAction,
+    UploadWorkflow,
     SqlAction,
     SqlParallelAction,
     ExportAction
@@ -70,18 +70,18 @@ def as_actions_toml(actions: Action| list[ Action | dict]) -> dict:
     """
     return {"actions": [_action_to_dict(action) for action in _as_list(actions)]}
 
-def as_upload_toml(action: UploadAction) -> dict:
+def as_upload_toml(workflow: UploadWorkflow) -> dict:
     """
-    Build a Python dict for a file_upload submanifest.
+    Build a Python dict for a file_upload workflow TOML.
 
-    :param action: upload action (file_list of CSVs, optional table-name prefix)
-    :return: dict content for `manifest.toml` submanifest
+    :param workflow: upload workflow (file_list of CSVs, optional table-name prefix)
+    :return: dict content for the workflow TOML
     """
     tables: dict[str, dict[str, str]] = {}
 
-    for filename in action.file_list:
+    for filename in workflow.file_list:
         filename = Path(filename).name
-        table_name = _upload_table_name(filename, action.prefix)
+        table_name = _upload_table_name(filename, workflow.prefix)
         if table_name in tables:
             raise ValueError(
                 f"Duplicate TOML table name {table_name!r}: both "
@@ -123,13 +123,13 @@ def save_actions_toml(actions: Action | list[Action | dict], toml_file: Path | s
     return _write_toml(as_actions_toml(actions), toml_file)
 
 
-def save_upload_toml(action: UploadAction, toml_file: Path | str) -> Path:
+def save_upload_toml(workflow: UploadWorkflow, toml_file: Path | str) -> Path:
     """
-    Save a file_upload submanifest; string filenames are relative to the spreadsheet directory.
+    Save a file_upload workflow TOML; string filenames are relative to the spreadsheet directory.
     """
     if not isinstance(toml_file, Path):
         toml_file = filetool.path_spreadsheet(toml_file)
-    return _write_toml(as_upload_toml(action), toml_file)
+    return _write_toml(as_upload_toml(workflow), toml_file)
 
 
 def _write_toml(content: dict, toml_file: Path) -> Path:
@@ -205,7 +205,7 @@ def _action_to_dict(action: Action | dict) -> dict:
 
     raise TypeError(
         f"{type(action).__name__} is not an [[actions]] entry "
-        "(UploadAction is a whole submanifest: use save_upload_toml)"
+        "(a workflow such as UploadWorkflow is saved with save_upload_toml)"
     )
 
 def _as_list(item):

@@ -73,18 +73,20 @@ class SqlParallelAction(SqlAction):
 class ExportAction(Action):
     export_type: str = "export:counts"
 
+#-----------------------------------------------------------------------------
+# Workflows
+#-----------------------------------------------------------------------------
 @dataclass(frozen=True)
-class UploadAction(Action):
+class UploadWorkflow:
     """
-    Cumulus Library file_upload workflow (CSV uploads).
-
-    Unlike the build/export actions above, an upload is a whole submanifest
-    (`config_type = "file_upload"`), not one entry in an `[[actions]]` list.
+    Cumulus Library `file_upload` workflow (CSV uploads): a TOML with `config_type = "file_upload"`,
+    reached from a build action whose `files` lists it. Not an `[[actions]]` entry.
 
     `manifest.py` owns the TOML details:
-    * UploadAction.file_list becomes one `[tables.<table_name>]` block per file
+    * UploadWorkflow.file_list becomes one `[tables.<table_name>]` block per file
     * table_name is `<prefix><simplename>` when prefix is given
     * otherwise `include_*` files keep their simplename, all others get `valueset_<simplename>`
-    * UploadAction.label is NOT written: Cumulus Library rejects unknown keys in file_upload TOML
+    * no label: Cumulus Library rejects unknown keys in file_upload TOML
     """
+    file_list: list[Path] | list[str]
     prefix: str | None = None

@@ -34,24 +34,12 @@ def path_outcome(table_suffix: str | None) -> Path:
 # -----------------------------------------------------------------------------
 # actions
 # -----------------------------------------------------------------------------
-def make_vital_status() -> list[Path]:
-    return [path_outcome('vital_status')]
-
-def make_first_event() -> list[Path]:
-    return [path_outcome('first_event')]
-
-def make_exposure() -> list[Path]:
-    return [path_outcome('exposure')]
-
-def make_outcome() -> list[Path]:
-    return [path_outcome(None)]
-
 def make_actions() -> list[Action]:
-    return [SqlAction([path_outcome(t) for t in ['vital_status', 'first_event', 'exposure']],
+    outcome_list = ['vital_status', 'first_event', 'exposure']
+    return [SqlAction([path_outcome(t) for t in outcome_list],
                       'outcome vital status, then first event, then exposure prior to first event'),
-            SqlAction(make_outcome(),
-                      'outcome per subject: overall survival and provisional event-free survival'),
-    ]
+            SqlAction([path_outcome(None)],
+                      'outcome per subject: overall survival and provisional event-free survival')]
 
 #-----------------------------------------------------------------------------
 # Make
