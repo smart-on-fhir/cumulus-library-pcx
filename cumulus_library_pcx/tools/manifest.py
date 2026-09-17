@@ -160,12 +160,14 @@ def _sql_file_entry(file: Path | str) -> str:
     """
     TOML `files` entry for one SQL file, relative to the project directory.
     Generated SQL lives in athena/, study-specific hand-written SQL lives in custom/,
-    QA and example tables live in ../tests/athena/.
+    LLM wide tables live in llm/athena/, QA and example tables live in ../tests/athena/.
     """
     path = Path(file)
     parent = path.parent.resolve()
     if parent == filetool.path_custom().resolve():
         return f"custom/{path.name}"
+    if parent == filetool.path_llm_athena().resolve():
+        return f"llm/athena/{path.name}"
     if parent == filetool.path_tests_athena().resolve():
         return f"../tests/athena/{path.name}"
     return f"athena/{path.name}"

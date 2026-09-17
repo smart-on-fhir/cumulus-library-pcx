@@ -1,9 +1,9 @@
 """
-NLP clinical wide stage: pcx__llm_* tables for the clinical extraction tasks
-(diagnosis, surgery, metastasis, molecular, systemic_therapy, radiation, response, event,
-survival_timeline, laboratory, registry_eligibility, transition_of_care), one per projection.
+NLP document wide stage: pcx__llm_document_type_wide and pcx__llm_document_topic_wide,
+the document classification and topic-routing results that the clinical extraction
+tasks are selected from.
 
-Task versions come from nlp_clinical_tasks.workflow; see tools/nlp_wide.py.
+Task versions come from nlp_doc_type_tasks.workflow; see tools/nlp_wide.py.
 """
 from pathlib import Path
 from typing import Iterable
@@ -11,9 +11,9 @@ from cumulus_library_pcx.tools import nlp_wide
 from cumulus_library_pcx.tools.nlp_wide import DEFAULT_DEPLOYMENTS
 from cumulus_library_pcx.tools.manifest import Action, save_actions_toml
 
-WORKFLOW = 'nlp_clinical_tasks.workflow'
-LABEL = 'Flattened NLP results for Clinical Tasks'
-TOML = 'nlp_clinical_tasks_wide.toml'
+WORKFLOW = 'nlp_doc_type_tasks.workflow'
+LABEL = 'Flattened NLP results for PCX document type and topic'
+TOML = 'nlp_doc_type_tasks_wide.toml'
 
 #-----------------------------------------------------------------------------
 # actions

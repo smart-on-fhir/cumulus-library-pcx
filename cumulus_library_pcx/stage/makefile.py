@@ -11,7 +11,9 @@ from cumulus_library_pcx.stage import (
     outcome,
     client_views,
     qa_athena,
-    cube
+    cube,
+    nlp_document_tasks_wide,
+    nlp_clinical_tasks_wide
 )
 
 #-----------------------------------------------------------------------------
@@ -27,7 +29,8 @@ STAGES = [
     Stage(elastic_upload),
     Stage('nlp_doc_type_tasks_50k.workflow', skip_by_default=True),
     Stage('nlp_clinical_tasks_50k.workflow', skip_by_default=True),
-    Stage('nlp_clinical_tasks_wide.toml'),
+    Stage(nlp_doc_type_tasks_wide),
+    Stage(nlp_clinical_tasks_wide),
     Stage(eligible),
     Stage(outcome),
     Stage(client_views),

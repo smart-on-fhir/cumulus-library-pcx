@@ -63,8 +63,7 @@ def build_command(stage: str = 'all') -> list[str]:
     return ['cumulus-library', 'build',
             '-s', str(filetool.path_project()),
             '-t', manifest.PREFIX,
-            '--stage', stage,
-            '--force-upload']
+            '--stage', stage]
 
 def build(stage: str = 'all') -> None:
     """
