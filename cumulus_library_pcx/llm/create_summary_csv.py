@@ -28,7 +28,6 @@ which criteria the models do not spell out.
 """
 import csv
 import enum
-import importlib
 import re
 from pathlib import Path
 from types import UnionType
@@ -36,9 +35,9 @@ from typing import Any, Union, get_args, get_origin
 
 import pydantic
 
-from cumulus_library_pcx.llm.create_schema import TASK_MODELS
+from cumulus_library_pcx.llm.create_schemas import annotation_model, list_tasks
+from cumulus_library_pcx.tools import filetool
 
-BASE_DIR = Path(__file__).parent
 COLUMNS = ["annot", "annot_col", "mention_type", "mention_col", "mention_key", "mention_value"]
 SPAN_FIELDS = {"has_mention", "spans"}
 
@@ -135,7 +134,7 @@ def summarize(annotation: type[pydantic.BaseModel]) -> list[list[str]]:
 
 def create(annotation: type[pydantic.BaseModel], filename: str, output_dir: Path | None = None) -> Path:
     """Write one task's summary CSV, creating the destination directory."""
-    directory = Path(output_dir) if output_dir is not None else BASE_DIR / "summaries"
+    directory = Path(output_dir) if output_dir is not None else filetool.path_llm("summaries")
     directory.mkdir(parents=True, exist_ok=True)
     file_path = directory / filename
     with file_path.open("w", newline="", encoding="utf-8") as f:
@@ -148,9 +147,8 @@ def create(annotation: type[pydantic.BaseModel], filename: str, output_dir: Path
 def create_pcx_llm_summaries(output_dir: Path | None = None) -> list[Path]:
     """Generate one summary CSV per PCX task, including document routing."""
     paths = []
-    for task, class_name in TASK_MODELS.items():
-        module = importlib.import_module(f"cumulus_library_pcx.llm.models.{task}")
-        paths.append(create(getattr(module, class_name), f"pcx__{task}.csv", output_dir))
+    for task in list_tasks():
+        paths.append(create(annotation_model(task), f"pcx__{task}.csv", output_dir))
     return paths
 
 
