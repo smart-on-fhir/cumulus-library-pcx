@@ -7,7 +7,7 @@ from cumulus_library_pcx.tools import settings, manifest, tablespace, filetool, 
 #-----------------------------------------------------------------------------
 # ElasticSearch output
 #-----------------------------------------------------------------------------
-def path_elastic_output() -> Path:
+def path_output() -> Path:
     """
     Workaround hack for
     https://github.com/smart-on-fhir/rapid-elastic/issues/29
@@ -16,10 +16,7 @@ def path_elastic_output() -> Path:
     return output_base / filetool.date_str()
 
 def list_csv() -> list[Path]:
-    """
-    `elastic_query.py` >> elastic_output/*.csv
-    """
-    output_path = path_elastic_output()
+    output_path = path_output()
     if output_path and output_path.exists():
         return list(output_path.glob('*.csv'))
     return list()
@@ -36,7 +33,7 @@ def list_tasks() -> list[Path]:
 # TOML files
 #-----------------------------------------------------------------------------
 def path_upload_toml() -> Path:
-    return path_elastic_output() / 'file_upload_elastic.toml'
+    return path_output() / 'file_upload_elastic.toml'
 
 def path_stage_toml() -> Path:
      return filetool.path_project() / 'elastic_output.toml'
@@ -76,8 +73,7 @@ def make_union(aspect:Aspect=None) -> Path:
         tablespace.name_elastic(cohort),
         template.load(f"elastic_{cohort}.sql",
                       encounter_ref=ENCOUNTER_REF,
-                      select_union=select_union(table_list))
-    )
+                      select_union=select_union(table_list)))
 
 def make() -> list[Path]:
     if len(list_csv()) > 0:
