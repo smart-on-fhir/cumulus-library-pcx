@@ -30,7 +30,7 @@ build-backend = "flit_core.buildapi"
 
 [project.optional-dependencies]
 dev = ["black", "pylint"]
-test = ["pytest", "pytest-cov", "pytest-xdist"]
+test = ["pytest", "pytest-cov", "pytest-xdist", "duckdb", "sqlglot"]
 
 [project.scripts]
 make-pcx = "cumulus_library_pcx.tools.cli:main"
