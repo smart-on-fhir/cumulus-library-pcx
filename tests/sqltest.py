@@ -1,0 +1,52 @@
+"""
+DuckDB test database built from tests/data: schema.sql plus one CSV per table,
+then the study's hand-written SQL (custom/) and QA/WARN tables (tests/athena/).
+"""
+import duckdb
+from pathlib import Path
+from cumulus_library_pcx.tools import filetool
+
+DATA = filetool.path_tests_data()
+
+# custom/ SQL in dependency order
+ELIGIBLE_OUTCOME = ['eligible_dx',
+                    'eligible_surgery',
+                    'eligible_rx',
+                    'eligible_radiation',
+                    'eligible',
+                    'eligible_trial',
+                    'outcome_vital_status',
+                    'outcome_first_event',
+                    'outcome_exposure',
+                    'outcome']
+
+def connect() -> duckdb.DuckDBPyConnection:
+    """
+    :return: connection with every tests/data table loaded (schema.sql types, CSV rows)
+    """
+    con = duckdb.connect()
+    con.execute("CREATE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
+    con.execute((DATA / 'schema.sql').read_text())
+    for csv_file in sorted(DATA.glob('*.csv')):
+        con.execute(f"COPY {csv_file.stem} FROM '{csv_file}' (HEADER, DELIMITER ',', NULLSTR '')")
+    return con
+
+
+def run_custom(con: duckdb.DuckDBPyConnection, names: list[str] = ELIGIBLE_OUTCOME) -> None:
+    for name in names:
+        con.execute(filetool.path_custom(f'pcx__{name}.sql').read_text())
+
+
+def list_athena(pattern: str) -> list[Path]:
+    """
+    tests/athena/<pattern>.sql with the union table last (it reads the others).
+    """
+    files = sorted(filetool.path_tests_athena().glob(pattern))
+    return [f for f in files if not f.stem.endswith('_union')] + [f for f in files if f.stem.endswith('_union')]
+
+
+def run_athena(con: duckdb.DuckDBPyConnection, pattern: str) -> list[Path]:
+    files = list_athena(pattern)
+    for file in files:
+        con.execute(file.read_text())
+    return files

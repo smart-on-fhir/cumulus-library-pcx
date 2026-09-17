@@ -1,10 +1,10 @@
 """Regression checks for scientific distinctions required by PCX extraction."""
 import importlib
 import inspect
-from pathlib import Path
 import pytest
 from pydantic import BaseModel, ValidationError
 from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
+from cumulus_library_pcx.tools import filetool
 from cumulus_library_pcx.llm.models.molecular import MolecularReportMention, MolecularAlterationMention
 from cumulus_library_pcx.llm.models.registry_eligibility import TrialEligibilityAnnotation
 from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministrationMention, TherapyAgentMention
@@ -17,7 +17,7 @@ EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
 
 
 def test_all_model_schemas_generate():
-    root = Path(__file__).parents[1] / 'cumulus_library_pcx/llm/models'
+    root = filetool.path_llm('models')
     for path in root.glob('*.py'):
         module = importlib.import_module('cumulus_library_pcx.llm.models.' + path.stem)
         for _, cls in inspect.getmembers(module, inspect.isclass):
