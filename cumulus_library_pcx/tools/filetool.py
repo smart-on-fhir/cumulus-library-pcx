@@ -110,6 +110,11 @@ def path_tests(file: Path | str = None) -> Path:
         return path_project().parent / 'tests'
     return path_project().parent / 'tests' / file
 
+def path_tests_data(test_file: Path | str = None) -> Path:
+    if not test_file:
+        return path_tests() / 'data'
+    return path_tests() / 'data' / test_file
+
 def path_tests_athena(file_sql: Path | str = None) -> Path:
     if not file_sql:
         return path_tests() / 'athena'
@@ -127,11 +132,6 @@ def path_llm(filename: Path | str = None) -> Path:
     if not filename:
         return path_project() / 'llm'
     return path_project() / 'llm' / filename
-
-def path_llm_builder(filename: Path | str = None) -> Path:
-    if not filename:
-        return path_llm() / 'builder'
-    return path_llm() / 'builder' / filename
 
 def path_llm_template(filename: Path | str = None) -> Path:
     if not filename:
