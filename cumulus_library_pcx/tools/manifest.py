@@ -104,9 +104,51 @@ class UploadAction(Action):
     """
     prefix: str | None = None
 
+@dataclass(frozen=True)
+class Stage:
+    """
+    One `[[stages.<name>]]` entry of the top-level manifest.toml.
+
+    `manifest.py` owns the TOML details:
+    * Stage.name becomes the `[[stages.<name>]]` table
+    * Stage.files becomes the TOML `files` key
+    * Stage.submanifest writes `type = "submanifest"` (Cumulus Library reads `.workflow` files without a type)
+    * Stage.skip_by_default is written only when true
+
+    `module` is the Python stage whose make() writes `<name>.toml`, run by study_builder.
+    None for hand-written workflow files (NLP tasks) that are only listed.
+    """
+    name: str
+    files: list[str]
+    module: object | None = None
+    submanifest: bool = True
+    skip_by_default: bool = False
+
 #-----------------------------------------------------------------------------
 # TOML builders
 #-----------------------------------------------------------------------------
+def as_manifest_toml(stages: list[Stage],
+                     study_prefix: str = PREFIX,
+                     data_dictionary: str = '../spreadsheet/data_dictionary.csv') -> dict:
+    """
+    Build a Python dict for the top-level manifest.toml, stages in build order.
+    """
+    stage_tables = dict()
+    for stage in stages:
+        entry = dict()
+        if stage.submanifest:
+            entry['type'] = 'submanifest'
+        entry['files'] = list(stage.files)
+        if stage.skip_by_default:
+            entry['skip_by_default'] = True
+        stage_tables[stage.name] = [entry]
+    return {
+        'study_prefix': study_prefix,
+        'data_dictionary': data_dictionary,
+        'stages': stage_tables,
+    }
+
+
 def as_actions_toml(actions: Action| list[ Action | dict]) -> dict:
     """
     Build a Python dict for a mixed list of SQL and export actions.
@@ -149,6 +191,15 @@ def load_toml(toml_file: Path | str) -> dict:
         toml_file = filetool.path_project(toml_file)
     with toml_file.open("rb") as source:
         return tomllib.load(source)
+
+
+def save_manifest_toml(stages: list[Stage], toml_file: Path | str = 'manifest.toml') -> Path:
+    """
+    Save the top-level manifest.toml; string filenames are relative to the project directory.
+    """
+    if not isinstance(toml_file, Path):
+        toml_file = filetool.path_project(toml_file)
+    return _write_toml(as_manifest_toml(stages), toml_file)
 
 
 def save_actions_toml(actions: Action | list[Action | dict], toml_file: Path | str) -> Path:
