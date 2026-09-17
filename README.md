@@ -108,10 +108,10 @@ Beyond the Cumulus `core__` tables, the build reads these objects, which the sit
 
 ```commandline
 export CUMULUS_LIBRARY_DATA_PATH=/some/path
-PYTHONPATH=tests python3 -m pytest -q
+python3 -m pytest -q   # run from the repository root
 ```
 
-The SQL tests render the real generators' output and run it end to end on synthetic DuckDB tables (`tests/test_study_period_sql.py`, `test_eligible_outcome_sql.py`, `test_warn_sql.py`, `test_client_views_sql.py`; 47 tests, all passing). The LLM tests (`test_llm_models.py`, `test_llm_strict_mode.py`, `test_llm_diagnosis_output.py`, `test_llm_builder_discovery.py`) currently have 40 failures and one collection error, mostly because `test_llm_builder_discovery.py` specifies a deployment-discovery design that is not yet implemented (workplan 1.5). DuckDB differs from Athena in ways the tests do not catch: month arithmetic, `varchar = integer`, `DATE(varchar)` on timestamps (workplan 1.6–1.8).
+The SQL tests run the hand-written `custom/` SQL and the `tests/athena/` QA/WARN tables on DuckDB over the synthetic tables in [tests/data/](tests/data) (`schema.sql` plus one CSV per table, loaded by `tests/sqltest.py`): `tests/test_eligible_outcome_sql.py` checks the trial-emulation rules, `test_warn_sql.py` asserts exactly which seeded subject each QA/WARN check fires on. The LLM tests (`test_llm_models.py`, `test_llm_strict_mode.py`, `test_nlp_wide_model_shape.py`, `test_nlp_clinical_wide.py`) currently have 40 failures and one collection error, mostly because `test_llm_builder_discovery.py` specifies a deployment-discovery design that is not yet implemented (workplan 1.5). DuckDB differs from Athena in ways the tests do not catch: month arithmetic, `varchar = integer`, `DATE(varchar)` on timestamps (workplan 1.6–1.8).
 
 ## Data Dictionary
 

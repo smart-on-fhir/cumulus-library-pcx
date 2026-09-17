@@ -11,7 +11,7 @@ Eligibility stage: pcx__eligible_* tables.
 Structured inputs: casedef, cohort_variable_union_rx, cohort_proc_craniotomy, cohort_proc_radiation,
 cohort_dx_radiation, core__patient. LLM inputs: llm_diagnosis_wide, llm_surgery_wide,
 llm_systemic_therapy_agent, llm_radiation_wide. The LLM wide tables are built first by this stage's
-opening action (empty tables when no NLP output exists yet, see llm/builder).
+nlp_clinical_wide stage (rendered from llm/template, see tools/nlp_wide.py).
 """
 from pathlib import Path
 from cumulus_library_pcx.tools import tablespace, filetool

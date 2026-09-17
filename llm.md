@@ -61,8 +61,8 @@ table at all (workplan 4.5).
 
 ## Schema generation and wide outputs
 
-Annotation classes use unprefixed names such as `DiagnosisAnnotation`; builder classes
-and table names retain the PCX prefix. From the repository root, generate schemas with:
+Annotation classes use unprefixed names such as `DiagnosisAnnotation`; table names
+retain the study prefix. From the repository root, generate schemas with:
 
 ```sh
 export CUMULUS_LIBRARY_DATA_PATH=/path/to/local/data
@@ -76,7 +76,8 @@ one at a time; it does not run inference. An import failure can leave a partial 
 The diagnosis schema still declares `additionalProperties: false`, although its model
 no longer forbids extra fields; resolve that drift before regenerating (workplan 1.10).
 
-Wide builders project values without repairing dates or adjudicating evidence:
+The wide templates (`llm/template/<prefix>__llm_*.sql.jinja`) project values without repairing
+dates or adjudicating evidence:
 
 - Scalar mentions produce one row per note; lists use `UNNEST ... WITH ORDINALITY`
   and a 1-based index. Systemic therapy has separate regimen, agent, administration,
@@ -86,57 +87,40 @@ Wide builders project values without repairing dates or adjudicating evidence:
   BIGINT, DOUBLE, BOOLEAN or VARCHAR; diagnosis dates remain VARCHAR with precision.
 - Diagnosis wide output omits mention flags and evidence spans. Retrieve those from
   the source NLP result; a projected value alone is not the full evidence record.
-- The [wide-stage manifest](cumulus_library_pcx/nlp_clinical_wide.toml) runs all
-  21 available clinical SQL projections. Document type/topic use a separate workflow.
-  Molecular has no wide template.
+- Two stages own the templates: [nlp_clinical_wide](cumulus_library_pcx/stage/nlp_clinical_wide.py)
+  renders the 21 clinical projections of `nlp_clinical_tasks.workflow` and
+  [nlp_document_wide](cumulus_library_pcx/stage/nlp_document_wide.py) renders document type
+  and topic from `nlp_document_tasks.workflow`. A template belongs to the workflow whose task
+  name it starts with (`diagnosis_wide` → `diagnosis`), see `tools/nlp_wide.py`.
 
-Generate the SQL resources and manifest with:
+Generate the SQL and the stage manifests with:
 
 ```sh
-make-pcx nlp_clinical_wide
+make-pcx nlp_clinical_wide nlp_document_wide
 ```
 
-Versions come from `nlp_clinical_tasks.workflow`. The default deployment is
-`gpt_oss_120b`; repeat `--deployment` to union other deployments, for example
-`--deployment site_a --deployment site_b`. Use `--workflow` for an alternate
-clinical workflow and `--output-dir` to prepare a separate study directory.
-Generation does not execute SQL or discover source tables. Every selected source
-table must exist with the expected result structure when the manifest is built.
-
-### Source discovery and versioning
-
-**Current behavior:** `pcx_base_mixin.py` probes `pcx__nlp_<task>_` with four fixed
-suffixes: `claude_sonnet45`, `gpt51`, `gpt54`, and `gpt_oss_120b`. It checks only for
-a structured `result` column, not required nested fields, usable rows or task version.
-When no source passes, it creates a typed empty destination. Empty output means no
-usable source results, not clinical absence.
-
-The diagnosis Python builder now passes version 2. Other Python builders still
-pass only `table_names`, leaving `task_version` blank. The generated SQL stage
-passes workflow versions for every projection. Older result structures require migration or
+Each template is rendered once as a `UNION ALL` over `<prefix>__nlp_<task>_<deployment>`
+for the deployments in `settings.NLP_DEPLOYMENTS` (default `gpt_oss_120b`), filtered to
+the task's `version` from its `.workflow`. Generation does not execute SQL or discover
+source tables: every selected source table must exist with the expected result structure
+when `cumulus-library build` runs the stage, and empty output means no usable source
+results, not clinical absence. Older result structures require migration or
 re-extraction; filtering row versions cannot repair an incompatible table schema.
 
-**Test-specified design, not implemented:** `tests/test_llm_builder_discovery.py` and
-`tests/task_contract.py` require configurable deployment suffixes via
-`CUMULUS_PCX_NLP_DEPLOYMENTS` (deduplicated in order; empty disables discovery;
-only `[A-Za-z0-9_]+` allowed), workflow-derived task versions, all nested fields and
-metadata columns, and at least one non-null result at that version. Invalid sources
-should be skipped with INFO logs, the version passed to templates, and an unset data
-path allowed for builders. These are field-presence/version checks, not scalar-type
-or clinical validation (workplan 1.5).
+The former Python builders (`llm/builder/pcx_*.py`, cumulus-library `BaseTableBuilder`s
+with build-time source discovery) and their `tests/render_snapshots.py` are retired under
+`_to_delete/llm/builder/`; the templates are the only generator of `llm/athena/`.
 
-### Regression snapshots and validation
+### Contract tests
 
-The 21 clinical files in `llm/athena/*.sql` are generated manifest inputs.
-Regenerate them with `make-pcx nlp_clinical_wide` (and `make-pcx nlp_document_wide` for the document tables).
-The older builder-based snapshot utility also renders document-routing examples:
-
-```sh
-python -m tests.render_snapshots --output-dir /path/to/review-copy
-```
-
-Use a separate output directory for this older utility: its unfixed Python builders
-still reproduce blank version filters. It neither discovers tables nor executes queries.
+`tests/test_nlp_wide_model_shape.py` checks that the `.workflow` files, the JSON schemas, the
+Pydantic models, the templates and the saved `llm/athena/*.sql` agree: every task owns a
+template and every template belongs to one workflow, every `nlp.result.<path>` a template
+projects exists in its model (and no template projects spans or `has_mention`), the
+rendered SQL pins the workflow version and unions deployments in sorted order.
+`tests/test_nlp_clinical_wide.py` exercises the stage's `prepare_resources()` into a temp
+directory. `llm/athena/*.sql` is build output, not source: it is not committed, and
+`make-pcx` regenerates it before `cumulus-library build`.
 
 The compact medulloblastoma task is configured but cannot be serialized by the
 reviewed Cumulus 6.3.1 installation: `convert_pydantic_fields_to_pyarrow` rejects its
@@ -147,5 +131,5 @@ execution; the transition-of-care projection uses `array_join`, which DuckDB lac
 The [September 11 review](reviews/code-review-2026-09-11/REVIEW.md) records the historical
 test failures and separates stale tests from unimplemented discovery and actual bugs.
 At that review, the suite needed `CUMULUS_LIBRARY_DATA_PATH` and `PYTHONPATH=tests`
-because of settings and the top-level `task_contract` import. Re-run validation after
-fixes; those historical results are not a current test run.
+because of settings and a top-level test helper import; neither is needed now. Those
+historical results are not a current test run.
