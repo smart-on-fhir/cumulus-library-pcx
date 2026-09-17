@@ -135,12 +135,12 @@ def as_manifest_toml(stages: list[Stage],
     """
     stage_tables = dict()
     for stage in stages:
-        entry = dict()
+        entry = dict()   # tomli-w keeps this key order
+        if stage.skip_by_default:
+            entry['skip_by_default'] = True
         if stage.submanifest:
             entry['type'] = 'submanifest'
         entry['files'] = list(stage.files)
-        if stage.skip_by_default:
-            entry['skip_by_default'] = True
         stage_tables[stage.name] = [entry]
     return {
         'study_prefix': study_prefix,

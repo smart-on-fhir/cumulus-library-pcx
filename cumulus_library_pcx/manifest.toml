@@ -3,73 +3,92 @@ data_dictionary = "../spreadsheet/data_dictionary.csv"
 
 [[stages.study_population]]
 type = "submanifest"
-files = ['study_population.toml']
+files = [
+    "study_population.toml",
+]
 
 [[stages.study_variable]]
 type = "submanifest"
-files = ['study_variable.toml']
+files = [
+    "study_variable.toml",
+]
 
 [[stages.study_variable_wide]]
 type = "submanifest"
-files = ['study_variable_wide.toml']
+files = [
+    "study_variable_wide.toml",
+]
 
 [[stages.casedef]]
 type = "submanifest"
-files = ['casedef.toml']
+files = [
+    "casedef.toml",
+]
 
 [[stages.sample]]
 type = "submanifest"
-files = ['sample.toml']
+files = [
+    "sample.toml",
+]
 
-# ------ <Elastic Search Tasks> ------
+[[stages.elastic_query]]
+type = "submanifest"
+skip_by_default = true
+files = [
+    "elastic_query.toml",
+]
 
-#[[stages.elastic_query]]
-#type = "submanifest"
-#files = ['elastic_query.toml']
-#skip_by_default=true
-
-#[[stages.elastic_output]]
-#type = "submanifest"
-#files = ['elastic_output.toml']
-#skip_by_default=true
-
-# ------ </Elastic Search Tasks> ------
-
-# [[stages.nlp_doc_type_tasks]]
-# type = "submanifest"
-# files = ['nlp_doc_type_tasks.workflow']
-# skip_by_default = true
+[[stages.elastic_output]]
+type = "submanifest"
+skip_by_default = true
+files = [
+    "elastic_output.toml",
+]
 
 [[stages.nlp_doc_type_tasks_50k]]
-files = ['nlp_doc_type_tasks_50k.workflow']
 skip_by_default = true
-
-
-# [[stages.nlp_clinical_tasks]]
-# type = "submanifest"
-# files = ['nlp_clinical_tasks.workflow']
-# skip_by_default = true
+files = [
+    "nlp_doc_type_tasks_50k.workflow",
+]
 
 [[stages.nlp_clinical_tasks_50k]]
-files = ['nlp_clinical_tasks_50k.workflow']
 skip_by_default = true
+files = [
+    "nlp_clinical_tasks_50k.workflow",
+]
 
 [[stages.nlp_clinical_tasks_wide]]
 type = "submanifest"
-files = ['nlp_clinical_tasks_wide.toml']
+files = [
+    "nlp_clinical_tasks_wide.toml",
+]
 
 [[stages.eligible]]
 type = "submanifest"
-files = ['eligible.toml']
+files = [
+    "eligible.toml",
+]
 
 [[stages.outcome]]
 type = "submanifest"
-files = ['outcome.toml']
+files = [
+    "outcome.toml",
+]
+
+[[stages.client_views]]
+type = "submanifest"
+files = [
+    "client_views.toml",
+]
 
 [[stages.qa_athena]]
 type = "submanifest"
-files = ['qa_athena.toml']
+files = [
+    "qa_athena.toml",
+]
 
 [[stages.cube]]
 type = "submanifest"
-files = ['cube.toml']
+files = [
+    "cube.toml",
+]

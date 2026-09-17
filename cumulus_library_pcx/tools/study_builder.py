@@ -1,7 +1,7 @@
 from pathlib import Path
 from types import ModuleType
 
-from cumulus_library_pcx.tools import manifest
+from cumulus_library_pcx.tools import filetool, manifest
 from cumulus_library_pcx.tools.manifest import Stage
 from cumulus_library_pcx.stage import (
     study_population,
@@ -17,26 +17,26 @@ from cumulus_library_pcx.stage import (
 )
 
 #-----------------------------------------------------------------------------
-# Helpers
+# Make targets
 #-----------------------------------------------------------------------------
-def make(target: ModuleType | str, skip_by_default: bool | None = None) -> Stage:
+def make(target: ModuleType | str, skip: bool = False) -> Stage:
     """
     Stage entry for manifest.toml.
 
-    :param target: a Python stage module, whose make() writes `<module name>.toml`
-                   (built by make_study, not skipped by default)
-                   or the str name of a hand-written `<name>.workflow` (NLP tasks)
-                   (listed only, skipped by default)
-    :param skip_by_default: override the default for that kind of target
+    :param target: a Python stage module, whose make() writes `<module name>.toml` (built by make_study)
+                   or the filename of an existing on-disk `<name>.toml` / `<name>.workflow`
+                   (NLP stages: listed in manifest.toml, not built here)
+    :param skip: write `skip_by_default = true` for this stage
     """
     if isinstance(target, ModuleType):
         name = target.__name__.rsplit('.', 1)[-1]
-        return Stage(name, [f'{name}.toml'], target,
-                     skip_by_default=False if skip_by_default is None else skip_by_default)
+        return Stage(name, [f'{name}.toml'], target, skip_by_default=skip)
     if isinstance(target, str):
-        return Stage(target, [f'{target}.workflow'], submanifest=False,
-                     skip_by_default=True if skip_by_default is None else skip_by_default)
-    raise TypeError(f"make() expects a stage module or a workflow name, got {type(target).__name__}")
+        path = filetool.path_project(target)
+        if not path.exists():
+            raise FileNotFoundError(f"stage file not found: {path}")
+        return Stage(path.stem, [target], submanifest=(path.suffix == '.toml'), skip_by_default=skip)
+    raise TypeError(f"make() expects a stage module or a stage filename, got {type(target).__name__}")
 
 #-----------------------------------------------------------------------------
 # Stages in build order: this list is the source of truth for manifest.toml
@@ -47,9 +47,13 @@ STAGES = [
     make(study_variable_wide),
     make(casedef),
     make(sample),
-    make('nlp_doc_type_tasks_50k'),
-    make('nlp_clinical_tasks_50k'),
-    Stage('nlp_clinical_tasks_wide', ['nlp_clinical_tasks_wide.toml']),
+    make(casedef),
+    make(sample),
+    make('elastic_query.toml', skip=True),
+    make('elastic_output.toml', skip=True),
+    make('nlp_doc_type_tasks_50k.workflow', skip=True),
+    make('nlp_clinical_tasks_50k.workflow', skip=True),
+    make('nlp_clinical_tasks_wide.toml'),
     make(eligible),
     make(outcome),
     make(client_views),
@@ -60,7 +64,7 @@ STAGES = [
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
-def make_study() -> list[Path]:
+def make_stages() -> list[Path]:
     """
     Run make() for every Python stage, in build order.
     :return: list of TOML outputs
@@ -69,8 +73,7 @@ def make_study() -> list[Path]:
     for stage in STAGES:
         if stage.module is None:
             continue
-        made = stage.module.make()
-        out.extend(made if isinstance(made, list) else [made])
+        out.append(stage.module.make())
     return out
 
 def make_manifest() -> Path:
@@ -81,6 +84,6 @@ def make_manifest() -> Path:
     return manifest.save_manifest_toml(STAGES)
 
 if __name__ == '__main__':
-    for manifest_toml in make_study():
+    for manifest_toml in make_stages():
         print(manifest_toml)
     print(make_manifest())
