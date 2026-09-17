@@ -1,4 +1,4 @@
-CREATE  TABLE   pcx__elastic_casedef AS
+CREATE  TABLE   {{ prefix }}__elastic_casedef AS
 SELECT  DISTINCT
         elastic.topic,
         casedef.group_name,
@@ -15,7 +15,7 @@ SELECT  DISTINCT
         casedef.enc_period_start_day,
         casedef.subject_ref,
         casedef.encounter_ref_link
-FROM    pcx__sample_casedef     AS casedef
-JOIN    pcx__elastic_union      AS elastic
+FROM    {{ prefix }}__sample_casedef     AS casedef
+JOIN    {{ prefix }}__elastic_union      AS elastic
 ON      casedef.note_ref = elastic.note_ref
 ;
