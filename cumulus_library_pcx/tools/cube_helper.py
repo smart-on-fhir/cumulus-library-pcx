@@ -5,8 +5,7 @@ from cumulus_library_pcx.tools.tablespace import name_trim, name_cube, ctas_as_v
 from cumulus_library_pcx.tools.settings import CUBE_MIN_SUBJECTS, CUBE_AS_VIEW
 from cumulus_library_pcx.tools import manifest
 
-MANIFEST = manifest.get_manifest()
-PREFIX = MANIFEST.get_study_prefix()
+PREFIX = manifest.PREFIX
 
 def cube_fhir_resource(primary_id:str,
                        source_table='study_population',

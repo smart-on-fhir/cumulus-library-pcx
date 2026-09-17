@@ -38,11 +38,10 @@ files = [
     "elastic_query.toml",
 ]
 
-[[stages.elastic_output]]
-skip_by_default = true
+[[stages.elastic_upload]]
 type = "submanifest"
 files = [
-    "elastic_output.toml",
+    "elastic_upload.toml",
 ]
 
 [[stages.nlp_doc_type_tasks_50k]]

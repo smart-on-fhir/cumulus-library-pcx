@@ -34,9 +34,16 @@ def get_manifest(manifest_path: Path | str = None) -> StudyManifest:
 
 #-----------------------------------------------------------------------------
 # LOAD ONCE
+#
+# Only the study prefix is read at import, straight from manifest.toml.
+# StudyManifest (get_manifest) also opens every submanifest it lists, which
+# cannot work while this package is the thing that generates those files.
 #-----------------------------------------------------------------------------
-MANIFEST = get_manifest()
-PREFIX = get_manifest().get_study_prefix()
+def _read_study_prefix() -> str:
+    with filetool.path_project('manifest.toml').open('rb') as source:
+        return tomllib.load(source)['study_prefix']
+
+PREFIX = _read_study_prefix()
 
 #-----------------------------------------------------------------------------
 # TOML builders

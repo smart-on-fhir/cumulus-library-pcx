@@ -1,13 +1,1 @@
-[[actions]]
-description = "elastic_output CSV uploads"
-type = "build:parallel"
-files = [
-    "../../../export/elastic/output/2026-09-10/file_upload_elastic.toml",
-]
-
-[[actions]]
-description = "elastic_output union tasks"
-type = "build:serial"
-files = [
-    "athena/pcx__elastic_union.sql",
-]
+actions = []
