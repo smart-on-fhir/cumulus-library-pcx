@@ -15,6 +15,9 @@ from cumulus_library_pcx.tools import manifest, template
 #                         first-fill vs refill, category, authorizing request,
 #                         and the coverage interval the fill implies
 
+#-----------------------------------------------------------------------------
+# Templates
+#-----------------------------------------------------------------------------
 MEDICATION_REQUEST = [
     'medicationrequest'
 ]
@@ -24,7 +27,7 @@ MEDICATION_DISPENSE = [
     'medicationdispense',
 ]
 
-def make_resources(resource_list: list[str]) -> list[Path]:
+def make_template(resource_list: list[str]) -> list[Path]:
     """
     :param resource_list: FHIR resource names in lowercase
     :return: list of rendered athena/prefix__<resource>.sql paths
@@ -32,15 +35,20 @@ def make_resources(resource_list: list[str]) -> list[Path]:
     return [template.copy(f"{resource}.sql")
             for resource in resource_list]
 
-def make() -> list[Path]:
+#-----------------------------------------------------------------------------
+# Actions
+#-----------------------------------------------------------------------------
+def make_actions() -> list[manifest.Action]:
+    return [manifest.SqlAction(make_template(MEDICATION_REQUEST),
+                               'FHIR MedicationRequest'),
+            manifest.SqlAction(make_template(MEDICATION_DISPENSE),
+                               'FHIR MedicationDispense')]
 
-    actions = [manifest.SqlAction(make_resources(MEDICATION_REQUEST),
-                                  'FHIR MedicationRequest'),
-               manifest.SqlAction(make_resources(MEDICATION_DISPENSE),
-                                  'FHIR MedicationDispense')]
-
-    return [manifest.save_actions_toml(actions, 'fhir_resource.toml')]
+#-----------------------------------------------------------------------------
+# Make
+#-----------------------------------------------------------------------------
+def make() -> Path:
+    return manifest.save_actions_toml(make_actions(), 'fhir_resource.toml')
 
 if __name__ == '__main__':
-    for manifest_toml in make():
-        print(manifest_toml)
+    make()

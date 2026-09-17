@@ -2,9 +2,17 @@ import tomllib
 import tomli_w
 from pathlib import Path
 from functools import lru_cache
-from dataclasses import dataclass
 from cumulus_library import StudyManifest
 from cumulus_library_pcx.tools import filetool
+from tools.staging import (
+    Stage,
+    Action,
+    FileAction,
+    UploadAction,
+    SqlAction,
+    SqlParallelAction,
+    ExportAction
+)
 
 #-----------------------------------------------------------------------------
 # get study manifest using cumulus library
@@ -31,100 +39,6 @@ MANIFEST = get_manifest()
 PREFIX = get_manifest().get_study_prefix()
 
 #-----------------------------------------------------------------------------
-# TOML action declarations
-#-----------------------------------------------------------------------------
-@dataclass(frozen=True)
-class Action:
-    """
-    Cumulus Library basic build action type.
-
-    `manifest.py` owns the TOML details:
-    * Action.label becomes the TOML `label` key
-      (Cumulus Library deprecated `description` on actions in favor of `label`)
-    """
-    file_list: list[Path] | list[str]
-    label: str = ""
-
-@dataclass(frozen=True)
-class FileAction(Action):
-    """
-    Cumulus Library FILE build action type.
-    """
-    build_type: str = "build:parallel"
-
-@dataclass(frozen=True)
-class SqlAction(Action):
-    """
-    Cumulus Library SQL build action.
-
-    `manifest.py` owns the TOML details:
-    * SqlAction.file_list becomes the TOML `files` key
-    * each file is written as `athena/<filename>`, or `custom/<filename>`
-    * SqlAction.build_type becomes the TOML `type` key
-    """
-    build_type: str = "build:serial"
-
-@dataclass(frozen=True)
-class SqlParallelAction(SqlAction):
-    """
-    Cumulus Library SQL build action in "parallel".
-
-    `manifest.py` owns the TOML details:
-    * SqlAction.file_list becomes the TOML `files` key
-    * each file is written as `athena/<filename>`, or `custom/<filename>`
-    * SqlAction.build_type becomes the TOML `type` key
-    """
-    build_type: str = "build:parallel"
-
-@dataclass(frozen=True)
-class ExportAction(Action):
-    """
-    Cumulus Library export action.
-
-    `manifest.py` owns the TOML details:
-    * ExportAction.file_list becomes the TOML `tables` key
-    * Path entries use their stem; string entries are already table names
-    * ExportAction.export_type becomes the TOML `type` key
-    """
-    export_type: str = "export:counts"
-
-@dataclass(frozen=True)
-class UploadAction(Action):
-    """
-    Cumulus Library file_upload workflow (CSV uploads).
-
-    Unlike the build/export actions above, an upload is a whole submanifest
-    (`config_type = "file_upload"`), not one entry in an `[[actions]]` list.
-
-    `manifest.py` owns the TOML details:
-    * UploadAction.file_list becomes one `[tables.<table_name>]` block per file
-    * table_name is `<prefix><simplename>` when prefix is given
-    * otherwise `include_*` files keep their simplename, all others get `valueset_<simplename>`
-    * UploadAction.label is NOT written: Cumulus Library rejects unknown keys in file_upload TOML
-    """
-    prefix: str | None = None
-
-@dataclass(frozen=True)
-class Stage:
-    """
-    One `[[stages.<name>]]` entry of the top-level manifest.toml.
-
-    `manifest.py` owns the TOML details:
-    * Stage.name becomes the `[[stages.<name>]]` table
-    * Stage.files becomes the TOML `files` key
-    * Stage.submanifest writes `type = "submanifest"` (Cumulus Library reads `.workflow` files without a type)
-    * Stage.skip_by_default is written only when true
-
-    `module` is the Python stage whose make() writes `<name>.toml`, run by study_builder.
-    None for hand-written workflow files (NLP tasks) that are only listed.
-    """
-    name: str
-    files: list[str]
-    module: object | None = None
-    submanifest: bool = True
-    skip_by_default: bool = False
-
-#-----------------------------------------------------------------------------
 # TOML builders
 #-----------------------------------------------------------------------------
 def as_manifest_toml(stages: list[Stage],
@@ -148,7 +62,6 @@ def as_manifest_toml(stages: list[Stage],
         'stages': stage_tables,
     }
 
-
 def as_actions_toml(actions: Action| list[ Action | dict]) -> dict:
     """
     Build a Python dict for a mixed list of SQL and export actions.
@@ -156,7 +69,6 @@ def as_actions_toml(actions: Action| list[ Action | dict]) -> dict:
     This is useful when one manifest contains both build and export actions.
     """
     return {"actions": [_action_to_dict(action) for action in _as_list(actions)]}
-
 
 def as_upload_toml(action: UploadAction) -> dict:
     """
@@ -229,13 +141,13 @@ def _write_toml(content: dict, toml_file: Path) -> Path:
 #-----------------------------------------------------------------------------
 # TOML helpers
 #-----------------------------------------------------------------------------
-def _clean_label(description: str | None = None) -> str:
+def _clean_label(label: str | None = None) -> str:
     """
     Cumulus Library rejects square brackets in an action label (reserved characters).
     """
-    if not description:
+    if not label:
         return ""
-    return description.replace("[", "(").replace("]", ")")
+    return label.replace("[", "(").replace("]", ")")
 
 def _sql_file_entry(file: Path | str) -> str:
     """

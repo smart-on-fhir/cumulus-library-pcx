@@ -32,15 +32,15 @@ files = [
 ]
 
 [[stages.elastic_query]]
-type = "submanifest"
 skip_by_default = true
+type = "submanifest"
 files = [
     "elastic_query.toml",
 ]
 
 [[stages.elastic_output]]
-type = "submanifest"
 skip_by_default = true
+type = "submanifest"
 files = [
     "elastic_output.toml",
 ]

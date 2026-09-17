@@ -59,8 +59,7 @@ def make_actions() -> list[Action]:
             SqlAction(make_template_aspects(),
                       'cohort for case definition aspects (dx, rx, lab, proc)'),
             SqlAction(make_template_timeline(),
-                      'timeline for casedef with variables'),
-    ]
+                      'timeline for casedef with variables')]
 
 #-----------------------------------------------------------------------------
 # Make

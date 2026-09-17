@@ -4,7 +4,6 @@ from cumulus_library_pcx.tools import filetool, template, tablespace
 from cumulus_library_pcx.stage.study_variable import Aspect, list_aspect_names
 from cumulus_library_pcx.tools.manifest import (
     Action,
-    FileAction,
     SqlAction,
     SqlParallelAction,
     save_actions_toml
