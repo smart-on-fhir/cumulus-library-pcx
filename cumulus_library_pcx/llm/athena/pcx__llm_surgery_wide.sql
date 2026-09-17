@@ -9,7 +9,6 @@ SELECT  DISTINCT
         nlp.system_fingerprint,
         -- 1-based position of each unnested list item (see FROM)
         surgery_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         surgery.surgery_role                                         AS surgery_role,
         surgery.age_at_surgery_months                                AS age_at_surgery_months,
         surgery.residual_tumor_area_cm2                              AS residual_tumor_area_cm2,

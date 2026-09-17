@@ -10,7 +10,6 @@ SELECT  DISTINCT
         -- 1-based position of each unnested list item (see FROM)
         regimen_index,
         agent_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         agent.delivery_status                                        AS delivery_status,
         agent.agent_name                                             AS agent_name,
         agent.therapy_start_date                                     AS therapy_start_date,

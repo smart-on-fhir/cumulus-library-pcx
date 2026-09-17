@@ -7,7 +7,6 @@ SELECT  DISTINCT
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
-        -- mention values only: spans, has_mention, and reasoning stay in the source nlp table
         nlp.result.response.relevance                                AS response_relevance,
         nlp.result.response.confidence                               AS response_confidence,
 

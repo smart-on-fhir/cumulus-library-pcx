@@ -7,7 +7,6 @@ SELECT  DISTINCT
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
-        -- mention values only: spans, has_mention, and verbatim stay in the source nlp table
         nlp.result.disease_subtype.disease_subtype                          AS disease_subtype,
         nlp.result.medulloblastoma_histology.histology                      AS medulloblastoma_histology,
         nlp.result.disease_subtype.historical_diagnosis_term                AS historical_diagnosis_term,

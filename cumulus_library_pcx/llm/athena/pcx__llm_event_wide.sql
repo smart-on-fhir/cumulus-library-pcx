@@ -9,7 +9,6 @@ SELECT  DISTINCT
         nlp.system_fingerprint,
         -- 1-based position of each unnested list item (see FROM)
         event_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         event.event_type                                             AS event_type,
         event.source_of_event_diagnosis                              AS source_of_event_diagnosis,
         event.event_date                                             AS event_date,
