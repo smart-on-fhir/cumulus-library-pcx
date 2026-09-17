@@ -11,6 +11,8 @@ from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministratio
 from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
 from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
 from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
+from cumulus_library_pcx.llm.models.diagnosis import DiagnosisAnnotation
+from cumulus_library_pcx.llm.create_schemas import create_pcx_llm_study_variables, list_tasks
 
 EMPTY = dict(has_mention=False, spans=[])
 EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
@@ -71,7 +73,7 @@ def test_missing_response_and_alive_are_not_event_free():
     assert EventFreeFollowUpMention(**EMPTY).event_free is None
 
 
-@pytest.mark.parametrize('day,precision', [('2020-02-30','DAY'), ('2020-01-02','MONTH'), ('2020-02-01','YEAR'), ('2020-01-01',None), (None,'DAY')])
+@pytest.mark.parametrize('day,precision', [('2020-02-30','DAY'), ('20200101','DAY'), ('2020-01-02','MONTH'), ('2020-02-01','YEAR'), ('2020-01-01',None), (None,'DAY')])
 def test_invalid_or_unpaired_dates_rejected(day, precision):
     with pytest.raises(ValidationError):
         TimelineAnchorMention(**EVIDENCE, anchor='DEFINITIVE_SURGERY', anchor_date=day, anchor_date_precision=precision)
@@ -97,3 +99,17 @@ def test_vital_timeline_contradictions_rejected():
         VitalStatusMention(**EVIDENCE, vital_status='ALIVE', death_date='2020-01-01', death_date_precision='DAY')
     with pytest.raises(ValidationError):
         VitalStatusMention(**EVIDENCE, vital_status='DECEASED', death_date='2020-01-01', death_date_precision='DAY', last_known_alive_date='2020-01-02', last_known_alive_date_precision='DAY')
+
+
+def test_annotation_rejects_flat_or_extra_fields():
+    with pytest.raises(ValidationError):
+        DiagnosisAnnotation(disease_subtype='MEDULLOBLASTOMA')
+    with pytest.raises(ValidationError):
+        DiagnosisAnnotation(**{name: EMPTY for name in DiagnosisAnnotation.model_fields},
+                            integrated_diagnosis_verbatim='not a top-level field')
+
+
+def test_schema_generation_writes_one_schema_per_task(tmp_path):
+    paths = create_pcx_llm_study_variables(tmp_path / 'schemas')
+    assert len(paths) == len(list_tasks())
+    assert all(path.exists() for path in paths)
