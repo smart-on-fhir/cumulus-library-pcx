@@ -86,14 +86,14 @@ Wide builders project values without repairing dates or adjudicating evidence:
   BIGINT, DOUBLE, BOOLEAN or VARCHAR; diagnosis dates remain VARCHAR with precision.
 - Diagnosis wide output omits mention flags and evidence spans. Retrieve those from
   the source NLP result; a projected value alone is not the full evidence record.
-- The [wide-stage manifest](cumulus_library_pcx/nlp_wide_clinical.toml) runs all
+- The [wide-stage manifest](cumulus_library_pcx/nlp_clinical_wide.toml) runs all
   21 available clinical SQL projections. Document type/topic use a separate workflow.
   Molecular has no wide template.
 
 Generate the SQL resources and manifest with:
 
 ```sh
-make-pcx nlp_wide_clinical
+make-pcx nlp_clinical_wide
 ```
 
 Versions come from `nlp_clinical_tasks.workflow`. The default deployment is
@@ -128,7 +128,7 @@ or clinical validation (workplan 1.5).
 ### Regression snapshots and validation
 
 The 21 clinical files in `llm/athena/*.sql` are generated manifest inputs.
-Regenerate them with `make-pcx nlp_wide_clinical` (and `make-pcx nlp_wide_document` for the document tables).
+Regenerate them with `make-pcx nlp_clinical_wide` (and `make-pcx nlp_document_wide` for the document tables).
 The older builder-based snapshot utility also renders document-routing examples:
 
 ```sh
