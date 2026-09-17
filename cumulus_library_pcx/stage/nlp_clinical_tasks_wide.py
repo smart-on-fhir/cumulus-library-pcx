@@ -6,9 +6,13 @@ The generated queries require the selected deployments' NLP source tables.
 
 from pathlib import Path
 from typing import Iterable
-
 from cumulus_library_pcx.tools import filetool, manifest, template
-
+from cumulus_library_pcx.tools.manifest import (
+    Action,
+    SqlAction,
+    SqlParallelAction,
+    save_actions_toml
+)
 
 DEFAULT_DEPLOYMENTS = ("gpt_oss_120b",)
 
@@ -70,11 +74,18 @@ def prepare_resources(
     manifest.save_actions_toml(action, manifest_path)
     return paths + [manifest_path]
 
+#-----------------------------------------------------------------------------
+# make
+#-----------------------------------------------------------------------------
+def make_actions() -> list[Action]:
+    return list() #TODO
 
-def make() -> list[Path]:
+#-----------------------------------------------------------------------------
+# make
+#-----------------------------------------------------------------------------
+def make() -> Path:
     """Prepare default resources and return the generated stage manifest."""
-    return [prepare_resources()[-1]]
-
+    return save_actions_toml(make_actions(), 'nlp_clinical_tasks_wide.toml')
 
 if __name__ == "__main__":
     for path in prepare_resources():
