@@ -1,5 +1,4 @@
 """NLP wide SQL contract: workflows, schemas, models, templates and the saved SQL agree."""
-import importlib
 import json
 import os
 import re
@@ -8,7 +7,7 @@ import sys
 import tomllib
 import pytest
 
-from cumulus_library_pcx.llm.create_schema import TASK_MODELS
+from cumulus_library_pcx.llm.create_schemas import annotation_model, list_tasks
 from cumulus_library_pcx.stage import nlp_clinical_wide, nlp_document_wide
 from cumulus_library_pcx.tools import filetool, nlp_wide
 
@@ -22,8 +21,7 @@ def workflow_of(task: str) -> str:
 
 def model_schema(task: str) -> dict:
     """JSON schema of the task's Pydantic annotation model."""
-    module = importlib.import_module(f"cumulus_library_pcx.llm.models.{task}")
-    return getattr(module, TASK_MODELS[task]).model_json_schema()
+    return annotation_model(task).model_json_schema()
 
 
 def model_fields(schema: dict) -> dict:
@@ -72,10 +70,11 @@ def templates_of(stage) -> dict[str, str]:
 #-----------------------------------------------------------------------------
 # workflow <-> schema <-> model
 #-----------------------------------------------------------------------------
-@pytest.mark.parametrize("task", TASK_MODELS)
+@pytest.mark.parametrize("task", list_tasks())
 def test_configured_schema_matches_the_model(task):
     config = tomllib.loads(filetool.path_project(workflow_of(task)).read_text())["tables"][task]
     assert json.loads(filetool.path_project(config["response_schema"]).read_text()) == model_schema(task)
+    assert config["select_by_table"] == f"pcx__llm_document_task_{task}"
     assert task in nlp_wide.list_tasks(workflow_of(task))
 
 
