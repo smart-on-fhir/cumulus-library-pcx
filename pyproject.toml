@@ -32,5 +32,8 @@ build-backend = "flit_core.buildapi"
 dev = ["black", "pylint"]
 test = ["pytest", "pytest-cov", "pytest-xdist"]
 
+[project.scripts]
+make-study = "cumulus_library_pcx.tools.cli:main"
+
 [tool.flit.sdist]
 include = ["cumulus_library_pcx/"]
