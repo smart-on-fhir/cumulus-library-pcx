@@ -1,11 +1,11 @@
 """
-pcx-study: make Cumulus Library stage manifests for this study.
+make-pcx: make Cumulus Library stage manifests for this study.
 
-    pcx-study                 make every stage, then manifest.toml
-    pcx-study casedef cube    make only the named stage(s)
-    pcx-study --build         make, then `cumulus-library build ... --stage all --force-upload`
-    pcx-study cube --build    make cube, then `cumulus-library build ... --stage cube --force-upload`
-    pcx-study --list          show stage names
+    make-pcx                 make every stage, then manifest.toml
+    make-pcx casedef cube    make only the named stage(s)
+    make-pcx --build         make, then `cumulus-library build ... --stage all --force-upload`
+    make-pcx cube --build    make cube, then `cumulus-library build ... --stage cube --force-upload`
+    make-pcx --list          show stage names
 """
 import sys
 from argparse import (
@@ -17,7 +17,7 @@ from cumulus_library_pcx.tools import study_builder
 
 def get_parser(stages:list[str]) -> ArgumentParser:
     parser = ArgumentParser(
-        prog='pcx-study',
+        prog='make-pcx',
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter)
 

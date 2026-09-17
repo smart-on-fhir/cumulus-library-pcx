@@ -42,24 +42,28 @@ pip3 install -e .
 Prerequirement: [cumulus-library](https://docs.smarthealthit.org/cumulus/library/)
 
 ```commandline
-# regenerate the athena SQL and the *.toml submanifests from the CSVs and templates
-python3 -m cumulus_library_pcx.tools.study_builder
+# regenerate the athena SQL, the *.toml submanifests and manifest.toml from the CSVs and templates
+make-pcx
 
-# build every stage that is not skip_by_default
-cumulus-library build -s . -t pcx --stage all
+# the same, then build every stage that is not skip_by_default
+make-pcx --build
+
+# regenerate (and build) one stage
+make-pcx casedef --build
 ```
 
-`study_builder` regenerates study_population, study_variable, study_variable_wide, casedef, sample, eligible, outcome and client_views. The qa_athena and elastic stages have their own entry points (`python3 -m cumulus_library_pcx.stage.qa_athena`, `.elastic_query`, `.elastic_upload`). Never hand-edit `cumulus_library_pcx/athena/*.sql` or the generated tomls; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/template) and regenerate. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/custom) (eligible, outcome, client views) is hand-written.
+`make-pcx` is installed by `pip3 install -e .`; see [make-pcx.md](make-pcx.md) for the commands, the stage list and what is generated versus hand-written. Never hand-edit `cumulus_library_pcx/athena/*.sql`, the generated tomls or `manifest.toml`; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/template) and rerun `make-pcx`. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/custom) (eligible, outcome, client views) is hand-written.
 
 ### Environment
 
 | variable                      | required | purpose                                                                                                                                                                  |
 |-------------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `CUMULUS_LIBRARY_DATA_PATH`   | yes      | root of Cumulus data exports; `tools/settings.py` derives the Elastic output directory from it and currently fails at import when it is unset (workplan item 1.3)         |
+| `CUMULUS_LIBRARY_DATA_PATH`   | build    | root of Cumulus data exports; also the fallback for `ELASTIC_OUTPUT_DIR`. Not needed by `make-pcx`                                                                        |
+| `ELASTIC_OUTPUT_DIR`          | no       | where the optional `elastic_upload` stage looks for Elastic result CSVs; default `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`                                            |
 | `HOME_INSTITUTION`            | no       | institution name interpolated into the transition-of-care LLM prompt and schema. The default in `settings.py` currently does not apply because of a precedence bug (1.3) |
 | `CUMULUS_PCX_STRICT_MENTIONS` | no       | `1` makes the LLM model validators raise on missing spans / bad dates; default is warn-only (the test suite forces strict)                                               |
 | `CUMULUS_ENCOUNTER_REF`       | no       | `encounter_ref_link` (default, date-rescued linkage) or `encounter_ref` (FHIR Encounter reference only)                                                                   |
-| `CUMULUS_CUBE_AS_VIEW`        | no       | build patient-count cubes as views instead of tables (cube stage is not wired)                                                                                            |
+| `CUMULUS_CUBE_AS_VIEW`        | no       | build patient-count cubes as views instead of tables                                                                                                                        |
 | `CUMULUS_CUBE_MIN_SUBJECTS`   | no       | minimum patients per cube cell, default 10                                                                                                                                |
 
 ### Site requirements
@@ -79,7 +83,7 @@ Beyond the Cumulus `core__` tables, the build reads these objects, which the sit
 
 ### Stages
 
-[manifest.toml](cumulus_library_pcx/manifest.toml) defines the build stages, in order. "on" means the stage runs under `--stage all`; "skip" means it is registered with `skip_by_default` and must be selected explicitly; "off" means it is commented out.
+[manifest.toml](cumulus_library_pcx/manifest.toml) defines the build stages, in order; `make-pcx` writes it from the `STAGES` list in [stage/makefile.py](cumulus_library_pcx/stage/makefile.py). "on" means the stage runs under `--stage all`; "skip" means it is registered with `skip_by_default` and must be selected explicitly (`make-pcx <stage> --build`).
 
 | stage                                                                         | state | purpose                                                                                                                                                                                                                                                   |
 |-------------------------------------------------------------------------------|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -88,15 +92,16 @@ Beyond the Cumulus `core__` tables, the build reads these objects, which the sit
 | [study_variable_wide](cumulus_library_pcx/study_variable_wide.toml)           | on    | enrich metadata for each **variable cohort** by type (dx, lab, proc, rx)                                                                                                                                                                                  |
 | [casedef](cumulus_library_pcx/casedef.toml)                                   | on    | select patient cohorts matching the coded "case definition" ([casedef.csv](spreadsheet/casedef.csv): medulloblastoma, atrt, etmr, pineoblastoma, cns_embryonal; tier 1 = diagnostic, tier 2 = supporting)                                                  |
 | [sample](cumulus_library_pcx/sample.toml)                                     | on    | from the casedef cohort, get clinical note samples (FHIR DiagnosticReport, FHIR DocumentReference) by pre / peri / post period                                                                                                                             |
-| [elastic_query](cumulus_library_pcx/elastic_query.toml)                       | off   | (optional) find more patient cases using full text search (requires server and client [rapid-elastic](https://github.com/smart-on-fhir/rapid-elastic)). See [query_topics.md](query_topics.md)                                                             |
-| [elastic_upload](cumulus_library_pcx/elastic_upload.toml)                     | skip  | (optional) load elastic search results into SQL. Currently points at an upload manifest outside the repo, which breaks manifest loading (1.2)                                                                                                             |
+| [elastic_query](cumulus_library_pcx/elastic_query.toml)                       | skip  | (optional) find more patient cases using full text search (requires server and client [rapid-elastic](https://github.com/smart-on-fhir/rapid-elastic)). See [query_topics.md](query_topics.md)                                                             |
+| [elastic_upload](cumulus_library_pcx/elastic_upload.toml)                     | on    | (optional) load elastic search results into SQL. Reads `ELASTIC_OUTPUT_DIR` (default `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`); with no results the stage is generated empty                                                                          |
 | [nlp_doc_type_tasks_50k](cumulus_library_pcx/nlp_doc_type_tasks_50k.workflow) | skip  | Notes -> LLM document topic routing (the full [nlp_doc_type_tasks.workflow](cumulus_library_pcx/nlp_doc_type_tasks.workflow) with document type is off). Wired as `submanifest`, which cumulus-library rejects (1.1)                                       |
 | [nlp_clinical_tasks_50k](cumulus_library_pcx/nlp_clinical_tasks_50k.workflow) | skip  | Notes -> LLM for diagnosis and surgery (the full [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) with all 14 tasks is off). Same wiring problem (1.1)                                                                       |
-| [nlp_clinical_tasks_wide](cumulus_library_pcx/nlp_clinical_tasks_wide.toml)   | on    | LLM -> SQL: 21 clinical projections generated by [nlp_clinical_tasks_wide.py](cumulus_library_pcx/stage/nlp_clinical_tasks_wide.py). Selected NLP source tables must exist. See [llm.md](llm.md#schema-generation-and-wide-outputs) |
+| [nlp_clinical_tasks_wide](cumulus_library_pcx/nlp_clinical_tasks_wide.toml)   | on    | LLM -> SQL: 21 clinical projections. Hand-written for now (the generator was removed pending the NLP rework); selected NLP source tables must exist. See [llm.md](llm.md#schema-generation-and-wide-outputs) |
 | [eligible](cumulus_library_pcx/eligible.toml)                                 | on    | inclusion/exclusion criteria (dx, rx, radiation, surgery), see [eligible.md](eligible.md)                                                                                                                                                                 |
 | [outcome](cumulus_library_pcx/outcome.toml)                                   | on    | vital status, first event, exposure timing relative to first event, OS and provisional EFS                                                                                                                                                                |
-| [client_views](cumulus_library_pcx/client_views.toml)                         | not wired | `pcx__client_*` tables for timeline / time-series analysis, especially [Kaplan-Meier](https://pmc.ncbi.nlm.nih.gov/articles/PMC3059453/) survival plots. Generated by `study_builder` but absent from `manifest.toml`; needs the other 15 wide builders first (4.2–4.4) |
-| [qa_athena](cumulus_library_pcx/qa_athena.toml)                               | off   | PCX data quality checks: 21 `pcx__warn_*` tables plus `pcx__warn_union` (no `pcx__qa_*` tables exist yet). Enable after review, see [reviews/qa-warn-2026-09-11/REVIEW.md](reviews/qa-warn-2026-09-11/REVIEW.md)                                           |
+| [client_views](cumulus_library_pcx/client_views.toml)                         | on    | `pcx__client_*` tables for timeline / time-series analysis, especially [Kaplan-Meier](https://pmc.ncbi.nlm.nih.gov/articles/PMC3059453/) survival plots. Depends on the NLP wide tables (4.2–4.4)                                                       |
+| [qa_athena](cumulus_library_pcx/qa_athena.toml)                               | on    | PCX data quality checks: 21 `pcx__warn_*` tables plus `pcx__warn_union` (no `pcx__qa_*` tables exist yet). See [reviews/qa-warn-2026-09-11/REVIEW.md](reviews/qa-warn-2026-09-11/REVIEW.md)                                                             |
+| [cube](cumulus_library_pcx/cube.toml)                                         | on    | patient-count cubes over the study population, casedef, samples and variable union                                                                                                                                                                       |
 
 ## Tests
 
