@@ -1,0 +1,12 @@
+subject_ref,subtype,tier,code,enc_period_start_day,enc_period_start_day_min
+Patient/p1,medulloblastoma,1,9470/3,2020-02-01,2020-01-20
+Patient/p1,atrt,3,C71.9,2020-01-20,2020-01-20
+Patient/p2,medulloblastoma,1,9470/3,2015-01-01,2015-01-01
+Patient/p2,medulloblastoma,2,C71.6,2015-03-01,2015-01-01
+Patient/p3,medulloblastoma,2,C71.6,2021-01-01,2021-01-01
+Patient/p3,,,,2021-02-01,2021-01-01
+Patient/p4,medulloblastoma,1,9470/3,2020-03-01,2020-03-01
+Patient/p5,medulloblastoma,1,9470/3,2020-05-01,2020-05-01
+Patient/p6,medulloblastoma,1,9470/3,2020-05-01,2020-05-01
+Patient/p7,medulloblastoma,1,9470/3,2020-01-01,2020-01-01
+Patient/p8,medulloblastoma,1,9470/3,2020-01-01,2020-01-01

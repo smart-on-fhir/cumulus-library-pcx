@@ -1,0 +1,8 @@
+subject_ref,note_ref,event_type,event_date,event_date_precision
+Patient/p1,note-p1-ev,PROGRESSION,2021-03-01,DAY
+Patient/p1,note-p1-ev,REMISSION,2020-08-01,DAY
+Patient/p2,note-p2-ev,RECURRENCE,2016-03-01,DAY
+Patient/p6,note-p6-ev,RECURRENCE,,
+Patient/p7,note-p7-ev,PROGRESSION,2019-11-01,DAY
+Patient/p8,note-p8-ev,PROGRESSION,2021-01-01,DAY
+Patient/p8,note-p8-ev,RECURRENCE,2021-01-01,DAY

@@ -1,0 +1,8 @@
+subject_ref,note_ref,surgery_role,age_at_surgery_months,residual_tumor_area_cm2,surgery_type,extent_of_resection,surgery_date,surgery_date_precision
+Patient/p1,note-p1-op,definitive initial surgery,24.5,,CRANIOTOMY,GROSS_TOTAL_RESECTION,2020-01-28,DAY
+Patient/p1,note-p1-op2,second-look after induction,,1.2,CRANIOTOMY,PARTIAL_RESECTION,2020-06-01,MONTH
+Patient/p2,note-p2-op,,,,CRANIOTOMY,NOT_AVAILABLE,2014-12-22,DAY
+Patient/p6,note-p6-op,definitive initial surgery,45.0,,CRANIOTOMY,GROSS_TOTAL_RESECTION,2020-05-03,DAY
+Patient/p7,note-p7-op,definitive initial surgery,,,CRANIOTOMY,GROSS_TOTAL_RESECTION,2019-09-01,DAY
+Patient/p8,note-p8-op,definitive initial surgery,,,CRANIOTOMY,GROSS_TOTAL_RESECTION,2020-09-01,DAY
+Patient/p3,note-p3-op,,,,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,2021-01-10,DAY

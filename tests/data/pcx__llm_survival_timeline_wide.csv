@@ -1,0 +1,4 @@
+subject_ref,note_ref,vital_status,death_date,death_date_precision,last_known_alive_date,last_known_alive_date_precision
+Patient/p1,note-p1-pt,ALIVE,,,2023-01-01,DAY
+Patient/p2,note-p2-pt,DECEASED,2016-02-05,DAY,,
+Patient/p6,note-p6-pt,ALIVE,,,2021-01-01,YEAR

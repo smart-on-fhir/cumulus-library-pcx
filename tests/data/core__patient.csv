@@ -1,0 +1,8 @@
+subject_ref,birthdate,gender
+Patient/p1,2018-01-15,female
+Patient/p2,2010-06-01,male
+Patient/p3,2019-03-01,male
+Patient/p5,,female
+Patient/p6,2017-05-01,male
+Patient/p7,2018-06-01,female
+Patient/p8,2018-06-01,male

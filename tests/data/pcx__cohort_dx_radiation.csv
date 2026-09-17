@@ -1,0 +1,3 @@
+subject_ref,dx_recorded_date,tier,condition_ref
+Patient/p2,2015-02-03,1,Condition/p2r
+Patient/p6,2020-04-01,2,Condition/p6h

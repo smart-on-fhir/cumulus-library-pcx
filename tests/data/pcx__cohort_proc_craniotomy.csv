@@ -1,0 +1,6 @@
+subject_ref,proc_performed_day,procedure_ref,tier
+Patient/p1,2020-01-28,Procedure/p1a,1
+Patient/p2,2014-12-22,Procedure/p2a,1
+Patient/p2,2015-06-01,Procedure/p2b,1
+Patient/p6,2020-06-01,Procedure/p6a,1
+Patient/p8,,Procedure/p8a,1
