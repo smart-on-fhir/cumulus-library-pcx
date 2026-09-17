@@ -9,7 +9,6 @@ SELECT  DISTINCT
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
-        -- mention values only: spans and has_mention stay in the source nlp table
         nlp.result.age_under_36_months_at_definitive_surgery.status                    AS age_under_36_months_at_definitive_surgery_status,
         nlp.result.age_under_36_months_at_definitive_surgery.assessment_date           AS age_under_36_months_at_definitive_surgery_assessment_date,
         nlp.result.age_under_36_months_at_definitive_surgery.assessment_date_precision AS age_under_36_months_at_definitive_surgery_assessment_date_precision,

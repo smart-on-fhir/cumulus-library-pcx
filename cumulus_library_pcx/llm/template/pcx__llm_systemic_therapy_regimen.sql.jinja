@@ -11,7 +11,6 @@ SELECT  DISTINCT
         nlp.system_fingerprint,
         -- 1-based position of each unnested list item (see FROM)
         regimen_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         regimen.phase                                                AS phase,
         regimen.documented_trial_arm                                 AS documented_trial_arm,
         regimen.protocol_name_verbatim                               AS protocol_name_verbatim,

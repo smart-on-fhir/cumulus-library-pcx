@@ -11,7 +11,6 @@ SELECT  DISTINCT
         nlp.system_fingerprint,
         -- 1-based position of each unnested list item (see FROM)
         metastasis_site_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         metastasis_site.site                                         AS site,
         metastasis_site.site_date                                    AS site_date,
         metastasis_site.site_date_precision                          AS site_date_precision

@@ -13,7 +13,6 @@ SELECT  DISTINCT
         regimen_index,
         agent_index,
         administration_index,
-        -- mention values only: spans and has_mention stay in the source nlp table
         administration.delivery_status                               AS delivery_status,
         administration.phase                                         AS phase,
         administration.cycle_name                                    AS cycle_name,
