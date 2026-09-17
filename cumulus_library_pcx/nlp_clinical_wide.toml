@@ -1,5 +1,5 @@
 [[actions]]
-label = "Flattened NLP results for PCX Clinical Tasks"
+label = "Flattened NLP results for Clinical Tasks"
 type = "build:parallel"
 files = [
     "llm/athena/pcx__llm_diagnosis_wide.sql",
