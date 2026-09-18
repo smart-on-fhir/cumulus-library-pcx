@@ -24,15 +24,15 @@ def make_actions() -> list[Action]:
                 'calc 1x for each note_ref the note_author_date'),
             SqlParallelAction(
                 sample_tool.make_aspects(),
-                f'sample for aspects {sample_tool.list_aspects()}'),
+                f'sample for aspects {sample_tool.list_aspect_names()}'),
             SqlParallelAction(
-                sample_tool.make_template_temporality(),
+                sample_tool.make_temporality_list(),
                 f'sample temporality {sample_tool.TEMPORALITY}'),
             SqlParallelAction(
-                sample_tool.make_template_temporality_limit_patient(LIMIT_PATIENTS),
+                sample_tool.make_temporality_limit_patient(LIMIT_PATIENTS),
                 'sample size limit patients'),
             SqlParallelAction(
-                sample_tool.make_template_temporality_limit_note(LIMIT_NOTES),
+                sample_tool.make_temporality_limit_note(LIMIT_NOTES),
                 'sample size limit notes')]
 
 def make() -> Path:

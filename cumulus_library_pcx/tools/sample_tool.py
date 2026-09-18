@@ -31,7 +31,7 @@ TEMPORALITY = ['pre', 'peri', 'peri_post', 'post']
 # Step 1: sample_casedef
 #-----------------------------------------------------------------------------
 def make_sample(table_name: str | None = None) -> list[Path]:
-    """make_template_sample('sample_casedef_author') -> [athena/pcx__sample_casedef_author.sql]"""
+    """make_sample('sample_casedef_author') -> [athena/pcx__sample_casedef_author.sql]"""
     if not table_name:
         table_name = 'sample_casedef'
     return [template.copy(f'{table_name}.sql', encounter_ref=ENCOUNTER_REF)]
@@ -67,16 +67,16 @@ def make_aspect(aspect: Aspect | str) -> Path:
 #-----------------------------------------------------------------------------
 # Step 4: with sample size limits
 #-----------------------------------------------------------------------------
-def make_template_temporality_limit_patient(limit: int = 10) -> list[Path]:
+def make_temporality_limit_patient(limit: int = 10) -> list[Path]:
     return make_temporality_list('sample_casedef_temporality_limit_patient', limit)
 
-def make_template_temporality_limit_note(limit: int = 50) -> list[Path]:
+def make_temporality_limit_note(limit: int = 50) -> list[Path]:
     return make_temporality_list('sample_casedef_temporality_limit_note', limit)
 
 #-----------------------------------------------------------------------------
 # Temporality helpers
 #-----------------------------------------------------------------------------
-def make_temporality_list(template_name: str, limit: int | None = None) -> list[Path]:
+def make_temporality_list(template_name: str='sample_casedef_temporality', limit: int | None = None) -> list[Path]:
     """One SQL file per TEMPORALITY, in TEMPORALITY order."""
     out = list()
     for temporality in TEMPORALITY:

@@ -6,7 +6,6 @@ from cumulus_library_pcx.tools.manifest import (
     SqlAction,
     save_actions_toml
 )
-
 #-----------------------------------------------------------------------------
 # Upload include_*.csv files
 # Common: edit the values of spreadsheet/include_*.csv

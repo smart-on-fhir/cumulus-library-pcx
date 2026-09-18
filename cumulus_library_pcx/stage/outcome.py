@@ -21,14 +21,7 @@ from cumulus_library_pcx.tools.manifest import (
 # helper path to custom "outcome" SQL files
 # -----------------------------------------------------------------------------
 def path_outcome(table_suffix: str | None) -> Path:
-    """
-    :param table_suffix: table name without prefix or "outcome"
-    :return: Path to fully qualified table_name in custom dir
-    """
-    if table_suffix:
-        outcome_table = tablespace.name_join('outcome', table_suffix)
-    else:
-        outcome_table = tablespace.name_prefix('outcome')
+    outcome_table = tablespace.name_outcome(table_suffix)
     return filetool.path_custom(f"{outcome_table}.sql")
 
 # -----------------------------------------------------------------------------

@@ -23,12 +23,12 @@ def name_trim(table) -> str:
 def name_join(part: str, table: str) -> str:
     return name_prefix('_'.join([part, name_trim(table)]))
 
-def name_sample(table: str, suffix=None) -> str:
-    part = name_suffix('sample', suffix)
-    return name_join(part, table)
-
 def name_cohort(table: str, suffix=None) -> str:
     part = name_suffix('cohort', suffix)
+    return name_join(part, table)
+
+def name_sample(table: str, suffix=None) -> str:
+    part = name_suffix('sample', suffix)
     return name_join(part, table)
 
 def name_elastic(table: str, suffix=None) -> str:
@@ -104,8 +104,8 @@ def ctas(source: str, variable: str, where: list) -> str:
     """
     from_list = sql_list([source, name_valueset(variable)])
     cohort_name = name_cohort(variable)
-    select = f"select distinct * from \n {from_list}"
-    sql = [f'create table {cohort_name} as ',
+    select = f"SELECT DISTINCT * FROM \n {from_list}"
+    sql = [f'CREATE TABLE {cohort_name} AS ',
            select, 'WHERE', sql_and(where)]
     return '\n'.join(sql)
 

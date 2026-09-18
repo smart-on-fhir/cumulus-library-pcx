@@ -26,14 +26,7 @@ from cumulus_library_pcx.tools.manifest import (
 # helper paths to custom "eligible" SQL files
 # -----------------------------------------------------------------------------
 def path_eligible(table_suffix: str | None) -> Path:
-    """
-    :param table_suffix: table name without prefix or "eligible"
-    :return: Path to fully qualified table_name in custom dir
-    """
-    if table_suffix:
-        eligible_table = tablespace.name_join('eligible', table_suffix)
-    else:
-        eligible_table = tablespace.name_prefix('eligible')
+    eligible_table = tablespace.name_eligible(table_suffix)
     return filetool.path_custom(f"{eligible_table}.sql")
 
 # -----------------------------------------------------------------------------

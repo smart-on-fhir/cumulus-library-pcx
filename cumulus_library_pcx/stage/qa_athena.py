@@ -12,14 +12,21 @@ from cumulus_library_pcx.tools.manifest import (
 
 STAGE_TOML = 'qa_athena.toml'
 
-
 def make_actions() -> list[Action]:
     qa_athena_tool.copy_templates()
     return [
-        SqlParallelAction(qa_athena_tool.list_qa(), 'all *qa* tables should have zero rows'),
-        SqlParallelAction(qa_athena_tool.list_warn(), 'warn tables - nonzero rows are findings to eyeball, not failures'),
-        SqlParallelAction(qa_athena_tool.list_example(), 'example tables for client users'),
-        SqlParallelAction(qa_athena_tool.make_union(), 'union qa'),
+        SqlParallelAction(
+            qa_athena_tool.list_qa(),
+            'all *qa* tables should have zero rows'),
+        SqlParallelAction(
+            qa_athena_tool.list_warn(),
+            'warn tables - nonzero rows are findings to eyeball, not failures'),
+        SqlParallelAction(
+            qa_athena_tool.list_example(),
+            'example tables for client users'),
+        SqlParallelAction(
+            qa_athena_tool.make_union(),
+            'union qa'),
     ]
 
 def make() -> Path:
