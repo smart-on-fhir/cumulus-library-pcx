@@ -2,7 +2,8 @@
 """Generate a synthetic, real-world-like PCX cohort and export the eligible and outcome tables.
 
     make-pcx test-synthetic [--patients 1000] [--seed 334] [--noise 1.0] [--no-utilization-screen]
-        regenerates tests/data/synthetic: the derived tables, synthetic__truth.csv and the upstream tables
+        regenerates tests/data/synthetic: the derived tables, synthetic__truth.csv, the upstream tables
+        and test-synthetic.csv, the report as one row per fact
     python tests/synthetic.py OUTPUT_DIR [same options] [--include-inputs]
         the same generator aimed at any directory
 
@@ -85,6 +86,7 @@ from cumulus_library_pcx.tools import filetool
 ###############################################################################
 STAGES = ['eligible.toml', 'outcome.toml']
 TRUTH_FILENAME = 'synthetic__truth.csv'
+REPORT_FILENAME = 'test-synthetic.csv'      # the report as records: section, table, column, item, value, count, percent, paper
 
 EXTRACT_DAY = date(2026, 6, 30)             # last day any EHR evidence can carry
 STUDY_PERIOD_START = date(2008, 1, 1)       # spreadsheet/include_study_period.csv
@@ -1316,8 +1318,35 @@ def write_truth(path: Path, eligible: list[Patient]) -> None:
 
 
 ###############################################################################
-# Calibration report
+# Report: every number is a record, printed compactly and written to test-synthetic.csv
 ###############################################################################
+REPORT_COLUMNS = ['section', 'table', 'column', 'item', 'value', 'count', 'percent', 'paper']
+CATEGORICAL_MAX_DISTINCT = 12       # a text column with more distinct values is summarized as a count
+PAPER_TABLE_1 = {                   # ACNS0334 Table 1, all 77 randomized patients
+    'median age at surgery, months': (None, 23.6),
+    'male': ("gender = 'male'", 50.6),
+    'metastatic, LLM M1-M3 (NULL counts as no)': ('llm_metastatic_bool', 55.8),
+    'anaplastic (NULL counts as no)': ('llm_anaplastic_bool', 13.0),
+    'residual disease, partial resection or biopsy': ('llm_residual_disease_bool', 33.8),
+    'methotrexate (randomized in the trial)': ('methotrexate_any_bool', 49.4),
+}
+PAPER_EFS_5Y = {                    # 5-year EFS percent without / with methotrexate, as the paper reports it
+    'MB': (45.8, 68.2), 'G3': (33, 70), 'SHH': (100, 100), 'G4': ('n=2', 'n=2'),
+    'WNT': (None, None), 'ETMR': (33, 20), 'PINEO': (0, 17), 'OTHER': (None, None),
+    'ATRT': ('not in trial', 'not in trial'),
+}
+
+
+def record(section: str, table=None, column=None, item=None, value=None, count=None, percent=None, paper=None) -> dict:
+    """
+    One report fact. percent is 0-100 (rounded to a tenth), count an integer, value anything scalar.
+    """
+    if percent is not None:
+        percent = round(percent, 1)
+    return {'section': section, 'table': table, 'column': column, 'item': item, 'value': value,
+            'count': count, 'percent': percent, 'paper': paper}
+
+
 def kaplan_meier(durations: list, events: list, at_days: int) -> float | None:
     """
     :return: Kaplan-Meier survival probability at `at_days`, None without subjects
@@ -1335,56 +1364,49 @@ def kaplan_meier(durations: list, events: list, at_days: int) -> float | None:
     return survival
 
 
-def share(con, table: str, condition: str) -> str:
-    total, hits = con.execute(f'SELECT COUNT(*), COUNT(*) FILTER (WHERE {condition}) FROM {table}').fetchone()
-    return 'n/a' if not total else f'{100.0 * hits / total:5.1f}%'
+def pct(value: float | None) -> float | None:
+    return None if value is None else 100.0 * value
 
 
-def percent(value: float | None) -> str:
-    return '  n/a' if value is None else f'{100.0 * value:5.1f}%'
-
-
-def report(con, simulated: list[Patient], screened: dict, row_counts: dict) -> None:
-    print('\nRows written')
+def calibration_records(con, simulated: list[Patient], screened: dict, row_counts: dict) -> list[dict]:
+    """
+    Rows written, patients screened out, the trial-like cohort against Table 1, Kaplan-Meier from
+    the derived tables, and the latent truth by kind (the calibration to the paper).
+    """
+    out = list()
     for table, count in row_counts.items():
-        print(f'  {table:<32}{count:>8}')
-    print('\nSimulated but screened out upstream (not in pcx__eligible)')
+        out.append(record('rows_written', table=table, count=count))
     for reason, count in sorted(screened.items()):
-        print(f'  {reason:<32}{count:>8}')
+        out.append(record('screened_out', item=reason, count=count))
 
-    print('\npcx__eligible_trial vs ACNS0334 Table 1            synthetic    paper')
     trial = 'pcx__eligible_trial'
-    median_age = con.execute(f'SELECT MEDIAN(age_months_at_definitive_surgery) FROM {trial}').fetchone()[0]
-    print(f'  median age at surgery, months                  {median_age or 0:8.1f}     23.6')
-    for label, condition, paper in (
-            ('male', "gender = 'male'", '50.6%'),
-            ('metastatic, LLM M1-M3 (NULL counts as no)', 'llm_metastatic_bool', '55.8%'),
-            ('anaplastic (NULL counts as no)', 'llm_anaplastic_bool', '13.0%'),
-            ('residual disease, partial resection or biopsy', 'llm_residual_disease_bool', '33.8%'),
-            ('methotrexate (randomized in the trial)', 'methotrexate_any_bool', '49.4%')):
-        print(f'  {label:<48} {share(con, trial, condition)}    {paper}')
+    total = con.execute(f'SELECT COUNT(*) FROM {trial}').fetchone()[0]
+    for label, (condition, paper) in PAPER_TABLE_1.items():
+        if condition is None:
+            median = con.execute(f'SELECT MEDIAN(age_months_at_definitive_surgery) FROM {trial}').fetchone()[0]
+            out.append(record('trial_vs_paper', table=trial, item=label, value=median, count=total, paper=paper))
+        else:
+            hits = con.execute(f'SELECT COUNT(*) FROM {trial} WHERE {condition}').fetchone()[0]
+            out.append(record('trial_vs_paper', table=trial, item=label, count=hits,
+                              percent=100.0 * hits / total if total else None, paper=paper))
 
-    print('\nKaplan-Meier at 5 years from the DERIVED tables: tier 1 medulloblastoma in pcx__eligible_trial')
-    print('  (naive: confounded by indication, and survivor-biased unless --no-utilization-screen)')
     rows = con.execute("""
         SELECT  o.methotrexate_prior_to_first_event_bool, o.efs_days, o.efs_event_bool, o.os_days, o.os_event_bool
         FROM    pcx__outcome AS o
         JOIN    pcx__eligible_trial AS t ON t.subject_ref = o.subject_ref
         WHERE   t.medulloblastoma_tier1_bool AND o.efs_days IS NOT NULL AND o.os_days IS NOT NULL""").fetchall()
-    for label, keep, paper in (('with methotrexate   ', True, 'EFS 68.2%'), ('without methotrexate', None, 'EFS 45.8%')):
-        arm = [row for row in rows if (row[0] is True) == bool(keep)]
+    for label, keep, paper in (('without methotrexate', False, PAPER_EFS_5Y['MB'][0]),
+                               ('with methotrexate', True, PAPER_EFS_5Y['MB'][1])):
+        arm = [row for row in rows if (row[0] is True) == keep]
         efs = kaplan_meier([row[1] for row in arm], [row[2] for row in arm], 1826)
         os_ = kaplan_meier([row[3] for row in arm], [row[4] for row in arm], 1826)
-        print(f'  {label}  n={len(arm):<6} EFS {percent(efs)}   OS {percent(os_)}     paper {paper}')
+        out.append(record('km_5y_derived', table='pcx__outcome', column='EFS', item=label, count=len(arm),
+                          percent=pct(efs), paper=paper))
+        out.append(record('km_5y_derived', table='pcx__outcome', column='OS', item=label, count=len(arm),
+                          percent=pct(os_)))
 
-    print('\nLatent truth, event-free at 5 years by kind and methotrexate: every simulated patient,')
-    print('  BEFORE the utilization screen removes early deaths (this is the calibration to the paper)')
-    print('  kind     without MTX        with MTX           paper (without / with)')
-    paper = {'G3': '33% / 70%', 'SHH': '100% / 100%', 'G4': 'n=2', 'WNT': 'n/a', 'ETMR': '33% / 20%',
-             'PINEO': '0% / 17%', 'OTHER': 'n/a', 'ATRT': 'not in trial'}
     for kind_name in KIND:
-        cells = list()
-        for methotrexate in (False, True):
+        for methotrexate, label in ((False, 'without methotrexate'), (True, 'with methotrexate')):
             group = [pat for pat in simulated if pat.kind == kind_name and pat.methotrexate == methotrexate
                      and not pat.radiation_first]
             event_free = list()
@@ -1393,81 +1415,136 @@ def report(con, simulated: list[Patient], screened: dict, row_counts: dict) -> N
                             default=None)
                 event_free.append(first is None or (first - pat.surgery_day).days > 1826)
             rate = sum(event_free) / len(group) if group else None
-            cells.append(f'{percent(rate)} (n={len(group):<5})')
-        print(f'  {kind_name:<8} {cells[0]}   {cells[1]}    {paper[kind_name]}')
+            out.append(record('truth_efs_5y', column=kind_name, item=label, count=len(group), percent=pct(rate),
+                              paper=PAPER_EFS_5Y[kind_name][int(methotrexate)]))
+    return out
 
 
-CATEGORICAL_MAX_DISTINCT = 12       # a text column with more distinct values is summarized as a count
-
-
-def column_summary(con, table: str, column: str, kind: str, rows: int) -> str | None:
+def column_records(con, table: str, column: str, kind: str, rows: int) -> list[dict]:
     """
-    One line describing a column: value shares for categorical text, range for dates,
-    median for numbers, distinct count for identifiers. None when there is nothing to say.
+    What one upstream column looks like: value shares for categorical text (and small integers),
+    min and max for dates (the LLM's ISO text dates are hard-cast like the SQL does), median
+    for other numbers, a distinct count for identifiers and free text, and the null share.
     """
+    out = list()
     nulls = con.execute(f'SELECT COUNT(*) FROM {table} WHERE {column} IS NULL').fetchone()[0]
-    null_text = f'   null {100.0 * nulls / rows:.0f}%' if nulls else ''
-    #  LLM dates are ISO text in the schema, the SQL hard-casts them and so does this
     llm_date = kind == 'VARCHAR' and 'date' in column and not column.endswith('_precision')
     if kind in ('DATE', 'TIMESTAMP') or llm_date:
         expression = f'CAST({column} AS DATE)' if llm_date else column
         low, high = con.execute(f'SELECT MIN({expression}), MAX({expression}) FROM {table}').fetchone()
-        if low is None:
-            return None
-        return f'{str(low)[:10]} .. {str(high)[:10]}{null_text}'
-    if kind == 'BOOLEAN':
+        if low is not None:
+            out.append(record('sources', table, column, 'min', str(low)[:10]))
+            out.append(record('sources', table, column, 'max', str(high)[:10]))
+    elif kind == 'BOOLEAN':
         true_cnt = con.execute(f'SELECT COUNT(*) FROM {table} WHERE {column}').fetchone()[0]
-        return f'true {100.0 * true_cnt / rows:.0f}%{null_text}'
-    if column.endswith('_ref') or column == 'id':
-        return None
-    distinct = con.execute(f'SELECT COUNT(DISTINCT {column}) FROM {table}').fetchone()[0]
-    if kind in ('BIGINT', 'INTEGER', 'DOUBLE') and distinct > CATEGORICAL_MAX_DISTINCT:
-        median = con.execute(f'SELECT MEDIAN({column}) FROM {table}').fetchone()[0]
-        return f'median {median:g}{null_text}'
-    if distinct > CATEGORICAL_MAX_DISTINCT:
-        return f'{distinct} distinct values{null_text}'
-    counted = con.execute(f'SELECT {column}, COUNT(*) FROM {table} WHERE {column} IS NOT NULL '
-                          f'GROUP BY 1 ORDER BY 2 DESC, 1').fetchall()
-    shares = list()
-    for value, count in counted:
-        shares.append(f'{value} {100.0 * count / rows:.0f}%')
-    return '  '.join(shares) + null_text if shares else None
+        out.append(record('sources', table, column, 'true', count=true_cnt, percent=100.0 * true_cnt / rows))
+    elif column.endswith('_ref') or column == 'id':
+        out.append(record('sources', table, column, 'distinct',
+                          count=con.execute(f'SELECT COUNT(DISTINCT {column}) FROM {table}').fetchone()[0]))
+    else:
+        distinct = con.execute(f'SELECT COUNT(DISTINCT {column}) FROM {table}').fetchone()[0]
+        if kind in ('BIGINT', 'INTEGER', 'DOUBLE') and distinct > CATEGORICAL_MAX_DISTINCT:
+            median = con.execute(f'SELECT MEDIAN({column}) FROM {table}').fetchone()[0]
+            out.append(record('sources', table, column, 'median', value=median))
+        elif distinct > CATEGORICAL_MAX_DISTINCT:
+            out.append(record('sources', table, column, 'distinct', count=distinct))
+        else:
+            counted = con.execute(f'SELECT {column}, COUNT(*) FROM {table} WHERE {column} IS NOT NULL '
+                                  f'GROUP BY 1 ORDER BY 2 DESC, 1').fetchall()
+            for value, count in counted:
+                out.append(record('sources', table, column, str(value), count=count, percent=100.0 * count / rows))
+    if nulls:
+        out.append(record('sources', table, column, 'null', count=nulls, percent=100.0 * nulls / rows))
+    return out
 
 
-def report_sources(con) -> None:
+def source_records(con) -> list[dict]:
     """
-    The upstream tables the SQL read (schema.sql), as they were generated: the encounter
-    criteria verbatim, then row and subject counts and a per-column characteristic for the rest.
+    The upstream tables the SQL read (schema.sql), as generated: the encounter criteria verbatim,
+    then row and subject counts and the column characteristics of every other table.
     """
-    print('\nFrom CSV sources (tables)')
-    print('  encounter criteria')
-    for table in ('pcx__include_study_period', 'pcx__include_utilization'):
-        cursor = con.execute(f'SELECT * FROM {table}')
-        columns = [col[0] for col in cursor.description]
-        for row in cursor.fetchall():
-            pairs = list()
-            for column, value in zip(columns, row):
-                pairs.append(f'{column}={value}')
-            print(f'    {table:<34}' + '  '.join(pairs))
-
+    out = list()
     for (table,) in con.execute('SHOW TABLES').fetchall():
-        if table.startswith('pcx__include_') or not (table in ('core__patient', 'patient')
-                                                      or table.startswith(('pcx__cohort_', 'pcx__llm_', 'pcx__sample_'))):
-            continue
         described = con.execute(f'DESCRIBE {table}').fetchall()
         columns = [(row[0], row[1]) for row in described]
+        if table.startswith('pcx__include_'):
+            cursor = con.execute(f'SELECT * FROM {table}')
+            for row in cursor.fetchall():
+                for (column, _), value in zip(columns, row):
+                    out.append(record('encounter_criteria', table, column, value=value))
+            continue
+        if not (table in ('core__patient', 'patient') or table.startswith(('pcx__cohort_', 'pcx__llm_', 'pcx__sample_'))):
+            continue
         rows = con.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
         subject_column = 'subject_ref' if 'subject_ref' in dict(columns) else 'id'
         subjects = con.execute(f'SELECT COUNT(DISTINCT {subject_column}) FROM {table}').fetchone()[0]
-        print(f'  {table:<36}{rows:>8} rows {subjects:>7} subjects')
+        out.append(record('sources', table, item='rows', count=rows))
+        out.append(record('sources', table, item='subjects', count=subjects))
         if not rows:
             continue
         for column, kind in columns:
-            if column == subject_column:
-                continue
-            summary = column_summary(con, table, column, kind, rows)
-            if summary:
-                print(f'      {column:<32}{summary}')
+            if column != subject_column:
+                out.extend(column_records(con, table, column, kind, rows))
+    return out
+
+
+def percent_text(value: float | None) -> str:
+    return '  n/a ' if value is None else f'{value:5.1f}%'
+
+
+def paper_text(value) -> str:
+    """
+    :return: a paper percent as text, or the paper's own words (n=2, not in trial), or n/a
+    """
+    if value is None:
+        return 'n/a'
+    if isinstance(value, (int, float)):
+        return f'{value:g}%'
+    return str(value)
+
+
+def print_calibration(records: list[dict]) -> None:
+    """
+    The calibration part of the report, compact, for the console. The CSV has every record.
+    """
+    def section(name: str) -> list[dict]:
+        return [row for row in records if row['section'] == name]
+
+    print('\nRows written')
+    for row in section('rows_written'):
+        print(f"  {row['table']:<32}{row['count']:>8}")
+    print('\nSimulated but screened out upstream (not in pcx__eligible)')
+    for row in section('screened_out'):
+        print(f"  {row['item']:<32}{row['count']:>8}")
+
+    print('\npcx__eligible_trial vs ACNS0334 Table 1            synthetic    paper')
+    for row in section('trial_vs_paper'):
+        synthetic = f"{row['value']:8.1f} " if row['percent'] is None else percent_text(row['percent'])
+        print(f"  {row['item']:<48} {synthetic}    {paper_text(row['paper'])}")
+
+    print('\nKaplan-Meier at 5 years from the DERIVED tables: tier 1 medulloblastoma in pcx__eligible_trial')
+    print('  (naive: confounded by indication, and survivor-biased unless --no-utilization-screen)')
+    km = section('km_5y_derived')
+    for efs in [row for row in km if row['column'] == 'EFS']:
+        os_ = [row for row in km if row['column'] == 'OS' and row['item'] == efs['item']][0]
+        print(f"  {efs['item']:<22} n={efs['count']:<6} EFS {percent_text(efs['percent'])}   "
+              f"OS {percent_text(os_['percent'])}     paper EFS {paper_text(efs['paper'])}")
+
+    print('\nLatent truth, event-free at 5 years by kind and methotrexate: every simulated patient,')
+    print('  BEFORE the utilization screen removes early deaths (this is the calibration to the paper)')
+    print('  kind     without MTX              with MTX                 paper (without / with)')
+    truth = section('truth_efs_5y')
+    for kind_name in KIND:
+        cells = list()
+        papers = list()
+        for row in [row for row in truth if row['column'] == kind_name]:
+            cells.append(f"{percent_text(row['percent'])} (n={row['count']:<5})")
+            papers.append(paper_text(row['paper']))
+        print(f"  {kind_name:<8} {cells[0]}   {cells[1]}    {papers[0]} / {papers[1]}")
+
+
+def write_report_csv(path: Path, records: list[dict]) -> None:
+    write_plain_csv(path, REPORT_COLUMNS, records)
 
 
 ###############################################################################
@@ -1497,6 +1574,11 @@ def main(argv: list[str] | None = None) -> int:
         parser.error('tests/data/warn holds the hand-written SQL test fixtures, choose another directory')
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    generate(args, output_dir)
+    return 0
+
+
+def generate(args: argparse.Namespace, output_dir: Path) -> None:
     tables, eligible, simulated, screened = simulate_cohort(args.patients, args.seed, args.noise,
                                                             not args.no_utilization_screen)
     with tempfile.TemporaryDirectory() as scratch:
@@ -1506,15 +1588,20 @@ def main(argv: list[str] | None = None) -> int:
     for sql_file in list_stage_sql():
         row_counts[sql_file.stem] = export_athena_csv(con, sql_file.stem, output_dir / f'{sql_file.stem}.csv')
     write_truth(output_dir / TRUTH_FILENAME, eligible)
-
     if row_counts['pcx__eligible'] != args.patients:
         raise RuntimeError(f"pcx__eligible has {row_counts['pcx__eligible']} rows, expected {args.patients}")
+
+    records = list()
+    for name, value in sorted(vars(args).items()):
+        if name != 'output_dir':
+            records.append(record('run', item=name, value=value))
+    records.extend(calibration_records(con, simulated, screened, row_counts))
+    records.extend(source_records(con))
+    write_report_csv(output_dir / REPORT_FILENAME, records)
     if not args.quiet:
-        report(con, simulated, screened, row_counts)
-    print(f'\nWrote {len(row_counts)} tables and {TRUTH_FILENAME} to {output_dir}')
-    if not args.quiet:
-        report_sources(con)
-    return 0
+        print_calibration(records)
+    print(f'\nWrote {len(row_counts)} tables, {TRUTH_FILENAME} and {REPORT_FILENAME} ({len(records)} rows: '
+          f'run options, calibration, source table characteristics) to {output_dir}')
 
 
 def make_tests_synthetic(argv: list[str] | None = None) -> int:

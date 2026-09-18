@@ -70,7 +70,10 @@ children 3 years old or younger with a CNS embryonal tumor, calibrated to ACNS03
 ([PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/)), run through the real
 `custom/pcx__eligible*.sql` and `pcx__outcome*.sql` in DuckDB. It writes the ten derived tables
 as Athena-download CSV, `synthetic__truth.csv` (the latent truth per subject) and the upstream
-tables in the [tests/data/warn](tests/data/warn) fixture style, all in one directory. Stale CSVs from an earlier
+tables in the [tests/data/warn](tests/data/warn) fixture style, all in one directory, plus
+`test-synthetic.csv`, the report as one row per fact (`section, table, column, item, value, count,
+percent, paper`: run options, calibration against the paper, and the characteristics of every
+source table and column). Stale CSVs from an earlier
 run are removed first. Options after the word go to the generator ([tests/synthetic.py](tests/synthetic.py),
 test code kept out of the study package and loaded from the checkout, so this needs a clone with `pip install -e .`):
 `--patients` (rows in `pcx__eligible`, default 1000), `--seed` (default 334), `--noise` (0 clean,
@@ -187,7 +190,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 | `spreadsheet/file_upload_study_variable.toml`                | study_variable (`UploadWorkflow`, all columns strings) |
 | `$ELASTIC_OUTPUT_DIR/<date>/file_upload_elastic.toml`        | elastic_upload, when results exist        |
 | `cumulus_library_pcx/manifest.toml`                          | the default (no-stage) run                |
-| `tests/data/synthetic/*.csv`                                 | `test-synthetic`                          |
+| `tests/data/synthetic/*.csv` (tables, `synthetic__truth.csv`, `test-synthetic.csv`) | `test-synthetic`   |
 
 ## Code
 

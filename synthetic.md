@@ -4,7 +4,8 @@ Generator that simulates a real-world-like cohort and exports the 10 eligible/ou
 (`SELECT * FROM pcx__<table>` download format: all values quoted, NULL empty, booleans true/false).
 
     make-pcx test-synthetic [--patients 1000] [--seed 334] [--noise 1.0] [--no-utilization-screen] [--quiet]
-        regenerates tests/data/synthetic (derived, synthetic__truth.csv and upstream tables in one directory), removing stale CSVs first
+        regenerates tests/data/synthetic (derived, synthetic__truth.csv and upstream tables in one directory,
+        plus test-synthetic.csv, the report as records), removing stale CSVs first
     python tests/synthetic.py OUTPUT_DIR [same options] [--include-inputs]
         the same generator aimed at any directory (test code, deliberately outside cumulus_library_pcx/)
 
