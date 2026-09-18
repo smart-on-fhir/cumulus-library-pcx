@@ -8,7 +8,7 @@ from cumulus_library_pcx.tools.manifest import (
     SqlAction,
     save_actions_toml
 )
-from cumulus_library_pcx.stage.study_variable import (
+from cumulus_library_pcx.tools.variable_tool import (
     list_variables,
     list_variables_as_str,
     list_aspects
@@ -43,7 +43,7 @@ def _make_union(aspect:Aspect=None) -> Path:
     :return: Path to SQL file
     """
     cohort = f'variable_union_{aspect.name}' if aspect else f'variable_union'
-    variable_list = list_variables(aspect)
+    variable_list = list_variables(aspect=aspect)
     return filetool.save_athena_view(
         name_cohort(cohort),
         template.load(f"cohort_{cohort}.sql",
@@ -81,7 +81,7 @@ def make_wide_bool(aspect:Aspect=None) -> Path:
     :return: Path to SQL file
     """
     cohort = f'variable_wide_{aspect.name}' if aspect else f'variable_wide'
-    variable_list = list_variables(aspect)
+    variable_list = list_variables(aspect=aspect)
     return filetool.save_athena_view(
         name_cohort(cohort),
         template.load(f"cohort_{cohort}.sql",
@@ -199,7 +199,7 @@ def select_wide_dx(variable_list: list[str] = None, columns: dict = None) -> str
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.dx)
+        variable_list = list_variables(aspect=Aspect.dx)
     if not columns:
         columns = {'dx_onset_date': 'onset',
                    'dx_category_code':'category',
@@ -219,7 +219,7 @@ def select_wide_rx(variable_list: list[str] = None, columns: dict = None) -> str
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.rx)
+        variable_list = list_variables(aspect=Aspect.rx)
     if not columns:
         columns = {'rx_authoredon_date': 'date',
                    'rx_status': 'status',
@@ -239,7 +239,7 @@ def select_wide_lab(variable_list: list[str]=None, columns:dict = None) -> str:
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.lab)
+        variable_list = list_variables(aspect=Aspect.lab)
     if not columns:
         columns = {'lab_effectivedate': 'date',
                    'lab_interpretation_code': 'interpretation',
@@ -257,7 +257,7 @@ def select_wide_enc(variable_list: list[str] = None, columns: dict = None) -> st
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.enc)
+        variable_list = list_variables(aspect=Aspect.enc)
     if not columns:
         columns = {'encounter_ref': 'ref'}
     return select_wide_dict(variable_list, columns)
@@ -274,7 +274,7 @@ def select_wide_diag(variable_list: list[str] = None, columns: dict = None) -> s
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.diag)
+        variable_list = list_variables(aspect=Aspect.diag)
     if not columns:
         columns = {'diag_effectivedatetime_day': 'date',
                    'diag_code': 'code',
@@ -291,7 +291,7 @@ def select_wide_doc(variable_list: list[str] = None, columns: dict = None) -> st
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.doc)
+        variable_list = list_variables(aspect=Aspect.doc)
     if not columns:
         columns = {'doc_author_day': 'date',
                    'doc_type_code': 'code',
@@ -310,7 +310,7 @@ def select_wide_proc(variable_list: list[str] = None, columns: dict = None) -> s
     :return: str SQL
     """
     if not variable_list:
-        variable_list = list_variables(Aspect.proc)
+        variable_list = list_variables(aspect=Aspect.proc)
     if not columns:
         columns = {'proc_performed_day': 'date',
                    'proc_category_code': 'code',

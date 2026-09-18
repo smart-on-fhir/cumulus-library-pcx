@@ -1,67 +1,29 @@
+"""QA stage: build the qa, warn and example tables, then their union counts.
+
+File discovery, template rendering and union SQL live in tools.qa_athena_tool.
+This module owns the action order and the qa_athena.toml manifest.
+"""
 from pathlib import Path
-from cumulus_library_pcx.tools import filetool, template, tablespace
+
+from cumulus_library_pcx.tools import qa_athena_tool
 from cumulus_library_pcx.tools.manifest import (
-    Action,
-    SqlParallelAction,
-    save_actions_toml
+    Action, SqlParallelAction, save_actions_toml,
 )
 
-# ----------------------------------------------------------------------------
-# LIST SQL files
-# ----------------------------------------------------------------------------
-def list_templates() -> list[Path]:
-    return sorted(list(filetool.path_tests_template().glob("*.sql")))
+STAGE_TOML = 'qa_athena.toml'
 
-def list_athena(wildcard:str, exclude:str='') -> list[Path]:
-    table_glob = tablespace.name_prefix(wildcard)
-    file_list = list(filetool.path_tests_athena().glob(table_glob))
-    return sorted([f for f in file_list if exclude not in str(f)])
 
-def list_qa() -> list[Path]:
-    return list_athena('qa_*.sql', tablespace.name_prefix('qa_union.sql'))
-
-def list_warn() -> list[Path]:
-    return list_athena('warn_*.sql', tablespace.name_prefix('warn_union.sql'))
-
-def list_example() -> list[Path]:
-    """Return user-facing examples built only from client tables."""
-    return list_athena('example_*.sql', '')
-
-def list_tables(file_list:list[Path]) -> list[str]:
-    return [file.stem for file in file_list]
-
-# ----------------------------------------------------------------------------
-# UNION
-# ----------------------------------------------------------------------------
-def make_union() -> list[Path]:
-    return [_ctas_union('qa_union', list_qa()),
-            _ctas_union('warn_union', list_warn())]
-
-def _ctas_union(table_part, file_list:list[Path]) -> Path:
-    table = tablespace.name_prefix(table_part)
-    ctas = f'CREATE TABLE {table} AS '
-    text = [f"SELECT COUNT(*) as cnt, '{table}' as test \n FROM {table}"
-            for table in list_tables(file_list)]
-    text = ctas + '\n' + '\n UNION ALL \n'.join(text)
-    return filetool.write_text(text, filetool.path_tests_athena(f"{table}.sql"))
-
-# ----------------------------------------------------------------------------
-# actions
-# ----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
-    for t in list_templates():
-        template.copy_test(t)
+    qa_athena_tool.copy_templates()
+    return [
+        SqlParallelAction(qa_athena_tool.list_qa(), 'all *qa* tables should have zero rows'),
+        SqlParallelAction(qa_athena_tool.list_warn(), 'warn tables - nonzero rows are findings to eyeball, not failures'),
+        SqlParallelAction(qa_athena_tool.list_example(), 'example tables for client users'),
+        SqlParallelAction(qa_athena_tool.make_union(), 'union qa'),
+    ]
 
-    return [SqlParallelAction(list_qa(), 'all *qa* tables should have zero rows'),
-            SqlParallelAction(list_warn(), 'warn tables - nonzero rows are findings to eyeball, not failures'),
-            SqlParallelAction(list_example(), 'example tables for client users'),
-            SqlParallelAction(make_union(), 'union qa')]
-
-# ----------------------------------------------------------------------------
-# make
-# ----------------------------------------------------------------------------
 def make() -> Path:
-    return save_actions_toml(make_actions(), 'qa_athena.toml')
+    return save_actions_toml(make_actions(), STAGE_TOML)
 
 if __name__ == '__main__':
     print(make())

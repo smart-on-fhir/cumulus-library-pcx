@@ -11,6 +11,7 @@ make-pcx: make Cumulus Library stage manifests for this study.
 """
 import sys
 import importlib.util
+from pathlib import Path
 from argparse import (
     ArgumentParser,
     RawDescriptionHelpFormatter
@@ -53,6 +54,16 @@ def load_tests_synthetic():
     if not path.exists():
         raise SystemExit(f'make-pcx {COMMAND_TEST_SYNTHETIC} needs the repository checkout: {path} not found '
                          '(clone the repo and `pip install -e ".[test]"`)')
+    # console scripts do not put the checkout on sys.path, and another installed package
+    # may own the name `tests`: put this checkout first so `tests.tools` is ours
+    checkout = str(path.parent.parent)
+    if checkout in sys.path:
+        sys.path.remove(checkout)
+    sys.path.insert(0, checkout)
+    imported = sys.modules.get('tests')
+    if imported is not None and Path(imported.__file__).parent != path.parent:
+        for name in [name for name in sys.modules if name == 'tests' or name.startswith('tests.')]:
+            del sys.modules[name]
     spec = importlib.util.spec_from_file_location('tests.synthetic', path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

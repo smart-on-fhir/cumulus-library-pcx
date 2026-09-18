@@ -1,7 +1,8 @@
 from pathlib import Path
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 from cumulus_library_pcx.tools import filetool, template, tablespace
-from cumulus_library_pcx.stage.study_variable import Aspect, list_aspect_names
+from cumulus_library_pcx.tools.fhir_reference import Aspect
+from cumulus_library_pcx.tools.variable_tool import list_aspect_names
 from cumulus_library_pcx.tools.manifest import (
     Action,
     SqlAction,

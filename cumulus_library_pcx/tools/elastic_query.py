@@ -3,6 +3,11 @@ from rapid_elastic import pipeline
 from cumulus_library_pcx.tools import filetool, settings
 
 def main() -> list[Path]:
+    """
+    https://github.com/smart-on-fhir/rapid-elastic/issues/28
+    Workaround for query_topics.tsv handling
+    :return: list of CSV output files
+    """
     query_topics = filetool.path_spreadsheet('query_topics.tsv')
     output_base = settings.get_elastic_output_dir().resolve()
     print('Configured output:', output_base)

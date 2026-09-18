@@ -27,11 +27,6 @@ STUDY_PERIOD = 'cohort_study_period'
 STUDY_POPULATION = 'cohort_study_population'
 OBS_TABLES = ['cohort_study_population_obs_base', 'cohort_study_population_lab_base']
 
-# def make_template(table_list:list|str) -> list[Path]:
-#     if isinstance(table_list, str):
-#         return [template.copy(sql_file=table_list)]
-#     return template.copy_list(sql_list=table_list)
-
 #-----------------------------------------------------------------------------
 #  Actions
 #-----------------------------------------------------------------------------

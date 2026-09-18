@@ -5,8 +5,8 @@ from cumulus_library_pcx.tools.manifest import (
     SqlAction,
     save_actions_toml
 )
-from cumulus_library_pcx.tools.cube_helper import PREFIX
-from cumulus_library_pcx.tools.cube_helper import (
+from cumulus_library_pcx.tools.cube_tool import PREFIX
+from cumulus_library_pcx.tools.cube_tool import (
     cube_patient,
     cube_encounter,
     cube_note,

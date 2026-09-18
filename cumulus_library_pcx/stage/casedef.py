@@ -1,71 +1,30 @@
+"""Casedef stage: upload casedef.csv, then build the case cohort, aspects and timeline.
+
+SQL rendering lives in tools.casedef_tool. This module owns the action order
+and the casedef.toml manifest.
+"""
 from pathlib import Path
-from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
-from cumulus_library_pcx.tools import filetool, template
+
+from cumulus_library_pcx.tools import casedef_tool
 from cumulus_library_pcx.tools.manifest import (
-    Action,
-    FileAction,
-    SqlAction,
-    save_actions_toml
+    Action, FileAction, SqlAction, save_actions_toml,
 )
 
-#-----------------------------------------------------------------------------
-# Upload casedef.csv file(s)
-# Common: users add custom spreadsheet/casedef*.csv files
-# Rare: change the UPLOAD_FILE path; file contents are generated
-#-----------------------------------------------------------------------------
-UPLOAD_TOML = 'file_upload_casedef.toml'
+STAGE_TOML = 'casedef.toml'
 
-#-----------------------------------------------------------------------------
-# Template Helpers
-#-----------------------------------------------------------------------------
-def make_template(table_suffix: str | None) -> Path:
-    if table_suffix:
-        table_name = f'cohort_casedef_{table_suffix}'
-    else:
-        table_name = 'cohort_casedef'
-    return copy_template(f'{table_name}.sql')
 
-def copy_template(template_sql:str) -> Path:
-    return template.copy(template_sql,
-                         casedef_columns=filetool.csv_columns('casedef.csv'),
-                         encounter_ref=ENCOUNTER_REF)
-#-----------------------------------------------------------------------------
-# Template
-#-----------------------------------------------------------------------------
-def make_candidate() -> list[Path]:
-    return [make_template(c)
-            for c in ['candidate', 'exclude', 'include']]
-
-def make_casedef() -> list[Path]:
-    return [copy_template('cohort_casedef.sql')]
-
-def make_aspects() -> list[Path]:
-    return [make_template(a)
-            for a in ['dx', 'lab', 'proc', 'rx']]
-
-def make_timeline() -> list[Path]:
-    return [copy_template('cohort_timeline.sql')]
-
-#-----------------------------------------------------------------------------
-# Actions
-#-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
-    return [FileAction([f'../spreadsheet/{UPLOAD_TOML}'],
-                       'case definition CSV upload'),
-            SqlAction(make_candidate(),
-                      'filter include/exclude'),
-            SqlAction(make_casedef(),
-                      'cohort from case definition (valueset_casedef)'),
-            SqlAction(make_aspects(),
-                      'cohort for case definition aspects (dx, rx, lab, proc)'),
-            SqlAction(make_timeline(),
-                      'timeline for casedef with variables')]
+    return [
+        FileAction([casedef_tool.path_upload_toml()], 'case definition CSV upload'),
+        SqlAction(casedef_tool.make_candidate(), 'filter include/exclude'),
+        SqlAction(casedef_tool.make_casedef(), 'cohort from case definition (valueset_casedef)'),
+        SqlAction(casedef_tool.make_aspects(), 'cohort for case definition aspects (dx, rx, lab, proc)'),
+        SqlAction(casedef_tool.make_timeline(), 'timeline for casedef with variables'),
+    ]
 
-#-----------------------------------------------------------------------------
-# Make
-#-----------------------------------------------------------------------------
 def make() -> Path:
-    return save_actions_toml(make_actions(), 'casedef.toml')
+    return save_actions_toml(make_actions(), STAGE_TOML)
+
 
 if __name__ == '__main__':
-    print(make)
+    print(make())
