@@ -27,12 +27,10 @@ STUDY_PERIOD = 'cohort_study_period'
 STUDY_POPULATION = 'cohort_study_population'
 OBS_TABLES = ['cohort_study_population_obs_base', 'cohort_study_population_lab_base']
 
-def make_template(table_list:list) -> list[Path]:
-    """
-    :param table_list: list of tables to make with a template
-    :return: list of files.sql
-    """
-    return [template.copy(f"{table}.sql") for table in table_list]
+# def make_template(table_list:list|str) -> list[Path]:
+#     if isinstance(table_list, str):
+#         return [template.copy(sql_file=table_list)]
+#     return template.copy_list(sql_list=table_list)
 
 #-----------------------------------------------------------------------------
 #  Actions
@@ -64,20 +62,23 @@ def make_actions() -> list[Action]:
     """
     aspect_list = fhir_reference.list_aspect()
     aspect_tables = [f"{STUDY_POPULATION}_{aspect}" for aspect in aspect_list]
-    aspect_tables = make_template(aspect_tables)
 
     return [
         FileAction(
             file_list=[f'../spreadsheet/{UPLOAD_TOML}'],
             label='inclusion criteria for study population'),
-        SqlAction(make_template([STUDY_PERIOD]),
-                  'study_period'),
-        SqlAction(make_template([STUDY_POPULATION]),
-                  'study_population'),
-        SqlAction(make_template(OBS_TABLES),
-                  'obs_base, lab_base'),
-        SqlAction(aspect_tables,
-                  f'study_population aspects {str(aspect_list)}'),
+        SqlAction(
+            template.copy_list(STUDY_PERIOD),
+            'study_period'),
+        SqlAction(
+            template.copy_list(STUDY_POPULATION),
+            'study_population'),
+        SqlAction(
+            template.copy_list(OBS_TABLES),
+            'obs_base, lab_base'),
+        SqlAction(
+            template.copy_list(aspect_tables),
+            f'study_population aspects {str(aspect_list)}'),
     ]
 
 #-----------------------------------------------------------------------------
