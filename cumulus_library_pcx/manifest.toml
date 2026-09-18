@@ -68,16 +68,16 @@ files = [
     "nlp_clinical_tasks_50k.workflow",
 ]
 
-[[stages.nlp_document_wide]]
+[[stages.llm_document_wide]]
 type = "submanifest"
 files = [
-    "nlp_document_wide.toml",
+    "llm_document_wide.toml",
 ]
 
-[[stages.nlp_clinical_wide]]
+[[stages.llm_clinical_wide]]
 type = "submanifest"
 files = [
-    "nlp_clinical_wide.toml",
+    "llm_clinical_wide.toml",
 ]
 
 [[stages.eligible]]

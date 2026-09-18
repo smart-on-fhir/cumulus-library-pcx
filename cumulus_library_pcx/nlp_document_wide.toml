@@ -1,7 +1,0 @@
-[[actions]]
-label = "Flatten NLP results for PCX document type and topic"
-type = "build:parallel"
-files = [
-    "sql/generated/pcx__llm_document_topic_wide.sql",
-    "sql/generated/pcx__llm_document_type_wide.sql",
-]

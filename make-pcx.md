@@ -121,8 +121,8 @@ Kind links to the stage's file: an **action** is a `.toml` submanifest of `[[act
 | [elastic_upload](cumulus_library_pcx/stage/elastic_upload.py)           | [action](cumulus_library_pcx/elastic_upload.toml)               | on            | load Elastic results into SQL; makes an empty stage when no results exist       |
 | `nlp_document_tasks_50k`                                                | [workflow](cumulus_library_pcx/nlp_document_tasks_50k.workflow) | skip          | notes → LLM document-topic routing                                              |
 | `nlp_clinical_tasks_50k`                                                | [workflow](cumulus_library_pcx/nlp_clinical_tasks_50k.workflow) | skip          | notes → LLM clinical tasks                                                      |
-| [nlp_document_wide](cumulus_library_pcx/stage/nlp_document_wide.py) | [action](cumulus_library_pcx/nlp_document_wide.toml)      | on            | LLM document type and topic → wide SQL                                               |
-| [nlp_clinical_wide](cumulus_library_pcx/stage/nlp_clinical_wide.py) | [action](cumulus_library_pcx/nlp_clinical_wide.toml)      | on            | LLM output → wide SQL projections                                               |
+| [llm_document_wide](cumulus_library_pcx/stage/llm_document_wide.py) | [action](cumulus_library_pcx/llm_document_wide.toml)      | on            | LLM document type and topic → wide SQL                                               |
+| [llm_clinical_wide](cumulus_library_pcx/stage/llm_clinical_wide.py) | [action](cumulus_library_pcx/llm_clinical_wide.toml)      | on            | LLM output → wide SQL projections                                               |
 | [eligible](cumulus_library_pcx/stage/eligible.py)                       | [action](cumulus_library_pcx/eligible.toml)                     | on            | trial inclusion/exclusion, see [eligible.md](eligible.md)                       |
 | [outcome](cumulus_library_pcx/stage/outcome.py)                         | [action](cumulus_library_pcx/outcome.toml)                      | on            | vital status, first event, OS and provisional EFS                               |
 | [client_views](cumulus_library_pcx/stage/client_views.py)               | [action](cumulus_library_pcx/client_views.toml)                 | on            | `pcx__client_*` tables for timeline and survival analysis                       |
@@ -176,7 +176,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 | `cumulus_library_pcx/custom/*.sql`                                                             | eligible, outcome, client_views (hand-written SQL, referenced as `custom/`) |
 | `spreadsheet/file_upload_population.toml`, `file_upload_casedef.toml`, `file_upload_client_views.toml` | hand-written upload workflows: they declare per-column `col_types`, which the generator does not |
 | `cumulus_library_pcx/elastic_query.toml`, `nlp_*.workflow`                                     | hand-written stages, listed only          |
-| `cumulus_library_pcx/sql/template/llm_*.sql.jinja`, `nlp_*_tasks.workflow` (task versions) | nlp_document_wide, nlp_clinical_wide |
+| `cumulus_library_pcx/sql/template/llm_*.sql.jinja`, `nlp_*_tasks.workflow` (task versions) | llm_document_wide, llm_clinical_wide |
 | `cumulus_library_pcx/manifest.toml` → `study_prefix`                                           | read at import for the `pcx__` prefix     |
 
 ## Output
@@ -185,7 +185,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 |--------------------------------------------------------------|-------------------------------------------|
 | `cumulus_library_pcx/athena/*.sql`                           | each made stage, from templates and CSVs  |
 | `tests/athena/*.sql`                                         | qa_athena                                 |
-| `cumulus_library_pcx/sql/generated/pcx__llm_*.sql`              | nlp_document_wide, nlp_clinical_wide |
+| `cumulus_library_pcx/sql/generated/pcx__llm_*.sql`              | llm_document_wide, llm_clinical_wide |
 | `cumulus_library_pcx/<stage>.toml`                           | each made stage                           |
 | `spreadsheet/file_upload_study_variable.toml`                | study_variable (`UploadWorkflow`, all columns strings) |
 | `$ELASTIC_OUTPUT_DIR/<date>/file_upload_elastic.toml`        | elastic_upload, when results exist        |

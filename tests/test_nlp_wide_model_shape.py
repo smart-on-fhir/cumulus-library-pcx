@@ -8,16 +8,16 @@ import tomllib
 import pytest
 
 from cumulus_library_pcx.stage.llm_schema import annotation_model, list_tasks
-from cumulus_library_pcx.stage import nlp_clinical_wide, nlp_document_wide
+from cumulus_library_pcx.stage import llm_clinical_wide, llm_document_wide
 from cumulus_library_pcx.tools import filetool, nlp_wide
 from cumulus_library_pcx.tools.tablespace import PREFIX
 
-STAGES = [nlp_clinical_wide, nlp_document_wide]
+STAGES = [llm_clinical_wide, llm_document_wide]
 DOCUMENT_TASKS = {"document_type", "document_topic"}
 
 
 def workflow_of(task: str) -> str:
-    return nlp_document_wide.WORKFLOW if task in DOCUMENT_TASKS else nlp_clinical_wide.WORKFLOW
+    return llm_document_wide.WORKFLOW if task in DOCUMENT_TASKS else llm_clinical_wide.WORKFLOW
 
 
 def model_schema(task: str) -> dict:

@@ -89,16 +89,16 @@ dates or adjudicating evidence:
   BIGINT, DOUBLE, BOOLEAN or VARCHAR; diagnosis dates remain VARCHAR with precision.
 - Diagnosis wide output omits mention flags and evidence spans. Retrieve those from
   the source NLP result; a projected value alone is not the full evidence record.
-- Two stages own the templates: [nlp_clinical_wide](cumulus_library_pcx/stage/nlp_clinical_wide.py)
+- Two stages own the templates: [llm_clinical_wide](cumulus_library_pcx/stage/llm_clinical_wide.py)
   renders the 21 clinical projections of `nlp_clinical_tasks.workflow` and
-  [nlp_document_wide](cumulus_library_pcx/stage/nlp_document_wide.py) renders document type
+  [llm_document_wide](cumulus_library_pcx/stage/llm_document_wide.py) renders document type
   and topic from `nlp_document_tasks.workflow`. A template belongs to the workflow whose task
   name it starts with (`diagnosis_wide` → `diagnosis`), see `tools/nlp_wide.py`.
 
 Generate the SQL and the stage manifests with:
 
 ```sh
-make-pcx nlp_clinical_wide nlp_document_wide
+make-pcx llm_clinical_wide llm_document_wide
 ```
 
 Each template is rendered once as a `UNION ALL` over `<prefix>__nlp_<task>_<deployment>`
@@ -120,7 +120,7 @@ Pydantic models, the templates and the saved `sql/generated/pcx__llm_*.sql` agre
 template and every template belongs to one workflow, every `nlp.result.<path>` a template
 projects exists in its model (and no template projects spans or `has_mention`), the
 rendered SQL pins the workflow version and unions deployments in sorted order.
-`tests/test_nlp_clinical_wide.py` exercises the stage's `make_resources()` into a temp
+`tests/test_llm_clinical_wide.py` exercises the stage's `make_resources()` into a temp
 directory. `sql/generated/pcx__llm_*.sql` is build output, not source: it is not committed, and
 `make-pcx` regenerates it before `cumulus-library build`.
 

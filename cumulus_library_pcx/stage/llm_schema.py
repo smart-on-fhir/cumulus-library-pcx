@@ -53,7 +53,6 @@ def make() -> Path:
 
 class LlmSchemaBuilder(BaseTableBuilder):
     """Refresh schemas when Cumulus executes this stage; no SQL is generated."""
-
     def prepare_queries(self, config, manifest, *args, **kwargs):
         make_files()
 

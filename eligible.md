@@ -128,7 +128,7 @@ no dated chemotherapy or no t0.
 | [pcx__eligible.sql](cumulus_library_pcx/sql/custom/pcx__eligible.sql)                     | every criterion as a nullable column (discovery cohort)                                                    |
 | [pcx__eligible_trial.sql](cumulus_library_pcx/sql/custom/pcx__eligible_trial.sql)         | strict intersection (trial-like cohort)                                                                    |
 
-The eligible SQL reads four LLM wide tables built by the `nlp_clinical_wide` stage: `pcx__llm_diagnosis_wide`,
+The eligible SQL reads four LLM wide tables built by the `llm_clinical_wide` stage: `pcx__llm_diagnosis_wide`,
 `pcx__llm_surgery_wide`, `pcx__llm_systemic_therapy_agent`, `pcx__llm_radiation_wide` (empty when no NLP output exists,
 so every `llm_*` column is then NULL). Every column is declared in [data_dictionary.csv](spreadsheet/data_dictionary.csv).
 The QA stage's `pcx__warn_eligible_*` tables measure each known weakness before the SQL is changed
