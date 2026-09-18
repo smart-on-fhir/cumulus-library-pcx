@@ -33,7 +33,7 @@ def make_template(resource_list: list[str]) -> list[Path]:
     :param resource_list: FHIR resource names in lowercase
     :return: list of rendered athena/prefix__<resource>.sql paths
     """
-    return [template.copy(f"{resource}.sql")
+    return [template.save(f"{resource}.sql")
             for resource in resource_list]
 
 #-----------------------------------------------------------------------------

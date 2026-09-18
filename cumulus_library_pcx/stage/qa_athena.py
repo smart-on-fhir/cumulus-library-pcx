@@ -12,7 +12,7 @@ from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 STAGE_TOML = 'qa_athena.toml'
 
 def make_actions() -> list[Action]:
-    qa_athena_tool.copy_templates()
+    qa_athena_tool.save_templates()
     return [
         SqlParallelAction(
             qa_athena_tool.list_qa(),

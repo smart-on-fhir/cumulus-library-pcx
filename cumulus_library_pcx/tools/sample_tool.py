@@ -31,15 +31,14 @@ TEMPORALITY = ['pre', 'peri', 'peri_post', 'post']
 # Step 1: sample_casedef
 #-----------------------------------------------------------------------------
 def make_sample(table_name: str | None = None) -> list[Path]:
-    """make_sample('sample_casedef_author') -> [athena/pcx__sample_casedef_author.sql]"""
     if not table_name:
         table_name = 'sample_casedef'
-    return [template.copy(f'{table_name}.sql', encounter_ref=ENCOUNTER_REF)]
+    return [template.save(f'{table_name}.sql', encounter_ref=ENCOUNTER_REF)]
 
 #-----------------------------------------------------------------------------
 # Step 2: for each Aspect
 #-----------------------------------------------------------------------------
-def make_aspects() -> list[Path]:
+def make_aspect_list_supported() -> list[Path]:
     out = list()
     for aspect in list_aspect_names():
         out.append(make_aspect(aspect))
@@ -60,7 +59,7 @@ def make_aspect(aspect: Aspect | str) -> Path:
     """
     if isinstance(aspect, Aspect):
         aspect = aspect.name
-    content = template.load('sample_casedef_aspect.sql', aspect=aspect, encounter_ref=ENCOUNTER_REF)
+    content = template.load('sample_casedef_aspect', aspect=aspect, encounter_ref=ENCOUNTER_REF)
     table = tablespace.name_prefix(f'sample_casedef_{aspect}')
     return filetool.save_athena(filetool.path_athena(f'{table}.sql'), content)
 
@@ -99,7 +98,7 @@ def make_temporality(template_name: str, temporality: str, limit: int | None = N
         table_name = f'{table_name}_{limit}'
     else:
         limit = ''
-    text = template.load(f'{template_name}.sql',
+    text = template.load(template_name,
                          encounter_ref=ENCOUNTER_REF,
                          temporality=temporality,
                          limit=limit)

@@ -195,7 +195,7 @@ def main(argv):
     path = pos[0] if pos else "query_topics.tsv"
     only = pos[1] if len(pos) > 1 else None
 
-    for topic, query in filetool.read_query_topics(path):
+    for topic, query in filetool.iter_query_topics(path):
         if only and topic != only:
             continue
         print(col_op("\u2501" * 70)); print(topic); print(col_op("\u2501" * 70))

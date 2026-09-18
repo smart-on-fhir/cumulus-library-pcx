@@ -22,7 +22,7 @@ def make_actions() -> list[Action]:
                 sample_tool.make_sample('sample_casedef_author'),
                 'calc 1x for each note_ref the note_author_date'),
             SqlParallelAction(
-                sample_tool.make_aspects(),
+                sample_tool.make_aspect_list_supported(),
                 f'sample for aspects {sample_tool.list_aspect_names()}'),
             SqlParallelAction(
                 sample_tool.make_temporality_list(),

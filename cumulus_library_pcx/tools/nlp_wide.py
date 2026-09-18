@@ -46,7 +46,7 @@ def prepare_resources(workflow: str, label: str, toml_file: str,
 #-----------------------------------------------------------------------------
 # Templates
 #-----------------------------------------------------------------------------
-def list_templates(tasks: dict[str, int]) -> dict[Path, str]:
+def dict_template_task(tasks: dict[str, int]) -> dict[Path, str]:
     """
     :return: llm/template/<prefix>__llm_*.sql.jinja -> task, for the templates these tasks own
     """
@@ -61,7 +61,7 @@ def list_templates(tasks: dict[str, int]) -> dict[Path, str]:
 #-----------------------------------------------------------------------------
 # NLP Tasks
 #-----------------------------------------------------------------------------
-def list_tasks(workflow: str) -> dict[str, int]:
+def dict_task_versions(workflow: str) -> dict[str, int]:
     """
     :param workflow: filename like 'nlp_clinical_tasks.workflow'
     :return: NLP task -> task version
@@ -116,9 +116,9 @@ def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> d
     :return: llm/athena filename -> SQL
     """
     deployments = list_deployments(deployments)
-    tasks = list_tasks(workflow)
+    tasks = dict_task_versions(workflow)
     out = dict()
-    for template_path, task in list_templates(tasks).items():
+    for template_path, task in dict_template_task(tasks).items():
         sql = template.load_llm(template_path.name,
                                 table_names=[f'{PREFIX}__nlp_{task}_{deployment}' for deployment in deployments],
                                 task_version=tasks[task])

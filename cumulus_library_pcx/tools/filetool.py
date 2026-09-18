@@ -81,7 +81,10 @@ def path_athena(file_sql: Path | str = None) -> Path:
     return path_project() / 'athena' / file_sql
 
 def save_athena(file_sql: Path | str, contents: str) -> Path:
-    return Path(write_text(contents, path_athena(file_sql)))
+    file_sql = Path(file_sql)
+    if file_sql.suffix != '.sql':
+        file_sql = file_sql.with_name(f'{file_sql.name}.sql')
+    return write_text(contents, path_athena(file_sql))
 
 def save_athena_view(view_name: str, contents: str) -> Path:
     return Path(write_text(contents, path_athena(f'{view_name}.sql')))
@@ -255,7 +258,7 @@ def date_str(datetime_obj=None) -> str:
         datetime_obj = datetime.now()
     return datetime_obj.strftime("%Y-%m-%d")
 
-def read_query_topics(path: Path|str):
+def iter_query_topics(path: Path | str):
     """Yield (topic, query) pairs, skipping the header row."""
     if not isinstance(path, Path):
         path = Path(path_spreadsheet(path))

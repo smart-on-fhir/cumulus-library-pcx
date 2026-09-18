@@ -84,14 +84,13 @@ def make_union(aspect: Aspect | None = None) -> Path:
     make_union(Aspect.dx)  -> athena/pcx__elastic_union_dx.sql    (template elastic_union_dx.sql)
     """
     cohort = f'union_{aspect.name}' if aspect else 'union'
-    return filetool.save_athena_view(
-        tablespace.name_elastic(cohort),
-        template.load(f'elastic_{cohort}.sql',
-                      encounter_ref=ENCOUNTER_REF,
-                      select_union=select_union(list_tables())))
+    return filetool.save_athena(tablespace.name_elastic(cohort),
+                                template.load(f'elastic_{cohort}',
+                                              encounter_ref=ENCOUNTER_REF,
+                                              select_union=select_union(list_tables())))
 
 def make_upload_toml() -> Path:
     """Write the upload workflow for the export CSVs beside them."""
-    return toml_tool.save_upload_toml(
-        workflow=UploadWorkflow(file_list=list_csv(), prefix=UPLOAD_PREFIX),
-        toml_file=path_upload_toml())
+    return toml_tool.save_upload_toml(workflow=UploadWorkflow(file_list=list_csv(),
+                                                              prefix=UPLOAD_PREFIX),
+                                      toml_file=path_upload_toml())

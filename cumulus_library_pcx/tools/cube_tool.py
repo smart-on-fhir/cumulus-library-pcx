@@ -36,7 +36,7 @@ def cube_fhir_resource(primary_id:str,
     if CUBE_AS_VIEW == 1:
         sql = ctas_as_view(sql, table_name)
 
-    return filetool.save_athena_view(table_name, sql)
+    return filetool.save_athena(table_name, sql)
 
 def cube_patient(source_table='study_population',
                  table_cols=None,

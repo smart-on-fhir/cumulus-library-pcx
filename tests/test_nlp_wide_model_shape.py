@@ -62,7 +62,7 @@ def model_fields(schema: dict) -> dict:
 def templates_of(stage) -> dict[str, str]:
     """rendered llm/athena filename -> task, for one stage"""
     out = dict()
-    for template_path, task in nlp_wide.list_templates(nlp_wide.list_tasks(stage.WORKFLOW)).items():
+    for template_path, task in nlp_wide.dict_template_task(nlp_wide.dict_task_versions(stage.WORKFLOW)).items():
         out[template_path.name.removesuffix(".jinja")] = task
     return out
 
@@ -75,7 +75,7 @@ def test_configured_schema_matches_the_model(task):
     config = tomllib.loads(filetool.path_project(workflow_of(task)).read_text())["tables"][task]
     assert json.loads(filetool.path_project(config["response_schema"]).read_text()) == model_schema(task)
     assert config["select_by_table"] == f"pcx__llm_document_task_{task}"
-    assert task in nlp_wide.list_tasks(workflow_of(task))
+    assert task in nlp_wide.dict_task_versions(workflow_of(task))
 
 
 def test_nested_arrays_and_optional_fields_are_required():
@@ -93,7 +93,7 @@ def test_nested_arrays_and_optional_fields_are_required():
 #-----------------------------------------------------------------------------
 @pytest.mark.parametrize("stage", STAGES, ids=lambda s: s.WORKFLOW)
 def test_every_workflow_task_owns_a_template(stage):
-    tasks = nlp_wide.list_tasks(stage.WORKFLOW)
+    tasks = nlp_wide.dict_task_versions(stage.WORKFLOW)
     assert set(templates_of(stage).values()) == set(tasks)
 
 
@@ -140,7 +140,7 @@ def test_projected_result_paths_exist_in_the_model(stage):
 
 @pytest.mark.parametrize("stage", STAGES, ids=lambda s: s.WORKFLOW)
 def test_rendered_sql_pins_the_workflow_version_and_unions_deployments(stage):
-    tasks = nlp_wide.list_tasks(stage.WORKFLOW)
+    tasks = nlp_wide.dict_task_versions(stage.WORKFLOW)
     rendered = nlp_wide.render(stage.WORKFLOW, ["site_b", "site_a", "site_a"])
     for file_sql, task in templates_of(stage).items():
         sql = rendered[file_sql]

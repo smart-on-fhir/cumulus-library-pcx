@@ -21,11 +21,11 @@ from cumulus_library_pcx.tools import filetool, tablespace, template
 def list_templates() -> list[Path]:
     return list_sql(filetool.path_tests_template(), '*.sql.jinja')
 
-def copy_templates() -> list[Path]:
+def save_templates() -> list[Path]:
     """Render every test template; returns the tests/athena SQL written."""
     out = list()
     for sql_template in list_templates():
-        out.append(template.copy_test(sql_template))
+        out.append(template.save_test(sql_template))
     return out
 
 #-----------------------------------------------------------------------------

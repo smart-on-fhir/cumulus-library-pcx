@@ -11,7 +11,7 @@ def make_study_meta_sql(data_package_version:int = settings.DATA_PACKAGE_VERSION
     """
     https://docs.smarthealthit.org/cumulus/library/creating-studies.html#metadata-tables
     """
-    return [template.copy(t, data_package_version=str(data_package_version)) for t in TEMPLATE_LIST]
+    return [template.save(t, data_package_version=str(data_package_version)) for t in TEMPLATE_LIST]
 
 def make_actions() -> list[Action]:
     """

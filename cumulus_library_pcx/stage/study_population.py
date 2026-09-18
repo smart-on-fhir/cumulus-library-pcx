@@ -58,16 +58,16 @@ def make_actions() -> list[Action]:
             file_list=[f'../spreadsheet/{UPLOAD_TOML}'],
             label='inclusion criteria for study population'),
         SqlAction(
-            template.copy_list(STUDY_PERIOD),
+            template.save_list(STUDY_PERIOD),
             'study_period'),
         SqlAction(
-            template.copy_list(STUDY_POPULATION),
+            template.save_list(STUDY_POPULATION),
             'study_population'),
         SqlAction(
-            template.copy_list(OBS_TABLES),
+            template.save_list(OBS_TABLES),
             'obs_base, lab_base'),
         SqlAction(
-            template.copy_list(aspect_tables),
+            template.save_list(aspect_tables),
             f'study_population aspects {str(aspect_list)}'),
     ]
 

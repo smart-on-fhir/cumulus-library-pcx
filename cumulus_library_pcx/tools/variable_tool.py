@@ -70,7 +70,7 @@ def list_variable_uploads(files: Iterable[Path] | None = None,
                         exclude=exclude)
 
 
-def list_variables_as_str(variable_list: list[str], quote="'", seperator=',') -> str:
+def join_variables_sql(variable_list: list[str], quote="'", seperator=',') -> str:
     """Format SQL values; retain the historical keyword spelling for callers."""
     return tablespace.sql_quote(variable_list, quote, seperator)
 
@@ -139,7 +139,7 @@ def make_wide_bool(aspect:Aspect=None) -> Path:
     variable_list = list_variables(aspect=aspect)
     return filetool.save_athena_view(
         tablespace.name_cohort(cohort),
-        template.load(f"cohort_{cohort}.sql",
+        template.load(f"cohort_{cohort}",
                       encounter_ref=settings.ENCOUNTER_REF,
                       select_wide_bool=select_wide_bool(variable_list),
                       select_wide_any=select_wide_any(variable_list)))
@@ -220,7 +220,7 @@ def _make_wide(aspect:Aspect, generator=None) -> Path:
         cohort = f'variable_wide_{aspect.name}'
         return filetool.save_athena_view(
             tablespace.name_cohort(cohort),
-            template.load(f"cohort_variable_wide_aspect.sql",
+            template.load("cohort_variable_wide_aspect",
                           encounter_ref=settings.ENCOUNTER_REF,
                           aspect=aspect.name,
                           select_wide_dict=generator()))
@@ -257,10 +257,10 @@ def _make_union(aspect:Aspect=None) -> Path:
     variable_list = list_variables(aspect=aspect)
     return filetool.save_athena_view(
         tablespace.name_cohort(cohort),
-        template.load(f"cohort_{cohort}.sql",
+        template.load(f"cohort_{cohort}",
                       encounter_ref=settings.ENCOUNTER_REF,
                       select_union=select_union(variable_list),
-                      variable_list=list_variables_as_str(variable_list)))
+                      variable_list=join_variables_sql(variable_list)))
 
 def select_union(variable_list: list[str]) -> str:
     """

@@ -54,18 +54,17 @@ def template_kwargs(csv_file: Path | str = CASEDEF_CSV) -> dict:
     return {'casedef_columns': filetool.csv_columns(csv_file),
             'encounter_ref': ENCOUNTER_REF}
 
-def copy_template(sql_file: str, kwargs: dict | None = None) -> Path:
-    """Render template/<sql_file>.jinja -> athena/pcx__<sql_file>."""
+def save_template(sql_file: str, kwargs: dict | None = None) -> Path:
     if kwargs is None:
         kwargs = template_kwargs()
-    return template.copy(sql_file, **kwargs)
+    return template.save(sql_file, **kwargs)
 
-def copy_templates(sql_files: list[str]) -> list[Path]:
+def save_template_list(sql_files: list[str]) -> list[Path]:
     """Render several templates, reading casedef.csv once."""
     kwargs = template_kwargs()
     out = list()
     for sql_file in sql_files:
-        out.append(copy_template(sql_file, kwargs))
+        out.append(save_template(sql_file, kwargs))
     return out
 
 #-----------------------------------------------------------------------------
@@ -73,13 +72,13 @@ def copy_templates(sql_files: list[str]) -> list[Path]:
 #-----------------------------------------------------------------------------
 def make_candidate() -> list[Path]:
     """candidate, then exclude, then include: the order the SQL depends on."""
-    return copy_templates([name_template(step) for step in CANDIDATE_STEPS])
+    return save_template_list([name_template(step) for step in CANDIDATE_STEPS])
 
 def make_casedef() -> list[Path]:
-    return copy_templates([name_template()])
+    return save_template_list([name_template()])
 
 def make_aspects() -> list[Path]:
-    return copy_templates([name_template(aspect) for aspect in ASPECTS])
+    return save_template_list([name_template(aspect) for aspect in ASPECTS])
 
 def make_timeline() -> list[Path]:
-    return copy_templates(['cohort_timeline.sql'])
+    return save_template_list(['cohort_timeline.sql'])
