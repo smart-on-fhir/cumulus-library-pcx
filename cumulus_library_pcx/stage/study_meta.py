@@ -2,7 +2,7 @@ from pathlib import Path
 from cumulus_library_pcx.tools import settings, tablespace, toml_tool, template
 from cumulus_library_pcx.tools.actions import Action, SqlAction, ExportAction
 
-TEMPLATE_LIST = ['meta_data', 'meta_version']
+TEMPLATE_LIST = ['meta_date', 'meta_version']
 
 def list_tables() -> list[str]:
     return tablespace.name_prefix(TEMPLATE_LIST)
@@ -23,5 +23,5 @@ def make_actions() -> list[Action]:
             ExportAction(file_list, 'export study metadata', 'export:meta'),
     ]
 
-def make() -> list[Path]:
-    return [toml_tool.save_actions_toml(make_actions(), 'study_meta.toml')]
+def make() -> Path:
+    return toml_tool.save_actions_toml(make_actions(), 'study_meta.toml')

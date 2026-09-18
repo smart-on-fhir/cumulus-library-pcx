@@ -28,6 +28,3 @@ def make_actions() -> list[Action]:
 
 def make() -> Path:
     return save_actions_toml(make_actions(), STAGE_TOML)
-
-if __name__ == '__main__':
-    print(make())

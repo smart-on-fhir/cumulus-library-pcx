@@ -103,3 +103,9 @@ type = "submanifest"
 files = [
     "cube.toml",
 ]
+
+[[stages.study_meta]]
+type = "submanifest"
+files = [
+    "study_meta.toml",
+]
