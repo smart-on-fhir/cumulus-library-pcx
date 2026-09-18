@@ -21,8 +21,7 @@ SELECT  DISTINCT
         result.interp_llm                                            AS interp_llm,
         result.reference_range                                       AS reference_range,
         result.collection_date                                       AS collection_date,
-        result.collection_date_precision                             AS collection_date_precision,
-        result.context                                               AS context
+        result.collection_date_precision                             AS collection_date_precision
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.results) WITH ORDINALITY AS result_t (result, result_index)

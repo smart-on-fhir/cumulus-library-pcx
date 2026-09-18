@@ -16,9 +16,7 @@ SELECT  DISTINCT
         assessment.radiologically_evaluable                          AS radiologically_evaluable,
         assessment.cytologically_evaluable                           AS cytologically_evaluable,
         assessment.assessment_date                                   AS assessment_date,
-        assessment.assessment_date_precision                         AS assessment_date_precision,
-        assessment.assessment_method                                 AS assessment_method,
-        assessment.review_context                                    AS review_context
+        assessment.assessment_date_precision                         AS assessment_date_precision
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.assessments) WITH ORDINALITY AS assessment_t (assessment, assessment_index)
