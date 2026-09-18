@@ -33,17 +33,14 @@ def list_variables(aspect: str | Aspect = None) -> list[str]:
 
 def _list_variables() -> list[str]:
     """
-    @refactor `study_variable.toml` is a better source of truth than the CSV files
-    @refactor casedef as special variable case.
-
     List of valueset variable names not including "case definition".
     :return: sorted list of ValueSet variable names
     """
-    var_list = filetool.filter_aspect(filetool.list_spreadsheet())
-    var_list = [v.name for v in var_list]
-    var_list = [v for v in var_list if "casedef" not in v]
-    var_list = [filetool.file_to_simplename(v) for v in var_list]
-    return sorted(list(set(var_list)))
+    out = set()
+    for f in filetool.filter_aspect(filetool.list_spreadsheet()):
+        if "casedef" not in f.name:
+            out.add(filetool.file_to_simplename(f))
+    return sorted(out)
 
 def list_variables_as_str(variable_list:list[str], quote="'", seperator=',') -> str:
     """

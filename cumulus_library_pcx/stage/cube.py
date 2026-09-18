@@ -103,6 +103,18 @@ def make_study_population() -> list[Path]:
     ]
 
 #-----------------------------------------------------------------------------
+# Variables (coded vars matching FHIR resource)
+#-----------------------------------------------------------------------------
+def make_variable_union() -> list[Path]:
+    return [
+        cube_patient(source_table=f'{PREFIX}__cohort_variable_union',
+                     table_cols=['age_group',
+                                 'variable',
+                                 'code',
+                                 'system',
+                                 'display'])]
+
+#-----------------------------------------------------------------------------
 # Case Definition
 #-----------------------------------------------------------------------------
 def make_casedef() -> list[Path]:
@@ -167,18 +179,6 @@ def make_casedef_samples() -> list[Path]:
     target_output+= [cube_note(source_table, table_cols) for source_table in source_table_list]
 
     return target_output
-
-#-----------------------------------------------------------------------------
-# Variables (coded vars matching FHIR resource)
-#-----------------------------------------------------------------------------
-def make_variable_union() -> list[Path]:
-    return [
-        cube_patient(source_table=f'{PREFIX}__cohort_variable_union',
-                     table_cols=['age_group',
-                                 'variable',
-                                 'code',
-                                 'system',
-                                 'display'])]
 
 #-----------------------------------------------------------------------------
 # actions

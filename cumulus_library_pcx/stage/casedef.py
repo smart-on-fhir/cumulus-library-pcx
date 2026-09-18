@@ -32,33 +32,33 @@ def copy_template(template_sql:str) -> Path:
 #-----------------------------------------------------------------------------
 # Template
 #-----------------------------------------------------------------------------
-def make_template_candidate() -> list[Path]:
+def make_candidate() -> list[Path]:
     return [make_template(c)
             for c in ['candidate', 'exclude', 'include']]
 
-def make_template_casedef() -> list[Path]:
+def make_casedef() -> list[Path]:
     return [copy_template('cohort_casedef.sql')]
 
-def make_template_aspects() -> list[Path]:
+def make_aspects() -> list[Path]:
     return [make_template(a)
             for a in ['dx', 'lab', 'proc', 'rx']]
 
-def make_template_timeline() -> list[Path]:
+def make_timeline() -> list[Path]:
     return [copy_template('cohort_timeline.sql')]
 
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
-    return [FileAction(['../spreadsheet/file_upload_casedef.toml'],
+    return [FileAction([f'../spreadsheet/{UPLOAD_TOML}'],
                        'case definition CSV upload'),
-            SqlAction(make_template_candidate(),
+            SqlAction(make_candidate(),
                       'filter include/exclude'),
-            SqlAction(make_template_casedef(),
+            SqlAction(make_casedef(),
                       'cohort from case definition (valueset_casedef)'),
-            SqlAction(make_template_aspects(),
+            SqlAction(make_aspects(),
                       'cohort for case definition aspects (dx, rx, lab, proc)'),
-            SqlAction(make_template_timeline(),
+            SqlAction(make_timeline(),
                       'timeline for casedef with variables')]
 
 #-----------------------------------------------------------------------------

@@ -17,16 +17,16 @@ from cumulus_library_pcx.stage.study_variable import (
 #-----------------------------------------------------------------------------
 # Template UNION
 #-----------------------------------------------------------------------------
-def make_template_union_bool() -> list[Path]:
+def make_union_bool() -> list[Path]:
     """
     1.1 Create table of all variable cohorts together (UNION ALL) having a single column
         `variable` which denotes the cohort source.
 
     :return: path to cohort_variable_union.sql
     """
-    return [_make_template_union(aspect=None)]
+    return [_make_union(aspect=None)]
 
-def make_template_union_aspect() -> list[Path]:
+def make_union_aspect() -> list[Path]:
     """
     1.2 Create tables of variables grouped by Aspect
 
@@ -35,9 +35,9 @@ def make_template_union_aspect() -> list[Path]:
              cohort_variable_union_doc.sql,
              cohort_variable_union_rx.sql]
     """
-    return [_make_template_union(aspect=aspect) for aspect in list_aspects()]
+    return [_make_union(aspect=aspect) for aspect in list_aspects()]
 
-def _make_template_union(aspect:Aspect=None) -> Path:
+def _make_union(aspect:Aspect=None) -> Path:
     """
     :param aspect: variable types to union, or None= all variables
     :return: Path to SQL file
@@ -71,7 +71,7 @@ def select_union(variable_list: list[str]) -> str:
 #-----------------------------------------------------------------------------
 # Template WIDE
 #-----------------------------------------------------------------------------
-def make_template_wide_bool(aspect:Aspect=None) -> Path:
+def make_wide_bool(aspect:Aspect=None) -> Path:
     """
     All study variable cohorts in one table in WIDE format.
     each variable has a single column denoting
@@ -128,7 +128,7 @@ def select_wide_any(variable_list: list[str]) -> str:
 #-----------------------------------------------------------------------------
 # Template WIDE for each aspect
 #-----------------------------------------------------------------------------
-def make_template_wide() -> list[Path]:
+def make_wide() -> list[Path]:
     """
     :return: list of SQL files for each aspect
             * cohort_variable_wide_lab
@@ -136,9 +136,9 @@ def make_template_wide() -> list[Path]:
             * cohort_variable_wide_dx
             * cohort_variable_wide_rx
     """
-    return [_make_template_wide(aspect) for aspect in list_aspects()]
+    return [_make_wide(aspect) for aspect in list_aspects()]
 
-def _make_template_wide(aspect:Aspect, generator=None) -> Path:
+def _make_wide(aspect:Aspect, generator=None) -> Path:
     """
     :param aspect: aspect to make variable wide for
     :param generator: select_wide_*** function
@@ -146,19 +146,19 @@ def _make_template_wide(aspect:Aspect, generator=None) -> Path:
     """
     if not generator:
         if aspect == Aspect.dx:
-            return _make_template_wide(aspect, select_wide_dx)
+            return _make_wide(aspect, select_wide_dx)
         elif aspect == Aspect.lab:
-            return _make_template_wide(aspect, select_wide_lab)
+            return _make_wide(aspect, select_wide_lab)
         elif aspect == Aspect.diag:
-            return _make_template_wide(aspect, select_wide_diag)
+            return _make_wide(aspect, select_wide_diag)
         elif aspect == Aspect.doc:
-            return _make_template_wide(aspect, select_wide_doc)
+            return _make_wide(aspect, select_wide_doc)
         elif aspect == Aspect.rx:
-            return _make_template_wide(aspect, select_wide_rx)
+            return _make_wide(aspect, select_wide_rx)
         elif aspect == Aspect.proc:
-            return _make_template_wide(aspect, select_wide_proc)
+            return _make_wide(aspect, select_wide_proc)
         elif aspect == Aspect.enc:
-            return _make_template_wide(aspect, select_wide_enc)
+            return _make_wide(aspect, select_wide_enc)
         else:
             raise NotImplementedError(f"'{aspect}' aspect type not yet supported.")
     else:
@@ -328,10 +328,10 @@ def make_actions() -> list[Action]:
     """
     aspect_list = [aspect.name for aspect in list_aspects()]
 
-    return [SqlAction(make_template_union_bool(), 'variable union (bool)'),
-            SqlAction(make_template_union_aspect(), f'variable union {aspect_list}'),
-            SqlAction([make_template_wide_bool()], 'variable wide (bool)'),
-            SqlAction(make_template_wide(), f'variable wide {aspect_list}'),
+    return [SqlAction(make_union_bool(), 'variable union (bool)'),
+            SqlAction(make_union_aspect(), f'variable union {aspect_list}'),
+            SqlAction([make_wide_bool()], 'variable wide (bool)'),
+            SqlAction(make_wide(), f'variable wide {aspect_list}'),
     ]
 
 #-----------------------------------------------------------------------------
