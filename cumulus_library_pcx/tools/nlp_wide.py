@@ -22,85 +22,7 @@ DEPLOYMENT_SUFFIX = re.compile(r'^[a-z0-9_]+$')   # becomes part of an Athena ta
 TEMPLATE_GLOB = f'{PREFIX}__llm_*.sql.jinja'      # llm/template/<prefix>__llm_<projection>.sql.jinja
 
 #-----------------------------------------------------------------------------
-# List
-#-----------------------------------------------------------------------------
-def list_tasks(workflow: str) -> dict[str, int]:
-    """
-    :param workflow: filename like 'nlp_clinical_tasks.workflow'
-    :return: NLP task -> task version
-    """
-    out = dict()
-    for task, config in manifest.load_toml(workflow)['tables'].items():
-        version = config.get('version')
-        if type(version) is not int or version < 1:
-            raise ValueError(f"{workflow}: task {task!r} must have a positive integer version")
-        out[task] = version
-    return out
-
-def list_deployments(deployments: Iterable[str]) -> list[str]:
-    """
-    :return: sorted, de-duplicated NLP deployment suffixes (<prefix>__nlp_<task>_<deployment>)
-    """
-    out = sorted(set(deployments))
-    bad = [d for d in out if not DEPLOYMENT_SUFFIX.match(d)]
-    if not out or bad:
-        raise ValueError(f"deployment suffixes must be non-empty [a-z0-9_]+, got {bad or out}")
-    return out
-
-def projection(template_path: Path) -> str:
-    return template_path.name.removeprefix(f'{PREFIX}__llm_').removesuffix('.sql.jinja')
-
-def task_of(template_path: Path, tasks: dict[str, int]) -> str | None:
-    """
-    :return: the longest task name that this projection extends (diagnosis_wide -> diagnosis), or None
-    """
-    name = projection(template_path)
-    matching = [task for task in tasks if name == task or name.startswith(task + '_')]
-    return max(matching, key=len) if matching else None
-
-def list_templates(tasks: dict[str, int]) -> dict[Path, str]:
-    """
-    :return: llm/template/<prefix>__llm_*.sql.jinja -> task, for the templates these tasks own
-    """
-    out = dict()
-    template_glob = f'{PREFIX}__llm_*.sql.jinja'
-    for path in sorted(filetool.path_llm_template().glob(template_glob)):
-        task = task_of(path, tasks)
-        if task:
-            out[path] = task
-    return out
-
-#-----------------------------------------------------------------------------
-# Render
-#-----------------------------------------------------------------------------
-def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> dict[str, str]:
-    """
-    Render every projection of the workflow before anything is written.
-    :return: llm/athena filename -> SQL
-    """
-    deployments = list_deployments(deployments)
-    tasks = list_tasks(workflow)
-    out = dict()
-    for template_path, task in list_templates(tasks).items():
-        sql = template.load_llm(template_path.name,
-                                table_names=[f'{PREFIX}__nlp_{task}_{deployment}' for deployment in deployments],
-                                task_version=tasks[task])
-        out[template_path.name.removesuffix('.jinja')] = sql.strip() + '\n'
-    if not out:
-        raise ValueError(f"{workflow}: no llm/template matches its tasks {sorted(tasks)}")
-    return out
-
-def make_wide(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Path]:
-    """
-    :return: llm/athena/<prefix>__llm_*.sql written for the workflow and deployments
-    """
-    return [filetool.save_llm_athena(file_sql, sql) for file_sql, sql in render(workflow, deployments).items()]
-
-def make_actions(workflow: str, label: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Action]:
-    return [SqlParallelAction(make_wide(workflow, deployments), label)]
-
-#-----------------------------------------------------------------------------
-# Test / inspection
+# Prepare (Test / inspection)
 #-----------------------------------------------------------------------------
 def prepare_resources(workflow: str, label: str, toml_file: str,
                       deployments: Iterable[str] = DEFAULT_DEPLOYMENTS,
@@ -120,3 +42,87 @@ def prepare_resources(workflow: str, label: str, toml_file: str,
         paths.append(filetool.write_text(sql, path))
     action = SqlParallelAction([filetool.path_llm_athena(p.name) for p in paths], label)
     return paths + [manifest.save_actions_toml(action, output_dir / toml_file)]
+
+#-----------------------------------------------------------------------------
+# Templates
+#-----------------------------------------------------------------------------
+def list_templates(tasks: dict[str, int]) -> dict[Path, str]:
+    """
+    :return: llm/template/<prefix>__llm_*.sql.jinja -> task, for the templates these tasks own
+    """
+    out = dict()
+    template_glob = f'{PREFIX}__llm_*.sql.jinja'
+    for path in sorted(filetool.path_llm_template().glob(template_glob)):
+        task = task_of(path, tasks)
+        if task:
+            out[path] = task
+    return out
+
+#-----------------------------------------------------------------------------
+# NLP Tasks
+#-----------------------------------------------------------------------------
+def list_tasks(workflow: str) -> dict[str, int]:
+    """
+    :param workflow: filename like 'nlp_clinical_tasks.workflow'
+    :return: NLP task -> task version
+    """
+    out = dict()
+    for task, config in manifest.load_toml(workflow)['tables'].items():
+        version = config.get('version')
+        if type(version) is not int or version < 1:
+            raise ValueError(f"{workflow}: task {task!r} must have a positive integer version")
+        out[task] = version
+    return out
+
+def task_of(template_path: Path, tasks: dict[str, int]) -> str | None:
+    """
+    :return: the longest task name that this projection extends (diagnosis_wide -> diagnosis), or None
+    """
+    name = projection(template_path)
+    matching = [task for task in tasks if name == task or name.startswith(task + '_')]
+    return max(matching, key=len) if matching else None
+
+#-----------------------------------------------------------------------------
+# Deployments
+#-----------------------------------------------------------------------------
+def list_deployments(deployments: Iterable[str]) -> list[str]:
+    """
+    :return: sorted, de-duplicated NLP deployment suffixes (<prefix>__nlp_<task>_<deployment>)
+    """
+    out = sorted(set(deployments))
+    bad = [d for d in out if not DEPLOYMENT_SUFFIX.match(d)]
+    if not out or bad:
+        raise ValueError(f"deployment suffixes must be non-empty [a-z0-9_]+, got {bad or out}")
+    return out
+
+def projection(template_path: Path) -> str:
+    return template_path.name.removeprefix(f'{PREFIX}__llm_').removesuffix('.sql.jinja')
+
+#-----------------------------------------------------------------------------
+# make/render
+#-----------------------------------------------------------------------------
+def make_wide(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Path]:
+    """
+    :return: llm/athena/<prefix>__llm_*.sql written for the workflow and deployments
+    """
+    return [filetool.save_llm_athena(file_sql, sql) for file_sql, sql in render(workflow, deployments).items()]
+
+def make_actions(workflow: str, label: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Action]:
+    return [SqlParallelAction(make_wide(workflow, deployments), label)]
+
+def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> dict[str, str]:
+    """
+    Render every projection of the workflow before anything is written.
+    :return: llm/athena filename -> SQL
+    """
+    deployments = list_deployments(deployments)
+    tasks = list_tasks(workflow)
+    out = dict()
+    for template_path, task in list_templates(tasks).items():
+        sql = template.load_llm(template_path.name,
+                                table_names=[f'{PREFIX}__nlp_{task}_{deployment}' for deployment in deployments],
+                                task_version=tasks[task])
+        out[template_path.name.removesuffix('.jinja')] = sql.strip() + '\n'
+    if not out:
+        raise ValueError(f"{workflow}: no llm/template matches its tasks {sorted(tasks)}")
+    return out
