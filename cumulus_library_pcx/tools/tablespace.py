@@ -35,6 +35,18 @@ def name_elastic(table: str, suffix=None) -> str:
     part = name_suffix('elastic', suffix)
     return name_join(part, table)
 
+def name_eligible(table: str, suffix=None) -> str:
+    part = name_suffix('eligible', suffix)
+    return name_join(part, table)
+
+def name_outcome(table: str, suffix=None) -> str:
+    part = name_suffix('outcome', suffix)
+    return name_join(part, table)
+
+def name_client(table: str, suffix=None) -> str:
+    part = name_suffix('client', suffix)
+    return name_join(part, table)
+
 def name_study_population(suffix=None) -> str:
     table = name_suffix('study_population', suffix)
     return name_join('cohort', table)
