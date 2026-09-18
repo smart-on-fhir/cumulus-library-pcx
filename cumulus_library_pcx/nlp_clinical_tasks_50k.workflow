@@ -4,7 +4,7 @@ config_type = "nlp"
 # Each task key matches its llm/models/<task>.py module and schema filename.
 # Selection tables must exist before running NLP; this config does not create them.
 # Expected selection-table convention: pcx__llm_document_task_<task>.
-# Generate schemas with: python -m cumulus_library_pcx.llm.create_schema
+# Generate schemas with: python -m cumulus_library_pcx.stage.llm_schema
 
 [shared]
 system_prompt = """

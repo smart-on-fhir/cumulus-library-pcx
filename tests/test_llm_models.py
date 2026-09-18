@@ -11,7 +11,7 @@ from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministratio
 from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
 from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
 from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
-from cumulus_library_pcx.llm.create_schemas import create_pcx_llm_study_variables, list_tasks
+from cumulus_library_pcx.stage.llm_schema import make_schemas, list_tasks
 
 EMPTY = dict(has_mention=False, spans=[])
 EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
@@ -101,6 +101,6 @@ def test_vital_timeline_contradictions_rejected():
 
 
 def test_schema_generation_writes_one_schema_per_task(tmp_path):
-    paths = create_pcx_llm_study_variables(tmp_path / 'schemas')
+    paths = make_schemas(tmp_path / 'schemas')
     assert len(paths) == len(list_tasks())
     assert all(path.exists() for path in paths)

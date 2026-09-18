@@ -7,7 +7,7 @@ import sys
 import tomllib
 import pytest
 
-from cumulus_library_pcx.llm.create_schemas import annotation_model, list_tasks
+from cumulus_library_pcx.stage.llm_schema import annotation_model, list_tasks
 from cumulus_library_pcx.stage import nlp_clinical_wide, nlp_document_wide
 from cumulus_library_pcx.tools import filetool, nlp_wide
 from cumulus_library_pcx.tools.tablespace import PREFIX

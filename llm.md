@@ -66,13 +66,14 @@ retain the study prefix. From the repository root, generate schemas with:
 
 ```sh
 export HOME_INSTITUTION="Boston Children's Hospital (BCH)"  # named in the transition_of_care prompts, set to your site
-python -m cumulus_library_pcx.llm.create_schemas
+python -m cumulus_library_pcx.stage.llm_schema
 ```
 
 `HOME_INSTITUTION` defaults to BCH when unset. This writes one schema per task module under
 `cumulus_library_pcx/llm/schemas/` (tasks are discovered from `llm/models/*.py`, one
-`*Annotation` model per file); it does not run inference. An import failure can leave a partial
-update. Cumulus loads the saved JSON, so editing a model's wording changes nothing until the
+`*Annotation` model per file), plus CSV and TXT summaries under `llm/summaries/`.
+The `llm_schema` stage runs before both NLP workflows in the full build; when running an NLP
+stage alone, run `llm_schema` first. Schema generation does not run inference. Cumulus loads the saved JSON, so editing a model's wording changes nothing until the
 schemas are regenerated, and `tests/test_nlp_wide_model_shape.py` fails until they are.
 Annotation models accept and ignore unknown keys (Pydantic's default), so the schemas do not
 declare `additionalProperties: false`.

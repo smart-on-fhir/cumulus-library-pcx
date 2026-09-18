@@ -8,7 +8,7 @@ The current extractions are:
 
 - `llm_schema_json.py`: discover annotation models in a supplied Python package
   and save their JSON schemas. `llm_schema_csv.py`: create human-readable CSV
-  review summaries with configurable omitted fields. `llm/create_schemas.py` and `llm/create_summary_csv.py` keep PCX package,
+  review summaries with configurable omitted fields. `llm_schema_txt.py` provides plain-text summaries. `stage/llm_schema.py` keeps PCX package,
   filename, output-directory, and evidence-field defaults as small adapters.
 - `variable_tool.py`: discover variable files, group FHIR aspects, and render cohort
   joins from explicit source/destination names and column metadata. Checkout adapters

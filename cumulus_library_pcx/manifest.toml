@@ -50,6 +50,12 @@ files = [
     "elastic_upload.toml",
 ]
 
+[[stages.llm_schema]]
+type = "submanifest"
+files = [
+    "llm_schema.toml",
+]
+
 [[stages.nlp_document_tasks_50k]]
 skip_by_default = true
 files = [
