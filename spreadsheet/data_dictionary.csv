@@ -173,12 +173,12 @@ llm_age_months_at_diagnosis_gold,LLM age months at diagnosis gold,Completed mont
 llm_age_at_diagnosis_months_min,LLM age at diagnosis months min,Smallest explicitly stated age at diagnosis in months across notes.,"Extracted text, not computed from dates.",integer
 llm_metastatic_bool,LLM metastatic,TRUE when any diagnosis-task note states Chang M1 to M4.,Directly stated M-stage only. Derived staging from metastasis-task inputs is a downstream step.,boolean
 llm_anaplastic_bool,LLM anaplastic,TRUE when any diagnosis-task note gives large-cell/anaplastic histology.,ACNS0334 high-risk qualifier.,boolean
-definitive_surgery_day,Definitive surgery day,Date of the definitive tumor resection.,"Precedence: LLM surgery_role containing definitive, then first structured tier 1 craniotomy. See definitive_surgery_source. Table: pcx__eligible_surgery.",day
-definitive_surgery_source,Definitive surgery source,Which rule produced definitive_surgery_day.,llm_surgery_role_definitive or proc_craniotomy_tier1_first. NULL when neither source has a date.,string
+definitive_surgery_day,Definitive surgery day,Date of the definitive tumor resection.,"Precedence: earliest LLM resection (extent_of_resection gross total, near total or partial), then first structured tier 1 craniotomy. See definitive_surgery_source. Table: pcx__eligible_surgery.",day
+definitive_surgery_source,Definitive surgery source,Which rule produced definitive_surgery_day.,llm_surgery_resection or proc_craniotomy_tier1_first. NULL when neither source has a date.,string
 proc_craniotomy_tier1_first_day,Proc craniotomy tier 1 first day,First tier 1 craniotomy procedure date.,Structured fallback for definitive surgery.,day
 proc_craniotomy_tier1_cnt,Proc craniotomy tier 1 cnt,Number of distinct tier 1 craniotomy procedures.,More than one suggests second-look or recurrence surgery is present.,integer
 llm_surgery_first_day,LLM surgery first day,"Earliest surgery_date across surgery-task notes, any role.",,day
-llm_definitive_surgery_day,LLM definitive surgery day,Earliest surgery_date where surgery_role contains definitive.,"surgery_role is free text in the current model, so this is a substring rule.",day
+llm_definitive_surgery_day,LLM definitive surgery day,Earliest surgery_date whose extent_of_resection is a resection.,"Resection means GROSS_TOTAL_RESECTION, NEAR_TOTAL_RESECTION or PARTIAL_RESECTION. Biopsy and NONE_OF_THE_ABOVE rows never pick the day.",day
 llm_age_at_definitive_surgery_months,LLM age at definitive surgery months,Explicitly stated age in months at the definitive operation.,"Extracted text, compare with age_months_at_definitive_surgery.",float
 llm_residual_tumor_area_cm2_min,LLM residual tumor area min,Smallest explicit postoperative residual area in cm2.,Never inferred from GTR/NTR/STR labels.,float
 llm_residual_tumor_area_cm2_max,LLM residual tumor area max,Largest explicit postoperative residual area in cm2.,"ACNS0334 high-risk threshold is 1.5 cm2; apply it downstream, not here.",float

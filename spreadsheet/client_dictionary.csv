@@ -8,7 +8,7 @@ pcx__client_subject,t0_day,,Time zero: first encounter with a tier 1 medulloblas
 pcx__client_subject,t0_source,,Rule that produced t0_day,provenance,varchar,,,,
 pcx__client_subject,age_months_at_t0,,Completed months from birthdate to t0_day,covariate,bigint,,,,
 pcx__client_subject,age_band_at_t0,,under_36_months or 36_months_or_older at t0_day,covariate,varchar,,,,
-pcx__client_subject,definitive_surgery_day,,"Date of the definitive tumor resection (LLM surgery_role, else first tier 1 craniotomy)",covariate_time,date,,,,
+pcx__client_subject,definitive_surgery_day,,"Date of the definitive tumor resection (earliest LLM resection by extent_of_resection, else first tier 1 craniotomy)",covariate_time,date,,,,
 pcx__client_subject,definitive_surgery_source,,Rule that produced definitive_surgery_day,provenance,varchar,,,,
 pcx__client_subject,age_months_at_definitive_surgery,,"Completed months from birthdate to definitive_surgery_day, the ACNS0334 age criterion",covariate,bigint,,,,
 pcx__client_subject,medulloblastoma_tier1_bool,,Any tier 1 medulloblastoma casedef code exists,eligibility,boolean,,,,
@@ -62,7 +62,6 @@ pcx__client_diagnosis,chang_m_stage_ever,,Most severe explicitly documented Chan
 pcx__client_diagnosis,chang_m_stage_baseline,,Most severe explicitly documented M-stage within 90 days of t0_day,covariate,varchar,,,,
 pcx__client_diagnosis,metastatic_ever_bool,,Any note documents M1 to M4,covariate,boolean,,,,
 pcx__client_diagnosis,historical_diagnosis_term,,Latest legacy diagnosis term used for this tumor (PNET etc.),provenance,varchar,,,,
-pcx__client_diagnosis,tumor_location_verbatim,,Latest primary site wording from the notes,covariate,varchar,,,,
 pcx__client_diagnosis,age_at_diagnosis_months_stated,,Smallest explicitly stated age at diagnosis in months,covariate,bigint,,,,
 pcx__client_diagnosis,diagnosis_day_stated_min,,Earliest stated diagnosis date across notes,covariate_time,date,,,,
 pcx__client_diagnosis,diagnosis_gold_day_min,,Earliest confirmatory tissue-diagnosis date across notes,covariate_time,date,,,,
@@ -166,7 +165,6 @@ pcx__client_timeline,variable,casedef_subtype,"FHIR coded case-definition eviden
 pcx__client_timeline,variable,llm_disease_subtype,LLM CNS embryonal subtype (interpretation = legacy term),covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_medulloblastoma_histology,LLM medulloblastoma histologic pattern,covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_chang_m_stage,LLM explicitly documented Chang M-stage,covariate_source,,LLM,,documented,
-pcx__client_timeline,variable,llm_tumor_location,LLM primary site wording,covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_age_at_diagnosis_months,"LLM explicitly stated age at diagnosis (value_number, months)",covariate_source,,LLM,,documented,
 pcx__client_timeline,variable,llm_diagnosis_date,"LLM earliest stated diagnosis date (event_date, with precision)",covariate_source,,LLM,,llm_clinical_date,note_author_date
 pcx__client_timeline,variable,llm_diagnosis_date_gold,"LLM confirmatory tissue-diagnosis date (event_date, with precision)",covariate_source,,LLM,,llm_clinical_date,note_author_date
