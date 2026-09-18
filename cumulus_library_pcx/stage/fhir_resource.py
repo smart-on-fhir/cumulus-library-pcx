@@ -1,6 +1,6 @@
 from pathlib import Path
 from cumulus_library_pcx.tools import toml_tool, template
-from cumulus_library_pcx.tools.staging import Action, SqlAction
+from cumulus_library_pcx.tools.actions import Action, SqlAction
 
 # -----------------------------------------------------------------------------
 # FHIR resource tables that extend the cumulus CORE layer.

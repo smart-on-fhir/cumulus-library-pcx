@@ -15,7 +15,7 @@ nlp_clinical_wide stage (rendered from llm/template, see tools/nlp_wide.py).
 """
 from pathlib import Path
 from cumulus_library_pcx.tools import tablespace, filetool
-from cumulus_library_pcx.tools.staging import Action, SqlAction, SqlParallelAction
+from cumulus_library_pcx.tools.actions import Action, SqlAction, SqlParallelAction
 from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 # -----------------------------------------------------------------------------

@@ -6,7 +6,7 @@ the sample-size limits and the sample.toml manifest.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import sample_tool
-from cumulus_library_pcx.tools.staging import Action, SqlAction, SqlParallelAction
+from cumulus_library_pcx.tools.actions import Action, SqlAction, SqlParallelAction
 from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'sample.toml'

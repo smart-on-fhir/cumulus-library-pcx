@@ -6,7 +6,7 @@ This module owns the action order and the cube.toml manifest.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import cube_tool
-from cumulus_library_pcx.tools.staging import Action, ExportAction, SqlAction
+from cumulus_library_pcx.tools.actions import Action, ExportAction, SqlAction
 from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'cube.toml'

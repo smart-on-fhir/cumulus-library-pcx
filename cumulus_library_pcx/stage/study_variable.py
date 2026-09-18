@@ -6,7 +6,7 @@ owns the action order and the manifests that expose the stage to Cumulus.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import variable_tool
-from cumulus_library_pcx.tools.staging import Action, FileAction, SqlAction, UploadWorkflow
+from cumulus_library_pcx.tools.actions import Action, FileAction, SqlAction, UploadWorkflow
 from cumulus_library_pcx.tools.toml_tool import save_actions_toml, save_upload_toml
 
 UPLOAD_TOML = 'file_upload_study_variable.toml'

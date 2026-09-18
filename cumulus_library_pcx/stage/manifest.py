@@ -1,6 +1,6 @@
 from pathlib import Path
 from cumulus_library_pcx.tools import study_builder
-from cumulus_library_pcx.tools.staging import Stage
+from cumulus_library_pcx.tools.actions import Stage
 from cumulus_library_pcx.stage import (
     fhir_resource,
     study_population,

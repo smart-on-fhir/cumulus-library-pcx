@@ -1,6 +1,6 @@
 from pathlib import Path
 from cumulus_library_pcx.tools import template, fhir_reference
-from cumulus_library_pcx.tools.staging import Action, FileAction, SqlAction
+from cumulus_library_pcx.tools.actions import Action, FileAction, SqlAction
 from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 #-----------------------------------------------------------------------------
 # Upload include_*.csv files
