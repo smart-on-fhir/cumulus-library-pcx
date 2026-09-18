@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     if argv and argv[0] == COMMAND_TEST_SYNTHETIC:
         return load_tests_synthetic().make_tests_synthetic(argv[1:])
 
-    stages = study_builder.list_names(STAGES)
+    stages = study_builder.list_stages(STAGES)
     parser = get_parser(stages)
     args = parser.parse_args(argv)
 

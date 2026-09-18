@@ -5,9 +5,9 @@ from cumulus_library_pcx.tools import filetool, tablespace, toml_tool
 from cumulus_library_pcx.tools.staging import Stage
 
 #-----------------------------------------------------------------------------
-# Select
+# Stages
 #-----------------------------------------------------------------------------
-def list_names(stage_list: list[Stage], makeable: bool | None = None) -> list[str]:
+def list_stages(stage_list: list[Stage], makeable: bool | None = None) -> list[str]:
     """
     :param makeable: True for Python stages with a make(), False for hand-written
                      on-disk stages, None for every stage
@@ -24,9 +24,9 @@ def select_stages(stage_list: list[Stage], names: list[str] | None = None) -> li
     """
     if not names:
         return list(stage_list)
-    unknown = set(names) - set(list_names(stage_list))
+    unknown = set(names) - set(list_stages(stage_list))
     if unknown:
-        raise KeyError(f"unknown stage(s) {sorted(unknown)}, expected one of {list_names(stage_list)}")
+        raise KeyError(f"unknown stage(s) {sorted(unknown)}, expected one of {list_stages(stage_list)}")
     return [stage for stage in stage_list if stage.name in names]
 
 #-----------------------------------------------------------------------------
