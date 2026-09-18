@@ -51,3 +51,6 @@ def test_sql_parses_as_one_trino_statement(path):
     statements = [s for s in statements if s is not None]
     assert len(statements) == 1, f'{path.name}: expected one statement'
     assert not isinstance(statements[0], exp.Command), f'{path.name}: not recognised as SQL (keyword typo?)'
+    if isinstance(statements[0], exp.Create):
+        # sqlglot accepts 'CREATE TABLE x AS' with nothing after it, Athena does not
+        assert statements[0].expression is not None, f'{path.name}: CREATE ... AS has no query body'

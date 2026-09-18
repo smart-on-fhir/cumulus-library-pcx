@@ -21,7 +21,7 @@ WITH history_code AS (
             MIN(dx_recorded_date)       AS history_first_day,
             COUNT(DISTINCT condition_ref) AS condition_cnt
     FROM    pcx__cohort_dx_radiation
-    WHERE   tier = 2
+    WHERE   CAST(tier AS INTEGER) = 2
     GROUP BY subject_ref
 )
 

@@ -19,7 +19,7 @@ WITH structured_all AS (
             COUNT(DISTINCT CASE WHEN proc_performed_day IS NOT NULL THEN procedure_ref END)
                                                                                 AS proc_dated_cnt
     FROM    pcx__cohort_proc_craniotomy
-    WHERE   tier = 1
+    WHERE   CAST(tier AS INTEGER) = 1
     GROUP BY subject_ref
 )
 

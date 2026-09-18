@@ -13,7 +13,7 @@
 --
 -- definitive_surgery_day drives age_under_36_months_at_definitive_surgery,
 -- the ACNS0334 age criterion, so every one of these moves trial membership.
--- surgery_role is free text matched with LIKE '%definitive%'.
+-- The LLM definitive day is the earliest resection (extent_of_resection GROSS_TOTAL, NEAR_TOTAL or PARTIAL).
 -- ============================================================================
 CREATE TABLE pcx__warn_eligible_surgery_timing AS
 

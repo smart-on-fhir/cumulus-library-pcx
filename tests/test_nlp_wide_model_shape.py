@@ -109,18 +109,32 @@ def test_every_template_belongs_to_exactly_one_workflow():
 #-----------------------------------------------------------------------------
 # templates <-> model (every projected result path exists, spans stay behind)
 #-----------------------------------------------------------------------------
+UNNEST_ALIAS = re.compile(r"UNNEST\(nlp\.result((?:\.\w+)+)\) WITH ORDINALITY AS \w+ \((\w+), \w+\)")
+
+
+def resolve(contract: dict, path: str, where: str) -> dict | None:
+    """Walk a dotted path through the field tree, failing on the first missing part."""
+    node = contract
+    for part in path.strip(".").split("."):
+        assert isinstance(node, dict) and part in node, f"{where}: {path} is not in the model"
+        node = node[part]
+    return node
+
+
 @pytest.mark.parametrize("stage", STAGES, ids=lambda s: s.WORKFLOW)
 def test_projected_result_paths_exist_in_the_model(stage):
+    """Every nlp.result.* path and every <unnest alias>.<field> the SQL reads exists in the model."""
     rendered = nlp_wide.render(stage.WORKFLOW, ["site_a"])
     for file_sql, task in templates_of(stage).items():
         sql = rendered[file_sql]
         contract = model_fields(model_schema(task))
         for path in sorted(set(re.findall(r"nlp\.result((?:\.\w+)+)", sql))):
-            node = contract
-            for part in path.strip(".").split("."):
-                assert (isinstance(node, dict) and part in node), \
-                    f"{file_sql}: nlp.result{path} is not in the {task} model"
-                node = node[part]
+            resolve(contract, path, f"{file_sql}: nlp.result")
+        for list_path, alias in set(UNNEST_ALIAS.findall(sql)):
+            item = resolve(contract, list_path, f"{file_sql}: nlp.result")
+            # (?<![\w.]) keeps an alias named "result" from matching inside "nlp.result.results"
+            for path in sorted(set(re.findall(rf"(?<![\w.]){alias}((?:\.\w+)+)", sql))):
+                resolve(item, path, f"{file_sql}: {alias}")
         assert not re.search(r"\.(spans|has_mention)\b", sql), file_sql
 
 
