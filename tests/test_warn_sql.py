@@ -1,6 +1,6 @@
-"""Exercise every tests/athena/pcx__warn_*.sql table on the synthetic tables in tests/data.
+"""Exercise every tests/athena/pcx__warn_*.sql table on the seeded fixtures in tests/data/warn.
 
-Each synthetic subject is seeded with one or more anomalies (see tests/data/schema.sql), and
+Each fixture subject is seeded with one or more anomalies (see tests/data/schema.sql), and
 each warn table is asserted against the exact set of (warn_check, subject_ref) pairs it must
 produce. A warn table that starts firing on a clean subject, or stops firing on a seeded one,
 fails here.

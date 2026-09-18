@@ -1,18 +1,22 @@
-# tests/data/make_synthetic_data.py
+# tests/synthetic.py (`make-pcx test-synthetic`)
 
-CLI that simulates a real-world-like cohort and exports the 10 eligible/outcome tables as Athena-style CSV
+Generator that simulates a real-world-like cohort and exports the 10 eligible/outcome tables as Athena-style CSV
 (`SELECT * FROM pcx__<table>` download format: all values quoted, NULL empty, booleans true/false).
 
-    python tests/data/make_synthetic_data.py OUTPUT_DIR --patients 1000 --seed 334
-        [--noise 1.0] [--no-utilization-screen] [--include-inputs] [--quiet]
+    make-pcx test-synthetic [--patients 1000] [--seed 334] [--noise 1.0] [--no-utilization-screen] [--quiet]
+        regenerates tests/data/synthetic (derived, synthetic__truth.csv and upstream tables in one directory), removing stale CSVs first
+    python tests/synthetic.py OUTPUT_DIR [same options] [--include-inputs]
+        the same generator aimed at any directory (test code, deliberately outside cumulus_library_pcx/)
 
 ## Design
 1. Latent truth per patient (tumor, molecular group, age, M-stage, resection, MTX, RT, relapse, death, follow-up).
 2. Emits the upstream tables in tests/data/schema.sql (casedef, encounters, orders, procedures, LLM wide tables).
 3. Runs the REAL custom/pcx__*.sql in DuckDB in the order eligible.toml + outcome.toml list them, so derived tables
    cannot drift from the SQL. `date_diff` is overridden with `datesub` so month ages are Athena completed months.
-4. Exports derived tables + `synthetic__truth.csv` (latent truth per subject). `--include-inputs` writes OUTPUT_DIR/input.
-Casedef codes are read from spreadsheet/casedef.csv at run time. Refuses to write into tests/data (fixtures p1-p8).
+4. Exports derived tables + `synthetic__truth.csv` (latent truth per subject). `--include-inputs` keeps the upstream
+   tables beside them, so `tests/sqltest.py connect(data_dir)` can load the directory in place of tests/data/warn
+   (it loads only schema.sql tables, ignoring the derived CSVs).
+Casedef codes are read from spreadsheet/casedef.csv at run time. Refuses to write into tests/data/warn (fixtures p1-p8).
 
 ## Population
 - Output = CSV as if selected out of Athena. Population = patients <= 3 years old (under 48 months at presentation,

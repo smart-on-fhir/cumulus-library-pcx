@@ -24,11 +24,13 @@ renders the Athena SQL and the stage `*.toml` submanifests from their sources, w
 ```
 make-pcx [STAGE ...] [--build]
 make-pcx --list
+make-pcx test-synthetic [--patients N] [--seed S] [--noise X] [--no-utilization-screen] [--quiet]
 ```
 
 `make-pcx` is installed by `pip3 install -e .` (`[project.scripts]` in [pyproject.toml](pyproject.toml)).
-It reads and writes only beneath the study package [cumulus_library_pcx/](cumulus_library_pcx)
-and the CSV directory [spreadsheet/](spreadsheet); it needs no environment variables of its own.
+It reads and writes only beneath the study package [cumulus_library_pcx/](cumulus_library_pcx),
+the CSV directory [spreadsheet/](spreadsheet) and, for `test-synthetic`, [tests/data/synthetic/](tests/data/synthetic);
+it needs no environment variables of its own.
 
 ---
 ## Commands
@@ -61,6 +63,21 @@ just builds it.
 
 Print the stage names in build order and exit.
 
+> make-pcx test-synthetic
+
+Regenerate [tests/data/synthetic/](tests/data/synthetic): a synthetic, real-world-like cohort of
+children 3 years old or younger with a CNS embryonal tumor, calibrated to ACNS0334
+([PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/)), run through the real
+`custom/pcx__eligible*.sql` and `pcx__outcome*.sql` in DuckDB. It writes the ten derived tables
+as Athena-download CSV, `synthetic__truth.csv` (the latent truth per subject) and the upstream
+tables in the [tests/data/warn](tests/data/warn) fixture style, all in one directory. Stale CSVs from an earlier
+run are removed first. Options after the word go to the generator ([tests/synthetic.py](tests/synthetic.py),
+test code kept out of the study package and loaded from the checkout, so this needs a clone with `pip install -e .`):
+`--patients` (rows in `pcx__eligible`, default 1000), `--seed` (default 334), `--noise` (0 clean,
+1 realistic), `--no-utilization-screen` (keep early deaths), `--quiet` (no calibration report).
+`test-synthetic` is a command word, not a stage: `--list` does not show it and `--build` does not apply.
+Needs `duckdb` and `numpy` (the `[test]` extra). See [synthetic.md](synthetic.md) for the design.
+
 ---
 ## Options
 
@@ -69,6 +86,7 @@ Print the stage names in build order and exit.
 | `STAGE`   | Zero or more stage names from `--list`. None means every stage plus `manifest.toml`.                     |
 | `--build` | After making, run `cumulus-library build` for the selected stage(s), `all` when none is named. Requires `cumulus-library` on the PATH (the study venv); stops on the first failing build. |
 | `--list`  | Print stage names and exit.                                                                              |
+| `test-synthetic` | Command word (first argument): regenerate `tests/data/synthetic`; later arguments are generator options, see [Commands](#commands). |
 | `-h`      | Usage.                                                                                                   |
 
 ---
@@ -169,6 +187,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 | `spreadsheet/file_upload_study_variable.toml`                | study_variable (`UploadWorkflow`, all columns strings) |
 | `$ELASTIC_OUTPUT_DIR/<date>/file_upload_elastic.toml`        | elastic_upload, when results exist        |
 | `cumulus_library_pcx/manifest.toml`                          | the default (no-stage) run                |
+| `tests/data/synthetic/*.csv`                                 | `test-synthetic`                          |
 
 ## Code
 
@@ -178,6 +197,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 - [tools/staging.py](cumulus_library_pcx/tools/staging.py): `Stage`, the `Action` dataclasses, `UploadWorkflow`
 - [tools/manifest.py](cumulus_library_pcx/tools/manifest.py): dataclasses → TOML (`save_actions_toml`, `save_upload_toml`, `save_manifest_toml`), study prefix
 - [tools/filetool.py](cumulus_library_pcx/tools/filetool.py): project paths, spreadsheet listing, `csv_columns`
+- [tests/synthetic.py](tests/synthetic.py): the `test-synthetic` generator (`make_tests_synthetic`, `main`), loaded by `cli.load_tests_synthetic`
 - [tools/template.py](cumulus_library_pcx/tools/template.py): Jinja rendering into `athena/` and `tests/athena/`
 - [tools/nlp_wide.py](cumulus_library_pcx/tools/nlp_wide.py): renders `llm/template/` against a `.workflow`'s tasks and deployments, shared by the two NLP wide stages
 - [stage/*.py](cumulus_library_pcx/stage): one module per made stage, each with `make_actions()` and `make()`

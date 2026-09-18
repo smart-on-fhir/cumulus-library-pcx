@@ -1,4 +1,4 @@
-"""Run the eligible and outcome SQL (custom/) on the synthetic tables in tests/data and check
+"""Run the eligible and outcome SQL (custom/) on the seeded fixtures in tests/data/warn and check
 the trial-emulation rules, not day counts (pcx__warn_outcome_survival_days guards those on real data).
 """
 from datetime import date
