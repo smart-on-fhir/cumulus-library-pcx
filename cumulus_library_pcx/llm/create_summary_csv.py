@@ -26,122 +26,26 @@ docstring for any member the attribute does not define (see the convention in mo
 A member defined in neither place gets an empty value, so blank enum rows are also an audit of
 which criteria the models do not spell out.
 """
-import csv
-import enum
-import re
 from pathlib import Path
-from types import UnionType
-from typing import Any, Union, get_args, get_origin
 
 import pydantic
 
 from cumulus_library_pcx.llm.create_schemas import annotation_model, list_tasks
-from cumulus_library_pcx.tools import filetool
+from cumulus_library_pcx.tools import filetool, llm_schema_csv
+from cumulus_library_pcx.tools.llm_schema_csv import COLUMNS, enum_clauses, parse_enum_description
 
-COLUMNS = ["annot", "annot_col", "mention_type", "mention_col", "mention_key", "mention_value"]
 SPAN_FIELDS = {"has_mention", "spans"}
 
 
-def _unwrap(tp: Any) -> Any:
-    """Strip Optional and list wrappers so `list[X] | None` yields X."""
-    origin = get_origin(tp)
-    if origin in (Union, UnionType):
-        tp = next(arg for arg in get_args(tp) if arg is not type(None))
-        origin = get_origin(tp)
-    if origin is list:
-        tp = get_args(tp)[0]
-    return tp
-
-
-def _is_model(tp: Any) -> bool:
-    return isinstance(tp, type) and issubclass(tp, pydantic.BaseModel)
-
-
-def _is_enum(tp: Any) -> bool:
-    return isinstance(tp, type) and issubclass(tp, enum.Enum)
-
-
-def _clean(text: str | None) -> str:
-    """Collapse the newlines and doubled spaces of a wrapped docstring into one line."""
-    return " ".join((text or "").split())
-
-
-def parse_enum_description(description: str, members: list[str]) -> tuple[str, dict[str, str]]:
-    """
-    Split "preamble. KEY: clause. KEY / KEY: clause." into the preamble and one clause per member.
-
-    >>> parse_enum_description("Pick one. A: first. B / C: shared.", ["A", "B", "C"])
-    ('Pick one.', {'A': 'first.', 'B': 'shared.', 'C': 'shared.'})
-    """
-    names = "|".join(re.escape(member) for member in sorted(members, key=len, reverse=True))
-    marker = re.compile(rf"(?:\d+\.\s*)?\b((?:{names})(?:\s*/\s*(?:{names}))*)\s*:")
-    matches = list(marker.finditer(description))
-
-    preamble = description[: matches[0].start()] if matches else description
-    clauses = dict.fromkeys(members, "")
-    for match, following in zip(matches, matches[1:] + [None]):
-        end = following.start() if following else len(description)
-        clause = _clean(description[match.end():end])
-        for key in re.split(r"\s*/\s*", match.group(1)):
-            clauses[key] = clause
-    return _clean(preamble), clauses
-
-
-def enum_clauses(enum_type: type[enum.Enum], description: str | None) -> tuple[str, dict[str, str]]:
-    """
-    The attribute's preamble and one clause per member: the attribute description's own clause
-    where it gives one, else the enum docstring's, else "".
-    """
-    members = [str(member.value) for member in enum_type]
-    _, defaults = parse_enum_description(enum_type.__doc__ or "", members)
-    preamble, clauses = parse_enum_description(description or "", members)
-    for key in members:
-        clauses[key] = clauses[key] or defaults[key]
-    return preamble, clauses
-
-
-def _mention_rows(annot: str, annot_col: str, mention: type[pydantic.BaseModel]) -> list[list[str]]:
-    """Rows for one mention bound at annot_col: its docstring, then each attribute and enum member."""
-    name = mention.__name__
-    rows = [[annot, annot_col, name, "", "", _clean(mention.__doc__)]]
-    for col, info in mention.model_fields.items():
-        if col in SPAN_FIELDS:
-            continue
-        inner = _unwrap(info.annotation)
-        if _is_enum(inner):
-            preamble, clauses = enum_clauses(inner, info.label)
-            rows.append([annot, annot_col, name, col, "", preamble])
-            for key, clause in clauses.items():
-                rows.append([annot, annot_col, name, col, key, clause])
-        else:
-            rows.append([annot, annot_col, name, col, "", _clean(info.label)])
-            if _is_model(inner):
-                rows.extend(_mention_rows(annot, f"{annot_col}.{col}", inner))
-    return rows
-
-
 def summarize(annotation: type[pydantic.BaseModel]) -> list[list[str]]:
-    """Rows for an annotation: its docstring, then each attribute and the mention bound to it."""
-    annot = annotation.__name__
-    rows = [[annot, "", "", "", "", _clean(annotation.__doc__)]]
-    for col, info in annotation.model_fields.items():
-        rows.append([annot, col, "", "", "", _clean(info.label)])
-        inner = _unwrap(info.annotation)
-        if _is_model(inner):
-            rows.extend(_mention_rows(annot, col, inner))
-    return rows
+    """Summarize a PCX model, omitting shared evidence-span fields."""
+    return llm_schema_csv.summarize(annotation, exclude_fields=SPAN_FIELDS)
 
 
 def create(annotation: type[pydantic.BaseModel], filename: str, output_dir: Path | None = None) -> Path:
     """Write one task's summary CSV, creating the destination directory."""
     directory = Path(output_dir) if output_dir is not None else filetool.path_llm("summaries")
-    directory.mkdir(parents=True, exist_ok=True)
-    file_path = directory / filename
-    with file_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(COLUMNS)
-        writer.writerows(summarize(annotation))
-    return file_path
+    return llm_schema_csv.save_summary(annotation, directory / filename, exclude_fields=SPAN_FIELDS)
 
 
 def create_pcx_llm_summaries(output_dir: Path | None = None) -> list[Path]:
