@@ -1,7 +1,10 @@
 [[actions]]
 label = "all *qa* tables should have zero rows"
 type = "build:parallel"
-files = []
+files = [
+    "../tests/athena/pcx__qa_study_period_bounds.sql",
+    "../tests/athena/pcx__qa_study_population_utilization.sql",
+]
 
 [[actions]]
 label = "warn tables - nonzero rows are findings to eyeball, not failures"
@@ -28,6 +31,7 @@ files = [
     "../tests/athena/pcx__warn_outcome_first_event_timing.sql",
     "../tests/athena/pcx__warn_outcome_survival_days.sql",
     "../tests/athena/pcx__warn_outcome_vital_status_conflict.sql",
+    "../tests/athena/pcx__warn_study_period_null_end.sql",
 ]
 
 [[actions]]
@@ -41,5 +45,4 @@ type = "build:parallel"
 files = [
     "../tests/athena/pcx__qa_union.sql",
     "../tests/athena/pcx__warn_union.sql",
-    "../tests/athena/pcx__example_union.sql",
 ]

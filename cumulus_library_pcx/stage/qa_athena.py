@@ -35,8 +35,7 @@ def list_tables(file_list:list[Path]) -> list[str]:
 # ----------------------------------------------------------------------------
 def make_union() -> list[Path]:
     return [_ctas_union('qa_union', list_qa()),
-            _ctas_union('warn_union', list_warn()),
-            _ctas_union('example_union', list_example())]
+            _ctas_union('warn_union', list_warn())]
 
 def _ctas_union(table_part, file_list:list[Path]) -> Path:
     table = tablespace.name_prefix(table_part)
