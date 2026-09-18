@@ -7,9 +7,8 @@ With no export the stage has no actions.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import elastic_upload_tool
-from cumulus_library_pcx.tools.manifest import (
-    Action, FileAction, SqlAction, save_actions_toml,
-)
+from cumulus_library_pcx.tools.staging import Action, FileAction, SqlAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'elastic_upload.toml'
 
@@ -24,7 +23,3 @@ def make_actions() -> list[Action]:
 
 def make() -> Path:
     return save_actions_toml(make_actions(), STAGE_TOML)
-
-
-if __name__ == '__main__':
-    print(make())

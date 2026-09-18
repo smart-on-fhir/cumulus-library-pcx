@@ -6,9 +6,8 @@ the sample-size limits and the sample.toml manifest.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import sample_tool
-from cumulus_library_pcx.tools.manifest import (
-    Action, SqlAction, SqlParallelAction, save_actions_toml,
-)
+from cumulus_library_pcx.tools.staging import Action, SqlAction, SqlParallelAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'sample.toml'
 LIMIT_PATIENTS = 10
@@ -37,7 +36,3 @@ def make_actions() -> list[Action]:
 
 def make() -> Path:
     return save_actions_toml(make_actions(), STAGE_TOML)
-
-
-if __name__ == '__main__':
-    print(make())

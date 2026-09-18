@@ -1,6 +1,6 @@
 """
 NLP wide tables: <prefix>__llm_<projection> from the raw <prefix>__nlp_<task>_<deployment> tables,
-where <prefix> is the study prefix from manifest.toml (manifest.PREFIX).
+where <prefix> is the study prefix from manifest.toml (tablespace.PREFIX).
 
 Each llm/template/<prefix>__llm_<projection>.sql.jinja is rendered once against the selected
 deployments (UNION ALL of <prefix>__nlp_<task>_<deployment>) at the task version declared in a
@@ -13,8 +13,8 @@ import re
 from pathlib import Path
 from typing import Iterable
 from cumulus_library_pcx.tools import settings
-from cumulus_library_pcx.tools import filetool, manifest, template
-from cumulus_library_pcx.tools.manifest import PREFIX
+from cumulus_library_pcx.tools import filetool, toml_tool, template
+from cumulus_library_pcx.tools.tablespace import PREFIX
 from cumulus_library_pcx.tools.staging import Action, SqlParallelAction
 
 DEFAULT_DEPLOYMENTS = settings.NLP_DEPLOYMENTS
@@ -33,7 +33,7 @@ def prepare_resources(workflow: str, label: str, toml_file: str,
     :return: SQL paths, then the stage TOML
     """
     if output_dir is None:
-        return make_wide(workflow, deployments) + [manifest.save_actions_toml(make_actions(workflow, label, deployments), toml_file)]
+        return make_wide(workflow, deployments) + [toml_tool.save_actions_toml(make_actions(workflow, label, deployments), toml_file)]
     output_dir = Path(output_dir)
     paths = list()
     for file_sql, sql in render(workflow, deployments).items():
@@ -41,7 +41,7 @@ def prepare_resources(workflow: str, label: str, toml_file: str,
         path.parent.mkdir(parents=True, exist_ok=True)
         paths.append(filetool.write_text(sql, path))
     action = SqlParallelAction([filetool.path_llm_athena(p.name) for p in paths], label)
-    return paths + [manifest.save_actions_toml(action, output_dir / toml_file)]
+    return paths + [toml_tool.save_actions_toml(action, output_dir / toml_file)]
 
 #-----------------------------------------------------------------------------
 # Templates
@@ -67,7 +67,7 @@ def list_tasks(workflow: str) -> dict[str, int]:
     :return: NLP task -> task version
     """
     out = dict()
-    for task, config in manifest.load_toml(workflow)['tables'].items():
+    for task, config in toml_tool.load_toml(workflow)['tables'].items():
         version = config.get('version')
         if type(version) is not int or version < 1:
             raise ValueError(f"{workflow}: task {task!r} must have a positive integer version")

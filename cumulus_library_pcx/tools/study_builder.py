@@ -1,7 +1,7 @@
 import shutil
 import subprocess
 from pathlib import Path
-from cumulus_library_pcx.tools import filetool, manifest
+from cumulus_library_pcx.tools import filetool, tablespace, toml_tool
 from cumulus_library_pcx.tools.staging import Stage
 
 #-----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ def make_manifest(stage_list: list[Stage]) -> Path:
     """
     Write manifest.toml listing every stage, in build order.
     """
-    return manifest.save_manifest_toml(stage_list)
+    return toml_tool.save_manifest_toml(stage_list)
 
 def make_study(stage_list: list[Stage]) -> list[Path]:
     """
@@ -62,7 +62,7 @@ def build_command(stage: str = 'all') -> list[str]:
     """
     return ['cumulus-library', 'build',
             '-s', str(filetool.path_project()),
-            '-t', manifest.PREFIX,
+            '-t', tablespace.PREFIX,
             '--stage', stage]
 
 def build(stage: str = 'all') -> None:

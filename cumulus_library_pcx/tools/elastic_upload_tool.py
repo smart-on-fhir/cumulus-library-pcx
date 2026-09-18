@@ -12,9 +12,9 @@ With no export, the stage has no actions.
 import os
 from pathlib import Path
 
-from cumulus_library_pcx.tools import filetool, manifest, settings, tablespace, template
+from cumulus_library_pcx.tools import filetool, toml_tool, settings, tablespace, template
 from cumulus_library_pcx.tools.fhir_reference import Aspect
-from cumulus_library_pcx.tools.manifest import UploadWorkflow
+from cumulus_library_pcx.tools.staging import UploadWorkflow
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 
 #-----------------------------------------------------------------------------
@@ -92,6 +92,6 @@ def make_union(aspect: Aspect | None = None) -> Path:
 
 def make_upload_toml() -> Path:
     """Write the upload workflow for the export CSVs beside them."""
-    return manifest.save_upload_toml(
+    return toml_tool.save_upload_toml(
         workflow=UploadWorkflow(file_list=list_csv(), prefix=UPLOAD_PREFIX),
         toml_file=path_upload_toml())

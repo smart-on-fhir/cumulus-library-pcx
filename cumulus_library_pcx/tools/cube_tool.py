@@ -1,11 +1,10 @@
 from pathlib import Path
 from cumulus_library.builders.counts import CountsBuilder
 from cumulus_library_pcx.tools import filetool
-from cumulus_library_pcx.tools.tablespace import name_trim, name_cube, ctas_as_view
+from cumulus_library_pcx.tools.tablespace import PREFIX, name_trim, name_cube, ctas_as_view
 from cumulus_library_pcx.tools.settings import CUBE_MIN_SUBJECTS, CUBE_AS_VIEW
-from cumulus_library_pcx.tools import manifest
+from cumulus_library_pcx.tools import toml_tool
 
-PREFIX = manifest.PREFIX
 
 def cube_fhir_resource(primary_id:str,
                        source_table='study_population',
@@ -27,7 +26,7 @@ def cube_fhir_resource(primary_id:str,
         table_name = name_cube(table_name, count_type)
 
     table_cols = sorted(list(set(table_cols)))
-    sql = CountsBuilder(manifest=manifest.get_manifest()).get_count_query(
+    sql = CountsBuilder(manifest=toml_tool.get_manifest()).get_count_query(
             table_name=table_name,
             source_table=source_table,
             table_cols=table_cols,

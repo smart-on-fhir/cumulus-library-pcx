@@ -6,9 +6,8 @@ This module owns the action order and the qa_athena.toml manifest.
 from pathlib import Path
 
 from cumulus_library_pcx.tools import qa_athena_tool
-from cumulus_library_pcx.tools.manifest import (
-    Action, SqlParallelAction, save_actions_toml,
-)
+from cumulus_library_pcx.tools.staging import Action, SqlParallelAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'qa_athena.toml'
 

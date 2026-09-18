@@ -1,6 +1,12 @@
 study_prefix = "pcx"
 data_dictionary = "../spreadsheet/data_dictionary.csv"
 
+[[stages.fhir_resource]]
+type = "submanifest"
+files = [
+    "fhir_resource.toml",
+]
+
 [[stages.study_population]]
 type = "submanifest"
 files = [

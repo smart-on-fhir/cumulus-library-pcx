@@ -4,6 +4,7 @@ from pathlib import Path
 from functools import lru_cache
 from cumulus_library import StudyManifest
 from cumulus_library_pcx.tools import filetool
+from cumulus_library_pcx.tools.tablespace import PREFIX
 from cumulus_library_pcx.tools.staging import (
     Stage,
     Action,
@@ -31,19 +32,6 @@ def get_manifest(manifest_path: Path | str = None) -> StudyManifest:
     if isinstance(manifest_path, str):
         manifest_path = filetool.path_project(manifest_path)
     return StudyManifest(manifest_path)
-
-#-----------------------------------------------------------------------------
-# LOAD ONCE
-#
-# Only the study prefix is read at import, straight from manifest.toml.
-# StudyManifest (get_manifest) also opens every submanifest it lists, which
-# cannot work while this package is the thing that generates those files.
-#-----------------------------------------------------------------------------
-def _read_study_prefix() -> str:
-    with filetool.path_project('manifest.toml').open('rb') as source:
-        return tomllib.load(source)['study_prefix']
-
-PREFIX = _read_study_prefix()
 
 #-----------------------------------------------------------------------------
 # TOML builders

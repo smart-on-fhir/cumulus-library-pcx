@@ -83,7 +83,7 @@ Beyond the Cumulus `core__` tables, the build reads these objects, which the sit
 
 ### Stages
 
-[manifest.toml](cumulus_library_pcx/manifest.toml) defines the build stages, in order; `make-pcx` writes it from the `STAGES` list in [stage/makefile.py](cumulus_library_pcx/stage/makefile.py). "on" means the stage runs under `--stage all`; "skip" means it is registered with `skip_by_default` and must be selected explicitly (`make-pcx <stage> --build`).
+[manifest.toml](cumulus_library_pcx/manifest.toml) defines the build stages, in order; `make-pcx` writes it from the `STAGES` list in [stage/manifest.py](cumulus_library_pcx/stage/manifest.py). "on" means the stage runs under `--stage all`; "skip" means it is registered with `skip_by_default` and must be selected explicitly (`make-pcx <stage> --build`).
 
 | stage                                                                         | state | purpose                                                                                                                                                                                                                                                   |
 |-------------------------------------------------------------------------------|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

@@ -2,7 +2,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from cumulus_library.template_sql import base_templates
 from cumulus_library_pcx.tools import filetool
-from cumulus_library_pcx.tools.manifest import PREFIX
+from cumulus_library_pcx.tools.tablespace import PREFIX
 
 #-----------------------------------------------------------------------------
 # Load

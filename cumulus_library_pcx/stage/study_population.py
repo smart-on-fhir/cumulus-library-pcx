@@ -1,11 +1,7 @@
 from pathlib import Path
 from cumulus_library_pcx.tools import template, fhir_reference
-from cumulus_library_pcx.tools.manifest import (
-    Action,
-    FileAction,
-    SqlAction,
-    save_actions_toml
-)
+from cumulus_library_pcx.tools.staging import Action, FileAction, SqlAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 #-----------------------------------------------------------------------------
 # Upload include_*.csv files
 # Common: edit the values of spreadsheet/include_*.csv
@@ -80,6 +76,3 @@ def make_actions() -> list[Action]:
 #-----------------------------------------------------------------------------
 def make() -> Path:
     return save_actions_toml(make_actions(), 'study_population.toml')
-
-if __name__ == '__main__':
-    print(make)

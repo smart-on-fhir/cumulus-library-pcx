@@ -6,6 +6,8 @@ HOME_INSTITUTION = os.environ.get("HOME_INSTITUTION", "Boston Children's Hospita
 # Cumulus data exports go here
 CUMULUS_LIBRARY_DATA_PATH = os.environ.get("CUMULUS_LIBRARY_DATA_PATH")
 
+DATA_PACKAGE_VERSION = os.environ.get("CUMULUS_DATA_PACKAGE_VERSION", 1)
+
 # Elastic search results go here
 ELASTIC_OUTPUT_DIR = os.environ.get('ELASTIC_OUTPUT_DIR')
 

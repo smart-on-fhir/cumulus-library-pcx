@@ -1,5 +1,6 @@
 from pathlib import Path
-from cumulus_library_pcx.tools import manifest, template
+from cumulus_library_pcx.tools import toml_tool, template
+from cumulus_library_pcx.tools.staging import Action, SqlAction
 
 # -----------------------------------------------------------------------------
 # FHIR resource tables that extend the cumulus CORE layer.
@@ -38,17 +39,14 @@ def make_template(resource_list: list[str]) -> list[Path]:
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
-def make_actions() -> list[manifest.Action]:
-    return [manifest.SqlAction(make_template(MEDICATION_REQUEST),
-                               'FHIR MedicationRequest'),
-            manifest.SqlAction(make_template(MEDICATION_DISPENSE),
-                               'FHIR MedicationDispense')]
+def make_actions() -> list[Action]:
+    return [SqlAction(make_template(MEDICATION_REQUEST),
+                      'FHIR MedicationRequest'),
+            SqlAction(make_template(MEDICATION_DISPENSE),
+                      'FHIR MedicationDispense')]
 
 #-----------------------------------------------------------------------------
 # Make
 #-----------------------------------------------------------------------------
 def make() -> Path:
-    return manifest.save_actions_toml(make_actions(), 'fhir_resource.toml')
-
-if __name__ == '__main__':
-    make()
+    return toml_tool.save_actions_toml(make_actions(), 'fhir_resource.toml')

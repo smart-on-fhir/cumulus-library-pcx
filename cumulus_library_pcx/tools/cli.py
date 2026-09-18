@@ -16,7 +16,7 @@ from argparse import (
     ArgumentParser,
     RawDescriptionHelpFormatter
 )
-from cumulus_library_pcx.stage.makefile import STAGES
+from cumulus_library_pcx.stage.manifest import STAGES
 from cumulus_library_pcx.tools import filetool, study_builder
 
 #  Command words handled before stage parsing. They are not stages and never appear in --list.

@@ -15,15 +15,11 @@ nlp_clinical_wide stage (rendered from llm/template, see tools/nlp_wide.py).
 """
 from pathlib import Path
 from cumulus_library_pcx.tools import tablespace, filetool
-from cumulus_library_pcx.tools.manifest import (
-    Action,
-    SqlAction,
-    SqlParallelAction,
-    save_actions_toml
-)
+from cumulus_library_pcx.tools.staging import Action, SqlAction, SqlParallelAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 # -----------------------------------------------------------------------------
-# helper paths to custom "eligible" SQL files
+# helper paths to custom "eligible"
 # -----------------------------------------------------------------------------
 def path_eligible(table_suffix: str | None) -> Path:
     eligible_table = tablespace.name_eligible(table_suffix)
@@ -64,6 +60,3 @@ def make_actions() -> list[Action]:
 #-----------------------------------------------------------------------------
 def make() -> Path:
     return save_actions_toml(make_actions(), 'eligible.toml')
-
-if __name__ == '__main__':
-    print(make)

@@ -1,0 +1,15 @@
+[[actions]]
+label = "FHIR MedicationRequest"
+type = "build:serial"
+files = [
+    "athena/pcx__medicationrequest.sql",
+]
+
+[[actions]]
+label = "FHIR MedicationDispense"
+type = "build:serial"
+files = [
+    "athena/pcx__medicationdispense_dn_inline_code.sql",
+    "athena/pcx__medicationdispense_dn_contained_code.sql",
+    "athena/pcx__medicationdispense.sql",
+]

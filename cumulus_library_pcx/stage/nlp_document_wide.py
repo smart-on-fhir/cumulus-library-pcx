@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Iterable
 from cumulus_library_pcx.tools import nlp_wide
 from cumulus_library_pcx.tools.nlp_wide import DEFAULT_DEPLOYMENTS
-from cumulus_library_pcx.tools.manifest import Action, save_actions_toml
+from cumulus_library_pcx.tools.staging import Action
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
 STAGE_TOML = 'nlp_document_wide.toml'
 WORKFLOW = 'nlp_document_tasks.workflow'
