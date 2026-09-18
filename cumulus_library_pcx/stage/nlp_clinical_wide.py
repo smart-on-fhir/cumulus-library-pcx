@@ -28,10 +28,10 @@ def make_actions(deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Actio
 def make() -> Path:
     return save_actions_toml(make_actions(), STAGE_TOML)
 
-def prepare_resources(deployments: Iterable[str] = DEFAULT_DEPLOYMENTS,
-                      output_dir: Path | None = None) -> list[Path]:
+def make_resources(deployments: Iterable[str] = DEFAULT_DEPLOYMENTS,
+                   output_dir: Path | None = None) -> list[Path]:
     """Test/inspection entry point, see nlp_wide.prepare_resources."""
-    return nlp_wide.prepare_resources(WORKFLOW, LABEL, STAGE_TOML, deployments, output_dir)
+    return nlp_wide.make_resources(WORKFLOW, LABEL, STAGE_TOML, deployments, output_dir)
 
 if __name__ == '__main__':
     print(make())

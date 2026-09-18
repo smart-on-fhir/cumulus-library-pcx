@@ -50,7 +50,7 @@ def make_actions() -> list[Action]:
 
     :return: list of manifest actions, in build order
     """
-    aspect_list = fhir_reference.list_aspect()
+    aspect_list = fhir_reference.list_aspect_names()
     aspect_tables = [f"{STUDY_POPULATION}_{aspect}" for aspect in aspect_list]
 
     return [

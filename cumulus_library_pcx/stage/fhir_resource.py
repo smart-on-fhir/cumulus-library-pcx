@@ -28,21 +28,13 @@ MEDICATION_DISPENSE = [
     'medicationdispense',
 ]
 
-def make_template(resource_list: list[str]) -> list[Path]:
-    """
-    :param resource_list: FHIR resource names in lowercase
-    :return: list of rendered athena/prefix__<resource>.sql paths
-    """
-    return [template.save(f"{resource}.sql")
-            for resource in resource_list]
-
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
-    return [SqlAction(make_template(MEDICATION_REQUEST),
+    return [SqlAction(template.save_list(MEDICATION_REQUEST),
                       'FHIR MedicationRequest'),
-            SqlAction(make_template(MEDICATION_DISPENSE),
+            SqlAction(template.save_list(MEDICATION_DISPENSE),
                       'FHIR MedicationDispense')]
 
 #-----------------------------------------------------------------------------

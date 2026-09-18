@@ -28,15 +28,15 @@ def path_eligible(table_suffix: str | None) -> Path:
 # -----------------------------------------------------------------------------
 # make targets
 # -----------------------------------------------------------------------------
-def make_dx() -> list[Path]:
+def list_dx() -> list[Path]:
     return [path_eligible('dx')]
 
-def make_treatment() -> list[Path]:
+def list_treatment() -> list[Path]:
     return [path_eligible('surgery'),
             path_eligible('rx'),
             path_eligible('radiation')]
 
-def make_eligible() -> list[Path]:
+def list_eligible() -> list[Path]:
     return [path_eligible(None),
             path_eligible('trial')]
 
@@ -45,13 +45,13 @@ def make_eligible() -> list[Path]:
 #-----------------------------------------------------------------------------
 def make_actions() -> list[Action]:
     return [SqlAction(
-                make_dx(),
+                list_dx(),
                 'eligible diagnosis: time zero, age in months, ATRT'),
             SqlParallelAction(
-                make_treatment(),
+                list_treatment(),
                 'eligible treatment: definitive surgery, methotrexate and chemo, radiation'),
             SqlAction(
-                make_eligible(),
+                list_eligible(),
                 'eligible criteria per subject, then trial-like intersection')
     ]
 

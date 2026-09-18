@@ -21,7 +21,7 @@ from cumulus_library_pcx.tools import (
 #-----------------------------------------------------------------------------
 def list_uploads(files: Iterable[Path], *, exclude: str) -> list[Path]:
     """Keep aspect-named variable files, preserving the caller's file order."""
-    aspects = set(fhir_reference.list_aspect())
+    aspects = set(fhir_reference.list_aspect_names())
     return [path for path in files
             if '_' in path.name and path.name.split('_')[0] in aspects
             and exclude not in path.name]
@@ -116,7 +116,7 @@ def make_cohort(variable: str) -> Path:
         cohort=cohort,
         column=column,
     )
-    return filetool.save_athena_view(cohort, sql)
+    return filetool.save_athena(cohort, sql)
 
 
 def make_cohorts(files: Iterable[Path] | None = None) -> list[Path]:
@@ -137,12 +137,11 @@ def make_wide_bool(aspect:Aspect=None) -> Path:
     """
     cohort = f'variable_wide_{aspect.name}' if aspect else f'variable_wide'
     variable_list = list_variables(aspect=aspect)
-    return filetool.save_athena_view(
-        tablespace.name_cohort(cohort),
-        template.load(f"cohort_{cohort}",
-                      encounter_ref=settings.ENCOUNTER_REF,
-                      select_wide_bool=select_wide_bool(variable_list),
-                      select_wide_any=select_wide_any(variable_list)))
+    return filetool.save_athena(tablespace.name_cohort(cohort),
+                                template.load(f"cohort_{cohort}",
+                                              encounter_ref=settings.ENCOUNTER_REF,
+                                              select_wide_bool=select_wide_bool(variable_list),
+                                              select_wide_any=select_wide_any(variable_list)))
 
 def select_wide_bool(variable_list: list[str]) -> str:
     """
@@ -218,12 +217,11 @@ def _make_wide(aspect:Aspect, generator=None) -> Path:
             raise NotImplementedError(f"'{aspect}' aspect type not yet supported.")
     else:
         cohort = f'variable_wide_{aspect.name}'
-        return filetool.save_athena_view(
-            tablespace.name_cohort(cohort),
-            template.load("cohort_variable_wide_aspect",
-                          encounter_ref=settings.ENCOUNTER_REF,
-                          aspect=aspect.name,
-                          select_wide_dict=generator()))
+        return filetool.save_athena(tablespace.name_cohort(cohort),
+                                    template.load("cohort_variable_wide_aspect",
+                                                  encounter_ref=settings.ENCOUNTER_REF,
+                                                  aspect=aspect.name,
+                                                  select_wide_dict=generator()))
 
 #-----------------------------------------------------------------------------
 # Template UNION
@@ -255,12 +253,11 @@ def _make_union(aspect:Aspect=None) -> Path:
     """
     cohort = f'variable_union_{aspect.name}' if aspect else f'variable_union'
     variable_list = list_variables(aspect=aspect)
-    return filetool.save_athena_view(
-        tablespace.name_cohort(cohort),
-        template.load(f"cohort_{cohort}",
-                      encounter_ref=settings.ENCOUNTER_REF,
-                      select_union=select_union(variable_list),
-                      variable_list=join_variables_sql(variable_list)))
+    return filetool.save_athena(tablespace.name_cohort(cohort),
+                                template.load(f"cohort_{cohort}",
+                                              encounter_ref=settings.ENCOUNTER_REF,
+                                              select_union=select_union(variable_list),
+                                              variable_list=join_variables_sql(variable_list)))
 
 def select_union(variable_list: list[str]) -> str:
     """

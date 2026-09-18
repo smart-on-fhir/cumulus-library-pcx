@@ -24,9 +24,9 @@ TEMPLATE_GLOB = f'{PREFIX}__llm_*.sql.jinja'      # llm/template/<prefix>__llm_<
 #-----------------------------------------------------------------------------
 # Prepare (Test / inspection)
 #-----------------------------------------------------------------------------
-def prepare_resources(workflow: str, label: str, toml_file: str,
-                      deployments: Iterable[str] = DEFAULT_DEPLOYMENTS,
-                      output_dir: Path | None = None) -> list[Path]:
+def make_resources(workflow: str, label: str, toml_file: str,
+                   deployments: Iterable[str] = DEFAULT_DEPLOYMENTS,
+                   output_dir: Path | None = None) -> list[Path]:
     """
     Render into `output_dir` (mirroring the project layout) instead of the project.
     With no output_dir this is the stage's make() plus the SQL paths.

@@ -38,7 +38,7 @@ def make_sample(table_name: str | None = None) -> list[Path]:
 #-----------------------------------------------------------------------------
 # Step 2: for each Aspect
 #-----------------------------------------------------------------------------
-def make_aspect_list_supported() -> list[Path]:
+def make_supported_aspects() -> list[Path]:
     out = list()
     for aspect in list_aspect_names():
         out.append(make_aspect(aspect))

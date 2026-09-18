@@ -37,25 +37,15 @@ VIEW_LIST = (
     "dictionary_coverage",
 )
 
-def list_views() -> list[str]:
+def list_tables() -> list[str]:
     """Return every flat view exported as CSV."""
     return [tablespace.name_join("client", suffix) for suffix in VIEW_LIST]
 
 # -----------------------------------------------------------------------------
 # Client namespace and path
 # -----------------------------------------------------------------------------
-def name_view(table_suffix: str | None) -> str:
-    """
-    :param table_suffix: table name without prefix or "client"
-    :return: $prefix_client_tablename
-    """
-    if table_suffix:
-        return tablespace.name_join('client', table_suffix)
-    else:
-        return tablespace.name_prefix('client')
-
 def path_client(table_suffix: str | None) -> Path:
-    client_table = name_view(table_suffix)
+    client_table = tablespace.name_client(table_suffix)
     return filetool.path_custom(f"{client_table}.sql")
 
 # -----------------------------------------------------------------------------
@@ -78,7 +68,7 @@ def make_actions() -> list[Action]:
                       'client outcome'),
             SqlAction([path_client('dictionary_coverage')],
                       'client dictionary coverage'),
-            ExportAction(list_views(),
+            ExportAction(list_tables(),
                          "client SQL views -> CSV files",
                          export_type="export:flat")
     ]

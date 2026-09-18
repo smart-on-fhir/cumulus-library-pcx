@@ -64,7 +64,7 @@ def filter_aspect(file_list:list[Path]) -> list[Path]:
     @refactor
     """
     filtered = list()
-    accept = fhir_reference.list_aspect()
+    accept = fhir_reference.list_aspect_names()
     for f in file_list:
         if '_' in f.name:
             key = f.name.split('_')[0]
