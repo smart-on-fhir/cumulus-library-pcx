@@ -15,13 +15,13 @@ candidate AS (
             'proc_radiation'            AS source,
             proc_performed_day          AS exposure_day
     FROM    pcx__cohort_proc_radiation
-    WHERE   tier = 1
+    WHERE   CAST(tier AS INTEGER) = 1
     UNION ALL
     SELECT  subject_ref,
             'dx_radiation'              AS source,
             dx_recorded_date            AS exposure_day
     FROM    pcx__cohort_dx_radiation
-    WHERE   tier = 1
+    WHERE   CAST(tier AS INTEGER) = 1
     UNION ALL
     SELECT  subject_ref,
             'llm_administered'          AS source,

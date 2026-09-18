@@ -22,7 +22,6 @@ diagnosis_note AS (
             src.disease_subtype,
             src.medulloblastoma_histology,
             src.historical_diagnosis_term,
-            src.tumor_location_verbatim,
             src.chang_m_stage,
             CASE src.chang_m_stage
                 WHEN 'M0' THEN 0
@@ -71,8 +70,6 @@ diagnosis AS (
             -- verbatim wording, latest
             MAX_BY(historical_diagnosis_term, ROW(note_author_date, note_ref))
                 FILTER (WHERE historical_diagnosis_term IS NOT NULL)    AS historical_diagnosis_term,
-            MAX_BY(tumor_location_verbatim, ROW(note_author_date, note_ref))
-                FILTER (WHERE tumor_location_verbatim IS NOT NULL)      AS tumor_location_verbatim,
             MIN(age_at_diagnosis_months)                                AS age_at_diagnosis_months_stated
     FROM    diagnosis_note
     GROUP BY subject_ref
@@ -140,7 +137,6 @@ SELECT  elig.subject_ref,
         diagnosis.chang_m_stage_baseline,
         diagnosis.metastatic_ever_bool,
         diagnosis.historical_diagnosis_term,
-        diagnosis.tumor_location_verbatim,
         diagnosis.age_at_diagnosis_months_stated,
         dx.llm_diagnosis_day_min                        AS diagnosis_day_stated_min,
         dx.llm_diagnosis_gold_day_min                   AS diagnosis_gold_day_min,

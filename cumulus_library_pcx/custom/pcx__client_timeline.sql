@@ -68,7 +68,7 @@ SELECT  DISTINCT
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        CAST(src.tier AS VARCHAR)                                    AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS interpretation,
         src.dx_clinical_status                                       AS status,
         src.code                                                     AS code,
         src.system                                                   AS code_system,
@@ -94,7 +94,7 @@ SELECT  DISTINCT
         src.rx_authoredon_date                                       AS evidence_date,
         CASE WHEN src.rx_authoredon_date IS NOT NULL THEN 'authored' ELSE 'encounter' END AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
-        src.rx_medication_display                                    AS value_text,
+        src.rx_display                                               AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
@@ -128,7 +128,7 @@ SELECT  DISTINCT
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        CAST(src.tier AS VARCHAR)                                    AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS interpretation,
         src.proc_status                                              AS status,
         src.code                                                     AS code,
         src.system                                                   AS code_system,
@@ -273,38 +273,6 @@ WHERE   src.chang_m_stage <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- pcx__llm_diagnosis_wide.tumor_location_verbatim
--- ----------------------------------------------------------------------
-SELECT  DISTINCT
-        src.subject_ref                                              AS subject_ref,
-        src.encounter_ref                                            AS encounter_ref,
-        'llm_tumor_location'                                         AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        'documented'                                                 AS date_type,
-        CAST(NULL AS VARCHAR)                                        AS date_precision,
-        src.tumor_location_verbatim                                  AS value_text,
-        CAST(NULL AS DOUBLE)                                         AS value_number,
-        CAST(NULL AS BOOLEAN)                                        AS value_boolean,
-        CAST(NULL AS VARCHAR)                                        AS unit,
-        CAST(NULL AS VARCHAR)                                        AS interpretation,
-        CAST(NULL AS VARCHAR)                                        AS status,
-        CAST(NULL AS VARCHAR)                                        AS code,
-        CAST(NULL AS VARCHAR)                                        AS code_system,
-        'LLM'                                                        AS source_type,
-        'evidence'                                                   AS assertion_level,
-        src.note_ref                                                 AS source_ref,
-        CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
-  ON    src.subject_ref = note_day.subject_ref
- AND    src.note_ref    = note_day.note_ref
-WHERE   src.tumor_location_verbatim IS NOT NULL
-
-UNION ALL
-
--- ----------------------------------------------------------------------
 -- pcx__llm_diagnosis_wide.age_at_diagnosis_months
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
@@ -416,7 +384,7 @@ SELECT  DISTINCT
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         'months'                                                     AS unit,
         src.extent_of_resection                                      AS interpretation,
-        src.surgery_role                                             AS status,
+        CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
         'LLM'                                                        AS source_type,
@@ -442,12 +410,12 @@ SELECT  DISTINCT
         note_day.note_author_date                                    AS evidence_date,
         CASE WHEN src.residual_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
         src.residual_assessment_date_precision                       AS date_precision,
-        src.residual_measurement_verbatim                            AS value_text,
+        CAST(NULL AS VARCHAR)                                        AS value_text,
         src.residual_tumor_area_cm2                                  AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         'cm2'                                                        AS unit,
-        CAST(NULL AS VARCHAR)                                        AS interpretation,
-        src.surgery_role                                             AS status,
+        src.extent_of_resection                                      AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
         'LLM'                                                        AS source_type,
@@ -459,7 +427,7 @@ FROM    pcx__llm_surgery_wide                AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.residual_tumor_area_cm2 IS NOT NULL OR src.residual_measurement_verbatim IS NOT NULL
+WHERE   src.residual_tumor_area_cm2 IS NOT NULL
 
 UNION ALL
 
@@ -668,7 +636,7 @@ SELECT  DISTINCT
         CAST(NULL AS DOUBLE)                                         AS value_number,
         src.event_free                                               AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        src.assessment_method                                        AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS interpretation,
         CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
@@ -855,7 +823,7 @@ SELECT  DISTINCT
         src.radiologically_evaluable                                 AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
         src.timepoint                                                AS interpretation,
-        src.assessment_method                                        AS status,
+        CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
         'LLM'                                                        AS source_type,
@@ -886,7 +854,7 @@ SELECT  DISTINCT
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        src.csf_collection_site                                      AS interpretation,
+        CAST(NULL AS VARCHAR)                                        AS interpretation,
         CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
@@ -1559,7 +1527,7 @@ SELECT  DISTINCT
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
-        ARRAY_JOIN(src.prior_therapy_modalities, '|')                AS interpretation,
+        src.prior_therapy_modalities                                 AS interpretation,
         CAST(NULL AS VARCHAR)                                        AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
@@ -1591,7 +1559,7 @@ SELECT  DISTINCT
         src.value_numeric                                            AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         src.value_unit                                               AS unit,
-        src.context                                                  AS interpretation,
+        src.interp_clinician                                         AS interpretation,
         src.reference_range                                          AS status,
         CAST(NULL AS VARCHAR)                                        AS code,
         CAST(NULL AS VARCHAR)                                        AS code_system,
