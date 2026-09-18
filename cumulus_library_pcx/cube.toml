@@ -67,35 +67,3 @@ tables = [
     "pcx__cube_patient_casedef_lab",
     "pcx__cube_patient_casedef_proc",
 ]
-
-[[actions]]
-label = "SQL cube casedef sample"
-type = "build:serial"
-files = [
-    "athena/pcx__cube_patient_sample_casedef.sql",
-    "athena/pcx__cube_patient_sample_casedef_pre.sql",
-    "athena/pcx__cube_patient_sample_casedef_peri.sql",
-    "athena/pcx__cube_patient_sample_casedef_peri_post.sql",
-    "athena/pcx__cube_patient_sample_casedef_post.sql",
-    "athena/pcx__cube_note_sample_casedef.sql",
-    "athena/pcx__cube_note_sample_casedef_pre.sql",
-    "athena/pcx__cube_note_sample_casedef_peri.sql",
-    "athena/pcx__cube_note_sample_casedef_peri_post.sql",
-    "athena/pcx__cube_note_sample_casedef_post.sql",
-]
-
-[[actions]]
-label = "export cube tables casedef sample"
-type = "export:counts"
-tables = [
-    "pcx__cube_patient_sample_casedef",
-    "pcx__cube_patient_sample_casedef_pre",
-    "pcx__cube_patient_sample_casedef_peri",
-    "pcx__cube_patient_sample_casedef_peri_post",
-    "pcx__cube_patient_sample_casedef_post",
-    "pcx__cube_note_sample_casedef",
-    "pcx__cube_note_sample_casedef_pre",
-    "pcx__cube_note_sample_casedef_peri",
-    "pcx__cube_note_sample_casedef_peri_post",
-    "pcx__cube_note_sample_casedef_post",
-]

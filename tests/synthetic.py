@@ -24,7 +24,8 @@ How it works
        orders, procedures and the LLM wide tables, with EHR-like gaps and disagreements.
     3. Run the study's real custom/pcx__*.sql in DuckDB, in the order the stage tomls list them.
     4. Export every derived table in Athena's CSV download format.
-   Because step 3 is the real SQL, the derived tables can never drift from the study logic.
+   Stage SQL is read from the checkout on each run. DuckDB compatibility is tested
+   separately; executing the same SQL does not guarantee complete Athena parity.
 
 Population: children diagnosed at 3 years old or younger (under 48 months) with a CNS embryonal
 tumor, calibrated to ACNS0334 (PMC12833527, https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/).
@@ -71,7 +72,6 @@ import argparse
 import csv
 import math
 import tempfile
-import tomllib
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
@@ -80,6 +80,10 @@ import duckdb
 import numpy as np
 
 from cumulus_library_pcx.tools import filetool
+from tests.tools import synthetic_io
+from tests.tools.synthetic_io import (
+    export_athena_csv, write_plain_csv,
+)
 
 ###############################################################################
 # Study constants
@@ -1214,82 +1218,13 @@ def simulate_cohort(patients: int, seed: int, noise_scale: float, utilization_sc
 # DuckDB build with the study's real SQL
 ###############################################################################
 def list_stage_sql() -> list[Path]:
-    """
-    :return: custom/ SQL files in the order eligible.toml then outcome.toml build them
-    """
-    files = list()
-    for stage in STAGES:
-        with open(filetool.path_project(stage), 'rb') as f:
-            for action in tomllib.load(f)['actions']:
-                for filename in action['files']:
-                    if filename.startswith('custom/'):
-                        files.append(filetool.path_project(filename))
-    return files
-
-
-def write_plain_csv(path: Path, columns: list[str], rows: list[dict]) -> None:
-    """
-    Upstream tables in the same plain style as the tests/data/warn fixtures (NULL is empty).
-    """
-    with open(path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(columns)
-        for row in rows:
-            unknown = set(row) - set(columns)
-            if unknown:
-                raise KeyError(f'{path.stem}: columns not in schema.sql: {sorted(unknown)}')
-            writer.writerow(['' if row.get(col) is None else row.get(col) for col in columns])
+    return synthetic_io.list_stage_sql(filetool.path_project(), STAGES, sql_prefix='custom/')
 
 
 def build_database(tables: Tables, input_dir: Path) -> duckdb.DuckDBPyConnection:
-    con = duckdb.connect()
-    #  Athena (Trino) semantics the study SQL relies on
-    con.execute("CREATE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
-    con.execute("CREATE MACRO date_diff(part, a, b) AS datesub(part, a, b)")    # completed months, not boundaries
-    con.execute(filetool.path_tests_data('schema.sql').read_text())
-    schema_tables = [row[0] for row in con.execute('SHOW TABLES').fetchall()]
-    unknown = set(tables.rows) - set(schema_tables)
-    if unknown:
-        raise KeyError(f'tables not in schema.sql: {sorted(unknown)}')
-    for table in schema_tables:
-        columns = [row[0] for row in con.execute(f'DESCRIBE {table}').fetchall()]
-        csv_file = input_dir / f'{table}.csv'
-        write_plain_csv(csv_file, columns, tables.rows.get(table, list()))
-        con.execute(f"COPY {table} FROM '{csv_file}' (HEADER, DELIMITER ',', NULLSTR '')")
-    for sql_file in list_stage_sql():
-        con.execute(sql_file.read_text())
-    return con
-
-
-###############################################################################
-# Athena-style CSV export
-###############################################################################
-def athena_text(value) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return 'true' if value else 'false'
-    return str(value)
-
-
-def export_athena_csv(con: duckdb.DuckDBPyConnection, table: str, path: Path) -> int:
-    """
-    Athena console/S3 download format: every value double-quoted, NULL as an empty unquoted
-    field, booleans true/false, dates YYYY-MM-DD. Rows are ordered for reproducible diffs.
-    :return: row count
-    """
-    cursor = con.execute(f'SELECT * FROM {table} ORDER BY subject_ref')
-    columns = [col[0] for col in cursor.description]
-    rows = cursor.fetchall()
-    with open(path, 'w', newline='', encoding='utf-8') as f:
-        f.write(','.join(f'"{col}"' for col in columns) + '\n')
-        for row in rows:
-            fields = list()
-            for value in row:
-                text = athena_text(value)
-                fields.append('' if text is None else '"' + text.replace('"', '""') + '"')
-            f.write(','.join(fields) + '\n')
-    return len(rows)
+    return synthetic_io.build_database(
+        tables.rows, filetool.path_tests_data('schema.sql'), list_stage_sql(), input_dir,
+    )
 
 
 TRUTH_COLUMNS = ['subject_ref', 'tumor', 'molecular_group', 'gender', 'age_months_at_presentation', 'm_stage',
@@ -1600,8 +1535,9 @@ def generate(args: argparse.Namespace, output_dir: Path) -> None:
     write_report_csv(output_dir / REPORT_FILENAME, records)
     if not args.quiet:
         print_calibration(records)
-    print(f'\nWrote {len(row_counts)} tables, {TRUTH_FILENAME} and {REPORT_FILENAME} ({len(records)} rows: '
-          f'run options, calibration, source table characteristics) to {output_dir}')
+    print(f'\nWrote {len(row_counts)} tables, {TRUTH_FILENAME} and {REPORT_FILENAME}\n\n'
+          f'({len(records)} rows: run options, calibration, source table characteristics) to\n'
+          f'{output_dir}')
 
 
 def make_tests_synthetic(argv: list[str] | None = None) -> int:

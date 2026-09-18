@@ -1,4 +1,4 @@
-	section,table,column,item,value,count,percent,paper
+section,table,column,item,value,count,percent,paper
 run,,,include_inputs,True,,,
 run,,,no_utilization_screen,False,,,
 run,,,noise,1.0,,,

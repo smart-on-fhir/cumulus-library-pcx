@@ -14,7 +14,7 @@ from cumulus_library_pcx.tools.manifest import (
 STAGE_TOML = 'elastic_upload.toml'
 
 
-def make_stages() -> list[Action]:
+def make_actions() -> list[Action]:
     if not elastic_upload_tool.list_csv():
         return list()
     return [
@@ -22,13 +22,8 @@ def make_stages() -> list[Action]:
         SqlAction([elastic_upload_tool.make_union()], 'elastic_output union tasks'),
     ]
 
-
-# Compatibility with stages/tools that use the established action-builder name.
-make_actions = make_stages
-
-
 def make() -> Path:
-    return save_actions_toml(make_stages(), STAGE_TOML)
+    return save_actions_toml(make_actions(), STAGE_TOML)
 
 
 if __name__ == '__main__':
