@@ -1,5 +1,5 @@
 [[actions]]
-label = "Flattened NLP results for PCX document type and topic"
+label = "Flatten NLP results for PCX document type and topic"
 type = "build:parallel"
 files = [
     "llm/athena/pcx__llm_document_topic_wide.sql",

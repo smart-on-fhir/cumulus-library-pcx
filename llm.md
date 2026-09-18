@@ -65,16 +65,17 @@ Annotation classes use unprefixed names such as `DiagnosisAnnotation`; table nam
 retain the study prefix. From the repository root, generate schemas with:
 
 ```sh
-export CUMULUS_LIBRARY_DATA_PATH=/path/to/local/data
-export HOME_INSTITUTION="Boston Children's Hospital (BCH)"  # set to your site
-python -m cumulus_library_pcx.llm.create_schema
+export HOME_INSTITUTION="Boston Children's Hospital (BCH)"  # named in the transition_of_care prompts, set to your site
+python -m cumulus_library_pcx.llm.create_schemas
 ```
 
-Both environment variables are currently needed because of the settings defects described
-above (workplan 1.3). This writes 16 schemas under `cumulus_library_pcx/llm/schemas/`,
-one at a time; it does not run inference. An import failure can leave a partial update.
-The diagnosis schema still declares `additionalProperties: false`, although its model
-no longer forbids extra fields; resolve that drift before regenerating (workplan 1.10).
+`HOME_INSTITUTION` defaults to BCH when unset. This writes one schema per task module under
+`cumulus_library_pcx/llm/schemas/` (tasks are discovered from `llm/models/*.py`, one
+`*Annotation` model per file); it does not run inference. An import failure can leave a partial
+update. Cumulus loads the saved JSON, so editing a model's wording changes nothing until the
+schemas are regenerated, and `tests/test_nlp_wide_model_shape.py` fails until they are.
+Annotation models accept and ignore unknown keys (Pydantic's default), so the schemas do not
+declare `additionalProperties: false`.
 
 The wide templates (`llm/template/<prefix>__llm_*.sql.jinja`) project values without repairing
 dates or adjudicating evidence:

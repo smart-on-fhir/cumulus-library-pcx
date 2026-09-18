@@ -6,7 +6,8 @@ from cumulus_library_pcx.tools.manifest import (
     UploadWorkflow,
     FileAction,
     SqlAction,
-    save_actions_toml
+    save_actions_toml,
+    save_upload_toml
 )
 
 #-----------------------------------------------------------------------------
@@ -53,7 +54,12 @@ def list_variables_as_str(variable_list:list[str], quote="'", seperator=',') -> 
     return tablespace.sql_quote(variable_list, quote, seperator)
 
 def list_variable_uploads() -> list[Path]:
-    return filetool.filter_aspect(filetool.list_spreadsheet())
+    """Valueset CSV files to upload: one per variable, casedef excluded (it has its own stage)."""
+    out = list()
+    for csv_file in filetool.filter_aspect(filetool.list_spreadsheet()):
+        if 'casedef' not in csv_file.name:
+            out.append(csv_file)
+    return out
 
 #-----------------------------------------------------------------------------
 # Aspect(s) for Variable
@@ -128,10 +134,9 @@ def make_cohort(variable: str) -> Path:
 #-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
-def make_upload(variable_list:list[str] | None) -> UploadWorkflow:
-    if not variable_list:
-        variable_list = list_variables()
-    return UploadWorkflow(file_list=variable_list)
+def make_upload() -> UploadWorkflow:
+    """Upload workflow over the discovered valueset CSVs (table valueset_<variable>, columns untyped)."""
+    return UploadWorkflow(file_list=list_variable_uploads())
 
 def make_actions() -> list[Action]:
     """
@@ -152,7 +157,8 @@ def make_actions() -> list[Action]:
 # Make
 #-----------------------------------------------------------------------------
 def make() -> Path:
+    save_upload_toml(make_upload(), UPLOAD_TOML)
     return save_actions_toml(make_actions(), 'study_variable.toml')
 
 if __name__ == '__main__':
-    print(make)
+    print(make())

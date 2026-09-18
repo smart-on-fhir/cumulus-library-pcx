@@ -2,7 +2,7 @@
 Eligibility stage: pcx__eligible_* tables.
 
     eligible_dx         time zero from tier 1 medulloblastoma casedef rows, age in months, ATRT and LLM diagnosis evidence
-    eligible_surgery    definitive surgery day (LLM surgery_role, then structured tier 1 craniotomy) and age at surgery
+    eligible_surgery    definitive surgery day (earliest LLM resection, then structured tier 1 craniotomy) and age at surgery
     eligible_rx         methotrexate (causal contrast) and backbone chemo, ordered and administered, prior to t0
     eligible_radiation  radiation delivered, ordered or coded, prior to t0
     eligible            one row per subject with every ACNS0334 criterion as a nullable column (discovery cohort)

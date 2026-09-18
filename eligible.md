@@ -64,7 +64,7 @@ Optional in `pcx__eligible`, **required** in `pcx__eligible_trial` (a NULL age a
 
 | file                                                    | criteria                                                                                                        |
 |---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| [surgery.py](cumulus_library_pcx/llm/models/surgery.py) | preferred: the LLM operation whose free-text `surgery_role` contains "definitive" (an enum is planned, 3.6)       |
+| [surgery.py](cumulus_library_pcx/llm/models/surgery.py) | preferred: the earliest LLM operation whose `extent_of_resection` is a resection (gross total, near total, partial) |
 | [proc_craniotomy.csv](spreadsheet/proc_craniotomy.csv)  | fallback: first tier 1 craniotomy `proc_performed_day` (candidate codes, verify)                                  |
 
 `definitive_surgery_source` records which one was used. Residual disease inputs (`llm_residual_disease_bool`,

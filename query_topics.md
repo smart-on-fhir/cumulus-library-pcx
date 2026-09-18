@@ -117,21 +117,18 @@ clause counts alone do not establish server acceptance.
 
 The entry points are:
 
-- `python -m cumulus_library_pcx.stage.elastic_query`: calls the rapid-elastic batch
-  pipeline with the selected topic file and configured output directory.
-- `python -m cumulus_library_pcx.stage.elastic_output`: generates upload/union artifacts
-  from CSV results in the configured dated output directory when results exist.
+- `python -m cumulus_library_pcx.tools.elastic_query [topics.tsv]`: calls the rapid-elastic batch
+  pipeline with the topic file (default `spreadsheet/query_topics.tsv`; `query_topics_ppv.tsv` and
+  `query_topics_recall.tsv` are the precision- and recall-leaning variants) and writes results under
+  `$ELASTIC_OUTPUT_DIR` (else `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`). It fails at once when
+  neither variable is set.
+- `make-pcx elastic_upload`: when result CSVs exist in that directory, writes
+  `file_upload_elastic.toml` beside them and schedules the upload plus the `pcx__elastic_union`
+  view; with no results the stage writes an empty `elastic_upload.toml` and prints a skip message.
+  `elastic_query` is `skip_by_default` in `manifest.toml`.
 
-Both are currently broken (workplan 1.2): they call `settings.get_elastic_output_dir()`, which
-does not exist (`settings.ELASTIC_OUTPUT_DIR` is the attribute, and it crashes at import without
-`CUMULUS_LIBRARY_DATA_PATH`), and, like every stage module, they cannot import while
-`manifest.toml` fails to load (workplan 1.1). `elastic_query.toml` still lists
-`tools/elastic_query.py`, which moved to `stage/`. `elastic_query` is commented out in the main
-manifest. `elastic_output` is registered with `skip_by_default=true`, but that flag is ignored on a
-submanifest stage, and its submanifest references an external dated upload manifest
-(`../../../export/elastic/output/2026-09-10/file_upload_elastic.toml`) that the manifest loader opens
-on every build. Use a fresh output directory for revised queries because cached topic results can be
-reused; exclude obsolete result files before generating an upload manifest.
+Use a fresh output directory for revised queries because cached topic results can be reused;
+exclude obsolete result files before generating an upload manifest.
 
 The repository also provides `tools/elastic_query_print_tree.py` for inspection (the topic-overlap
 printer mentioned in earlier notes does not exist). Local checks of TSV headers, unique names, quotes,
