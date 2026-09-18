@@ -15,7 +15,7 @@ from typing import Iterable
 from cumulus_library_pcx.tools import settings
 from cumulus_library_pcx.tools import filetool, toml_tool, template
 from cumulus_library_pcx.tools.tablespace import PREFIX
-from cumulus_library_pcx.tools.staging import Action, SqlParallelAction
+from cumulus_library_pcx.tools.actions import Action, SqlParallelAction
 
 DEFAULT_DEPLOYMENTS = settings.NLP_DEPLOYMENTS
 DEPLOYMENT_SUFFIX = re.compile(r'^[a-z0-9_]+$')   # becomes part of an Athena table name

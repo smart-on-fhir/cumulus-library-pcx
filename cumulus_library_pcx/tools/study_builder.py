@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from cumulus_library_pcx.tools import filetool, tablespace, toml_tool
-from cumulus_library_pcx.tools.staging import Stage
+from cumulus_library_pcx.tools.actions import Stage
 
 #-----------------------------------------------------------------------------
 # Stages

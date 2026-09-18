@@ -5,7 +5,7 @@ from functools import lru_cache
 from cumulus_library import StudyManifest
 from cumulus_library_pcx.tools import filetool
 from cumulus_library_pcx.tools.tablespace import PREFIX
-from cumulus_library_pcx.tools.staging import (
+from cumulus_library_pcx.tools.actions import (
     Stage,
     Action,
     FileAction,

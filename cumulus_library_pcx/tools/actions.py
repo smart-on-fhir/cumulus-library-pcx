@@ -3,47 +3,6 @@ from types import ModuleType
 from dataclasses import dataclass
 
 #-----------------------------------------------------------------------------
-# Stage
-#-----------------------------------------------------------------------------
-@dataclass(frozen=True)
-class Stage:
-    """
-    One `[[stages.<name>]]` entry of the top-level manifest.toml.
-
-    target is either
-    * a Python stage module: its make() writes `<module name>.toml` (built from STAGES in stage/manifest.py), or
-    * the filename of an existing on-disk `<name>.toml` / `<name>.workflow`
-      (NLP and elastic stages: listed in manifest.toml, not built)
-
-    `toml_tool.py` owns the TOML details:
-    * Stage.name becomes the `[[stages.<name>]]` table
-    * Stage.files becomes the TOML `files` key
-    * Stage.submanifest writes `type = "submanifest"` (Cumulus Library reads `.workflow` files without a type)
-    * Stage.skip_by_default is written only when true
-    """
-    target: ModuleType | str
-    skip_by_default: bool = False
-
-    @property
-    def module(self) -> ModuleType | None:
-        """Python stage to build, or None for an on-disk file that is only listed."""
-        return self.target if isinstance(self.target, ModuleType) else None
-
-    @property
-    def name(self) -> str:
-        if self.module:
-            return self.module.__name__.rsplit('.', 1)[-1]
-        return Path(self.target).stem
-
-    @property
-    def files(self) -> list[str]:
-        return [f'{self.name}.toml'] if self.module else [self.target]
-
-    @property
-    def submanifest(self) -> bool:
-        return bool(self.module) or self.target.endswith('.toml')
-
-#-----------------------------------------------------------------------------
 # Actions
 #-----------------------------------------------------------------------------
 @dataclass(frozen=True)
@@ -90,3 +49,44 @@ class UploadWorkflow:
     """
     file_list: list[Path] | list[str]
     prefix: str | None = None
+
+#-----------------------------------------------------------------------------
+# Stage
+#-----------------------------------------------------------------------------
+@dataclass(frozen=True)
+class Stage:
+    """
+    One `[[stages.<name>]]` entry of the top-level manifest.toml.
+
+    target is either
+    * a Python stage module: its make() writes `<module name>.toml` (built from STAGES in stage/manifest.py), or
+    * the filename of an existing on-disk `<name>.toml` / `<name>.workflow`
+      (NLP and elastic stages: listed in manifest.toml, not built)
+
+    `toml_tool.py` owns the TOML details:
+    * Stage.name becomes the `[[stages.<name>]]` table
+    * Stage.files becomes the TOML `files` key
+    * Stage.submanifest writes `type = "submanifest"` (Cumulus Library reads `.workflow` files without a type)
+    * Stage.skip_by_default is written only when true
+    """
+    target: ModuleType | str
+    skip_by_default: bool = False
+
+    @property
+    def module(self) -> ModuleType | None:
+        """Python stage to build, or None for an on-disk file that is only listed."""
+        return self.target if isinstance(self.target, ModuleType) else None
+
+    @property
+    def name(self) -> str:
+        if self.module:
+            return self.module.__name__.rsplit('.', 1)[-1]
+        return Path(self.target).stem
+
+    @property
+    def files(self) -> list[str]:
+        return [f'{self.name}.toml'] if self.module else [self.target]
+
+    @property
+    def submanifest(self) -> bool:
+        return bool(self.module) or self.target.endswith('.toml')

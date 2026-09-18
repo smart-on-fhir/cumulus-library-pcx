@@ -99,7 +99,7 @@ The build order is the `STAGES` list in [stage/manifest.py](cumulus_library_pcx/
 which is the single source of truth for `manifest.toml`. 
 
 Each entry is a
-`Stage` ([tools/staging.py](cumulus_library_pcx/tools/staging.py)) built from one of two targets:
+`Stage` ([tools/actions.py](cumulus_library_pcx/tools/actions.py)) built from one of two targets:
 
 * **a Python stage module** in [stage/](cumulus_library_pcx/stage): `make-pcx` calls its
   `make()`, which writes `<module name>.toml`. 
@@ -135,7 +135,7 @@ Kind links to the stage's file: an **action** is a `.toml` submanifest of `[[act
 instead, insert `Stage('<name>.toml')` or `Stage('<name>.workflow')`, with
 `skip_by_default=True` if it should not run under `--stage all`.
 
-A stage declares its actions with the dataclasses in [tools/staging.py](cumulus_library_pcx/tools/staging.py);
+A stage declares its actions with the dataclasses in [tools/actions.py](cumulus_library_pcx/tools/actions.py);
 [tools/manifest.py](cumulus_library_pcx/tools/toml_tool.py) owns every TOML detail.
 
 | Class                             | TOML                                                                                                   |
@@ -197,7 +197,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 - [tools/cli.py](cumulus_library_pcx/tools/cli.py): argument parser and the installed `make-pcx` command
 - [tools/study_builder.py](cumulus_library_pcx/tools/study_builder.py): stage selection, `make_stages`, `make_manifest`, `make_study`, and the `cumulus-library build` wrapper
 - [stage/manifest.py](cumulus_library_pcx/stage/manifest.py): `STAGES`, the build order
-- [tools/staging.py](cumulus_library_pcx/tools/staging.py): `Stage`, the `Action` dataclasses, `UploadWorkflow`
+- [tools/actions.py](cumulus_library_pcx/tools/actions.py): `Stage`, the `Action` dataclasses, `UploadWorkflow`
 - [tools/manifest.py](cumulus_library_pcx/tools/toml_tool.py): dataclasses → TOML (`save_actions_toml`, `save_upload_toml`, `save_manifest_toml`), study prefix
 - [tools/filetool.py](cumulus_library_pcx/tools/filetool.py): project paths, spreadsheet listing, `csv_columns`
 - [tests/synthetic.py](tests/synthetic.py): the `test-synthetic` generator (`make_tests_synthetic`, `main`), loaded by `cli.load_tests_synthetic`

@@ -14,7 +14,7 @@ from pathlib import Path
 
 from cumulus_library_pcx.tools import filetool, toml_tool, settings, tablespace, template
 from cumulus_library_pcx.tools.fhir_reference import Aspect
-from cumulus_library_pcx.tools.staging import UploadWorkflow
+from cumulus_library_pcx.tools.actions import UploadWorkflow
 from cumulus_library_pcx.tools.settings import ENCOUNTER_REF
 
 #-----------------------------------------------------------------------------
