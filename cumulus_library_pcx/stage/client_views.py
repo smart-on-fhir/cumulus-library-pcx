@@ -12,7 +12,7 @@ Client views stage: pcx__client_* tables, the flat contract exported as CSV.
 
 Same structure as cumulus-library-ibd-cds client_views.py with PCX variables: diagnosis replaces
 paris, exposure replaces therapy_line. The SQL is study-specific and lives in custom/.
-Depends on the eligible and outcome stages and on every LLM wide table in llm/athena.
+Depends on the eligible and outcome stages and on every LLM wide table in sql/generated.
 """
 from pathlib import Path
 from cumulus_library_pcx.tools import filetool, tablespace
@@ -46,7 +46,7 @@ def list_tables() -> list[str]:
 # -----------------------------------------------------------------------------
 def path_client(table_suffix: str | None) -> Path:
     client_table = tablespace.name_client(table_suffix)
-    return filetool.path_custom(f"{client_table}.sql")
+    return filetool.path_sql_custom(f"{client_table}.sql")
 
 # -----------------------------------------------------------------------------
 # actions

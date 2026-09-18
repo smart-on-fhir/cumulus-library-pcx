@@ -1,4 +1,4 @@
-"""Exercise every tests/athena/pcx__warn_*.sql table on the seeded fixtures in tests/data/warn.
+"""Exercise every tests/custom/pcx__warn_*.sql table on the seeded fixtures in tests/data/warn.
 
 Each fixture subject is seeded with one or more anomalies (see tests/data/schema.sql), and
 each warn table is asserted against the exact set of (warn_check, subject_ref) pairs it must

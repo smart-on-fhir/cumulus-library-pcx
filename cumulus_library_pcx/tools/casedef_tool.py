@@ -68,7 +68,7 @@ def save_template_list(sql_files: list[str]) -> list[Path]:
     return out
 
 #-----------------------------------------------------------------------------
-# Make: one function per build step, each returns the athena SQL it wrote
+# Make: one function per build step, each returns the custom SQL it wrote
 #-----------------------------------------------------------------------------
 def make_candidate() -> list[Path]:
     """candidate, then exclude, then include: the order the SQL depends on."""

@@ -1,6 +1,6 @@
 """
 DuckDB test database: tests/data/schema.sql plus one CSV per table from a data directory,
-then the study's hand-written SQL (custom/) and QA/WARN tables (tests/athena/).
+then the study's hand-written SQL (custom/) and QA/WARN tables (tests/custom/).
 
 Data directories:
     tests/data/warn         default: hand-written fixtures p1-p8, each seeded with anomalies
@@ -44,14 +44,14 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
 
 def run_custom(con: duckdb.DuckDBPyConnection, names: list[str] = ELIGIBLE_OUTCOME) -> None:
     for name in names:
-        con.execute(filetool.path_custom(f'pcx__{name}.sql').read_text())
+        con.execute(filetool.path_sql_custom(f'pcx__{name}.sql').read_text())
 
 
 def list_athena(pattern: str) -> list[Path]:
     """
-    tests/athena/<pattern>.sql with the union table last (it reads the others).
+    tests/custom/<pattern>.sql with the union table last (it reads the others).
     """
-    files = sorted(filetool.path_tests_athena().glob(pattern))
+    files = sorted(filetool.path_tests_sql_custom().glob(pattern))
     return [f for f in files if not f.stem.endswith('_union')] + [f for f in files if f.stem.endswith('_union')]
 
 

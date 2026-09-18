@@ -2,22 +2,22 @@
 label = "eligible diagnosis: time zero, age in months, ATRT"
 type = "build:serial"
 files = [
-    "custom/pcx__eligible_dx.sql",
+    "sql/custom/pcx__eligible_dx.sql",
 ]
 
 [[actions]]
 label = "eligible treatment: definitive surgery, methotrexate and chemo, radiation"
 type = "build:parallel"
 files = [
-    "custom/pcx__eligible_surgery.sql",
-    "custom/pcx__eligible_rx.sql",
-    "custom/pcx__eligible_radiation.sql",
+    "sql/custom/pcx__eligible_surgery.sql",
+    "sql/custom/pcx__eligible_rx.sql",
+    "sql/custom/pcx__eligible_radiation.sql",
 ]
 
 [[actions]]
 label = "eligible criteria per subject, then trial-like intersection"
 type = "build:serial"
 files = [
-    "custom/pcx__eligible.sql",
-    "custom/pcx__eligible_trial.sql",
+    "sql/custom/pcx__eligible.sql",
+    "sql/custom/pcx__eligible_trial.sql",
 ]

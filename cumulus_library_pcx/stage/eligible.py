@@ -11,7 +11,7 @@ Eligibility stage: pcx__eligible_* tables.
 Structured inputs: casedef, cohort_variable_union_rx, cohort_proc_craniotomy, cohort_proc_radiation,
 cohort_dx_radiation, core__patient. LLM inputs: llm_diagnosis_wide, llm_surgery_wide,
 llm_systemic_therapy_agent, llm_radiation_wide. The LLM wide tables are built first by this stage's
-nlp_clinical_wide stage (rendered from llm/template, see tools/nlp_wide.py).
+nlp_clinical_wide stage (rendered from sql/template, see tools/nlp_wide.py).
 """
 from pathlib import Path
 from cumulus_library_pcx.tools import tablespace, filetool
@@ -23,7 +23,7 @@ from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 # -----------------------------------------------------------------------------
 def path_eligible(table_suffix: str | None) -> Path:
     eligible_table = tablespace.name_eligible(table_suffix)
-    return filetool.path_custom(f"{eligible_table}.sql")
+    return filetool.path_sql_custom(f"{eligible_table}.sql")
 
 # -----------------------------------------------------------------------------
 # make targets

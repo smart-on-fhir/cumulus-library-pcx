@@ -1,4 +1,4 @@
-"""QA tables: find the qa, warn and example SQL in tests/athena and render their union SQL.
+"""QA tables: find the qa, warn and example SQL in tests/custom and render their union SQL.
 
 Three kinds of table, named by prefix:
     pcx__qa_*        must have zero rows; any row is a failure
@@ -16,13 +16,13 @@ from pathlib import Path
 from cumulus_library_pcx.tools import filetool, tablespace, template
 
 #-----------------------------------------------------------------------------
-# Templates: tests/template/<name>.sql.jinja -> tests/athena/<render>>.sql
+# Templates: tests/template/<name>.sql.jinja -> tests/custom/<render>>.sql
 #-----------------------------------------------------------------------------
 def list_templates() -> list[Path]:
-    return list_sql(filetool.path_tests_template(), '*.sql.jinja')
+    return list_sql(filetool.path_tests_sql_template(), '*.sql.jinja')
 
 def save_templates() -> list[Path]:
-    """Render every test template; returns the tests/athena SQL written."""
+    """Render every test template; returns the tests/custom SQL written."""
     out = list()
     for sql_template in list_templates():
         out.append(template.save_test(sql_template))
@@ -63,10 +63,10 @@ def list_sql(directory: Path, pattern: str, exclude: str | None = None) -> list[
 
 def list_athena(wildcard: str, exclude: str | None = None) -> list[Path]:
     """
-    list_athena('warn_*.sql') -> tests/athena/pcx__warn_*.sql, sorted
+    list_athena('warn_*.sql') -> tests/custom/pcx__warn_*.sql, sorted
     :param exclude: substring of paths to leave out, e.g. the union table's own file
     """
-    return list_sql(filetool.path_tests_athena(), tablespace.name_prefix(wildcard), exclude)
+    return list_sql(filetool.path_tests_sql_custom(), tablespace.name_prefix(wildcard), exclude)
 
 def list_qa() -> list[Path]:
     return list_athena('qa_*.sql', tablespace.name_prefix('qa_union.sql'))
@@ -81,10 +81,10 @@ def list_example() -> list[Path]:
 # Union: one count row per qa / warn table
 #-----------------------------------------------------------------------------
 def make_union_table(union_table: str, file_list: list[Path]) -> Path:
-    """make_union_table('qa_union', list_qa()) -> tests/athena/pcx__qa_union.sql"""
+    """make_union_table('qa_union', list_qa()) -> tests/custom/pcx__qa_union.sql"""
     table = tablespace.name_prefix(union_table)
     sql = ctas_union_all(table, list_tables(file_list))
-    return filetool.write_text(sql, filetool.path_tests_athena(f'{table}.sql'))
+    return filetool.write_text(sql, filetool.path_tests_sql_custom(f'{table}.sql'))
 
 def make_union() -> list[Path]:
     return [make_union_table('qa_union', list_qa()),

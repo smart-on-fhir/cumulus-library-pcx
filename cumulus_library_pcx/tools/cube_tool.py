@@ -36,7 +36,7 @@ def cube_fhir_resource(primary_id:str,
     if CUBE_AS_VIEW == 1:
         sql = ctas_as_view(sql, table_name)
 
-    return filetool.save_athena(table_name, sql)
+    return filetool.save_sql_generated(table_name, sql)
 
 def cube_patient(source_table='study_population',
                  table_cols=None,
@@ -96,7 +96,7 @@ def cube_note(source_table='sample_casedef',
 
 ###############################################################################
 # PCX cube tables: one make_* per stage whose tables are counted.
-# Each returns the athena SQL it wrote, in build order.
+# Each returns the custom SQL it wrote, in build order.
 ###############################################################################
 #-----------------------------------------------------------------------------
 # Study Population

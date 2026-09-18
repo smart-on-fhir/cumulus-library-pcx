@@ -9,34 +9,34 @@ files = [
 label = "study_period"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_study_period.sql",
+    "sql/generated/pcx__cohort_study_period.sql",
 ]
 
 [[actions]]
 label = "study_population"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_study_population.sql",
+    "sql/generated/pcx__cohort_study_population.sql",
 ]
 
 [[actions]]
 label = "obs_base, lab_base"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_study_population_obs_base.sql",
-    "athena/pcx__cohort_study_population_lab_base.sql",
+    "sql/generated/pcx__cohort_study_population_obs_base.sql",
+    "sql/generated/pcx__cohort_study_population_lab_base.sql",
 ]
 
 [[actions]]
 label = "study_population aspects ('enc', 'dx', 'rx', 'lab', 'proc', 'doc', 'diag', 'allergy')"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_study_population_enc.sql",
-    "athena/pcx__cohort_study_population_dx.sql",
-    "athena/pcx__cohort_study_population_rx.sql",
-    "athena/pcx__cohort_study_population_lab.sql",
-    "athena/pcx__cohort_study_population_proc.sql",
-    "athena/pcx__cohort_study_population_doc.sql",
-    "athena/pcx__cohort_study_population_diag.sql",
-    "athena/pcx__cohort_study_population_allergy.sql",
+    "sql/generated/pcx__cohort_study_population_enc.sql",
+    "sql/generated/pcx__cohort_study_population_dx.sql",
+    "sql/generated/pcx__cohort_study_population_rx.sql",
+    "sql/generated/pcx__cohort_study_population_lab.sql",
+    "sql/generated/pcx__cohort_study_population_proc.sql",
+    "sql/generated/pcx__cohort_study_population_doc.sql",
+    "sql/generated/pcx__cohort_study_population_diag.sql",
+    "sql/generated/pcx__cohort_study_population_allergy.sql",
 ]

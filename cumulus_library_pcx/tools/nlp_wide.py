@@ -2,9 +2,9 @@
 NLP wide tables: <prefix>__llm_<projection> from the raw <prefix>__nlp_<task>_<deployment> tables,
 where <prefix> is the study prefix from manifest.toml (tablespace.PREFIX).
 
-Each llm/template/<prefix>__llm_<projection>.sql.jinja is rendered once against the selected
+Each sql/template/llm_<projection>.sql.jinja is rendered once against the selected
 deployments (UNION ALL of <prefix>__nlp_<task>_<deployment>) at the task version declared in a
-`.workflow` file, and written to llm/athena/. A workflow's tasks select which templates
+`.workflow` file, and written to sql/generated/. A workflow's tasks select which templates
 belong to it: projection `<task>` or `<task>_<suffix>`.
 
 The generated queries require the selected deployments' NLP source tables.
@@ -19,7 +19,7 @@ from cumulus_library_pcx.tools.actions import Action, SqlParallelAction
 
 DEFAULT_DEPLOYMENTS = settings.NLP_DEPLOYMENTS
 DEPLOYMENT_SUFFIX = re.compile(r'^[a-z0-9_]+$')   # becomes part of an Athena table name
-TEMPLATE_GLOB = f'{PREFIX}__llm_*.sql.jinja'      # llm/template/<prefix>__llm_<projection>.sql.jinja
+TEMPLATE_GLOB = 'llm_*.sql.jinja'      # sql/template/llm_<projection>.sql.jinja
 
 #-----------------------------------------------------------------------------
 # Prepare (Test / inspection)
@@ -37,10 +37,10 @@ def make_resources(workflow: str, label: str, toml_file: str,
     output_dir = Path(output_dir)
     paths = list()
     for file_sql, sql in render(workflow, deployments).items():
-        path = output_dir / filetool.path_llm_athena(file_sql).relative_to(filetool.path_project())
+        path = output_dir / filetool.path_sql_generated(file_sql).relative_to(filetool.path_project())
         path.parent.mkdir(parents=True, exist_ok=True)
         paths.append(filetool.write_text(sql, path))
-    action = SqlParallelAction([filetool.path_llm_athena(p.name) for p in paths], label)
+    action = SqlParallelAction([filetool.path_sql_generated(p.name) for p in paths], label)
     return paths + [toml_tool.save_actions_toml(action, output_dir / toml_file)]
 
 #-----------------------------------------------------------------------------
@@ -48,11 +48,10 @@ def make_resources(workflow: str, label: str, toml_file: str,
 #-----------------------------------------------------------------------------
 def dict_template_task(tasks: dict[str, int]) -> dict[Path, str]:
     """
-    :return: llm/template/<prefix>__llm_*.sql.jinja -> task, for the templates these tasks own
+    :return: sql/template/llm_*.sql.jinja -> task, for the templates these tasks own
     """
     out = dict()
-    template_glob = f'{PREFIX}__llm_*.sql.jinja'
-    for path in sorted(filetool.path_llm_template().glob(template_glob)):
+    for path in sorted(filetool.path_sql_template().glob(TEMPLATE_GLOB)):
         task = task_of(path, tasks)
         if task:
             out[path] = task
@@ -96,16 +95,16 @@ def list_deployments(deployments: Iterable[str]) -> list[str]:
     return out
 
 def projection(template_path: Path) -> str:
-    return template_path.name.removeprefix(f'{PREFIX}__llm_').removesuffix('.sql.jinja')
+    return template_path.name.removeprefix('llm_').removesuffix('.sql.jinja')
 
 #-----------------------------------------------------------------------------
 # make/render
 #-----------------------------------------------------------------------------
 def make_wide(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Path]:
     """
-    :return: llm/athena/<prefix>__llm_*.sql written for the workflow and deployments
+    :return: sql/generated/<prefix>__llm_*.sql written for the workflow and deployments
     """
-    return [filetool.save_llm_athena(file_sql, sql) for file_sql, sql in render(workflow, deployments).items()]
+    return [filetool.save_sql_generated(file_sql, sql) for file_sql, sql in render(workflow, deployments).items()]
 
 def make_actions(workflow: str, label: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> list[Action]:
     return [SqlParallelAction(make_wide(workflow, deployments), label)]
@@ -113,16 +112,16 @@ def make_actions(workflow: str, label: str, deployments: Iterable[str] = DEFAULT
 def render(workflow: str, deployments: Iterable[str] = DEFAULT_DEPLOYMENTS) -> dict[str, str]:
     """
     Render every projection of the workflow before anything is written.
-    :return: llm/athena filename -> SQL
+    :return: sql/generated filename -> SQL
     """
     deployments = list_deployments(deployments)
     tasks = dict_task_versions(workflow)
     out = dict()
     for template_path, task in dict_template_task(tasks).items():
-        sql = template.load_llm(template_path.name,
+        sql = template.load(template_path.name,
                                 table_names=[f'{PREFIX}__nlp_{task}_{deployment}' for deployment in deployments],
                                 task_version=tasks[task])
-        out[template_path.name.removesuffix('.jinja')] = sql.strip() + '\n'
+        out[f'{PREFIX}__{template_path.name.removesuffix(".jinja")}'] = sql.strip() + '\n'
     if not out:
-        raise ValueError(f"{workflow}: no llm/template matches its tasks {sorted(tasks)}")
+        raise ValueError(f"{workflow}: no sql/template matches its tasks {sorted(tasks)}")
     return out

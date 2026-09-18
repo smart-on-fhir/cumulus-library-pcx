@@ -147,18 +147,16 @@ def _clean_label(label: str | None = None) -> str:
 def _sql_file_entry(file: Path | str) -> str:
     """
     TOML `files` entry for one SQL file, relative to the project directory.
-    Generated SQL lives in athena/, study-specific hand-written SQL lives in custom/,
-    LLM wide tables live in llm/athena/, QA and example tables live in ../tests/athena/.
+    Generated SQL lives in sql/generated/, handwritten SQL lives in sql/custom/,
+    including LLM queries. QA and example tables live in ../tests/sql/custom/.
     """
     path = Path(file)
     parent = path.parent.resolve()
-    if parent == filetool.path_custom().resolve():
-        return f"custom/{path.name}"
-    if parent == filetool.path_llm_athena().resolve():
-        return f"llm/athena/{path.name}"
-    if parent == filetool.path_tests_athena().resolve():
-        return f"../tests/athena/{path.name}"
-    return f"athena/{path.name}"
+    if parent == filetool.path_sql_custom().resolve():
+        return f"sql/custom/{path.name}"
+    if parent == filetool.path_tests_sql_custom().resolve():
+        return f"../tests/sql/custom/{path.name}"
+    return f"sql/generated/{path.name}"
 
 
 def _upload_table_name(filename: str, prefix: str | None = None) -> str:

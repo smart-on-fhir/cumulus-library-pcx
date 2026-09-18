@@ -103,7 +103,7 @@ def list_tables(files: Iterable[Path] | None = None) -> list[str]:
 
 def list_files(files: Iterable[Path] | None = None) -> list[Path]:
     """Return legacy cohort paths (without adding a SQL extension)."""
-    return [filetool.path_athena(name) for name in list_tables_cohort(files)]
+    return [filetool.path_sql_generated(name) for name in list_tables_cohort(files)]
 
 
 def make_cohort(variable: str) -> Path:
@@ -116,7 +116,7 @@ def make_cohort(variable: str) -> Path:
         cohort=cohort,
         column=column,
     )
-    return filetool.save_athena(cohort, sql)
+    return filetool.save_sql_generated(cohort, sql)
 
 
 def make_cohorts(files: Iterable[Path] | None = None) -> list[Path]:
@@ -137,8 +137,8 @@ def make_wide_bool(aspect:Aspect=None) -> Path:
     """
     cohort = f'variable_wide_{aspect.name}' if aspect else f'variable_wide'
     variable_list = list_variables(aspect=aspect)
-    return filetool.save_athena(tablespace.name_cohort(cohort),
-                                template.load(f"cohort_{cohort}",
+    return filetool.save_sql_generated(tablespace.name_cohort(cohort),
+                                       template.load(f"cohort_{cohort}",
                                               encounter_ref=settings.ENCOUNTER_REF,
                                               select_wide_bool=select_wide_bool(variable_list),
                                               select_wide_any=select_wide_any(variable_list)))
@@ -217,8 +217,8 @@ def _make_wide(aspect:Aspect, generator=None) -> Path:
             raise NotImplementedError(f"'{aspect}' aspect type not yet supported.")
     else:
         cohort = f'variable_wide_{aspect.name}'
-        return filetool.save_athena(tablespace.name_cohort(cohort),
-                                    template.load("cohort_variable_wide_aspect",
+        return filetool.save_sql_generated(tablespace.name_cohort(cohort),
+                                           template.load("cohort_variable_wide_aspect",
                                                   encounter_ref=settings.ENCOUNTER_REF,
                                                   aspect=aspect.name,
                                                   select_wide_dict=generator()))
@@ -253,8 +253,8 @@ def _make_union(aspect:Aspect=None) -> Path:
     """
     cohort = f'variable_union_{aspect.name}' if aspect else f'variable_union'
     variable_list = list_variables(aspect=aspect)
-    return filetool.save_athena(tablespace.name_cohort(cohort),
-                                template.load(f"cohort_{cohort}",
+    return filetool.save_sql_generated(tablespace.name_cohort(cohort),
+                                       template.load(f"cohort_{cohort}",
                                               encounter_ref=settings.ENCOUNTER_REF,
                                               select_union=select_union(variable_list),
                                               variable_list=join_variables_sql(variable_list)))

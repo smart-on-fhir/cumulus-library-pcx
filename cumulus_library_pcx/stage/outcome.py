@@ -19,7 +19,7 @@ from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 # -----------------------------------------------------------------------------
 def path_outcome(table_suffix: str | None) -> Path:
     outcome_table = tablespace.name_outcome(table_suffix)
-    return filetool.path_custom(f"{outcome_table}.sql")
+    return filetool.path_sql_custom(f"{outcome_table}.sql")
 
 # -----------------------------------------------------------------------------
 # actions

@@ -52,7 +52,7 @@ make-pcx --build
 make-pcx casedef --build
 ```
 
-`make-pcx` is installed by `pip3 install -e .`; see [make-pcx.md](make-pcx.md) for the commands, the stage list and what is generated versus hand-written. Never hand-edit `cumulus_library_pcx/athena/*.sql`, the generated tomls or `manifest.toml`; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/template) and rerun `make-pcx`. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/custom) (eligible, outcome, client views) is hand-written.
+`make-pcx` is installed by `pip3 install -e .`; see [make-pcx.md](make-pcx.md) for the commands, the stage list and what is generated versus hand-written. Never hand-edit `cumulus_library_pcx/athena/*.sql`, the generated tomls or `manifest.toml`; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/sql/template) and rerun `make-pcx`. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/sql/custom) (eligible, outcome, client views) is hand-written.
 
 ### Environment
 

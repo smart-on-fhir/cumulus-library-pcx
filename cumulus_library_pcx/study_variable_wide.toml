@@ -2,32 +2,32 @@
 label = "variable union (bool)"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_variable_union.sql",
+    "sql/generated/pcx__cohort_variable_union.sql",
 ]
 
 [[actions]]
 label = "variable union ('dx', 'lab', 'proc', 'rx')"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_variable_union_dx.sql",
-    "athena/pcx__cohort_variable_union_lab.sql",
-    "athena/pcx__cohort_variable_union_proc.sql",
-    "athena/pcx__cohort_variable_union_rx.sql",
+    "sql/generated/pcx__cohort_variable_union_dx.sql",
+    "sql/generated/pcx__cohort_variable_union_lab.sql",
+    "sql/generated/pcx__cohort_variable_union_proc.sql",
+    "sql/generated/pcx__cohort_variable_union_rx.sql",
 ]
 
 [[actions]]
 label = "variable wide (bool)"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_variable_wide.sql",
+    "sql/generated/pcx__cohort_variable_wide.sql",
 ]
 
 [[actions]]
 label = "variable wide ('dx', 'lab', 'proc', 'rx')"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_variable_wide_dx.sql",
-    "athena/pcx__cohort_variable_wide_lab.sql",
-    "athena/pcx__cohort_variable_wide_proc.sql",
-    "athena/pcx__cohort_variable_wide_rx.sql",
+    "sql/generated/pcx__cohort_variable_wide_dx.sql",
+    "sql/generated/pcx__cohort_variable_wide_lab.sql",
+    "sql/generated/pcx__cohort_variable_wide_proc.sql",
+    "sql/generated/pcx__cohort_variable_wide_rx.sql",
 ]

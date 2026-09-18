@@ -80,12 +80,12 @@ def select_union(table_list: list[str]) -> str:
 #-----------------------------------------------------------------------------
 def make_union(aspect: Aspect | None = None) -> Path:
     """
-    make_union()           -> athena/pcx__elastic_union.sql       (template elastic_union.sql)
-    make_union(Aspect.dx)  -> athena/pcx__elastic_union_dx.sql    (template elastic_union_dx.sql)
+    make_union()           -> custom/pcx__elastic_union.sql       (template elastic_union.sql)
+    make_union(Aspect.dx)  -> custom/pcx__elastic_union_dx.sql    (template elastic_union_dx.sql)
     """
     cohort = f'union_{aspect.name}' if aspect else 'union'
-    return filetool.save_athena(tablespace.name_elastic(cohort),
-                                template.load(f'elastic_{cohort}',
+    return filetool.save_sql_generated(tablespace.name_elastic(cohort),
+                                       template.load(f'elastic_{cohort}',
                                               encounter_ref=ENCOUNTER_REF,
                                               select_union=select_union(list_tables())))
 

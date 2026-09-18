@@ -15,10 +15,9 @@ from sqlglot.errors import ParseError
 from cumulus_library_pcx.tools import filetool
 
 SQL_DIRS = {
-    'athena': filetool.path_athena(),
-    'custom': filetool.path_custom(),
-    'llm/athena': filetool.path_llm_athena(),
-    'tests/athena': filetool.path_tests_athena(),
+    'sql/generated': filetool.path_sql_generated(),
+    'sql/custom': filetool.path_sql_custom(),
+    'tests/sql/custom': filetool.path_tests_sql_custom(),
 }
 
 TRAILING_COMMA = re.compile(

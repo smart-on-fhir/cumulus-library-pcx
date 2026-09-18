@@ -61,7 +61,7 @@ def make_aspect(aspect: Aspect | str) -> Path:
         aspect = aspect.name
     content = template.load('sample_casedef_aspect', aspect=aspect, encounter_ref=ENCOUNTER_REF)
     table = tablespace.name_prefix(f'sample_casedef_{aspect}')
-    return filetool.save_athena(filetool.path_athena(f'{table}.sql'), content)
+    return filetool.save_sql_generated(filetool.path_sql_generated(f'{table}.sql'), content)
 
 #-----------------------------------------------------------------------------
 # Step 4: with sample size limits
@@ -85,7 +85,7 @@ def make_temporality_list(template_name: str='sample_casedef_temporality', limit
 def make_temporality(template_name: str, temporality: str, limit: int | None = None) -> Path:
     """
     make_temporality('sample_casedef_temporality_limit_note', 'pre', 50)
-        -> athena/pcx__sample_casedef_pre_limit_note_50.sql
+        -> custom/pcx__sample_casedef_pre_limit_note_50.sql
 
     :param template_name: name of the SQL template to load
     :param temporality: one of TEMPORALITY
@@ -103,4 +103,4 @@ def make_temporality(template_name: str, temporality: str, limit: int | None = N
                          temporality=temporality,
                          limit=limit)
     target_table = tablespace.name_prefix(table_name)
-    return Path(filetool.write_text(text, filetool.path_athena(f'{target_table}.sql')))
+    return Path(filetool.write_text(text, filetool.path_sql_generated(f'{target_table}.sql')))

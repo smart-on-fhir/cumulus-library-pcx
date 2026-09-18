@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Any
 from datetime import datetime
@@ -75,35 +76,26 @@ def filter_aspect(file_list:list[Path]) -> list[Path]:
 #-----------------------------------------------------------------------------
 # SQL File(s)
 #-----------------------------------------------------------------------------
-def path_athena(file_sql: Path | str = None) -> Path:
+def path_sql_generated(file_sql: Path | str = None) -> Path:
     if not file_sql:
-        return path_project() / 'athena'
-    return path_project() / 'athena' / file_sql
+        return path_project() / 'sql' / 'generated'
+    return path_project() / 'sql' / 'generated' / file_sql
 
-def save_athena(file_sql: Path | str, contents: str) -> Path:
+def save_sql_generated(file_sql: Path | str, contents: str) -> Path:
     file_sql = Path(file_sql)
     if file_sql.suffix != '.sql':
         file_sql = file_sql.with_name(f'{file_sql.name}.sql')
-    return write_text(contents, path_athena(file_sql))
+    return write_text(contents, path_sql_generated(file_sql))
 
-def save_athena_view(view_name: str, contents: str) -> Path:
-    return Path(write_text(contents, path_athena(f'{view_name}.sql')))
-
-def path_template(file_sql: Path | str = None) -> Path:
+def path_sql_template(file_sql: Path | str = None) -> Path:
     if not file_sql:
-        return path_project() / 'template'
-    return path_project() / 'template' / file_sql
+        return path_project() / 'sql' / 'template'
+    return path_project() / 'sql' / 'template' / file_sql
 
-#-----------------------------------------------------------------------------
-# Custom File(s)
-#-----------------------------------------------------------------------------
-def path_custom(file_custom: Path | str = None) -> Path:
+def path_sql_custom(file_custom: Path | str = None) -> Path:
     if not file_custom:
-        return path_project() / 'custom'
-    return path_project() / 'custom' / file_custom
-
-def save_custom(file_custom: Path | str, contents: str) -> Path:
-    return Path(write_text(contents, path_custom(file_custom)))
+        return path_project() / 'sql' / 'custom'
+    return path_project() / 'sql' / 'custom' / file_custom
 
 #-----------------------------------------------------------------------------
 # Tests File(s)
@@ -133,15 +125,20 @@ def path_tests_data_synthetic(test_file: Path | str = None) -> Path:
     """
     return path_tests_data('synthetic') / test_file if test_file else path_tests_data('synthetic')
 
-def path_tests_athena(file_sql: Path | str = None) -> Path:
+def path_tests_sql(file_sql: Path | str = None) -> Path:
     if not file_sql:
-        return path_tests() / 'athena'
-    return path_tests() / 'athena' / file_sql
+        return path_tests() / 'sql'
+    return path_tests() / 'sql' / file_sql
 
-def path_tests_template(file_sql: Path | str = None) -> Path:
+def path_tests_sql_custom(file_sql: Path | str = None) -> Path:
     if not file_sql:
-        return path_tests() / 'template'
-    return path_tests() / 'template' / file_sql
+        return path_tests_sql() / 'custom'
+    return path_tests_sql() / 'custom' / file_sql
+
+def path_tests_sql_template(file_sql: Path | str = None) -> Path:
+    if not file_sql:
+        return path_tests_sql() / 'template'
+    return path_tests_sql() / 'template' / file_sql
 
 #-----------------------------------------------------------------------------
 # LLM File(s)
@@ -150,19 +147,6 @@ def path_llm(filename: Path | str = None) -> Path:
     if not filename:
         return path_project() / 'llm'
     return path_project() / 'llm' / filename
-
-def path_llm_template(filename: Path | str = None) -> Path:
-    if not filename:
-        return path_llm() / 'template'
-    return path_llm() / 'template' / filename
-
-def path_llm_athena(filename: Path | str = None) -> Path:
-    if not filename:
-        return path_llm() / 'athena'
-    return path_llm() / 'athena' / filename
-
-def save_llm_athena(file_sql: str, contents: str) -> Path:
-    return Path(write_text(contents, path_llm_athena(file_sql)))
 
 #-----------------------------------------------------------------------------
 # Read/Write Text
@@ -209,7 +193,7 @@ def m_open(**kwargs):
     try:
         return open(**kwargs)
     except Exception:
-        print('m_open raised an exception', exc_info=True)
+        logging.getLogger(__name__).exception('m_open raised an exception')
         raise
 
 #-----------------------------------------------------------------------------

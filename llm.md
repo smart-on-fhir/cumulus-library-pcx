@@ -77,7 +77,7 @@ schemas are regenerated, and `tests/test_nlp_wide_model_shape.py` fails until th
 Annotation models accept and ignore unknown keys (Pydantic's default), so the schemas do not
 declare `additionalProperties: false`.
 
-The wide templates (`llm/template/<prefix>__llm_*.sql.jinja`) project values without repairing
+The wide templates (`sql/template/llm_*.sql.jinja`) project values without repairing
 dates or adjudicating evidence:
 
 - Scalar mentions produce one row per note; lists use `UNNEST ... WITH ORDINALITY`
@@ -110,17 +110,17 @@ re-extraction; filtering row versions cannot repair an incompatible table schema
 
 The former Python builders (`llm/builder/pcx_*.py`, cumulus-library `BaseTableBuilder`s
 with build-time source discovery) and their `tests/render_snapshots.py` are retired under
-`_to_delete/llm/builder/`; the templates are the only generator of `llm/athena/`.
+`_to_delete/llm/builder/`; the templates are the only generator of `sql/generated/pcx__llm_*.sql`.
 
 ### Contract tests
 
 `tests/test_nlp_wide_model_shape.py` checks that the `.workflow` files, the JSON schemas, the
-Pydantic models, the templates and the saved `llm/athena/*.sql` agree: every task owns a
+Pydantic models, the templates and the saved `sql/generated/pcx__llm_*.sql` agree: every task owns a
 template and every template belongs to one workflow, every `nlp.result.<path>` a template
 projects exists in its model (and no template projects spans or `has_mention`), the
 rendered SQL pins the workflow version and unions deployments in sorted order.
-`tests/test_nlp_clinical_wide.py` exercises the stage's `prepare_resources()` into a temp
-directory. `llm/athena/*.sql` is build output, not source: it is not committed, and
+`tests/test_nlp_clinical_wide.py` exercises the stage's `make_resources()` into a temp
+directory. `sql/generated/pcx__llm_*.sql` is build output, not source: it is not committed, and
 `make-pcx` regenerates it before `cumulus-library build`.
 
 The compact medulloblastoma task is configured but cannot be serialized by the

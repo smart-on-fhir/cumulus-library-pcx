@@ -27,29 +27,25 @@ def load(sql_file: Path | str, **kwargs) -> str:
 
     `sql_file` may be a bare name, `<name>.sql`, or `<name>.sql.jinja`.
     """
-    return _render(filetool.path_template(), sql_file, **kwargs)
+    return _render(filetool.path_sql_template(), sql_file, **kwargs)
 
 def load_test(sql_file: Path | str, **kwargs) -> str:
-    """Render from tests/template/ -- keeps QA/test SQL out of the production template/ folder."""
-    return _render(filetool.path_tests_template(), sql_file, **kwargs)
-
-def load_llm(sql_file: Path | str, **kwargs) -> str:
-    """Render from llm/template/ with the shared Cumulus SQL macros."""
-    return _render(filetool.path_llm_template(), sql_file, **kwargs)
+    """Render from tests/sql/template/."""
+    return _render(filetool.path_tests_sql_template(), sql_file, **kwargs)
 
 #-----------------------------------------------------------------------------
 # Save
 #-----------------------------------------------------------------------------
 def save(sql_file: Path | str, **kwargs) -> Path:
-    """Render template/ -> athena/{PREFIX}__<name>.sql"""
-    return _save(filetool.path_template(), filetool.path_athena, sql_file, **kwargs)
+    """Render sql/template/ -> sql/generated/{PREFIX}__<name>.sql."""
+    return _save(filetool.path_sql_template(), filetool.path_sql_generated, sql_file, **kwargs)
 
 def save_list(sql_list: list[Path | str] | Path | str, **kwargs) -> list[Path]:
     """
-    Render many templates at once, template/ -> athena/{PREFIX}__<name>.sql
+    Render many templates at once, sql/template/ -> sql/generated/{PREFIX}__<name>.sql
 
-    files = copy_list(["study_population", "study_population_dx"])
-    files = copy_list("meta_date.sql")
+    files = save_list(["study_population", "study_population_dx"])
+    files = save_list("meta_date.sql")
 
     Names may be bare table names ("x"), "x.sql", or "x.sql.jinja".
     The same **kwargs are passed to every template.
@@ -62,8 +58,8 @@ def save_list(sql_list: list[Path | str] | Path | str, **kwargs) -> list[Path]:
     return out
 
 def save_test(sql_file: Path | str, **kwargs) -> Path:
-    """Render tests/template/ -> tests/athena/{PREFIX}__<name>.sql"""
-    return _save(filetool.path_tests_template(), filetool.path_tests_athena, sql_file, **kwargs)
+    """Render tests/sql/template/ -> tests/sql/custom/{PREFIX}__<name>.sql."""
+    return _save(filetool.path_tests_sql_template(), filetool.path_tests_sql_custom, sql_file, **kwargs)
 
 #-----------------------------------------------------------------------------
 # Helpers

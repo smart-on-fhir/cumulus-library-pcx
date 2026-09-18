@@ -2,17 +2,17 @@
 label = "SQL cube study population"
 type = "build:serial"
 files = [
-    "athena/pcx__cube_encounter_study_population_enc.sql",
-    "athena/pcx__cube_patient_study_population.sql",
-    "athena/pcx__cube_patient_study_population_dx.sql",
-    "athena/pcx__cube_patient_study_population_allergy.sql",
-    "athena/pcx__cube_patient_study_population_rx.sql",
-    "athena/pcx__cube_patient_study_population_proc.sql",
-    "athena/pcx__cube_patient_study_population_lab.sql",
-    "athena/pcx__cube_patient_study_population_doc.sql",
-    "athena/pcx__cube_documentreference_study_population_doc.sql",
-    "athena/pcx__cube_patient_study_population_diag.sql",
-    "athena/pcx__cube_diagnosticreport_study_population_diag.sql",
+    "sql/generated/pcx__cube_encounter_study_population_enc.sql",
+    "sql/generated/pcx__cube_patient_study_population.sql",
+    "sql/generated/pcx__cube_patient_study_population_dx.sql",
+    "sql/generated/pcx__cube_patient_study_population_allergy.sql",
+    "sql/generated/pcx__cube_patient_study_population_rx.sql",
+    "sql/generated/pcx__cube_patient_study_population_proc.sql",
+    "sql/generated/pcx__cube_patient_study_population_lab.sql",
+    "sql/generated/pcx__cube_patient_study_population_doc.sql",
+    "sql/generated/pcx__cube_documentreference_study_population_doc.sql",
+    "sql/generated/pcx__cube_patient_study_population_diag.sql",
+    "sql/generated/pcx__cube_diagnosticreport_study_population_diag.sql",
 ]
 
 [[actions]]
@@ -36,7 +36,7 @@ tables = [
 label = "SQL cube variable union"
 type = "build:serial"
 files = [
-    "athena/pcx__cube_patient_variable_union.sql",
+    "sql/generated/pcx__cube_patient_variable_union.sql",
 ]
 
 [[actions]]
@@ -50,11 +50,11 @@ tables = [
 label = "SQL cube casedef"
 type = "build:serial"
 files = [
-    "athena/pcx__cube_patient_casedef.sql",
-    "athena/pcx__cube_patient_casedef_dx.sql",
-    "athena/pcx__cube_patient_casedef_rx.sql",
-    "athena/pcx__cube_patient_casedef_lab.sql",
-    "athena/pcx__cube_patient_casedef_proc.sql",
+    "sql/generated/pcx__cube_patient_casedef.sql",
+    "sql/generated/pcx__cube_patient_casedef_dx.sql",
+    "sql/generated/pcx__cube_patient_casedef_rx.sql",
+    "sql/generated/pcx__cube_patient_casedef_lab.sql",
+    "sql/generated/pcx__cube_patient_casedef_proc.sql",
 ]
 
 [[actions]]

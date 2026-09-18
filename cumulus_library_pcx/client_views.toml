@@ -9,50 +9,50 @@ files = [
 label = "client subject"
 type = "build:serial"
 files = [
-    "custom/pcx__client_subject.sql",
+    "sql/custom/pcx__client_subject.sql",
 ]
 
 [[actions]]
 label = "client diagnosis"
 type = "build:serial"
 files = [
-    "custom/pcx__client_diagnosis.sql",
+    "sql/custom/pcx__client_diagnosis.sql",
 ]
 
 [[actions]]
 label = "client encounter"
 type = "build:serial"
 files = [
-    "custom/pcx__client_encounter.sql",
+    "sql/custom/pcx__client_encounter.sql",
 ]
 
 [[actions]]
 label = "client exposure"
 type = "build:serial"
 files = [
-    "custom/pcx__client_exposure.sql",
+    "sql/custom/pcx__client_exposure.sql",
 ]
 
 [[actions]]
 label = "client timeline"
 type = "build:serial"
 files = [
-    "custom/pcx__client_timeline.sql",
-    "custom/pcx__client_timeline_latest.sql",
+    "sql/custom/pcx__client_timeline.sql",
+    "sql/custom/pcx__client_timeline_latest.sql",
 ]
 
 [[actions]]
 label = "client outcome"
 type = "build:serial"
 files = [
-    "custom/pcx__client_outcome.sql",
+    "sql/custom/pcx__client_outcome.sql",
 ]
 
 [[actions]]
 label = "client dictionary coverage"
 type = "build:serial"
 files = [
-    "custom/pcx__client_dictionary_coverage.sql",
+    "sql/custom/pcx__client_dictionary_coverage.sql",
 ]
 
 [[actions]]

@@ -6,7 +6,7 @@ from cumulus_library_pcx.tools.actions import Action, SqlAction
 # FHIR resource tables that extend the cumulus CORE layer.
 #
 # One table per resource, named prefix__<resource>, rendered from
-# template/<resource>.sql into athena/. Built as the first stage so every
+# template/<resource>.sql into custom/. Built as the first stage so every
 # later stage (study_population onward) can join them.
 #
 #   medicationrequest  -> core__medicationrequest columns plus course of therapy,

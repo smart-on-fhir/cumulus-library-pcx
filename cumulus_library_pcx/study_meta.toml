@@ -1,0 +1,15 @@
+[[actions]]
+label = "SQL study metadata"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__meta_date.sql",
+    "sql/generated/pcx__meta_version.sql",
+]
+
+[[actions]]
+label = "export study metadata"
+type = "export:meta"
+tables = [
+    "pcx__meta_date",
+    "pcx__meta_version",
+]

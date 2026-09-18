@@ -10,6 +10,7 @@ import pytest
 from cumulus_library_pcx.llm.create_schemas import annotation_model, list_tasks
 from cumulus_library_pcx.stage import nlp_clinical_wide, nlp_document_wide
 from cumulus_library_pcx.tools import filetool, nlp_wide
+from cumulus_library_pcx.tools.tablespace import PREFIX
 
 STAGES = [nlp_clinical_wide, nlp_document_wide]
 DOCUMENT_TASKS = {"document_type", "document_topic"}
@@ -60,10 +61,10 @@ def model_fields(schema: dict) -> dict:
 
 
 def templates_of(stage) -> dict[str, str]:
-    """rendered llm/athena filename -> task, for one stage"""
+    """rendered sql/generated filename -> task, for one stage"""
     out = dict()
     for template_path, task in nlp_wide.dict_template_task(nlp_wide.dict_task_versions(stage.WORKFLOW)).items():
-        out[template_path.name.removesuffix(".jinja")] = task
+        out[f'{PREFIX}__{template_path.name.removesuffix(".jinja")}'] = task
     return out
 
 
@@ -101,8 +102,8 @@ def test_every_template_belongs_to_exactly_one_workflow():
     claimed = list()
     for stage in STAGES:
         claimed.extend(templates_of(stage))
-    on_disk = sorted(p.name.removesuffix(".jinja")
-                     for p in filetool.path_llm_template().glob(nlp_wide.TEMPLATE_GLOB))
+    on_disk = sorted(f'{PREFIX}__{p.name.removesuffix(".jinja")}'
+                     for p in filetool.path_sql_template().glob(nlp_wide.TEMPLATE_GLOB))
     assert sorted(claimed) == on_disk
 
 

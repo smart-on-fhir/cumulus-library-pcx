@@ -121,12 +121,12 @@ no dated chemotherapy or no t0.
 
 | table                                                                                 | purpose                                                                                                   |
 |---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [pcx__eligible_dx.sql](cumulus_library_pcx/custom/pcx__eligible_dx.sql)               | case-definition subjects, t0, age at t0, MB and ATRT evidence, LLM diagnosis summary (M-stage, anaplastic) |
-| [pcx__eligible_surgery.sql](cumulus_library_pcx/custom/pcx__eligible_surgery.sql)     | definitive surgery day and source, age at definitive surgery, under 36 months, residual disease inputs     |
-| [pcx__eligible_rx.sql](cumulus_library_pcx/custom/pcx__eligible_rx.sql)               | first methotrexate and chemotherapy days by source, `chemo_prior_to_t0_bool`                               |
-| [pcx__eligible_radiation.sql](cumulus_library_pcx/custom/pcx__eligible_radiation.sql) | first radiation day by source, `radiation_prior_to_t0_bool`, craniospinal and proton flags                 |
-| [pcx__eligible.sql](cumulus_library_pcx/custom/pcx__eligible.sql)                     | every criterion as a nullable column (discovery cohort)                                                    |
-| [pcx__eligible_trial.sql](cumulus_library_pcx/custom/pcx__eligible_trial.sql)         | strict intersection (trial-like cohort)                                                                    |
+| [pcx__eligible_dx.sql](cumulus_library_pcx/sql/custom/pcx__eligible_dx.sql)               | case-definition subjects, t0, age at t0, MB and ATRT evidence, LLM diagnosis summary (M-stage, anaplastic) |
+| [pcx__eligible_surgery.sql](cumulus_library_pcx/sql/custom/pcx__eligible_surgery.sql)     | definitive surgery day and source, age at definitive surgery, under 36 months, residual disease inputs     |
+| [pcx__eligible_rx.sql](cumulus_library_pcx/sql/custom/pcx__eligible_rx.sql)               | first methotrexate and chemotherapy days by source, `chemo_prior_to_t0_bool`                               |
+| [pcx__eligible_radiation.sql](cumulus_library_pcx/sql/custom/pcx__eligible_radiation.sql) | first radiation day by source, `radiation_prior_to_t0_bool`, craniospinal and proton flags                 |
+| [pcx__eligible.sql](cumulus_library_pcx/sql/custom/pcx__eligible.sql)                     | every criterion as a nullable column (discovery cohort)                                                    |
+| [pcx__eligible_trial.sql](cumulus_library_pcx/sql/custom/pcx__eligible_trial.sql)         | strict intersection (trial-like cohort)                                                                    |
 
 The eligible SQL reads four LLM wide tables built by the `nlp_clinical_wide` stage: `pcx__llm_diagnosis_wide`,
 `pcx__llm_surgery_wide`, `pcx__llm_systemic_therapy_agent`, `pcx__llm_radiation_wide` (empty when no NLP output exists,

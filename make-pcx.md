@@ -176,7 +176,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 | `cumulus_library_pcx/custom/*.sql`                                                             | eligible, outcome, client_views (hand-written SQL, referenced as `custom/`) |
 | `spreadsheet/file_upload_population.toml`, `file_upload_casedef.toml`, `file_upload_client_views.toml` | hand-written upload workflows: they declare per-column `col_types`, which the generator does not |
 | `cumulus_library_pcx/elastic_query.toml`, `nlp_*.workflow`                                     | hand-written stages, listed only          |
-| `cumulus_library_pcx/llm/template/pcx__llm_*.sql.jinja`, `nlp_*_tasks.workflow` (task versions) | nlp_document_wide, nlp_clinical_wide |
+| `cumulus_library_pcx/sql/template/llm_*.sql.jinja`, `nlp_*_tasks.workflow` (task versions) | nlp_document_wide, nlp_clinical_wide |
 | `cumulus_library_pcx/manifest.toml` → `study_prefix`                                           | read at import for the `pcx__` prefix     |
 
 ## Output
@@ -185,7 +185,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 |--------------------------------------------------------------|-------------------------------------------|
 | `cumulus_library_pcx/athena/*.sql`                           | each made stage, from templates and CSVs  |
 | `tests/athena/*.sql`                                         | qa_athena                                 |
-| `cumulus_library_pcx/llm/athena/pcx__llm_*.sql`              | nlp_document_wide, nlp_clinical_wide |
+| `cumulus_library_pcx/sql/generated/pcx__llm_*.sql`              | nlp_document_wide, nlp_clinical_wide |
 | `cumulus_library_pcx/<stage>.toml`                           | each made stage                           |
 | `spreadsheet/file_upload_study_variable.toml`                | study_variable (`UploadWorkflow`, all columns strings) |
 | `$ELASTIC_OUTPUT_DIR/<date>/file_upload_elastic.toml`        | elastic_upload, when results exist        |
@@ -202,7 +202,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 - [tools/filetool.py](cumulus_library_pcx/tools/filetool.py): project paths, spreadsheet listing, `csv_columns`
 - [tests/synthetic.py](tests/synthetic.py): the `test-synthetic` generator (`make_tests_synthetic`, `main`), loaded by `cli.load_tests_synthetic`
 - [tools/template.py](cumulus_library_pcx/tools/template.py): Jinja rendering into `athena/` and `tests/athena/`
-- [tools/nlp_wide.py](cumulus_library_pcx/tools/nlp_wide.py): renders `llm/template/` against a `.workflow`'s tasks and deployments, shared by the two NLP wide stages
+- [tools/nlp_wide.py](cumulus_library_pcx/tools/nlp_wide.py): renders `sql/template/` against a `.workflow`'s tasks and deployments, shared by the two NLP wide stages
 - [stage/*.py](cumulus_library_pcx/stage): one module per made stage, each with `make_actions()` and `make()`
 
 ## Known issues

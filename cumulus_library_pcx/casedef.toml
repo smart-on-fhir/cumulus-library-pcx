@@ -9,31 +9,31 @@ files = [
 label = "filter include/exclude"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_casedef_candidate.sql",
-    "athena/pcx__cohort_casedef_exclude.sql",
-    "athena/pcx__cohort_casedef_include.sql",
+    "sql/generated/pcx__cohort_casedef_candidate.sql",
+    "sql/generated/pcx__cohort_casedef_exclude.sql",
+    "sql/generated/pcx__cohort_casedef_include.sql",
 ]
 
 [[actions]]
 label = "cohort from case definition (valueset_casedef)"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_casedef.sql",
+    "sql/generated/pcx__cohort_casedef.sql",
 ]
 
 [[actions]]
 label = "cohort for case definition aspects (dx, rx, lab, proc)"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_casedef_dx.sql",
-    "athena/pcx__cohort_casedef_lab.sql",
-    "athena/pcx__cohort_casedef_proc.sql",
-    "athena/pcx__cohort_casedef_rx.sql",
+    "sql/generated/pcx__cohort_casedef_dx.sql",
+    "sql/generated/pcx__cohort_casedef_lab.sql",
+    "sql/generated/pcx__cohort_casedef_proc.sql",
+    "sql/generated/pcx__cohort_casedef_rx.sql",
 ]
 
 [[actions]]
 label = "timeline for casedef with variables"
 type = "build:serial"
 files = [
-    "athena/pcx__cohort_timeline.sql",
+    "sql/generated/pcx__cohort_timeline.sql",
 ]
