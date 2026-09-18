@@ -79,13 +79,12 @@ CREATE TABLE pcx__cohort_proc_craniotomy (
     subject_ref VARCHAR,
     proc_performed_day DATE,
     procedure_ref VARCHAR,
-    tier INTEGER
+    tier VARCHAR  -- study-variable uploads are untyped, so STRING like Athena
 );
 
 CREATE TABLE pcx__llm_surgery_wide (
     subject_ref VARCHAR,
     note_ref VARCHAR,
-    surgery_role VARCHAR,
     age_at_surgery_months DOUBLE,
     residual_tumor_area_cm2 DOUBLE,
     surgery_type VARCHAR,
@@ -112,13 +111,13 @@ CREATE TABLE pcx__llm_systemic_therapy_agent (
 CREATE TABLE pcx__cohort_proc_radiation (
     subject_ref VARCHAR,
     proc_performed_day DATE,
-    tier INTEGER
+    tier VARCHAR  -- study-variable uploads are untyped, so STRING like Athena
 );
 
 CREATE TABLE pcx__cohort_dx_radiation (
     subject_ref VARCHAR,
     dx_recorded_date DATE,
-    tier INTEGER,
+    tier VARCHAR,  -- study-variable uploads are untyped, so STRING like Athena
     condition_ref VARCHAR
 );
 
