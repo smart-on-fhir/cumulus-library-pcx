@@ -37,6 +37,3 @@ def make_actions() -> list[Action]:
 def make() -> Path:
     return save_actions_toml(make_actions(), 'outcome.toml')
 
-if __name__ == '__main__':
-    print(make)
-
