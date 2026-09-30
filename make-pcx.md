@@ -194,7 +194,7 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
 
 ## Code
 
-- [tools/cli.py](cumulus_library_pcx/tools/cli.py): argument parser and the installed `make-pcx` command
+- [tools/cli.py](cumulus_library_pcx/cli.py): argument parser and the installed `make-pcx` command
 - [tools/study_builder.py](cumulus_library_pcx/tools/study_builder.py): stage selection, `make_stages`, `make_manifest`, `make_study`, and the `cumulus-library build` wrapper
 - [stage/manifest.py](cumulus_library_pcx/stage/manifest.py): `STAGES`, the build order
 - [tools/actions.py](cumulus_library_pcx/tools/actions.py): `Stage`, the `Action` dataclasses, `UploadWorkflow`
