@@ -5,8 +5,13 @@
 --    pcx__cohort_proc_radiation tier 1 = delivery or management procedure
 --    pcx__cohort_dx_radiation   tier 1 = radiotherapy encounter code
 --  LLM evidence is pcx__llm_radiation_wide with delivery_status = ADMINISTERED.
---  Same candidate-union shape as eligible_rx.
---  "prior to t0" supports the ACNS0334 no-prior-radiation criterion.
+--  Same candidate-union shape and the same yes/no flags as eligible_rx:
+--    radiation_any_bool          ever radiated, FALSE = no evidence
+--    radiation_prior_to_t0_bool  first dated radiation before t0_day. FALSE when
+--                                t0 is known and nothing is dated before it,
+--                                NULL only when t0_day is NULL
+--  pcx__eligible_trial applies radiation_prior_to_t0_bool as the ACNS0334
+--  no-prior-radiation criterion.
 --  =====================================================================
 CREATE  TABLE   pcx__eligible_radiation AS
 WITH
@@ -35,7 +40,6 @@ first_day AS (
             MIN(CASE WHEN source = 'proc_radiation'   THEN exposure_day END)    AS radiation_proc_first_day,
             MIN(CASE WHEN source = 'dx_radiation'     THEN exposure_day END)    AS radiation_dx_first_day,
             MIN(CASE WHEN source = 'llm_administered' THEN exposure_day END)    AS radiation_administered_first_day,
-            (COUNT(*) > 0)                                                      AS radiation_any_bool,
             BOOL_OR(source = 'llm_administered')                                AS radiation_administered_bool
     FROM    candidate
     GROUP BY subject_ref
@@ -54,12 +58,16 @@ SELECT  dx.subject_ref,
         first_day.radiation_proc_first_day,
         first_day.radiation_dx_first_day,
         first_day.radiation_administered_first_day,
-        first_day.radiation_any_bool,
+        (first_day.subject_ref IS NOT NULL)                                 AS radiation_any_bool,
         first_day.radiation_administered_bool,
         llm_field.llm_craniospinal_bool,
         llm_field.llm_proton_bool,
         llm_field.llm_explicitly_not_received_bool,
-        (first_day.radiation_first_day < dx.t0_day)                         AS radiation_prior_to_t0_bool
+        CASE
+            WHEN dx.t0_day IS NULL                                          THEN NULL
+            WHEN first_day.radiation_first_day < dx.t0_day                  THEN TRUE
+            ELSE                                                                 FALSE
+        END                                                                 AS radiation_prior_to_t0_bool
 FROM    pcx__eligible_dx   AS dx
 LEFT JOIN first_day                 ON first_day.subject_ref = dx.subject_ref
 LEFT JOIN llm_field                 ON llm_field.subject_ref = dx.subject_ref

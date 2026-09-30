@@ -1,9 +1,9 @@
 -- ============================================================================
 -- Warning: treatment evidence dated before time zero.
 --
--- pcx__eligible turns chemo_prior_to_t0_bool / radiation_prior_to_t0_bool
--- into no_prior_chemotherapy_bool = FALSE / no_prior_radiation_bool = FALSE,
--- which removes the subject from pcx__eligible_trial. That is correct for a
+-- pcx__eligible keeps the subject and flags it (chemo_prior_to_t0_bool,
+-- methotrexate_prior_to_t0_bool, radiation_prior_to_t0_bool = TRUE), and
+-- each flag removes it from pcx__eligible_trial. That is correct for a
 -- child treated elsewhere before referral, and wrong when t0_day simply lags
 -- the real diagnosis (see pcx__warn_eligible_t0_after_condition_date). Small
 -- gaps (a chemo order authored a few days before the coded diagnosis

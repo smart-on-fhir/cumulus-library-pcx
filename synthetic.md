@@ -32,10 +32,14 @@ Casedef codes are read from spreadsheet/casedef.csv at run time. Refuses to writ
 - MTX confounded by metastatic, anaplastic, era >= 2016, age < 8 months: naive contrast understates the benefit.
 
 ## Findings worth knowing
-- The utilization screen (2+ encounters, 365+ days) removes ~18% of simulated patients, mostly early deaths:
-  derived KM 5y EFS for trial-like MB is ~78% vs 62% with the screen, ~73% vs 51% with `--no-utilization-screen`
+Numbers from the 2026-09-30 regeneration (seed 334), after study_population widened to visits at ages 0-120 (follow-up
+is no longer cut at the 9th birthday) and the prior-therapy criteria became flags that no longer need treatment evidence.
+- The utilization screen (2+ encounters, 365+ days) removes ~17% of simulated patients, mostly early deaths:
+  derived KM 5y EFS for trial-like MB is ~79% vs 60% with the screen, ~74% vs 55% with `--no-utilization-screen`
   (paper 68% vs 46%). Quantifies limitations.md / workplan 2.7.
-- ETMR / pineoblastoma / cns_embryonal subjects get NULL t0 and NULL os_days today (workplan 2.5), ~30% of rows.
-- pcx__eligible_trial is ~30% of pcx__eligible at noise 1, ~46% at noise 0. Main losses: NULL no_prior_radiation
-  (no RT evidence and no EXPLICITLY_NOT_RECEIVED note), MONTH-precision LLM chemo dates landing before t0, transfers.
+- ETMR / pineoblastoma / cns_embryonal subjects get NULL t0 and NULL os_days today (workplan 2.5), ~40% of rows.
+- pcx__eligible_trial is ~36% of pcx__eligible at noise 1, ~45% at noise 0. Main losses: no t0 (and so NULL prior
+  flags), no definitive surgery under 36 months, ATRT, and chemo_prior_to_t0_bool from MONTH-precision LLM chemo dates
+  landing before t0 and from transfers. Prior methotrexate never excludes on its own here, because the simulated
+  methotrexate always comes with backbone chemotherapy.
 - All pcx__warn_* tables fire at plausible rates; both pcx__qa_* tables stay at 0.

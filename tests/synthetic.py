@@ -45,8 +45,9 @@ Real-world features kept on purpose
     - ATRT (exclusion), ETMR, pineoblastoma and other embryonal tumors (no tier 1 t0 today)
     - transfers who had surgery and chemotherapy elsewhere before their first encounter here
     - the study_population utilization screen (2+ encounters spanning 365+ days, visits at
-      ages 0 to 8), which silently removes early deaths, see limitations.md
-    - follow-up that ends at loss to follow-up, the 9th birthday, or the data extract day
+      ages 0 to 120), which silently removes early deaths, see limitations.md
+    - follow-up that ends at loss to follow-up, the data extract day, or the visit-age limit
+      (never reached now that include_age_at_visit.csv is 0-120)
 
 Options
     --patients N    rows in pcx__eligible. Patients screened out upstream (failed utilization,
@@ -96,7 +97,7 @@ EXTRACT_DAY = date(2026, 6, 30)             # last day any EHR evidence can carr
 STUDY_PERIOD_START = date(2008, 1, 1)       # spreadsheet/include_study_period.csv
 UTILIZATION_ENC_MIN = 2                     # spreadsheet/include_utilization.csv
 UTILIZATION_DAYS_MIN = 365
-VISIT_AGE_YEARS_MAX = 9                     # study_population keeps visits at ages 0-8
+VISIT_AGE_YEARS_MAX = 121                   # study_population keeps visits at ages 0-120 (include_age_at_visit.csv)
 AGE_MONTHS_MAX = 48                         # "3 years old or younger" at presentation
 DAYS_PER_MONTH = 30.4375
 
@@ -586,8 +587,8 @@ def truth_outcome(rng, pat: Patient) -> None:
 
     #  where this EHR stops seeing the patient
     lost_day = (pat.therapy_end_day or pat.surgery_day) + days(rng.exponential(365.25 / LOSS_TO_FOLLOWUP_PER_YEAR))
-    ninth_birthday_eve = add_years(pat.birthdate, VISIT_AGE_YEARS_MAX) - days(1)
-    pat.observed_end_day = min(EXTRACT_DAY, lost_day, ninth_birthday_eve)
+    visit_age_limit_eve = add_years(pat.birthdate, VISIT_AGE_YEARS_MAX) - days(1)
+    pat.observed_end_day = min(EXTRACT_DAY, lost_day, visit_age_limit_eve)
     if pat.observed(pat.death_day):
         pat.observed_end_day = pat.death_day
 
@@ -609,7 +610,7 @@ def cut_therapy_at(pat: Patient, first_event_day: date) -> None:
 
 def truth_encounters(rng, pat: Patient) -> None:
     """
-    Encounters here, already limited to what study_population keeps (visits at ages 0 to 8).
+    Encounters here, already limited to what study_population keeps (visits at ages 0 to 120).
     """
     if not pat.transfer and len(pat.cycles) >= 3 and rng.random() < P_SECOND_LOOK_SURGERY:
         second_look_day = pat.cycles[2][0] + uniform_days(rng, 18, 30)
@@ -661,12 +662,12 @@ def truth_encounters(rng, pat: Patient) -> None:
     if pat.death_day and rng.random() < 0.6:
         visits.append((pat.death_day - uniform_days(rng, 0, 10), pat.death_day))
 
-    ninth_birthday = add_years(pat.birthdate, VISIT_AGE_YEARS_MAX)
+    visit_age_limit_day = add_years(pat.birthdate, VISIT_AGE_YEARS_MAX)
     kept = dict()
     for start, end in sorted(visits):
         if start < pat.arrival_day and pat.transfer:
             continue
-        if start > pat.observed_end_day or start >= ninth_birthday:
+        if start > pat.observed_end_day or start >= visit_age_limit_day:
             continue
         if start not in kept:
             kept[start] = min(end, pat.observed_end_day)
@@ -1218,7 +1219,7 @@ def simulate_cohort(patients: int, seed: int, noise_scale: float, utilization_sc
 # DuckDB build with the study's real SQL
 ###############################################################################
 def list_stage_sql() -> list[Path]:
-    return synthetic_io.list_stage_sql(filetool.path_project(), STAGES, sql_prefix='custom/')
+    return synthetic_io.list_stage_sql(filetool.path_project(), STAGES, sql_prefix='sql/custom/')
 
 
 def build_database(tables: Tables, input_dir: Path) -> duckdb.DuckDBPyConnection:

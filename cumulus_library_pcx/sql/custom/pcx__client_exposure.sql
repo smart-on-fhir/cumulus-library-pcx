@@ -17,7 +17,7 @@ exposure AS (
             rx.methotrexate_administered_first_day  AS administered_first_day,
             rx.methotrexate_any_bool                AS any_bool,
             rx.methotrexate_administered_bool       AS administered_bool,
-            (rx.methotrexate_first_day < rx.t0_day) AS prior_to_t0_bool,
+            rx.methotrexate_prior_to_t0_bool        AS prior_to_t0_bool,
             outcome.methotrexate_prior_to_first_event_bool AS prior_to_first_event_bool
     FROM    pcx__eligible_rx            AS rx
     LEFT JOIN pcx__outcome_exposure     AS outcome ON outcome.subject_ref = rx.subject_ref

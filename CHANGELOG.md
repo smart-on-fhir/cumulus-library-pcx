@@ -2,6 +2,32 @@
 
 Short, human-readable notes on what changed and why. Newest first.
 
+## 2026-09-30 (relaxed eligibility: flags, not exclusions)
+
+- PCX is broader than the ACNS0334 trial. Three criteria are now yes/no flags on
+  `pcx__eligible` instead of exclusions: age under 36 months, prior methotrexate
+  and prior radiation. Prior chemotherapy is a flag too.
+- `pcx__eligible` gains `age_under_36_months_at_t0` (diagnosis) next to
+  `age_under_36_months_at_definitive_surgery` (ACNS0334), plus
+  `methotrexate_prior_to_t0_bool`, `chemo_prior_to_t0_bool` and
+  `radiation_prior_to_t0_bool`. `no_prior_chemotherapy_bool` and
+  `no_prior_radiation_bool` are removed.
+- Prior flags are FALSE when t0 is known and nothing is dated before it, NULL
+  only without a t0. The "ever" flags (`*_any_bool`) are FALSE when there is no
+  evidence, never NULL. Closes workplan 2.1 and 2.2.
+- `pcx__eligible_trial` stays strict, and prior methotrexate now excludes too
+  (ACNS0334 excludes any prior chemotherapy). Subjects with a t0 and no
+  treatment evidence are now in it, and subjects without a t0 are not.
+- `study_population` keeps visits at ages 0-120 (was 0-8). `age_group.csv`
+  covers every age: Adolescent, Young adult, Adult and Older adult bands were
+  added.
+- Downstream: `pcx__client_subject` carries the new flags,
+  `pcx__client_exposure` reads `methotrexate_prior_to_t0_bool`, two warn tables
+  are reworded, and the data and client dictionaries are updated.
+- `tests/synthetic.py` follows the 0-120 visit window and reads the stage tomls'
+  `sql/custom/` paths again (it had found no SQL to run).
+  `tests/data/synthetic` has been regenerated.
+
 ## 2026-09-30 (merge of main)
 
 - The two 50k NLP stages are replaced by Dylan's single `nlp_all_50k.workflow`
