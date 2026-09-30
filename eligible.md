@@ -77,9 +77,15 @@ dated candidate with its source and takes the earliest day per exposure:
 
 | file                                                                       | criteria                                                                                              |
 |----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`); not counted as chemotherapy                  |
-| [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** |
+| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`) and **dispenses** (MedicationDispense `whenHandedOver`); not counted as chemotherapy |
+| [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** and **dispenses** |
 | [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate by agent name; **every** administered agent counts as chemotherapy, methotrexate included (asymmetry, workplan 3.4) |
+
+Orders and dispenses both come from cumulus-library core (`core__medicationrequest`, `core__medicationdispense`) and
+match the same valueset codes. Orders are linked to study_population encounters, dispenses are matched for every case
+subject, and cancelled or declined dispenses are dropped. A dispense is the pharmacy handing the drug over, not
+administration, so the `*_administered_*` columns stay LLM-only and a dispensed-only exposure still shows in
+`pcx__warn_outcome_exposure_order_only`.
 
 Views by strictness, as implemented:
 

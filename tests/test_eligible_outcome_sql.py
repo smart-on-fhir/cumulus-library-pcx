@@ -36,6 +36,19 @@ def test_prior_therapy_rules(con):
     assert rows['Patient/p5'][2:] == (None, None)        # no birthdate and no therapy evidence at all
 
 
+def test_dispense_is_structured_evidence_not_receipt(con):
+    rows = {r[0]: r[1:] for r in con.execute(
+        "SELECT subject_ref, chemo_first_day, chemo_order_first_day, chemo_dispense_first_day, "
+        "methotrexate_dispense_first_day, methotrexate_administered_bool, chemo_any_bool FROM pcx__eligible_rx").fetchall()}
+    # p2: cisplatin handed over before its first order is the earliest chemo day
+    assert rows['Patient/p2'][:3] == (date(2014, 10, 28), date(2014, 11, 1), date(2014, 10, 28))
+    # p6: a methotrexate dispense is neither receipt nor chemotherapy
+    assert rows['Patient/p6'][3:] == (date(2020, 6, 3), False, False)
+    # p5: cancelled and never-handed-over dispenses are ignored, p1: a code outside the rx valuesets is ignored
+    assert rows['Patient/p5'][2] is None
+    assert rows['Patient/p1'][2] is None
+
+
 def test_trial_cohort_is_the_strict_intersection(con):
     assert (con.execute("SELECT subject_ref FROM pcx__eligible_trial ORDER BY 1").fetchall()
             == [('Patient/p1',), ('Patient/p8',)])
