@@ -1,6 +1,6 @@
 # PCX clinical-note retrieval topics
 
-Repository definitions checked 2026-09-10. These queries select candidate notes for
+Repository definitions checked 2026-09-10; entry-point status updated 2026-09-11. These queries select candidate notes for
 chart review and extraction; the names `ppv` and `recall` describe intended operating
 points, not measured accuracy.
 
@@ -43,13 +43,12 @@ alone do not identify which query revision generated them.
 | `radiation` | Planned/delivered radiation, fields, doses, timing and explicit omission |
 | `response` | Response assessments, evaluable disease and treatment milestones |
 | `event` | Progression, recurrence, remission, secondary malignancy and death |
-| `patient` | Timeline anchors, vital status and follow-up |
+| `survival_timeline` | Timeline anchors, vital status and follow-up |
 | `laboratory` | Organ function, methotrexate levels/clearance and toxicity evidence |
-| `predisposition` | Germline testing and reported findings |
 | `registry_eligibility` | Evidence relevant to a separate ACNS0334-like eligibility assessment |
 | `medulloblastoma` | Compact discovery summary: treatment, molecular group and survival evidence |
 
-The 14 task names correspond to extraction modules. `base.py` and `treatment.py`
+The 13 task names correspond to extraction modules. `base.py` and `treatment.py`
 provide shared definitions; `document_topic.py` and `document_type.py` provide routing
 and classification rather than dedicated retrieval pairs. Retrieval labels do not
 populate annotation fields automatically. Old `pcx_*`, `pnoc30_*`, `enc_transfer`,
@@ -85,7 +84,7 @@ separate these from delivered treatment, confirmed diagnoses and patient-specifi
 facts. Topic hits do not establish high-dose methotrexate, protocol enrollment,
 causality, toxicity, or event-free survival. Remission is not automatically an adverse
 EFS event. Lab retrieval also includes text/coded evidence absent from numeric wide
-fields; see [folate review](folate_review.md).
+fields; see [laboratory data](laboratory.md).
 
 ## Response query revision
 
@@ -116,24 +115,23 @@ review these for each participating site. Confirm tokenization of hyphens and wi
 case handling. The response queries use phrase proximity; query length and visible
 clause counts alone do not establish server acceptance.
 
-The current entry points are:
+The entry points are:
 
-- `python -m cumulus_library_pcx.stage.elastic_query`: calls the rapid-elastic batch
-  pipeline with the selected topic file and configured output directory.
-- `python -m cumulus_library_pcx.stage.elastic_output`: generates upload/union artifacts
-  from CSV results in the configured dated output directory when results exist.
+- `python -m cumulus_library_pcx.tools.elastic_query [topics.tsv]`: calls the rapid-elastic batch
+  pipeline with the topic file (default `spreadsheet/query_topics.tsv`; `query_topics_ppv.tsv` and
+  `query_topics_recall.tsv` are the precision- and recall-leaning variants) and writes results under
+  `$ELASTIC_OUTPUT_DIR` (else `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`). It fails at once when
+  neither variable is set.
+- `make-pcx elastic_upload`: when result CSVs exist in that directory, writes
+  `file_upload_elastic.toml` beside them and schedules the upload plus the `pcx__elastic_union`
+  view; with no results the stage writes an empty `elastic_upload.toml` and prints a skip message.
+  `elastic_query` is `skip_by_default` in `manifest.toml`.
 
-These commands perform work; they were not run for this documentation update.
-`elastic_query` is commented out in the main manifest. `elastic_output` is registered
-with `skip_by_default=true`, and its current submanifest references an external dated
-upload manifest. The default structured build does not execute retrieval or import
-those results. External results and upload availability were not inspected here.
-Use a fresh output directory for revised queries because cached topic results can be
-reused; exclude obsolete result files before generating an upload manifest.
+Use a fresh output directory for revised queries because cached topic results can be reused;
+exclude obsolete result files before generating an upload manifest.
 
-The repository also provides `tools/elastic_query_print_tree.py` and
-`tools/elastic_results_print_topic_overalaps.py` for inspection. Local checks of TSV
-headers, unique names, quotes, parentheses and pair inclusion are structural checks,
-not validation of Elasticsearch execution or LLM extraction. The existing custom
-Elastic case/task SQL is separate from the generated union; inspect its topic filters
-before using it with the current labels.
+The repository also provides `tools/elastic_query_print_tree.py` for inspection (the topic-overlap
+printer mentioned in earlier notes does not exist). Local checks of TSV headers, unique names, quotes,
+parentheses and pair inclusion are structural checks, not validation of Elasticsearch execution or
+LLM extraction. `custom/pcx__elastic_casedef.sql` (join on note_ref, no topic filter) and
+`custom/pcx__elastic_task.sql` (a single commented line) are referenced by no toml (workplan 5.1).

@@ -1,0 +1,14 @@
+subject_ref,enc_period_ordinal,enc_period_start_day,enc_period_end_day_filled
+Patient/p1,1,2020-01-10,2020-01-10
+Patient/p1,2,2022-06-01,2022-06-01
+Patient/p2,1,2015-01-01,2016-01-15
+Patient/p2,2,2016-03-01,2016-03-01
+Patient/p3,1,2021-02-01,2021-02-01
+Patient/p5,1,2019-11-01,2019-11-01
+Patient/p5,2,2021-01-01,2021-01-01
+Patient/p6,1,2019-11-01,2019-11-01
+Patient/p6,2,2021-01-01,2021-01-01
+Patient/p7,1,2018-12-01,2018-12-01
+Patient/p7,2,2020-02-01,2020-02-01
+Patient/p8,1,2018-11-01,2018-11-01
+Patient/p8,2,2020-01-01,2020-01-01

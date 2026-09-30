@@ -20,10 +20,7 @@ class RadiationMethod(StrEnum):
     STEREOTACTIC_RADIOSURGERY = "STEREOTACTIC_RADIOSURGERY"
     GAMMA_KNIFE = "GAMMA_KNIFE"
     BRACHYTHERAPY = "BRACHYTHERAPY"
-    OTHER = "OTHER"
-    NOT_REPORTED = "NOT_REPORTED"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
-
 
 class RadiationField(StrEnum):
     """Radiation field used by PCX chart review."""
@@ -31,7 +28,6 @@ class RadiationField(StrEnum):
     CRANIOSPINAL_WITH_FOCAL_BOOST = "CRANIOSPINAL_WITH_FOCAL_BOOST"
     FOCAL_TUMOR_BED = "FOCAL_TUMOR_BED"
     WHOLE_VENTRICULAR_WITH_FOCAL_BOOST = "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
@@ -47,8 +43,23 @@ class RadiationRoundMention(SpanAugmentedMention):
     course of radiation documented in this note. Leave dose fields null when not stated or
     not applicable (metastatic-site doses require metastasis; whole-ventricular is only for
     germ-cell tumors)."""
-    delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NOT_DOCUMENTED, description="ADMINISTERED requires delivered RT; PLANNED or HELD is not exposure. Explicit non-receipt must be stated, not inferred from silence.")
-    phase: TreatmentPhase = Field(default=TreatmentPhase.NOT_DOCUMENTED)
+    delivery_status: DeliveryStatus = Field(
+        default=DeliveryStatus.NONE_OF_THE_ABOVE,
+        description=(
+            "Whether this radiation course was actually delivered. Choose exactly one. "
+            "A course counts as delivered once any fraction is given; plans, recommendations and simulations are not exposure. "
+            "ADMINISTERED: at least one fraction was delivered, including a course stopped early. "
+            "PLANNED: recommended, consented, simulated or scheduled, with no fraction delivered yet. "
+            "HELD: a scheduled course paused or deferred before the first fraction, with intent to proceed. "
+            "CANCELLED: a planned course explicitly cancelled before any fraction was delivered. "
+            "EXPLICITLY_NOT_RECEIVED: the note states the patient did not receive radiation, "
+            "for example declined, omitted by protocol, or never given. "
+            "NONE_OF_THE_ABOVE: delivery cannot be determined from this note; not evidence of non-receipt."
+        ),
+    )
+    phase: TreatmentPhase = Field(
+        default=TreatmentPhase.NONE_OF_THE_ABOVE
+    )
     indication: str | None = Field(default=None, description="Initial treatment, post-chemotherapy residual/metastatic disease, salvage after relapse or other documented indication. Do not infer from dose.")
     assessed_through_date: str | None = Field(default=None, description="Date through which explicit non-receipt or delivery is assessed.")
     assessed_through_date_precision: DatePrecision | None = Field(default=None, description="Precision for assessed_through_date; null if absent.")
@@ -56,10 +67,17 @@ class RadiationRoundMention(SpanAugmentedMention):
     radiation_method: RadiationMethod = Field(
         default=RadiationMethod.NONE_OF_THE_ABOVE,
         description=(
-            "Delivery method/energy. PHOTON / PROTON / COMBINATION_PROTONS_AND_PHOTONS / "
-            "ELECTRONS by modality. THREE_D_CONFORMAL: 3D conformal. IMRT: intensity-modulated. "
-            "STEREOTACTIC_RADIOSURGERY: SRS. GAMMA_KNIFE. BRACHYTHERAPY. OTHER: another method. "
-            "NOT_REPORTED: radiation given but method not stated. NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt."
+            "Delivery method/energy. "
+            "PHOTON: photon modality. "
+            "PROTON: proton modality. "
+            "COMBINATION_PROTONS_AND_PHOTONS: combination of protons and photons. "
+            "ELECTRONS: electron modality. "
+            "THREE_D_CONFORMAL: 3D conformal. "
+            "IMRT: intensity-modulated. "
+            "STEREOTACTIC_RADIOSURGERY: SRS. "
+            "GAMMA_KNIFE: Gamma Knife. "
+            "BRACHYTHERAPY: brachytherapy. "                        
+            "NONE_OF_THE_ABOVE: method not established; not evidence of non-receipt; or none of the above."
         ),
     )
     radiation_field: RadiationField = Field(
@@ -68,7 +86,7 @@ class RadiationRoundMention(SpanAugmentedMention):
             "Treated field. CRANIOSPINAL: CSI without a documented boost. CRANIOSPINAL_WITH_FOCAL_BOOST: craniospinal irradiation plus a "
             "tumor-bed boost. FOCAL_TUMOR_BED: focal/involved-field only. "
             "WHOLE_VENTRICULAR_WITH_FOCAL_BOOST: whole-ventricular plus boost (germ-cell). "
-            "OTHER: another field. NONE_OF_THE_ABOVE: field not stated."
+            "NONE_OF_THE_ABOVE: a documented field not listed above, or the field is not stated."
         ),
     )
     radiation_start_date: str | None = Field(

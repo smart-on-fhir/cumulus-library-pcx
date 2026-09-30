@@ -4,13 +4,13 @@
       "enum": [
         "PRESENT",
         "ABSENT",
-        "INDETERMINATE",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "AlterationStatus",
       "type": "string"
     },
     "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
         "DAY",
         "MONTH",
@@ -19,7 +19,8 @@
       "title": "DatePrecision",
       "type": "string"
     },
-    "MbMolecularGroup": {
+    "MedulloblastomaMolecularGroup": {
+      "description": "Medulloblastoma molecular group as reported.\nWNT: WNT.\nSHH: SHH.\nGROUP_3: Group 3.\nGROUP_4: Group 4.\nNON_WNT_NON_SHH: non-WNT/non-SHH.\nNOT_SUBGROUPED: not subgrouped.\nINDETERMINATE: indeterminate.\nNONE_OF_THE_ABOVE: no group documented.",
       "enum": [
         "WNT",
         "SHH",
@@ -28,10 +29,9 @@
         "NON_WNT_NON_SHH",
         "NOT_SUBGROUPED",
         "INDETERMINATE",
-        "CONFLICTING",
         "NONE_OF_THE_ABOVE"
       ],
-      "title": "MbMolecularGroup",
+      "title": "MedulloblastomaMolecularGroup",
       "type": "string"
     },
     "MolecularAlterationMention": {
@@ -69,21 +69,8 @@
         },
         "status": {
           "$ref": "#/$defs/AlterationStatus",
-          "default": "NOT_DOCUMENTED",
-          "description": "ABSENT requires explicitly negative testing; silence is NOT_DOCUMENTED."
-        },
-        "origin": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Somatic, germline or unknown as documented; never infer germline from tumor-only testing.",
-          "title": "Origin"
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Status of this alteration. PRESENT: explicitly reported as present. ABSENT: requires explicitly negative testing. NONE_OF_THE_ABOVE: tested but indeterminate, or status not documented."
         },
         "report_date": {
           "anyOf": [
@@ -110,23 +97,10 @@
           "default": null,
           "description": "Precision for report_date; null if absent."
         },
-        "source_report": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Documented source report identifier or title linking this alteration to its classification.",
-          "title": "Source Report"
-        },
         "testing_method": {
           "$ref": "#/$defs/MolecularMethod",
-          "default": "NOT_DOCUMENTED",
-          "description": "Method supporting this alteration, if stated."
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Method supporting this alteration, if stated. NONE_OF_THE_ABOVE: another named method, or no method given."
         }
       },
       "required": [
@@ -145,8 +119,7 @@
         "FISH",
         "COPY_NUMBER_ANALYSIS",
         "CLINICAL_SUMMARY",
-        "OTHER",
-        "NOT_DOCUMENTED"
+        "NONE_OF_THE_ABOVE"
       ],
       "title": "MolecularMethod",
       "type": "string"
@@ -167,53 +140,12 @@
           "type": "array"
         },
         "molecular_group": {
-          "$ref": "#/$defs/MbMolecularGroup",
+          "$ref": "#/$defs/MedulloblastomaMolecularGroup",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Explicit medulloblastoma group. NON_WNT_NON_SHH does not distinguish Group 3 from 4. Preserve conflicting calls; never infer a group from a single alteration."
-        },
-        "integrated_diagnosis_verbatim": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Exact diagnosis/classification, including ETMR, pineoblastoma or revised non-embryonal diagnoses. ATRT can be an exclusion/reclassification finding.",
-          "title": "Integrated Diagnosis Verbatim"
-        },
-        "methylation_class": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Exact methylation class/subclass, including SHH-I/II or Group 3 subtype if reported.",
-          "title": "Methylation Class"
-        },
-        "calibrated_score": {
-          "anyOf": [
-            {
-              "maximum": 1,
-              "minimum": 0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Explicit classifier score on a 0\u20131 scale; do not invent a confidence threshold.",
-          "title": "Calibrated Score"
+          "description": "Explicit medulloblastoma molecular group as this report states it. Preserve conflicting calls across reports. Never infer a group from a single alteration, from histology, or from treatment. WNT: WNT-activated. SHH: SHH-activated, any TP53 status. GROUP_3: Group 3 by methylation or expression profiling. GROUP_4: Group 4 by methylation or expression profiling. NON_WNT_NON_SHH: non-WNT/non-SHH without a Group 3 versus Group 4 call, as from immunohistochemistry. NOT_SUBGROUPED: testing explicitly not performed or not available. INDETERMINATE: testing attempted but no classification reached, such as failed assay or insufficient tissue. NONE_OF_THE_ABOVE: no molecular group documented in this report."
         },
         "methods": {
-          "description": "Methods documented for this result. A note quoting a group without the original method is CLINICAL_SUMMARY.",
+          "description": "Methods this report documents for molecular classification. Select every method the report documents; several may apply to one report. NONE_OF_THE_ABOVE is only valid on its own, never alongside a named method. DNA_METHYLATION: methylation array or methylation-based classifier. SEQUENCING: DNA or RNA sequencing, including expression-based subgrouping such as NanoString. IMMUNOHISTOCHEMISTRY: surrogate markers such as beta-catenin, GAB1, YAP1 or filamin A. FISH: fluorescence in situ hybridization. COPY_NUMBER_ANALYSIS: array or sequencing-derived copy number. CLINICAL_SUMMARY: the note quotes a group without the original report or method. NONE_OF_THE_ABOVE: another named method, or a result is stated but no method is given.",
           "items": {
             "$ref": "#/$defs/MolecularMethod"
           },
@@ -244,58 +176,6 @@
           ],
           "default": null,
           "description": "Precision for report_date; null if absent."
-        },
-        "source_report": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Report identifier, laboratory or referenced report title as documented; do not invent identifiers.",
-          "title": "Source Report"
-        },
-        "specimen": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Tumor, blood or other specimen as documented.",
-          "title": "Specimen"
-        },
-        "review_context": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Local, central, retrospective or revised review, only if documented.",
-          "title": "Review Context"
-        },
-        "uncertainty": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Explicit uncertainty, insufficient tissue, failed testing or conflicting classifications. Null if not stated.",
-          "title": "Uncertainty"
         }
       },
       "required": [

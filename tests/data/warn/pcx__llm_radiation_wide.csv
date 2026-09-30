@@ -1,0 +1,4 @@
+subject_ref,note_ref,delivery_status,radiation_field,radiation_method,radiation_start_date,radiation_start_date_precision
+Patient/p1,note-p1-rt,ADMINISTERED,CRANIOSPINAL_WITH_FOCAL_BOOST,PROTON,2020-09-01,DAY
+Patient/p3,note-p3-rt,EXPLICITLY_NOT_RECEIVED,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,
+Patient/p6,note-p6-rt,EXPLICITLY_NOT_RECEIVED,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,

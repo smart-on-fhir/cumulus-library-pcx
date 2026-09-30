@@ -21,12 +21,13 @@ class TopicRelevanceMention(SpanAugmentedMention):
     relevance: TopicRelevance = Field(
         default=TopicRelevance.NONE_OF_THE_ABOVE,
         description=(
-            "EXPLICIT when the topic is directly named or measured for this patient. "
-            "IMPLICIT only when the document contains the topic-specific supporting "
-            "facts in the parent field description. NONE_OF_THE_ABOVE when neither "
-            "level is supported. Explicit negative tests and non-receipt statements are "
+            "Explicit negative tests and non-receipt statements are "
             "relevant to staging, treatment, molecular testing and eligibility. "
-            "Exclude hypothetical/rule-out disease and family history unless requested."
+            "Exclude hypothetical/rule-out disease and family history unless requested. "
+            "EXPLICIT: the topic is directly named or measured for this patient. "
+            "IMPLICIT: only when the document contains the topic-specific supporting "
+            "facts in the parent field description. "
+            "NONE_OF_THE_ABOVE: neither level is supported."
         ),
     )
     confidence: float | None = Field(
@@ -112,14 +113,7 @@ class DocumentTopicAnnotation(BaseModel):
             "Include explicit normal and abnormal results; absent testing is not a negative result."
         ),
     )
-    predisposition: TopicRelevanceMention = Field(
-        ...,
-        description=(
-            "Patient germline findings such as SUFU, PTCH1, TP53 or other documented predisposition; "
-            "include negative tests and VUS."
-        ),
-    )
-    patient: TopicRelevanceMention = Field(
+    survival_timeline: TopicRelevanceMention = Field(
         ...,
         description=(
             "Initial tumor-detecting MRI date, vital status, last known alive date, "

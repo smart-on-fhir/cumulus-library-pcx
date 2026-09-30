@@ -1,15 +1,15 @@
 [[actions]]
-description = "outcome vital status, then first event, then exposure prior to first event"
+label = "outcome vital status, then first event, then exposure prior to first event"
 type = "build:serial"
 files = [
-    "custom/pcx__outcome_vital_status.sql",
-    "custom/pcx__outcome_first_event.sql",
-    "custom/pcx__outcome_exposure.sql",
+    "sql/custom/pcx__outcome_vital_status.sql",
+    "sql/custom/pcx__outcome_first_event.sql",
+    "sql/custom/pcx__outcome_exposure.sql",
 ]
 
 [[actions]]
-description = "outcome per subject: overall survival and provisional event-free survival"
+label = "outcome per subject: overall survival and provisional event-free survival"
 type = "build:serial"
 files = [
-    "custom/pcx__outcome.sql",
+    "sql/custom/pcx__outcome.sql",
 ]

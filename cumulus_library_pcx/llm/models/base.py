@@ -66,17 +66,25 @@ class SpanAugmentedMention(BaseModel):
     )
 
 ################################################################
-# How to use DatePrecision
-# $YOUR_DATE is the name of your date variable, e.g. "rx_start_date"
+# Enum description convention
 #
-# description=
-# "Precision actually supported by the source text for $YOUR_DATE. "
-# "DAY: day, month, and year were explicitly stated; "
-# "MONTH: month and year were explicitly stated; "
-# "YEAR: only year was explicitly stated; "
-# "Use Null when $YOUR_DATE is null."
+# Enum members are defined as "KEY: clause." sentences, one per member, in period-separated
+# prose. Text before the first KEY is a preamble. The member definitions live in ONE place:
+#   - on the enum class docstring when the meaning is the same wherever the enum is used
+#     (DatePrecision, TreatmentPhase, DeliveryStatus), which pydantic copies into the JSON
+#     schema the LLM receives, or
+#   - in the Field(description=...) when the meaning is field-specific (MetastasisEvidence
+#     reads differently for spine MRI and CSF cytology).
+# A field description may override individual members of an enum docstring.
+#
+# For a date field named $YOUR_DATE the precision field only needs
+#   description="Precision for $YOUR_DATE; null if absent."
 ################################################################
 class DatePrecision(StrEnum):
+    """Precision supported by the source text for a date field; null when the date is null.
+    DAY: day, month and year explicitly stated.
+    MONTH: month and year explicitly stated.
+    YEAR: only the year explicitly stated."""
     DAY = "DAY"
     MONTH = "MONTH"
     YEAR = "YEAR"

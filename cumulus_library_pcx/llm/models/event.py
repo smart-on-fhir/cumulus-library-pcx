@@ -27,23 +27,41 @@ class SourceOfEventDiagnosis(StrEnum):
     CSF_CYTOLOGY = "CSF_CYTOLOGY"
     CLINICAL = "CLINICAL"
     DEATH_RECORD = "DEATH_RECORD"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class EventMention(SpanAugmentedMention):
     event_type: EventType = Field(
         default=EventType.NONE_OF_THE_ABOVE,
-        description=("Documented event. "
-                     "Use clinician-designated progression or relapse; progression can follow partial response. "
-                     "SECOND_MALIGNANCY does not require proven treatment causation. "
-                     "SECOND_PRIMARY requires explicit designation, not a time/site heuristic. "
-                     "Exclude suspected, negated or family-history events."))
+        description=("Documented event. Choose exactly one. "
+                     "Use clinician-designated progression or relapse; "
+                     "progression can follow partial response. "
+                     "Exclude suspected, negated or family-history events. "
+                     
+                     "INITIAL_DIAGNOSIS: the first diagnosis of this embryonal tumor, "
+                     "when this note records it as a dated event. "
+                     "RECURRENCE: relapse or recurrence of the tumor after a documented remission or complete response. "
+                     "PROGRESSION: growth of known disease or new lesions without an intervening remission, "
+                     "as designated by the clinician. "
+                     "REMISSION: documented remission, complete response or no evidence of disease; "
+                     "a response state, not an EFS event. "
+                     "SECOND_MALIGNANCY: a new malignancy documented as secondary or treatment-related "
+                     "(e.g. therapy-related leukemia); does not require proven treatment causation. "
+                     "SECOND_PRIMARY: a new, independent primary cancer explicitly designated as a second primary; "
+                     "requires explicit designation, not a time/site heuristic. "
+                     "DECEASED: the patient's death from any cause. "
+                     "NONE_OF_THE_ABOVE: no event of these types is documented in this note."))
 
     source_of_event_diagnosis: SourceOfEventDiagnosis = Field(
         default=SourceOfEventDiagnosis.NONE_OF_THE_ABOVE,
         description=("Evidence actually establishing this event; "
-                     "no arbitrary proximity window or surgery priority."))
+                     "no arbitrary proximity window or surgery priority. "
+                     "PATHOLOGY: tissue or biopsy diagnosis. "
+                     "IMAGING: MRI, CT or other imaging read documenting the event. "
+                     "CSF_CYTOLOGY: cerebrospinal fluid cytology. "
+                     "CLINICAL: clinician assessment or examination without a confirmatory test cited. "
+                     "DEATH_RECORD: death note, pronouncement or death summary. "
+                     "NONE_OF_THE_ABOVE: another documented source of evidence, or the source is not documented."))
 
     event_date: str | None = Field(
         default=None,
@@ -62,8 +80,7 @@ class EventMention(SpanAugmentedMention):
 
     date_of_progression_mri_precision: DatePrecision | None = Field(
         default=None,
-        description="Precision for date_of_progression_mri; "
-                    "null if absent.")
+        description="Precision for date_of_progression_mri; null if absent.")
 
     confirmation_date: str | None = Field(
         default=None,
@@ -75,4 +92,8 @@ class EventMention(SpanAugmentedMention):
 
 
 class EventAnnotation(BaseModel):
-    events: list[EventMention] = Field(default_factory=list, description="Distinct documented events, including undated events. Deduplication and EFS adjudication occur downstream.")
+    events: list[EventMention] = Field(
+        default_factory=list,
+        description="Distinct documented events, including undated events. "
+                    "Deduplication and EFS adjudication occur downstream."
+    )

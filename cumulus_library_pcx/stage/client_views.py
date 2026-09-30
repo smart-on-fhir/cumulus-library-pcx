@@ -12,11 +12,21 @@ Client views stage: pcx__client_* tables, the flat contract exported as CSV.
 
 Same structure as cumulus-library-ibd-cds client_views.py with PCX variables: diagnosis replaces
 paris, exposure replaces therapy_line. The SQL is study-specific and lives in custom/.
-Depends on the eligible and outcome stages and on every LLM wide table in llm/athena.
+Depends on the eligible and outcome stages and on every LLM wide table in sql/generated.
 """
 from pathlib import Path
-from cumulus_library_pcx.tools import manifest, filetool, tablespace
+from cumulus_library_pcx.tools import filetool, tablespace
+from cumulus_library_pcx.tools.actions import Action, SqlAction, FileAction, ExportAction
+from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
+# -----------------------------------------------------------------------------
+# Client tables data dictionary
+# -----------------------------------------------------------------------------
+UPLOAD_TOML = 'file_upload_client_views.toml'
+
+# -----------------------------------------------------------------------------
+# Views
+# -----------------------------------------------------------------------------
 VIEW_LIST = (
     "subject",
     "diagnosis",
@@ -27,84 +37,44 @@ VIEW_LIST = (
     "dictionary_coverage",
 )
 
-# -----------------------------------------------------------------------------
-# Views
-# -----------------------------------------------------------------------------
-def list_views() -> list[str]:
+def list_tables() -> list[str]:
     """Return every flat view exported as CSV."""
     return [tablespace.name_join("client", suffix) for suffix in VIEW_LIST]
 
 # -----------------------------------------------------------------------------
-# helper paths to "client" SQL files
+# Client namespace and path
 # -----------------------------------------------------------------------------
 def path_client(table_suffix: str | None) -> Path:
-    """
-    :param table_suffix: table name without prefix or "client"
-    :return: Path to fully qualified table_name in custom dir
-    """
-    if table_suffix:
-        client_table = tablespace.name_join('client', table_suffix)
-    else:
-        client_table = tablespace.name_prefix('client')
-    return filetool.path_custom(f"{client_table}.sql")
+    client_table = tablespace.name_client(table_suffix)
+    return filetool.path_sql_custom(f"{client_table}.sql")
 
 # -----------------------------------------------------------------------------
-# make targets
+# actions
 # -----------------------------------------------------------------------------
-def make_subject() -> list[Path]:
-    return [path_client('subject')]
+def make_actions() -> list[Action]:
+    return [FileAction([f'../spreadsheet/{UPLOAD_TOML}'],
+                       'upload client_dictionary.csv'),
+            SqlAction([path_client('subject')],
+                      'client subject'),
+            SqlAction([path_client('diagnosis')],
+                      'client diagnosis'),
+            SqlAction([path_client('encounter')],
+                      'client encounter'),
+            SqlAction([path_client('exposure')],
+                      'client exposure'),
+            SqlAction([path_client('timeline'), path_client('timeline_latest')],
+                      'client timeline'),
+            SqlAction([path_client('outcome')],
+                      'client outcome'),
+            SqlAction([path_client('dictionary_coverage')],
+                      'client dictionary coverage'),
+            ExportAction(list_tables(),
+                         "client SQL views -> CSV files",
+                         export_type="export:flat")
+    ]
+# -----------------------------------------------------------------------------
+# make
+# -----------------------------------------------------------------------------
+def make() -> Path:
+    return save_actions_toml(make_actions(), 'client_views.toml')
 
-def make_diagnosis() -> list[Path]:
-    return [path_client('diagnosis')]
-
-def make_encounter() -> list[Path]:
-    return [path_client('encounter')]
-
-def make_exposure() -> list[Path]:
-    return [path_client('exposure')]
-
-def make_timeline() -> list[Path]:
-    return [path_client('timeline'),
-            path_client('timeline_latest')]
-
-def make_outcome() -> list[Path]:
-    return [path_client('outcome')]
-
-def make_dictionary_coverage() -> list[Path]:
-    return [path_client('dictionary_coverage')]
-
-
-def make() -> list[Path]:
-    actions = [manifest.FileAction([f'../spreadsheet/file_upload_client_views.toml'],
-                                   'upload client_dictionary.csv'),
-               manifest.SqlAction(make_subject(),
-                                  'client subject',
-                                  'build:serial'),
-               manifest.SqlAction(make_diagnosis(),
-                                  'client diagnosis',
-                                  'build:serial'),
-               manifest.SqlAction(make_encounter(),
-                                  'client encounter',
-                                  'build:serial'),
-               manifest.SqlAction(make_exposure(),
-                                  'client exposure',
-                                  'build:serial'),
-               manifest.SqlAction(make_timeline(),
-                                  'client timeline',
-                                  'build:serial'),
-               manifest.SqlAction(make_outcome(),
-                                  'client outcome',
-                                  'build:serial'),
-               manifest.SqlAction(make_dictionary_coverage(),
-                                  'client dictionary coverage',
-                                  'build:serial'),
-               manifest.ExportAction(list_views(),
-                                     "client SQL views -> CSV files",
-                                     export_type="export:flat"),
-               ]
-
-    return [manifest.save_actions_toml(actions, 'client_views.toml')]
-
-if __name__ == '__main__':
-    for target in make():
-        print(target)

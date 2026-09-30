@@ -1,0 +1,5 @@
+subject_ref,note_ref,delivery_status,agent_name,therapy_start_date,therapy_start_date_precision
+Patient/p1,note-p1-rx,ADMINISTERED,methotrexate,2020-02-12,DAY
+Patient/p1,note-p1-rx,ADMINISTERED,leucovorin,2020-02-13,DAY
+Patient/p1,note-p1-rx,PLANNED,cisplatin,2020-02-01,DAY
+Patient/p8,note-p8-rx,ADMINISTERED,MTX,2021-02-01,DAY

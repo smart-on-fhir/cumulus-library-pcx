@@ -1,0 +1,5 @@
+subject_ref,period_ordinal,period_start_day,period_end_day,encounter_ref
+Patient/p1,1,2020-01-10,,Encounter/p1-open
+Patient/p1,2,2021-03-01,2021-03-02,Encounter/p1-closed
+Patient/p6,1,2005-06-01,,Encounter/p6-history
+Patient/p6,2,2020-05-01,2020-05-03,Encounter/p6-closed

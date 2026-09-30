@@ -20,7 +20,7 @@ class Aspect(Enum):
     diag = 'diagnosticreport'
     allergy = 'allergy'
 
-def list_aspect() -> list[str]:
+def list_aspect_names() -> list[str]:
     return [aspect.name for aspect in Aspect]
 
 def get_aspect(variable_name:str) -> Aspect:

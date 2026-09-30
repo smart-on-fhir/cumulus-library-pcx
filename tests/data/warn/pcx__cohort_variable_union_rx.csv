@@ -1,0 +1,6 @@
+subject_ref,variable,rx_authoredon_date
+Patient/p1,rx_contrast_methotrexate,2020-02-10
+Patient/p1,rx_chemo_vincristine,2020-02-10
+Patient/p2,rx_chemo_cisplatin,2015-06-01
+Patient/p2,rx_chemo_cisplatin,2014-11-01
+Patient/p6,rx_contrast_methotrexate,2020-06-01

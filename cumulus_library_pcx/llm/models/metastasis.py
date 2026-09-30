@@ -10,15 +10,11 @@ from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecis
 
 
 class MetastasisEvidence(StrEnum):
-    """Result of a single Chang-staging input assessment."""
     POSITIVE = "POSITIVE"
     NEGATIVE = "NEGATIVE"
-    INDETERMINATE = "INDETERMINATE"
-    UNAVAILABLE = "UNAVAILABLE"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 class MetastaticSite(StrEnum):
-    """Anatomic site of metastatic dissemination."""
     CSF = "CSF"
     SPINE = "SPINE"
     BRAIN = "BRAIN"
@@ -26,49 +22,75 @@ class MetastaticSite(StrEnum):
     BONE_MARROW = "BONE_MARROW"
     KIDNEY = "KIDNEY"
     LIVER = "LIVER"
-    OTHER = "OTHER"
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
 class MetastaticStagingInputsMention(SpanAugmentedMention):
     """Staging assessments documented together; preserve dates for temporal review."""
-    csf_collection_site: str | None = Field(default=None, description="Lumbar, ventricular, or other site exactly as documented; null if unknown.")
-    csf_collection_date: str | None = Field(default=None, description="CSF specimen collection date, not result-signoff date; ISO date at supported precision.")
-    csf_collection_date_precision: DatePrecision | None = Field(default=None, description="Precision of csf_collection_date; null when absent.")
-    brain_mri_date: str | None = Field(default=None, description="Brain metastatic assessment date, ISO date at supported precision.")
-    brain_mri_date_precision: DatePrecision | None = Field(default=None, description="Precision of brain_mri_date; null when absent.")
-    spine_mri_date: str | None = Field(default=None, description="Spine metastatic assessment date, ISO date at supported precision.")
-    spine_mri_date_precision: DatePrecision | None = Field(default=None, description="Precision of spine_mri_date; null when absent.")
+    csf_collection_date: str | None = Field(
+        default=None,
+        description="CSF specimen collection date, not result-signoff date; ISO date at supported precision."
+    )
+    csf_collection_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision of csf_collection_date; null when absent."
+    )
+
+    brain_mri_date: str | None = Field(
+        default=None,
+        description="Brain metastatic assessment date, ISO date at supported precision."
+    )
+    brain_mri_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision of brain_mri_date; null when absent."
+    )
+
+    spine_mri_date: str | None = Field(
+        default=None,
+        description="Spine metastatic assessment date, ISO date at supported precision."
+    )
+    spine_mri_date_precision: DatePrecision | None = Field(
+        default=None,
+        description="Precision of spine_mri_date; null when absent."
+    )
+
     spine_mri_findings: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Spine MRI for drop metastases / spinal leptomeningeal seeding. "
-            "POSITIVE: seeding present. NEGATIVE: spine MRI done, no seeding. "
-            "UNAVAILABLE: spine MRI not done or not reported."
+            "POSITIVE: seeding present. "
+            "NEGATIVE: spine MRI done, no seeding. "
+            "NONE_OF_THE_ABOVE: spine MRI not done, indeterminate, or not reported."
         ),
     )
+
     brain_mri_findings: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Brain MRI for intracranial metastasis/seeding beyond the primary. "
-            "POSITIVE: intracranial seeding present. NEGATIVE: done, none. "
-            "UNAVAILABLE: not done or not reported."
+            "POSITIVE: intracranial seeding present. "
+            "NEGATIVE: done, none. "
+            "NONE_OF_THE_ABOVE: not done, indeterminate, or not reported."
         ),
     )
+
     csf_cytology: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "CSF cytology; record lumbar versus ventricular source and collection date separately. "
-            "POSITIVE: malignant cells present. NEGATIVE: cytology negative. "
-            "UNAVAILABLE: not performed or not reported."
+            "POSITIVE: malignant cells present. "
+            "NEGATIVE: cytology negative. "
+            "NONE_OF_THE_ABOVE: not performed, indeterminate, or not reported."
         ),
     )
+
     extraneural_metastasis: MetastasisEvidence = Field(
-        default=MetastasisEvidence.UNAVAILABLE,
+        default=MetastasisEvidence.NONE_OF_THE_ABOVE,
         description=(
             "Metastasis outside the CNS (bone marrow, bone, viscera). "
-            "POSITIVE: extraneural metastasis present. NEGATIVE: worked up, none. "
-            "UNAVAILABLE: no extraneural workup or not reported."
+            "POSITIVE: extraneural metastasis present. "
+            "NEGATIVE: worked up, none. "
+            "NONE_OF_THE_ABOVE: no extraneural workup, indeterminate, or not reported."
         ),
     )
 
@@ -79,12 +101,17 @@ class MetastasisSiteMention(SpanAugmentedMention):
     site: MetastaticSite = Field(
         default=MetastaticSite.NONE_OF_THE_ABOVE,
         description=(
-            "CSF: positive CSF/cytology. SPINE: spinal drop metastases. BRAIN: intracranial "
-            "metastasis beyond primary. LEPTOMENINGEAL: leptomeningeal spread. "
-            "BONE_MARROW: marrow involvement. KIDNEY / LIVER: named viscus. OTHER: another site. "
-            "NONE_OF_THE_ABOVE: no metastatic site documented."
+            "CSF: positive CSF/cytology. "
+            "SPINE: spinal drop metastases. "
+            "BRAIN: intracranial metastasis beyond primary. "
+            "LEPTOMENINGEAL: leptomeningeal spread. "
+            "BONE_MARROW: marrow involvement. "
+            "KIDNEY: renal metastasis. "
+            "LIVER: hepatic metastasis. "
+            "NONE_OF_THE_ABOVE: a documented metastatic site not listed above, or the site is not stated."
         ),
     )
+
     site_date: str | None = Field(
         default=None,
         description="Date this metastatic site was documented, ISO YYYY-MM-DD. Null if not stated.",
@@ -96,8 +123,8 @@ class MetastasisSiteMention(SpanAugmentedMention):
 
 
 class MetastasisAnnotation(BaseModel):
-    """Metastasis / Chang-staging annotations from a single clinical note.
-
+    """
+    Metastasis / Chang-staging annotations from a single clinical note.
     """
     staging_inputs: MetastaticStagingInputsMention
     metastasis_sites: list[MetastasisSiteMention] = Field(

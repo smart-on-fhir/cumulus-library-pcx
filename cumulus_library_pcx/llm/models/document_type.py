@@ -33,9 +33,7 @@ class DocumentType(StrEnum):
     END_OF_LIFE_DOCUMENT = "END_OF_LIFE_DOCUMENT"
     NEUROSURGERY_NOTE = "NEUROSURGERY_NOTE"
     ONCOLOGY_NOTE = "ONCOLOGY_NOTE"
-    OTHER_CLINICAL_NOTE = "OTHER_CLINICAL_NOTE"
-    OTHER = "OTHER"
-
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 # Which extraction modules (llm/models/<task>.py) read each document type. Selection SQL
 # builds pcx__llm_document_task_<task> from this mapping. A task absent from a type's list
@@ -46,19 +44,18 @@ DOCUMENT_TASKS: dict[DocumentType, list[str]] = {
     DocumentType.OPERATIVE_NOTE: ["surgery", "diagnosis"],
     DocumentType.PATHOLOGY_REPORT: ["diagnosis", "molecular", "metastasis"],
     DocumentType.IMAGING_REPORT: ["metastasis", "response", "event"],
-    DocumentType.GENETICS_DOCUMENT: ["predisposition", "molecular"],
+    DocumentType.GENETICS_DOCUMENT: ["molecular"],
     DocumentType.TREATMENT_ADMINISTRATION_RECORD: ["systemic_therapy"],
     DocumentType.RADIATION_ONCOLOGY_NOTE: ["radiation", "response", "event"],
     DocumentType.TUMOR_BOARD_NOTE: ["diagnosis", "molecular", "metastasis", "response", "registry_eligibility"],
-    DocumentType.RESEARCH_PROTOCOL_DOCUMENT: ["registry_eligibility", "systemic_therapy", "patient"],
+    DocumentType.RESEARCH_PROTOCOL_DOCUMENT: ["registry_eligibility", "systemic_therapy", "survival_timeline"],
     DocumentType.TRANSFER_DOCUMENT: ["transition_of_care", "diagnosis", "surgery", "systemic_therapy", "radiation"],
-    DocumentType.DISCHARGE_SUMMARY: ["systemic_therapy", "surgery", "event", "patient", "laboratory", "transition_of_care"],
-    DocumentType.END_OF_LIFE_DOCUMENT: ["event", "patient"],
+    DocumentType.DISCHARGE_SUMMARY: ["systemic_therapy", "surgery", "event", "survival_timeline", "laboratory", "transition_of_care"],
+    DocumentType.END_OF_LIFE_DOCUMENT: ["event", "survival_timeline"],
     DocumentType.NEUROSURGERY_NOTE: ["surgery", "diagnosis", "event", "transition_of_care"],
-    DocumentType.ONCOLOGY_NOTE: ["systemic_therapy", "radiation", "response", "event", "patient", "laboratory",
-                                 "registry_eligibility", "medulloblastoma", "transition_of_care"],
-    DocumentType.OTHER_CLINICAL_NOTE: ["patient", "event"],
-    DocumentType.OTHER: [],
+    DocumentType.ONCOLOGY_NOTE: ["systemic_therapy", "radiation", "response", "event", "survival_timeline", "laboratory",
+                                 "registry_eligibility", "transition_of_care"],
+    DocumentType.NONE_OF_THE_ABOVE: ["survival_timeline", "event"],
 }
 
 
@@ -92,7 +89,7 @@ list wins.
 4. DISCHARGE_SUMMARY: a synopsis of a completed admission written at discharge: reason for
    admission, hospital course, procedures and treatment given, condition and disposition,
    follow-up. Includes chemotherapy-admission discharge summaries authored by oncology.
-   Excludes ED discharge notes and nursing discharge instructions (OTHER_CLINICAL_NOTE).
+   Excludes ED discharge notes and nursing discharge instructions (NONE_OF_THE_ABOVE).
 
 5. OPERATIVE_NOTE: the surgeon's report of an operation: operative report, brief operative
    note, procedure note for a tumor resection, biopsy, shunt, EVD, or second-look surgery.
@@ -138,16 +135,15 @@ list wins.
     interval history, off-therapy or survivorship visit, telephone or nurse-practitioner
     oncology note. This is the default for the treating team's own documentation.
 
-14. OTHER_CLINICAL_NOTE: a clinical encounter note from any other service or setting:
-    emergency department, PICU or critical care, general pediatrics or hospitalist,
-    rehabilitation, physical or occupational or speech therapy, nutrition, endocrinology,
-    ophthalmology, neurology, nursing, social work, psychology, anesthesia, ED discharge
-    note, nursing discharge instructions.
-
-15. OTHER: not a clinical document, or unclassifiable: administrative or billing note,
-    consent unrelated to research, patient education, immunization record, medication
-    list without administration data, telephone encounter with no clinical content,
-    fax cover, records request, empty or unreadable document.
+14. NONE_OF_THE_ABOVE: none of the types above. Either a clinical encounter note from
+    any other service or setting (emergency department, PICU or critical care, general
+    pediatrics or hospitalist, rehabilitation, physical or occupational or speech therapy,
+    nutrition, endocrinology, ophthalmology, neurology, nursing, social work, psychology,
+    anesthesia, ED discharge note, nursing discharge instructions), or not a clinical
+    document at all or unclassifiable (administrative or billing note, consent unrelated
+    to research, patient education, immunization record, medication list without
+    administration data, telephone encounter with no clinical content, fax cover, records
+    request, empty or unreadable document).
 """
 
 
@@ -156,7 +152,7 @@ class DocumentTypeMention(SpanAugmentedMention):
 
     Set ``has_mention`` to true when the title, headings, author or service, or body
     provides classification evidence, and put the shortest verbatim title, header, or
-    signature cue in ``spans``. Set ``has_mention`` to false, use ``OTHER``, and return an
+    signature cue in ``spans``. Set ``has_mention`` to false, use ``NONE_OF_THE_ABOVE``, and return an
     empty span list only when the document is empty, unreadable, or too ambiguous to
     classify.
 
@@ -165,7 +161,7 @@ class DocumentTypeMention(SpanAugmentedMention):
     """
 
     document_type: DocumentType = Field(
-        default=DocumentType.OTHER,
+        default=DocumentType.NONE_OF_THE_ABOVE,
         description=DOCUMENT_TYPE_DESCRIPTION,
     )
     confidence: float | None = Field(

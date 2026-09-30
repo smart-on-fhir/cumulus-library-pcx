@@ -1,6 +1,19 @@
-# study prefix is the schema "root" or "tablespace" for tables in this study
-# @refactor to use manifest.py instead, note that presently this would create a circular dependancy.
-PREFIX = 'pcx'
+import tomllib
+
+from cumulus_library_pcx.tools import filetool
+
+#-----------------------------------------------------------------------------
+# Study prefix: the schema "root" or "tablespace" for tables in this study.
+#
+# Read once at import, straight from manifest.toml `study_prefix`.
+# StudyManifest (toml_tool.get_manifest) also opens every submanifest it lists,
+# which cannot work while this package is the thing that generates those files.
+#-----------------------------------------------------------------------------
+def read_study_prefix() -> str:
+    with filetool.path_project('manifest.toml').open('rb') as source:
+        return tomllib.load(source)['study_prefix']
+
+PREFIX = read_study_prefix()
 
 #-----------------------------------------------------------------------------
 # naming conventions
@@ -20,19 +33,33 @@ def name_trim(table) -> str:
         simple = simple.replace(part, '')
     return simple.replace(name_prefix(''), '')
 
-def name_join(part: str, table: str) -> str:
+def name_join(part: str, table: str | None = None) -> str:
+    if not table:
+        return name_prefix(part)
     return name_prefix('_'.join([part, name_trim(table)]))
-
-def name_sample(table: str, suffix=None) -> str:
-    part = name_suffix('sample', suffix)
-    return name_join(part, table)
 
 def name_cohort(table: str, suffix=None) -> str:
     part = name_suffix('cohort', suffix)
     return name_join(part, table)
 
+def name_sample(table: str, suffix=None) -> str:
+    part = name_suffix('sample', suffix)
+    return name_join(part, table)
+
 def name_elastic(table: str, suffix=None) -> str:
     part = name_suffix('elastic', suffix)
+    return name_join(part, table)
+
+def name_eligible(table: str|None= None, suffix=None) -> str:
+    part = name_suffix('eligible', suffix)
+    return name_join(part, table)
+
+def name_outcome(table: str|None= None, suffix=None) -> str:
+    part = name_suffix('outcome', suffix)
+    return name_join(part, table)
+
+def name_client(table: str, suffix=None) -> str:
+    part = name_suffix('client', suffix)
     return name_join(part, table)
 
 def name_study_population(suffix=None) -> str:
@@ -92,8 +119,8 @@ def ctas(source: str, variable: str, where: list) -> str:
     """
     from_list = sql_list([source, name_valueset(variable)])
     cohort_name = name_cohort(variable)
-    select = f"select distinct * from \n {from_list}"
-    sql = [f'create table {cohort_name} as ',
+    select = f"SELECT DISTINCT * FROM \n {from_list}"
+    sql = [f'CREATE TABLE {cohort_name} AS ',
            select, 'WHERE', sql_and(where)]
     return '\n'.join(sql)
 

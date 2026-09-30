@@ -1,1 +1,0 @@
--- CREATE OR REPLACE VIEW  pcx__elastic_task_diagnosis AS

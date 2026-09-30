@@ -1,0 +1,6 @@
+[[actions]]
+label = "Prepare LLM schemas and summaries"
+type = "build:serial"
+files = [
+    "stage/llm_schema.py",
+]
