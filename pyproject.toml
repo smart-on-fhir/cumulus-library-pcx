@@ -1,39 +1,21 @@
-# Package metadata for the PNOC30 Cumulus Library study.
-
 [project]
 name = "cumulus-library-pcx"
-version = "0.2.0"
-requires-python = ">= 3.11"
-dependencies = [
-    "tomli_w",
-    "cumulus-library >= 6.3.4",
-    "pydantic",
-    "rapid-elastic @ git+https://github.com/smart-on-fhir/rapid-elastic.git@v1.1.0-beta.1",
-]
-description = "Cumulus Library study for the PNOC030 ATRT registry and PCX comparator analysis."
-readme = "README.md"
-license = { text = "Apache License 2.0" }
-classifiers = [
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
-
-[project.urls]
-Home = "https://smarthealthit.org/cumulus-a-universal-sidecar-for-a-smart-learning-healthcare-system/"
-Documentation = "https://docs.smarthealthit.org/cumulus/"
-
-[build-system]
-requires = ["flit_core >=3.12,<4"]
-build-backend = "flit_core.buildapi"
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = ["cumulus-study-builder==0.4.1", "cumulus-library>=6.3.2,<6.4"]
+description = "Migrated pcx study on the shared Cumulus study builder."
 
 [project.optional-dependencies]
-dev = ["black", "pylint"]
-test = ["pytest", "pytest-cov", "pytest-xdist", "duckdb", "sqlglot"]
+test = ["pytest", "duckdb", "sqlglot", "PyYAML"]
+biostats = ["cumulus-study-builder[biostats]==0.4.1"]
 
-[project.scripts]
-make-pcx = "cumulus_library_pcx.tools.cli:main"
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.flit.sdist]
-include = ["cumulus_library_pcx/"]
+[tool.setuptools.packages.find]
+include = ["study*", "analysis*"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["tests"]

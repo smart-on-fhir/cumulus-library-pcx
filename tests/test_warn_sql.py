@@ -101,7 +101,7 @@ def test_qa_table_fires_only_on_seeded_subjects(con, table):
 
 def test_qa_athena_toml_lists_every_warn_table():
     import tomllib
-    from cumulus_library_pcx.tools import filetool
+    from cumulus_study_builder.tools import filetool
     toml = tomllib.loads(filetool.path_project("qa_athena.toml").read_text())
     listed = {pathlib.Path(f).stem for action in toml["actions"] for f in action["files"]}
     assert listed >= {f.stem for f in sqltest.list_athena("pcx__warn_*.sql")}

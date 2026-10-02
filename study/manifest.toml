@@ -1,0 +1,157 @@
+study_prefix = "pcx"
+data_dictionary = "../spreadsheet/data_dictionary.csv"
+
+[[stages.fhir_resource]]
+type = "submanifest"
+files = [
+    "fhir_resource.toml",
+]
+
+[[stages.study_population]]
+type = "submanifest"
+files = [
+    "study_population.toml",
+]
+
+[[stages.study_variable]]
+type = "submanifest"
+files = [
+    "study_variable.toml",
+]
+
+[[stages.study_variable_wide]]
+type = "submanifest"
+files = [
+    "study_variable_wide.toml",
+]
+
+[[stages.casedef]]
+type = "submanifest"
+files = [
+    "casedef.toml",
+]
+
+[[stages.sample]]
+type = "submanifest"
+files = [
+    "sample.toml",
+]
+
+[[stages.llm_schema]]
+type = "submanifest"
+files = [
+    "llm_schema.toml",
+]
+
+[[stages.elastic_upload]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "elastic_upload.toml",
+]
+
+[[stages.nlp_document_tasks]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "nlp_document_tasks_guard.toml",
+]
+
+[[stages.nlp_document_tasks]]
+skip_by_default = true
+files = [
+    "nlp_document_tasks.workflow",
+]
+
+[[stages.llm_document_wide]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "llm_document_wide.toml",
+]
+
+[[stages.nlp_clinical_tasks]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "nlp_clinical_tasks_guard.toml",
+]
+
+[[stages.nlp_clinical_tasks]]
+skip_by_default = true
+files = [
+    "nlp_clinical_tasks.workflow",
+]
+
+[[stages.llm_clinical_wide]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "llm_clinical_wide.toml",
+]
+
+[[stages.eligible]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "eligible.toml",
+]
+
+[[stages.outcome]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "outcome.toml",
+]
+
+[[stages.client_views]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "client_views.toml",
+]
+
+[[stages.nlp_document_tasks_50k]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "nlp_document_tasks_50k_guard.toml",
+]
+
+[[stages.nlp_document_tasks_50k]]
+skip_by_default = true
+files = [
+    "nlp_document_tasks_50k.workflow",
+]
+
+[[stages.nlp_clinical_tasks_50k]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "nlp_clinical_tasks_50k_guard.toml",
+]
+
+[[stages.nlp_clinical_tasks_50k]]
+skip_by_default = true
+files = [
+    "nlp_clinical_tasks_50k.workflow",
+]
+
+[[stages.qa_athena]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "qa_athena.toml",
+]
+
+[[stages.counts]]
+type = "submanifest"
+files = [
+    "counts.toml",
+]
+
+[[stages.study_meta]]
+type = "submanifest"
+files = [
+    "study_meta.toml",
+]

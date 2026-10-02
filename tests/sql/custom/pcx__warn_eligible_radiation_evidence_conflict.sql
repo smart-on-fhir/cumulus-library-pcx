@@ -45,11 +45,11 @@ SELECT  'radiation_history_code_ignored'                                        
             CONCAT('history_first=',    CAST(history.history_first_day AS VARCHAR)),
             CONCAT('t0=',               CAST(radiation.t0_day AS VARCHAR)),
             CONCAT('conditions=',       CAST(history.condition_cnt AS VARCHAR)),
-            CONCAT('radiation_prior_to_t0=', CAST(radiation.radiation_prior_to_t0_bool AS VARCHAR)))
+            CONCAT('no_prior_radiation_input=', CAST(radiation.radiation_prior_to_t0_bool AS VARCHAR)))
                                                                                 AS detail
 FROM    pcx__eligible_radiation AS radiation
 JOIN    history_code            AS history ON history.subject_ref = radiation.subject_ref
 WHERE   radiation.t0_day IS NOT NULL
 AND     history.history_first_day <= radiation.t0_day
-AND     NOT radiation.radiation_prior_to_t0_bool
+AND     NOT COALESCE(radiation.radiation_prior_to_t0_bool, FALSE)
 ;

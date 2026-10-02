@@ -9,7 +9,7 @@ Data directories:
 """
 import duckdb
 from pathlib import Path
-from cumulus_library_pcx.tools import filetool
+from cumulus_study_builder.tools import filetool
 
 SCHEMA = filetool.path_tests_data('schema.sql')
 
@@ -44,7 +44,7 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
 
 def run_custom(con: duckdb.DuckDBPyConnection, names: list[str] = ELIGIBLE_OUTCOME) -> None:
     for name in names:
-        con.execute(filetool.path_sql_custom(f'pcx__{name}.sql').read_text())
+        con.execute(filetool.path_sql_generated(f'pcx__{name}.sql').read_text())
 
 
 def list_athena(pattern: str) -> list[Path]:

@@ -2,15 +2,15 @@
 -- Warning: exposure counted as received without administration evidence.
 --
 -- README section 2 asks for ACTUAL administration. pcx__eligible_rx unions
--- MedicationRequest orders (authoredOn) and MedicationDispense hand-overs
--- (whenHandedOver) with LLM ADMINISTERED agents and takes the earliest day,
--- and pcx__eligible_radiation does the same with procedure and encounter codes. methotrexate_first_day / radiation_first_day, and so
+-- MedicationRequest orders (authoredOn) with LLM ADMINISTERED agents and takes
+-- the earliest day, and pcx__eligible_radiation does the same with procedure
+-- and encounter codes. methotrexate_first_day / radiation_first_day, and so
 -- every prior-to-first-event flag and initial_therapy_sequence, can therefore
--- rest on an order, a dispense or an encounter code alone.
+-- rest on an order or an encounter code alone.
 --
---   methotrexate_order_only   methotrexate ordered or dispensed, never LLM-administered
+--   methotrexate_order_only   methotrexate ordered, never LLM-administered
 --   radiation_code_only       radiation coded, never LLM-administered
---   chemo_order_only          backbone chemo ordered or dispensed, never LLM-administered
+--   chemo_order_only          backbone chemo ordered, never LLM-administered
 -- ============================================================================
 CREATE TABLE pcx__warn_outcome_exposure_order_only AS
 
@@ -18,7 +18,6 @@ SELECT  'methotrexate_order_only'                                               
         CAST(rx.subject_ref AS VARCHAR)                                         AS subject_ref,
         CONCAT_WS('|',
             CONCAT('order_first=',      CAST(rx.methotrexate_order_first_day AS VARCHAR)),
-            CONCAT('dispense_first=',   CAST(rx.methotrexate_dispense_first_day AS VARCHAR)),
             CONCAT('prior_to_first_event=', CAST(exposure.methotrexate_prior_to_first_event_bool AS VARCHAR)),
             CONCAT('first_event=',      CAST(exposure.first_event_day AS VARCHAR)))
                                                                                 AS detail
@@ -48,7 +47,6 @@ SELECT  'chemo_order_only'                                                      
         CAST(rx.subject_ref AS VARCHAR)                                         AS subject_ref,
         CONCAT_WS('|',
             CONCAT('order_first=',      CAST(rx.chemo_order_first_day AS VARCHAR)),
-            CONCAT('dispense_first=',   CAST(rx.chemo_dispense_first_day AS VARCHAR)),
             CONCAT('sequence=',         exposure.initial_therapy_sequence),
             CONCAT('first_event=',      CAST(exposure.first_event_day AS VARCHAR)))
                                                                                 AS detail

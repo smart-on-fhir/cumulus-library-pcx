@@ -1,0 +1,27 @@
+[study]
+directory = "study"
+manifest = "stage/manifest.py"
+
+[builder]
+sample_patient_limit = 10
+sample_note_limit = 50
+data_package_version = 2
+nlp_deployments = ["gpt_oss_120b"]
+# Note-selection tables the site supplies (study/nlp-selection-requirements.json): no stage
+# builds them, so validate accepts them as NLP selectors and the workflow guards count them.
+external_tables = [
+    "pcx__llm_document_task_diagnosis",
+    "pcx__llm_document_task_document_topic",
+    "pcx__llm_document_task_document_type",
+    "pcx__llm_document_task_event",
+    "pcx__llm_document_task_laboratory",
+    "pcx__llm_document_task_metastasis",
+    "pcx__llm_document_task_molecular",
+    "pcx__llm_document_task_radiation",
+    "pcx__llm_document_task_registry_eligibility",
+    "pcx__llm_document_task_response",
+    "pcx__llm_document_task_surgery",
+    "pcx__llm_document_task_survival_timeline",
+    "pcx__llm_document_task_systemic_therapy",
+    "pcx__llm_document_task_transition_of_care",
+]

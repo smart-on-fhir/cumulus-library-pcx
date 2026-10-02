@@ -1,79 +1,108 @@
 # Changelog
 
-Short, human-readable notes on what changed and why. Newest first.
+## 2026-09-24 — builder 0.5.0 inputs and docs
 
-## 0.2.0 (2026-10-02): last make-pcx version
+- WORKPLAN.md, PROTOCOL.md and MIGRATION.md now target cumulus-study-builder 0.5.0 after a
+  code review; the code move itself is the P1 item in WORKPLAN.md.
+- Removed `spreadsheet/include_diag_category.csv`: builder 0.5.0 no longer reads it and carries
+  the same six report-category labels itself. Its hash left `tests/legacy_contract.json`.
+- The builder's biostats module is not used outside IBD: the demo biostats scaffold is to be
+  removed in the 0.5.0 move, not converted.
 
-- Version 0.2.0, tagged `0.2-pre-study-builder`: the last version of PCX built
-  with `make-pcx`. Development continues on cumulus-study-builder.
+## 2026-09-22 — builder 0.4.1 release candidate
 
-## 2026-10-02 (no empty synthetic test files)
+- Checked against the final cumulus-study-builder 0.4.1 candidate and cumulus-study-template
+  v0.4.1: skills sync, template sync, validate, build and tests pass. `AGENTS.md` now points
+  study-specific agent rules to a new `Agent rules` section at the end of `PROTOCOL.md`.
 
-- The synthetic generator no longer writes header-only CSVs for tables it
-  leaves empty. The 7 `pcx__valueset_rx_*.csv` files and
-  `core__medicationdispense.csv` in `tests/data/synthetic` go away. schema.sql
-  still creates those tables (empty) because `pcx__eligible_rx` reads them.
-- The dispense test is unchanged: it uses the 2 non-empty valueset fixtures
-  in `tests/data/warn`.
+## 2026-09-22 — workplan by protocol section
 
-## 2026-10-02 (.gitignore cleanup)
+- `WORKPLAN.md` headings are now the plain PROTOCOL.md section names (no numbers), every section listed ("No changes planned." when empty), Open questions first and Build, tests and docs last; the Summary heading was dropped, its text kept as the intro.
+- `WORKPLAN.md` regrouped under the `PROTOCOL.md` section headings (plus Build, tests and docs);
+  each entry tagged with priority and stage, decisions moved to the top. No tasks added or dropped.
 
-- `.gitignore` now ignores all of `cumulus_library_pcx/sql/generated`
-  (was only `pcx__llm_*.sql`). Regenerate, do not commit.
-- `.gitignore` also ignores `.DS_Store`, `__pycache__/`, `*~` editor backups
-  and the `ve/` and `.venv/` virtualenvs.
+## 2026-09-22 — workplan section titles
 
-## 2026-09-30 (relaxed eligibility: flags, not exclusions)
+- `WORKPLAN.md`: P1, P2 and P3 items grouped under short titled headings (e.g. `P1 · Trial
+  cohort eligibility`); a priority can now have several sections. No items changed.
 
-- PCX is broader than the ACNS0334 trial. Three criteria are now yes/no flags on
-  `pcx__eligible` instead of exclusions: age under 36 months, prior methotrexate
-  and prior radiation. Prior chemotherapy is a flag too.
-- `pcx__eligible` gains `age_under_36_months_at_t0` (diagnosis) next to
-  `age_under_36_months_at_definitive_surgery` (ACNS0334), plus
-  `methotrexate_prior_to_t0_bool`, `chemo_prior_to_t0_bool` and
-  `radiation_prior_to_t0_bool`. `no_prior_chemotherapy_bool` and
-  `no_prior_radiation_bool` are removed.
-- Prior flags are FALSE when t0 is known and nothing is dated before it, NULL
-  only without a t0. The "ever" flags (`*_any_bool`) are FALSE when there is no
-  evidence, never NULL. Closes workplan 2.1 and 2.2.
-- `pcx__eligible_trial` stays strict, and prior methotrexate now excludes too
-  (ACNS0334 excludes any prior chemotherapy). Subjects with a t0 and no
-  treatment evidence are now in it, and subjects without a t0 are not.
-- `study_population` keeps visits at ages 0-120 (was 0-8). `age_group.csv`
-  covers every age: Adolescent, Young adult, Adult and Older adult bands were
-  added.
-- Downstream: `pcx__client_subject` carries the new flags,
-  `pcx__client_exposure` reads `methotrexate_prior_to_t0_bool`, two warn tables
-  are reworded, and the data and client dictionaries are updated.
-- `tests/synthetic.py` follows the 0-120 visit window and reads the stage tomls'
-  `sql/custom/` paths again (it had found no SQL to run).
-  `tests/data/synthetic` has been regenerated.
+## 2026-09-22 — workplan for builder 0.4.1
 
-## 2026-09-30 (merge of main)
+- `WORKPLAN.md` rewritten: open study work only, assuming cumulus-study-builder 0.4.1 and
+  cumulus-study-template v0.4.1, under Summary / P1 / P2 / P3 / Decisions with links to
+  `PROTOCOL.md`. Superseded workplans and reviews moved to `_to_delete/`.
+- `pyproject.toml` requires `cumulus-library>=6.3.2,<6.4` (was `==6.3.1`), as builder 0.4.1 needs.
+- Adopted builder 0.4.1: `tests/test_migration.py` reads upload `files` (falling back to `file`);
+  `tests/column_contracts.json` drops `core__encounter.class_system`, adds `information_schema.columns`, adds `core__condition.category_system`/`category_display`
+  and the DiagnosticReport `conclusioncode_*` columns; skills re-synced; validate, build and
+  pytest pass on cumulus-library 6.3.2; `requirements-tested.txt` updated.
 
-- The two 50k NLP stages are replaced by Dylan's single `nlp_all_50k.workflow`
-  (diagnosis, document_topic, surgery, no `select_by_table`), in
-  `stage/manifest.py` and `manifest.toml`. Task versions follow this branch's
-  schemas: diagnosis 3, document_topic 2, surgery 2.
-- `nlp_document_tasks_50k.workflow` and `nlp_clinical_tasks_50k.workflow` are
-  removed. The full `nlp_document_tasks.workflow` and
-  `nlp_clinical_tasks.workflow` are unchanged.
+## 2026-09-22 — template sync adopted
 
-## 2026-09-30
+- Counts moved to the builder's shared `counts` stage (counts skill):
+  `study/sql/custom/counts/counts.workflow` defines the same 17 `pcx__cube_*` tables and
+  replaces `study/stage/cube.py`, `study/cubes.json` and the two `_source` join tables. All
+  tables count patients; encounter, document and report tables add the resource as
+  `secondary_id`. Old files are in `_to_delete/`, with the root `counts*.workflow` drafts.
+  `tests/test_counts.py` checks suppression and the variable-union join in DuckDB;
+  `test_migration.py` expands the workflow in its count and column checks. Needs the current
+  builder checkout (WORKPLAN P4): with it, validate passes and 71 tests pass, but only
+  after temporary local fixes for P4's three unrelated breakages. The repo copy was not
+  rebuilt.
+- `WORKPLAN-sept-21.md` renamed to `WORKPLAN.md`, now the PCX workplan: shared S1–S4 marked
+  done, the review's regression checks, priority meanings and provenance (runtime, wheel hash,
+  what was not run) folded in from `README-sept-21.md`. `README.md` links it and now names the
+  0.4.1 wheel it pins.
+- NLP selector guards (builder 0.4.1): each of the four workflows now has a
+  `study/nlp_<workflow>_guard.toml` and `sql/generated/pcx__qa_selector_<workflow>.sql`, listed
+  ahead of the workflow under its own stage in `manifest.toml`. The guard counts the usable
+  `note_ref` values (`DocumentReference/...`, `DiagnosticReport/...`) in every `select_by_table`
+  and fails the stage when a selection has none, because cumulus-library 6.3.1 drops an empty
+  selection and would send every note to the LLM. `cumulus-study.toml` gains
+  `[builder] external_tables`, the 14 site-supplied `pcx__llm_document_task_*` tables from
+  `study/nlp-selection-requirements.json`, so `validate` accepts selectors no stage builds;
+  `tests/test_migration.py` gives those tables the `required_columns` of that file. Workflow
+  files are unchanged.
+- Regenerated with the current builder: `pcx__cohort_study_population_enc.sql` gains
+  `enc_class_system` (builder joins encounter class on system and code).
+  `tests/column_contracts.json` adds `class_system` to `core__encounter`, which cumulus-library
+  6.3.1 has; the migration test failed on the new column without it.
+- Count cubes keyed on encounters, notes, documents or reports now suppress on distinct
+  patients as well (builder change, regenerated: 3 `pcx__cube_*` files). `min_subject` is no longer
+  hard-coded in `study/cubes.json`; the builder default (`CUMULUS_CUBE_MIN_SUBJECTS`, 10) governs
+  unless a spec sets its own.
+- `pcx__cohort_casedef.sql` regenerated without the duplicate `history.subject_ref` in
+  `longitudinal` (builder template fix); Athena had rejected the ambiguous reference.
+- Skills re-synced from the 0.4.1 sdist (`skills check` clean: rxnorm cites Wasz et al., valueset writes discovery SQL, study-builder syncs before Orient).
+- Builder pin moved from `==0.4.0` to `==0.4.1`; validate (now including the protocol section check), build and tests pass with the merged 0.4.1 tree.
+- First `cumulus-study template sync --template ../../cumulus-study-template`: `.cumulus-template.json`
+  now records the template path and the managed files (agent pointers, runtime adapter, generic
+  notes) this study follows; seeds stay study-owned. Rebuilt and tests pass with the patched builder.
+- Opt-in stage TOMLs now carry `skip_by_default` on every action (builder S1), so a default `cumulus-library build` no longer runs eligible, outcome, client_views, qa_athena or the LLM wide stages; `cumulus-study validate` flagged the old TOMLs before the rebuild.
 
-- Medication data now comes only from cumulus-library 6.3.4 core tables. No
-  study SQL reads the study-built `pcx__medicationrequest` /
-  `pcx__medicationdispense` tables, so those templates and the `fhir_resource`
-  stage can be removed.
-- `pcx__eligible_rx`: new structured source `rx_dispense` from
-  `core__medicationdispense` (`whenhandedover_day`, matched to the rx valuesets,
-  cancelled and declined dropped). New columns `methotrexate_dispense_first_day`
-  and `chemo_dispense_first_day`. A dispense feeds `*_first_day` and `*_any_bool`
-  but is not receipt, so `*_administered_*` stays LLM-only.
-- `pcx__client_exposure`: new `dispense_first_day` column (NULL for RADIATION).
-- Warn tables: `pcx__warn_outcome_exposure_order_only` shows the dispense day,
-  `pcx__warn_eligible_therapy_precedes_t0` labels a dispense-sourced first day
-  `rx_dispense`.
-- Tests: `core__medicationdispense` and the seven `pcx__valueset_rx_*` tables in
-  `tests/data/schema.sql`, seeded dispenses for p1, p2, p5, p6, and a new
-  `test_dispense_is_structured_evidence_not_receipt`.
+## 2026-09-21 — re-aligned with the current builder and template
+
+- Rebuilt the unreleased cumulus-study-builder 0.4.0 wheel from the 2026-09-21 checkout into
+  `../baseline/dist` (the 2026-09-19 wheel is kept in `../baseline/dist-2026-09-19`). The
+  `==0.4.0` pins are unchanged; `requirements-tested.txt` records the newly measured versions.
+- Re-synced the managed agent skills: `study-encounter` is now `study-population`; rxnorm,
+  study-variable, biostats and study-builder updated. `cumulus-study skills check` passes.
+- Added the template's optional biostats scaffold (`analysis/exports.toml`, `analysis/README.md`,
+  `study/stage/biostats.py`, `study/sql/custom/biostats/analysis.sql`) with `Stage(biostats)`
+  commented out in `study/stage/manifest.py`, and a `biostats` extra in `pyproject.toml`.
+- Added `spreadsheet/README.md`, `study/sql/template/README.md` and `study/sql/generated/README.md`.
+- Rewrote `PROTOCOL.md` in the template's numbered sections (0-10) from the migration notes,
+  the inherited documents and the 2026-09-19 review; rewrote `README.md`.
+- Regenerated with the new builder: `pcx__cohort_study_population_observation_values` is no
+  longer produced (Observation evidence now projects directly from `obs_base`), so
+  `pcx__cohort_study_population_obs.sql` and `study/study_population.toml` changed.
+- Validation: validate, build, skills check and 69 tests pass on a clean copy (Python 3.11.15,
+  Linux). Warehouse execution was not run. CODE_REVIEW.md findings remain unapplied.
+- Added `WORKPLAN-sept-21.md`: tasks from `README-sept-21.md`, referencing the shared
+  `../WORKPLAN-sept-21.md`. Nothing applied yet.
+
+## 2026-09-19 — builder backport
+
+- Migrated from `cumulus-library-pcx` to cumulus-study-builder 0.4.0 and the study-template layout (prefix `pcx`, data package version 1 -> 2).
+- 21 coded variables, 14 annotation models, four workflows, 23 NLP projections, eligibility, outcomes, client exports, QA and 17 count outputs retained; `HOME_INSTITUTION` resolves from local settings.
+- Reviewed 2026-09-19: see CODE_REVIEW.md.

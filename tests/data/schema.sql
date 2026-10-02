@@ -100,52 +100,6 @@ CREATE TABLE pcx__cohort_variable_union_rx (
     rx_authoredon_date DATE
 );
 
--- dispense seeds: p2 cisplatin handed over before its first order (earliest chemo day),
--- p6 methotrexate (not receipt, so methotrexate_order_only still fires), p5 cancelled and
--- never-handed-over cisplatin (ignored), p1 ondansetron (outside the rx valuesets, ignored)
-CREATE TABLE core__medicationdispense (
-    subject_ref VARCHAR,
-    status VARCHAR,
-    medication_system VARCHAR,
-    medication_code VARCHAR,
-    whenhandedover_day DATE
-);
-
-CREATE TABLE pcx__valueset_rx_contrast_methotrexate (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_carboplatin (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_cisplatin (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_cyclophosphamide (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_etoposide (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_thiotepa (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
-CREATE TABLE pcx__valueset_rx_chemo_vincristine (
-    "system" VARCHAR,
-    code VARCHAR
-);
-
 CREATE TABLE pcx__llm_systemic_therapy_agent (
     subject_ref VARCHAR,
     note_ref VARCHAR,

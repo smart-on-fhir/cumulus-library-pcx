@@ -1,6 +1,0 @@
-subject_ref,status,medication_system,medication_code,whenhandedover_day
-Patient/p1,completed,http://www.nlm.nih.gov/research/umls/rxnorm,26225,2019-01-01
-Patient/p2,completed,http://www.nlm.nih.gov/research/umls/rxnorm,309311,2014-10-28
-Patient/p5,cancelled,http://www.nlm.nih.gov/research/umls/rxnorm,309311,2019-01-01
-Patient/p5,in-progress,http://www.nlm.nih.gov/research/umls/rxnorm,309311,
-Patient/p6,completed,http://www.nlm.nih.gov/research/umls/rxnorm,1946772,2020-06-03
