@@ -2,6 +2,11 @@
 
 Short, human-readable notes on what changed and why. Newest first.
 
+## 0.2.0 (2026-10-02): last make-pcx version
+
+- Version 0.2.0, tagged `0.2-pre-study-builder`: the last version of PCX built
+  with `make-pcx`. Development continues on cumulus-study-builder.
+
 ## 2026-10-02 (no empty synthetic test files)
 
 - The synthetic generator no longer writes header-only CSVs for tables it
