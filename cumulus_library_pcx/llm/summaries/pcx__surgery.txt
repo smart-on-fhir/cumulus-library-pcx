@@ -1,0 +1,41 @@
+model = "SurgeryAnnotation"
+surgeries: A (possibly empty) list of SurgeryMention instances, which contain:
+    age_at_surgery_months = Optional mention of [Decimal number 0 or greater]
+        # Explicit age at this operation in months. Do not substitute age at diagnosis or restrict to under 36 months.
+    residual_tumor_area_cm2 = Optional mention of [Decimal number 0 or greater]
+        # Explicit postoperative residual tumor AREA in cm2. Do not convert a length or volume to area, or infer from GTR/NTR/STR.
+    residual_assessment_date = Optional mention of [Plaintext string]
+        # Postoperative imaging assessment date, ISO date at supported precision; not automatically surgery date.
+    residual_assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision of residual_assessment_date; null when absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+    surgery_type = SurgeryType (Choice Value)
+        # CRANIOTOMY: open cranial tumor resection/debulking. SPINAL_LAMINECTOMY: spinal laminectomy for tumor. ENDOSCOPIC_ENDONASAL: endoscopic endonasal tumor surgery. STEREOTACTIC_BIOPSY: stereotactic-guided biopsy. LITT: laser interstitial thermal therapy. NONE_OF_THE_ABOVE: a documented tumor surgery of a type not listed above, or the type is not stated.
+        # Possible Values:
+        #   - CRANIOTOMY
+        #   - SPINAL_LAMINECTOMY
+        #   - ENDOSCOPIC_ENDONASAL
+        #   - STEREOTACTIC_BIOPSY
+        #   - LITT
+        #   - NONE_OF_THE_ABOVE
+    extent_of_resection = ExtentOfResection (Choice Value)
+        # GROSS_TOTAL_RESECTION: GTR / complete / no residual. NEAR_TOTAL_RESECTION: NTR / >90% with minimal residual. PARTIAL_RESECTION: subtotal / partial / debulking with residual. BIOPSY: biopsy only. NONE_OF_THE_ABOVE: extent not stated (default).
+        # Possible Values:
+        #   - GROSS_TOTAL_RESECTION
+        #   - NEAR_TOTAL_RESECTION
+        #   - PARTIAL_RESECTION
+        #   - BIOPSY
+        #   - NONE_OF_THE_ABOVE
+    surgery_date = Optional mention of [Plaintext string]
+        # Date of this surgery, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated.
+    surgery_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for surgery_date. Null when surgery_date is null.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+

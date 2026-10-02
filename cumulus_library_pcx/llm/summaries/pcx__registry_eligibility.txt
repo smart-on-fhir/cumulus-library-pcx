@@ -1,0 +1,188 @@
+model = "TrialEligibilityAnnotation"
+age_under_36_months_at_definitive_surgery:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+newly_diagnosed_embryonal_tumor:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+high_risk_disease:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+atrt_excluded:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+no_prior_chemotherapy:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+no_prior_radiation:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+adequate_renal_function:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+adequate_hepatic_function:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+adequate_cardiac_function:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+adequate_pulmonary_function:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+
+adequate_marrow_function:
+    status = CriterionStatus (Choice Value)
+        # Evidence for the parent criterion in this note only. MET: direct evidence the criterion is satisfied. NOT_MET: direct evidence the criterion is not satisfied. NONE_OF_THE_ABOVE: missing information, or direct evidence both for and against; never eligible or ineligible by default.
+        # Possible Values:
+        #   - MET
+        #   - NOT_MET
+        #   - NONE_OF_THE_ABOVE
+    assessment_date = Optional mention of [Plaintext string]
+        # Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+

@@ -1,0 +1,25 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+ResponseAnnotation,,,,,
+ResponseAnnotation,assessments,,,,"All baseline and subsequent assessments. Empty means no assessment extracted, not no disease."
+ResponseAnnotation,assessments,ResponseAssessmentMention,,,
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,,Documented treatment-relative timepoint; do not infer end-consolidation from a remission statement.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,BASELINE,before treatment starts.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,DURING_INDUCTION,during induction.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,END_INDUCTION,at end of induction.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,DURING_CONSOLIDATION,during consolidation.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,END_CONSOLIDATION,at end of consolidation.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,FOLLOW_UP,after treatment completion.
+ResponseAnnotation,assessments,ResponseAssessmentMention,timepoint,NONE_OF_THE_ABOVE,"another timepoint, or timepoint not documented."
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,,Explicit CR/PR/SD/PD or assessment result. Missing imaging is not CR; do not assign CR from resection alone.
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,COMPLETE_RESPONSE,complete response (CR).
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,PARTIAL_RESPONSE,partial response (PR).
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,STABLE_DISEASE,stable disease (SD).
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,PROGRESSIVE_DISEASE,progressive disease (PD).
+ResponseAnnotation,assessments,ResponseAssessmentMention,response,NONE_OF_THE_ABOVE,"not evaluable, indeterminate, or no response documented."
+ResponseAnnotation,assessments,ResponseAssessmentMention,radiologically_evaluable,,Explicit evaluable/measurable disease on imaging at this assessment; null if unknown. Baseline evaluability determines the primary-response denominator.
+ResponseAnnotation,assessments,ResponseAssessmentMention,cytologically_evaluable,,Explicit cytologically evaluable disease at this assessment; null if unknown.
+ResponseAnnotation,assessments,ResponseAssessmentMention,assessment_date,,"Actual response assessment date, ISO date at supported precision."
+ResponseAnnotation,assessments,ResponseAssessmentMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+ResponseAnnotation,assessments,ResponseAssessmentMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+ResponseAnnotation,assessments,ResponseAssessmentMention,assessment_date_precision,MONTH,month and year explicitly stated.
+ResponseAnnotation,assessments,ResponseAssessmentMention,assessment_date_precision,YEAR,only the year explicitly stated.

@@ -1,0 +1,29 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+SurgeryAnnotation,,,,,Surgery annotations from a single clinical note (a list — surgeries repeat).
+SurgeryAnnotation,surgeries,,,,All tumor-directed surgeries documented in this note; empty list if none.
+SurgeryAnnotation,surgeries,SurgeryMention,,,"A single neurosurgical procedure for the tumor, with its type, resection extent, and date. Emit one SurgeryMention per distinct operation documented in this note."
+SurgeryAnnotation,surgeries,SurgeryMention,age_at_surgery_months,,Explicit age at this operation in months. Do not substitute age at diagnosis or restrict to under 36 months.
+SurgeryAnnotation,surgeries,SurgeryMention,residual_tumor_area_cm2,,"Explicit postoperative residual tumor AREA in cm2. Do not convert a length or volume to area, or infer from GTR/NTR/STR."
+SurgeryAnnotation,surgeries,SurgeryMention,residual_assessment_date,,"Postoperative imaging assessment date, ISO date at supported precision; not automatically surgery date."
+SurgeryAnnotation,surgeries,SurgeryMention,residual_assessment_date_precision,,Precision of residual_assessment_date; null when absent.
+SurgeryAnnotation,surgeries,SurgeryMention,residual_assessment_date_precision,DAY,"day, month and year explicitly stated."
+SurgeryAnnotation,surgeries,SurgeryMention,residual_assessment_date_precision,MONTH,month and year explicitly stated.
+SurgeryAnnotation,surgeries,SurgeryMention,residual_assessment_date_precision,YEAR,only the year explicitly stated.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,,
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,CRANIOTOMY,open cranial tumor resection/debulking.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,SPINAL_LAMINECTOMY,spinal laminectomy for tumor.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,ENDOSCOPIC_ENDONASAL,endoscopic endonasal tumor surgery.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,STEREOTACTIC_BIOPSY,stereotactic-guided biopsy.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,LITT,laser interstitial thermal therapy.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_type,NONE_OF_THE_ABOVE,"a documented tumor surgery of a type not listed above, or the type is not stated."
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,,
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,GROSS_TOTAL_RESECTION,GTR / complete / no residual.
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,NEAR_TOTAL_RESECTION,NTR / >90% with minimal residual.
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,PARTIAL_RESECTION,subtotal / partial / debulking with residual.
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,BIOPSY,biopsy only.
+SurgeryAnnotation,surgeries,SurgeryMention,extent_of_resection,NONE_OF_THE_ABOVE,extent not stated (default).
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_date,,"Date of this surgery, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated."
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_date_precision,,Precision for surgery_date. Null when surgery_date is null.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_date_precision,DAY,"day, month and year explicitly stated."
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_date_precision,MONTH,month and year explicitly stated.
+SurgeryAnnotation,surgeries,SurgeryMention,surgery_date_precision,YEAR,only the year explicitly stated.

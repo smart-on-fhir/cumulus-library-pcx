@@ -1,0 +1,47 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+MolecularAnnotation,,,,,
+MolecularAnnotation,reports,,,,One entry per report/classification; retain conflicting reports separately.
+MolecularAnnotation,reports,MolecularReportMention,,,
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,,"Explicit medulloblastoma molecular group as this report states it. Preserve conflicting calls across reports. Never infer a group from a single alteration, from histology, or from treatment."
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,WNT,WNT-activated.
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,SHH,"SHH-activated, any TP53 status."
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,GROUP_3,Group 3 by methylation or expression profiling.
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,GROUP_4,Group 4 by methylation or expression profiling.
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,NON_WNT_NON_SHH,"non-WNT/non-SHH without a Group 3 versus Group 4 call, as from immunohistochemistry."
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,NOT_SUBGROUPED,testing explicitly not performed or not available.
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,INDETERMINATE,"testing attempted but no classification reached, such as failed assay or insufficient tissue."
+MolecularAnnotation,reports,MolecularReportMention,molecular_group,NONE_OF_THE_ABOVE,no molecular group documented in this report.
+MolecularAnnotation,reports,MolecularReportMention,methods,,"Methods this report documents for molecular classification. Select every method the report documents; several may apply to one report. NONE_OF_THE_ABOVE is only valid on its own, never alongside a named method."
+MolecularAnnotation,reports,MolecularReportMention,methods,DNA_METHYLATION,methylation array or methylation-based classifier.
+MolecularAnnotation,reports,MolecularReportMention,methods,SEQUENCING,"DNA or RNA sequencing, including expression-based subgrouping such as NanoString."
+MolecularAnnotation,reports,MolecularReportMention,methods,IMMUNOHISTOCHEMISTRY,"surrogate markers such as beta-catenin, GAB1, YAP1 or filamin A."
+MolecularAnnotation,reports,MolecularReportMention,methods,FISH,fluorescence in situ hybridization.
+MolecularAnnotation,reports,MolecularReportMention,methods,COPY_NUMBER_ANALYSIS,array or sequencing-derived copy number.
+MolecularAnnotation,reports,MolecularReportMention,methods,CLINICAL_SUMMARY,the note quotes a group without the original report or method.
+MolecularAnnotation,reports,MolecularReportMention,methods,NONE_OF_THE_ABOVE,"another named method, or a result is stated but no method is given."
+MolecularAnnotation,reports,MolecularReportMention,report_date,,"Date of this molecular report, ISO date at supported precision; distinct from original diagnosis."
+MolecularAnnotation,reports,MolecularReportMention,report_date_precision,,Precision for report_date; null if absent.
+MolecularAnnotation,reports,MolecularReportMention,report_date_precision,DAY,"day, month and year explicitly stated."
+MolecularAnnotation,reports,MolecularReportMention,report_date_precision,MONTH,month and year explicitly stated.
+MolecularAnnotation,reports,MolecularReportMention,report_date_precision,YEAR,only the year explicitly stated.
+MolecularAnnotation,alterations,,,,Documented alterations or explicit negative results; empty is not a negative panel.
+MolecularAnnotation,alterations,MolecularAlterationMention,,,
+MolecularAnnotation,alterations,MolecularAlterationMention,target,,"Exact gene/chromosome, e.g. MYC, MYCN, TP53, isochromosome 17q, chromosome 8, 10 or 11. Keep MYC and MYCN separate."
+MolecularAnnotation,alterations,MolecularAlterationMention,alteration,,"Amplification, gain, loss, mutation or isochromosome as stated. Amplification and gain are distinct; preserve the reported term."
+MolecularAnnotation,alterations,MolecularAlterationMention,status,,Status of this alteration.
+MolecularAnnotation,alterations,MolecularAlterationMention,status,PRESENT,explicitly reported as present.
+MolecularAnnotation,alterations,MolecularAlterationMention,status,ABSENT,requires explicitly negative testing.
+MolecularAnnotation,alterations,MolecularAlterationMention,status,NONE_OF_THE_ABOVE,"tested but indeterminate, or status not documented."
+MolecularAnnotation,alterations,MolecularAlterationMention,report_date,,"Date of the source result, ISO date at supported precision."
+MolecularAnnotation,alterations,MolecularAlterationMention,report_date_precision,,Precision for report_date; null if absent.
+MolecularAnnotation,alterations,MolecularAlterationMention,report_date_precision,DAY,"day, month and year explicitly stated."
+MolecularAnnotation,alterations,MolecularAlterationMention,report_date_precision,MONTH,month and year explicitly stated.
+MolecularAnnotation,alterations,MolecularAlterationMention,report_date_precision,YEAR,only the year explicitly stated.
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,,"Method supporting this alteration, if stated."
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,DNA_METHYLATION,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,SEQUENCING,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,IMMUNOHISTOCHEMISTRY,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,FISH,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,COPY_NUMBER_ANALYSIS,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,CLINICAL_SUMMARY,
+MolecularAnnotation,alterations,MolecularAlterationMention,testing_method,NONE_OF_THE_ABOVE,"another named method, or no method given."
