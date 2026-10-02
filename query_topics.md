@@ -75,7 +75,7 @@ medulloblastoma cohort, use the appropriate reviewed diagnosis evidence or struc
 case definition; `diagnosis_recall` also retrieves other CNS tumors. A patient-level
 intersection does not remove the query's same-note context requirements. Follow-up
 notes without those anchors may be missed, which can affect both note and patient
-coverage. The structured age-at-visit 0–8 and minimum 365-day encounter-span filters
+coverage. The structured age-at-visit 0–120 and minimum 365-day encounter-span filters
 are additional, independent restrictions (see [limitations](limitations.md)).
 
 Same-note co-occurrence does not prove that a procedure treated the tumor. Negated,

@@ -41,6 +41,7 @@ def build_database(rows: Mapping[str, list[dict]], schema: Path,
                    sql_files: Iterable[Path], input_dir: Path):
     """Load typed fixtures and execute the supplied SQL in an in-memory database.
 
+    A table with no rows stays empty from schema.sql and gets no CSV in input_dir.
     The caller owns the returned connection. On failure it is closed here.
     Compatibility macros cover the existing stage queries, not all Athena SQL.
     """
@@ -56,10 +57,12 @@ def build_database(rows: Mapping[str, list[dict]], schema: Path,
         if unknown:
             raise KeyError(f'tables not in schema.sql: {sorted(unknown)}')
         for table in schema_tables:
+            if not rows.get(table):
+                continue
             quoted = _identifier(table)
             columns = [row[0] for row in con.execute(f'DESCRIBE {quoted}').fetchall()]
             csv_file = input_dir / f'{table}.csv'
-            write_plain_csv(csv_file, columns, rows.get(table, []))
+            write_plain_csv(csv_file, columns, rows[table])
             filename = str(csv_file).replace("'", "''")
             con.execute(f"COPY {quoted} FROM '{filename}' (HEADER, DELIMITER ',', NULLSTR '')")
         for sql_file in sql_files:

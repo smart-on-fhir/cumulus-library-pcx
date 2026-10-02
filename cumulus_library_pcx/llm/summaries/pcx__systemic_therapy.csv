@@ -1,0 +1,117 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+SystemicTherapyAnnotation,,,,,Systemic-therapy annotations from a single clinical note.
+SystemicTherapyAnnotation,regimens,,,,All medical-therapy regimens documented in this note; empty list if none.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,,,"A medical-therapy (chemotherapy) regimen: the protocol the patient is treated on or in accordance with, its start/stop, and the agents it comprises. Emit one per distinct regimen documented in this note."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,,
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,INDUCTION,induction.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,CONSOLIDATION,consolidation.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,POST_CONSOLIDATION,post-consolidation.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,SALVAGE,salvage.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,phase,NONE_OF_THE_ABOVE,"another documented phase, or phase not documented."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,documented_trial_arm,,"Explicit randomized arm assignment, if any. Do not infer randomization from observed treatment."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,protocol_name_verbatim,,"Treatment protocol name as written (e.g. 'ACNS0334', 'CCG99703', 'Head Start'). Null if the note states the patient is not treated per a protocol, or no protocol is named."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_start_date,,"Regimen start date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_start_date_precision,,Precision for regimen_start_date. Null when it is null.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_start_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_start_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_start_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_stop_date,,"Regimen stop date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_stop_date_precision,,Precision for regimen_stop_date. Null when it is null.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_stop_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_stop_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,regimen_stop_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens,MedicalTherapyRegimenMention,agents,,"Agents documented for this regimen; inspect delivery_status to establish receipt, not the protocol name."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,,,"A single systemic agent documented in treatment planning or delivery. Emit one per distinct agent (e.g. vincristine, cisplatin, cyclophosphamide, methotrexate)."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,,Receipt of this agent when individual doses are not detailed. Plans do not establish exposure.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,ADMINISTERED,administered.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,PLANNED,planned.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,HELD,held.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,CANCELLED,cancelled.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,EXPLICITLY_NOT_RECEIVED,explicitly documented as not received.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,delivery_status,NONE_OF_THE_ABOVE,none of the above.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,agent_name,,Therapeutic agent name as written (generic preferred). Null if none documented.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_start_date,,"Agent start date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_start_date_precision,,Precision for therapy_start_date. Null when it is null.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_start_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_start_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_start_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_stop_date,,"Agent stop date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_stop_date_precision,,Precision for therapy_stop_date. Null when it is null.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_stop_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_stop_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,therapy_stop_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,assessed_through_date,,"Date through which explicit non-receipt or delivery of this agent is assessed, ISO YYYY-MM-DD. Mainly for EXPLICITLY_NOT_RECEIVED: the note states the agent was not given as of this date. Never infer from the note date. Null if not stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,assessed_through_date_precision,,Precision for assessed_through_date. Null when it is null.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,assessed_through_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,assessed_through_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,assessed_through_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents,TherapyAgentMention,administrations,,All distinct dated administrations or explicitly stated protocol doses for this agent in the document. Empty when no administration-level detail is stated.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,,,One documented administration or protocol dose for an agent.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,,Delivery status of this dose.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,ADMINISTERED,actual receipt.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,PLANNED,"planned protocol doses, held doses and cancelled orders remain separate from receipt."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,HELD,"planned protocol doses, held doses and cancelled orders remain separate from receipt."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,CANCELLED,"planned protocol doses, held doses and cancelled orders remain separate from receipt."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,EXPLICITLY_NOT_RECEIVED,explicitly documented as not received.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,delivery_status,NONE_OF_THE_ABOVE,none of the above.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,,Documented phase of this dose; never infer from drug name alone.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,INDUCTION,induction.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,CONSOLIDATION,consolidation.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,POST_CONSOLIDATION,post-consolidation.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,SALVAGE,salvage.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,phase,NONE_OF_THE_ABOVE,"another documented phase, or phase not documented."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,cycle_name,,"Cycle linked to this administration, if stated."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,administration_date,,"Administration date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,administration_date_precision,,Precision for administration_date. Null when it is null.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,administration_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,administration_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,administration_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,dose_amount,,Numeric dose amount as documented. Use the per-body-surface-area amount when the note gives g/m2 or mg/m2; otherwise use the administered amount. Null if no numeric dose is stated.
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,dose_unit,,"Dose unit exactly as written, including denominator when present, such as 'g/m2', 'mg/m2', or 'mg/kg'. Null when dose_amount is null."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,route,,"Administration route as written, such as intravenous, intrathecal, or oral. Null if not stated."
+SystemicTherapyAnnotation,regimens.agents.administrations,TherapyAdministrationMention,high_dose_methotrexate_explicit_bool,,True only when this administration is explicitly called high-dose methotrexate. False only when explicitly characterized as not high-dose; null when unknown. Numeric dose-based classification occurs downstream. This label does not establish receipt; inspect delivery_status.
+SystemicTherapyAnnotation,stem_cell_infusions,,,,"Documented stem-cell rescue/infusion events, separate from collection and plans."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,,,
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,,
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,ADMINISTERED,administered.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,PLANNED,planned.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,HELD,held.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,CANCELLED,cancelled.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,EXPLICITLY_NOT_RECEIVED,explicitly documented as not received.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,delivery_status,NONE_OF_THE_ABOVE,none of the above.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,,
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,INDUCTION,induction.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,CONSOLIDATION,consolidation.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,POST_CONSOLIDATION,post-consolidation.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,SALVAGE,salvage.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,phase,NONE_OF_THE_ABOVE,"another documented phase, or phase not documented."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,infusion_date,,"Actual stem-cell infusion date, not collection date."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,infusion_date_precision,,Precision for infusion_date; null if absent.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,infusion_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,infusion_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,infusion_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,cycle_name,,"Associated consolidation cycle, only when documented."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,cell_source,,"Autologous peripheral blood, bone marrow or other documented source."
+SystemicTherapyAnnotation,stem_cell_infusions,StemCellInfusionMention,cd34_cells_per_kg,,Explicit absolute CD34+ cells/kg; convert a stated multiplier such as 2 x 10^6 to 2000000. Never substitute collected dose for infused dose.
+SystemicTherapyAnnotation,cycles,,,,All named/numbered therapy cycles documented in this note; empty list if none.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,,,A named or numbered chemotherapy cycle (for protocols that use cycles).
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,,"Documented induction, consolidation or salvage phase."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,INDUCTION,induction.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,CONSOLIDATION,consolidation.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,POST_CONSOLIDATION,post-consolidation.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,SALVAGE,salvage.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,phase,NONE_OF_THE_ABOVE,"another documented phase, or phase not documented."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,protocol_name_verbatim,,Protocol linking this cycle to its regimen if stated.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,completion_status,,"Explicit planned, started, completed, interrupted or discontinued cycle status."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,interruption_reason,,Reason for interruption/discontinuation only if stated; do not infer toxicity or progression.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_name,,"Cycle name or number as written (e.g. 'Induction Cycle 2', 'Cycle 3'). Null if none."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_start_date,,"Cycle start date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_start_date_precision,,Precision for cycle_start_date. Null when it is null.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_start_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_start_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_start_date_precision,YEAR,only the year explicitly stated.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_stop_date,,"Cycle stop date, ISO YYYY-MM-DD. Null if not stated."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_stop_date_precision,,Precision for cycle_stop_date. Null when it is null.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_stop_date_precision,DAY,"day, month and year explicitly stated."
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_stop_date_precision,MONTH,month and year explicitly stated.
+SystemicTherapyAnnotation,cycles,MedicalTherapyCycleMention,cycle_stop_date_precision,YEAR,only the year explicitly stated.

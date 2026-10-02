@@ -1,0 +1,90 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+DocumentTopicAnnotation,,,,,Wide-friendly routing gate for the PCX extraction models. Each routing field matches its extraction module's filename without ``.py``.
+DocumentTopicAnnotation,response,,,,"Baseline measurable/evaluable disease, CR/PR/SD/PD, end-induction or end-consolidation assessment, including explicitly negative MRI/CSF findings."
+DocumentTopicAnnotation,response,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,response,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,response,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,response,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,response,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,response,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,response,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,diagnosis,,,,"ATRT, medulloblastoma, other CNS embryonal diagnosis, WHO-CNS5 integrated diagnosis, primary site, or diagnosis date."
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,diagnosis,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,molecular,,,,"Medulloblastoma subgroup, MYC/MYCN, chromosome alterations, assay provenance, WNT/SHH/Group 3/Group 4, methylation class, or a qualifying pathology and molecular report."
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,molecular,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,event,,,,"Initial diagnosis, progression, recurrence, refractory disease, second malignancy, second primary, death, response, or current disease status."
+DocumentTopicAnnotation,event,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,event,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,event,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,event,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,event,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,event,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,event,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,metastasis,,,,"Chang M stage, brain/spine metastatic imaging, CSF cytology, leptomeningeal spread, or extraneural metastatic disease."
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,metastasis,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,surgery,,,,"Tumor biopsy/resection, surgery date, procedure type, or extent of resection."
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,surgery,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,radiation,,,,"Radiation course, modality, field, start/stop date, craniospinal or focal treatment, and dose."
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,radiation,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,systemic_therapy,,,,"Chemotherapy protocol, regimen, cycle, administered agent, dose, route, high-dose methotrexate, induction/consolidation, stem-cell rescue or prior treatment."
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,systemic_therapy,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,laboratory,,,,"Hemoglobin, platelets, absolute neutrophils, creatinine, ALT, AST, bilirubin, creatinine clearance/measured GFR, MTX level, or documented toxicity. Include explicit normal and abnormal results; absent testing is not a negative result."
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,laboratory,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,survival_timeline,,,,"Initial tumor-detecting MRI date, vital status, last known alive date, death date, event-free follow-up, definitive surgery, treatment initiation or actual trial enrollment."
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,survival_timeline,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.
+DocumentTopicAnnotation,registry_eligibility,,,,"ACNS0334 comparability: age at definitive surgery, newly diagnosed high-risk embryonal disease, ATRT exclusion/reclassification, pretreatment history or renal/hepatic/cardiac/pulmonary/marrow adequacy. Include explicit negatives."
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,,,Classify one fixed PCX topic using patient-specific document evidence.
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,relevance,,"Explicit negative tests and non-receipt statements are relevant to staging, treatment, molecular testing and eligibility. Exclude hypothetical/rule-out disease and family history unless requested."
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,relevance,EXPLICIT,the topic is directly named or measured for this patient.
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,relevance,IMPLICIT,only when the document contains the topic-specific supporting facts in the parent field description.
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,relevance,NONE_OF_THE_ABOVE,neither level is supported.
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,confidence,,Confidence in the relevance classification from 0.0 to 1.0.
+DocumentTopicAnnotation,registry_eligibility,TopicRelevanceMention,reasoning,,One concise sentence applying the parent field definition to the cited spans. Null for NONE_OF_THE_ABOVE.

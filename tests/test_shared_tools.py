@@ -62,7 +62,8 @@ def test_synthetic_io_build_order_types_and_quoted_path(tmp_path):
     folder = tmp_path / "another study's fixtures"
     folder.mkdir()
     schema = tmp_path / 'schema.sql'
-    schema.write_text('CREATE TABLE people (subject_ref VARCHAR, seen DATE, flag BOOLEAN);')
+    schema.write_text('CREATE TABLE people (subject_ref VARCHAR, seen DATE, flag BOOLEAN);'
+                      'CREATE TABLE unused (subject_ref VARCHAR);')
     custom = tmp_path / 'custom'
     custom.mkdir()
     (custom / 'first.sql').write_text('CREATE TABLE first AS SELECT * FROM people;')
@@ -75,7 +76,9 @@ def test_synthetic_io_build_order_types_and_quoted_path(tmp_path):
     rows = {'people': [{'subject_ref': 'p1', 'seen': date(2020, 1, 31), 'flag': True}]}
     with synthetic_io.build_database(rows, schema, sql, folder) as con:
         assert con.execute('SELECT * FROM second').fetchall() == [('p1', date(2020, 1, 31), True)]
+        assert con.execute('SELECT COUNT(*) FROM unused').fetchone() == (0,)
         assert con.execute("SELECT date_diff('month', DATE '2020-01-31', DATE '2020-02-29')").fetchone() == (1,)
+    assert not (folder / 'unused.csv').exists()     # no header-only CSV for a table with no rows
 
 
 def test_synthetic_io_rejects_unknown_tables_and_columns(tmp_path):

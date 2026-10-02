@@ -14,7 +14,13 @@
 --  exposure is taken, so adding a source is one more UNION branch.
 --  Orders are linked to study_population encounters, dispenses are matched for
 --  every case subject.
---  "prior to t0" supports the ACNS0334 no-prior-chemotherapy criterion.
+--  Flags are yes/no, they never remove a subject:
+--    *_any_bool          ever exposed, any source, any date. FALSE = no evidence
+--    *_prior_to_t0_bool  first dated exposure before t0_day. FALSE when t0 is
+--                        known and nothing is dated before it (including no
+--                        evidence at all), NULL only when t0_day is NULL
+--  pcx__eligible_trial applies the prior-to-t0 flags as the ACNS0334
+--  no-prior-chemotherapy criterion, methotrexate included.
 --  =====================================================================
 CREATE  TABLE   pcx__eligible_rx AS
 WITH
@@ -101,10 +107,19 @@ SELECT  dx.subject_ref,
         first_day.chemo_order_first_day,
         first_day.chemo_dispense_first_day,
         first_day.chemo_administered_first_day,
-        first_day.methotrexate_any_bool,
+        COALESCE(first_day.methotrexate_any_bool, FALSE)                    AS methotrexate_any_bool,
         first_day.methotrexate_administered_bool,
-        first_day.chemo_any_bool,
-        (first_day.chemo_first_day < dx.t0_day)                             AS chemo_prior_to_t0_bool
+        COALESCE(first_day.chemo_any_bool, FALSE)                           AS chemo_any_bool,
+        CASE
+            WHEN dx.t0_day IS NULL                                          THEN NULL
+            WHEN first_day.methotrexate_first_day < dx.t0_day               THEN TRUE
+            ELSE                                                                 FALSE
+        END                                                                 AS methotrexate_prior_to_t0_bool,
+        CASE
+            WHEN dx.t0_day IS NULL                                          THEN NULL
+            WHEN first_day.chemo_first_day < dx.t0_day                      THEN TRUE
+            ELSE                                                                 FALSE
+        END                                                                 AS chemo_prior_to_t0_bool
 FROM    pcx__eligible_dx   AS dx
 LEFT JOIN first_day                 ON first_day.subject_ref = dx.subject_ref
 ;

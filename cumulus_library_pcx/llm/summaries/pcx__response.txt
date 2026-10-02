@@ -1,0 +1,34 @@
+model = "ResponseAnnotation"
+assessments: A (possibly empty) list of ResponseAssessmentMention instances, which contain:
+    timepoint = AssessmentTimepoint (Choice Value)
+        # Documented treatment-relative timepoint; do not infer end-consolidation from a remission statement.
+        # Possible Values:
+        #   - BASELINE
+        #   - DURING_INDUCTION
+        #   - END_INDUCTION
+        #   - DURING_CONSOLIDATION
+        #   - END_CONSOLIDATION
+        #   - FOLLOW_UP
+        #   - NONE_OF_THE_ABOVE
+    response = ResponseStatus (Choice Value)
+        # Explicit CR/PR/SD/PD or assessment result. Missing imaging is not CR; do not assign CR from resection alone.
+        # Possible Values:
+        #   - COMPLETE_RESPONSE
+        #   - PARTIAL_RESPONSE
+        #   - STABLE_DISEASE
+        #   - PROGRESSIVE_DISEASE
+        #   - NONE_OF_THE_ABOVE
+    radiologically_evaluable = Optional mention of [True or False]
+        # Explicit evaluable/measurable disease on imaging at this assessment; null if unknown. Baseline evaluability determines the primary-response denominator.
+    cytologically_evaluable = Optional mention of [True or False]
+        # Explicit cytologically evaluable disease at this assessment; null if unknown.
+    assessment_date = Optional mention of [Plaintext string]
+        # Actual response assessment date, ISO date at supported precision.
+    assessment_date_precision = Optional mention of [DatePrecision (Choice Value)]
+        # Precision for assessment_date; null if absent.
+        # Possible Values:
+        #   - DAY
+        #   - MONTH
+        #   - YEAR
+
+

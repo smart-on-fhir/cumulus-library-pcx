@@ -1,0 +1,123 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+TrialEligibilityAnnotation,,,,,
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,,,,Strictly under 36 months AT DEFINITIVE SURGERY. Age at diagnosis alone does not establish this criterion.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,,,
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,age_under_36_months_at_definitive_surgery,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,,,,Newly diagnosed medulloblastoma or historical sPNET/related embryonal tumor; recurrence alone does not establish newly diagnosed disease.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,,,
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,newly_diagnosed_embryonal_tumor,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,high_risk_disease,,,,"Documented high-risk MB evidence: residual disease, metastasis, anaplastic histology, or diagnosis under 8 months; historical sPNET any stage. Retain detailed histology/stage/residual measurements separately for stratum adjudication. Do not invent an area threshold from a resection label."
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,,,
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,high_risk_disease,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,atrt_excluded,,,,MET when diagnosis/pathology explicitly excludes ATRT; NOT_MET when ATRT is confirmed; NONE_OF_THE_ABOVE when unaddressed. Marker loss alone does not diagnose ATRT.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,,,
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,atrt_excluded,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,no_prior_chemotherapy,,,,"No chemotherapy before initial study-like treatment, with steroids allowed. Subsequent chemotherapy is not evidence of pretreatment ineligibility."
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,,,
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,no_prior_chemotherapy,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,no_prior_radiation,,,,No radiation before initial study-like treatment. Later discretionary or salvage radiation does not fail this baseline criterion.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,,,
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,no_prior_radiation,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,adequate_renal_function,,,,Explicit baseline renal adequacy or inadequacy. Do not infer adequacy from absent lab results; capture numeric evidence in laboratory.py.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,,,
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,adequate_renal_function,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,adequate_hepatic_function,,,,Explicit baseline hepatic adequacy or inadequacy; retain dated laboratory evidence.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,,,
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,adequate_hepatic_function,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,adequate_cardiac_function,,,,Explicit baseline cardiac adequacy or inadequacy; preserve supporting assessment.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,,,
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,adequate_cardiac_function,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,adequate_pulmonary_function,,,,Explicit baseline pulmonary adequacy or inadequacy; preserve supporting assessment.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,,,
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,adequate_pulmonary_function,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.
+TrialEligibilityAnnotation,adequate_marrow_function,,,,Explicit baseline marrow adequacy or inadequacy; retain dated counts and transfusion context.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,,,
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,status,,Evidence for the parent criterion in this note only.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,status,MET,direct evidence the criterion is satisfied.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,status,NOT_MET,direct evidence the criterion is not satisfied.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,status,NONE_OF_THE_ABOVE,"missing information, or direct evidence both for and against; never eligible or ineligible by default."
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,assessment_date,,"Date to which criterion evidence applies, ISO date at supported precision; preserve pretreatment versus later findings."
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,assessment_date_precision,,Precision for assessment_date; null if absent.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,assessment_date_precision,DAY,"day, month and year explicitly stated."
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,assessment_date_precision,MONTH,month and year explicitly stated.
+TrialEligibilityAnnotation,adequate_marrow_function,TrialCriterionMention,assessment_date_precision,YEAR,only the year explicitly stated.

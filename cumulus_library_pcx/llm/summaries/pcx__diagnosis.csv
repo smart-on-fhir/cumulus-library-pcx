@@ -1,0 +1,47 @@
+annot,annot_col,mention_type,mention_col,mention_key,mention_value
+DiagnosisAnnotation,,,,,"Extract confirmed patient-specific diagnoses, including documented history. Exclude suspected, negated, rule-out, and family-history diagnoses. Preserve exact diagnosis/site wording and legacy terms without inferring modern entities. Molecular classification is handled separately. Unknown findings do not imply eligibility or exclusion. Extract only explicitly documented M-stage; do not derive it from imaging or cytology here. Histology is unknown when unstated or not medulloblastoma. Every mention carries verbatim spans; has_mention must agree with the spans."
+DiagnosisAnnotation,disease_subtype,,,,
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,,,"The patient's documented CNS embryonal tumor diagnosis. Choose the single best subtype supported by pathology/molecular text in THIS note. Do not extract negated, rule-out, suspected/probable, or family-history diagnoses."
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,,Documented diagnosis using only evidence from this note. Choose exactly one.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,ATRT,"atypical teratoid/rhabdoid tumor, AT/RT, malignant rhabdoid tumor of the CNS. Record ATRT as an exclusion/reclassification; do not infer it from a marker alone."
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,MEDULLOBLASTOMA,"medulloblastoma of any histology or molecular group (WNT, SHH, Group 3, Group 4), include medullomyoblastoma and MBEN."
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,ETMR,embryonal tumor with multilayered rosettes.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,PINEOBLASTOMA,pineoblastoma.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,LEGACY_SPNET,historical supratentorial PNET/CNS-PNET without a modern diagnosis.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,OTHER_CNS_EMBRYONAL,other embryonal CNS tumor or embryonal tumor NOS.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,disease_subtype,NONE_OF_THE_ABOVE,no embryonal-tumor diagnosis is documented in this note.
+DiagnosisAnnotation,disease_subtype,DiseaseSubtypeMention,historical_diagnosis_term,,"A deprecated or legacy (pre-WHO-CNS5) diagnosis term the note uses for THIS tumor -- e.g. 'PNET', 'CNS-PNET', 'supratentorial PNET', 'cerebellar sarcoma', 'medulloblastoma variant'. Capture the exact historical phrase verbatim so a downstream crosswalk can review it against a current diagnosis; do not infer a modern entity from a legacy term. Null when the note uses only current integrated-diagnosis terminology, or no such term is stated. Do not record family-history, negated, or rule-out terms."
+DiagnosisAnnotation,medulloblastoma_histology,,,,
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,,,Histologic pattern when the diagnosis is medulloblastoma. Leave NONE_OF_THE_ABOVE if the histologic pattern is not stated or the tumor is not a medulloblastoma.
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,,Choose exactly one.
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,CLASSIC,classic medulloblastoma.
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,DESMOPLASTIC_NODULAR,desmoplastic/nodular.
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,EXTENSIVE_NODULARITY_MBEN,medulloblastoma with extensive nodularity (MBEN).
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,LARGE_CELL_ANAPLASTIC,large-cell and/or anaplastic.
+DiagnosisAnnotation,medulloblastoma_histology,MedulloblastomaHistologyMention,histology,NONE_OF_THE_ABOVE,histologic pattern not stated or not a medulloblastoma.
+DiagnosisAnnotation,chang_m_stage,,,,
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,,,"Documented Chang metastasis stage (M-stage) at diagnosis/staging, when stated directly. Do not derive it from imaging or cytology here; the derived stage is adjudicated downstream from the metastasis.py inputs."
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,,
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,M0,no metastasis (localized).
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,M1,positive CSF cytology only.
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,M2,intracranial metastasis beyond primary.
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,M3,spinal/leptomeningeal metastasis.
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,M4,metastasis outside the CNS.
+DiagnosisAnnotation,chang_m_stage,ChangMStageMention,chang_m_stage,NONE_OF_THE_ABOVE,M-stage not documented.
+DiagnosisAnnotation,age_at_diagnosis,,,,
+DiagnosisAnnotation,age_at_diagnosis,AgeAtDiagnosisMention,,,Patient's age at initial diagnosis in completed months. Extract only if explicitly stated. Preserve all ages; age at definitive surgery is a separate trial criterion.
+DiagnosisAnnotation,age_at_diagnosis,AgeAtDiagnosisMention,age_at_diagnosis_months,,Explicit age at initial diagnosis in completed months (e.g. '2 years' -> 24); not age at definitive surgery. Null if unstated.
+DiagnosisAnnotation,diagnosis_date,,,,
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,,,"Date the patient was first diagnosed with this embryonal tumor. If several dates appear, use the earliest diagnosis date."
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,diagnosis_date,,"Earliest diagnosis date, ISO YYYY-MM-DD (first-of-period if coarse). Null if not stated."
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,diagnosis_date_precision,,Precision supported by the text for diagnosis_date. Null when diagnosis_date is null.
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,diagnosis_date_precision,DAY,"day, month and year explicitly stated."
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,diagnosis_date_precision,MONTH,month and year explicitly stated.
+DiagnosisAnnotation,diagnosis_date,DiagnosisDateMention,diagnosis_date_precision,YEAR,only the year explicitly stated.
+DiagnosisAnnotation,diagnosis_date_gold,,,,
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,,,Date of the confirmatory ('gold standard') tissue diagnosis: prefer the surgery / biopsy procedure date that produced the diagnostic specimen over a later report date. Not necessarily the definitive surgery.
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,diagnosis_date_gold,,"Confirmatory tissue-diagnosis date, ISO YYYY-MM-DD, first-of-period if coarse. Null if unstated."
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,diagnosis_date_gold_precision,,Precision for diagnosis_date_gold. Null when diagnosis_date_gold is null.
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,diagnosis_date_gold_precision,DAY,"day, month and year explicitly stated."
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,diagnosis_date_gold_precision,MONTH,month and year explicitly stated.
+DiagnosisAnnotation,diagnosis_date_gold,DiagnosisDateGoldMention,diagnosis_date_gold_precision,YEAR,only the year explicitly stated.

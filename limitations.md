@@ -15,10 +15,10 @@ data or completed cross-network analysis was audited. The ordered fix list is [w
 - The build does not run. `manifest.toml` wires the `.workflow` NLP configs as submanifests, which cumulus-library 6.3.1 rejects at parse time; `elastic_output.toml` references an upload manifest outside the repository; `tools/settings.py` fails at import without `CUMULUS_LIBRARY_DATA_PATH`; the wide-table templates render `AND task_version =`; and on Athena the tiered study-variable valuesets are uploaded as strings, so `tier = 1` is `varchar = integer`. Details in [reviews/code-review-2026-09-11/REVIEW.md](reviews/code-review-2026-09-11/REVIEW.md), fixes in workplan phase 1.
 - The active manifest runs population, variable, wide-variable, case-definition, sample, wide-LLM, eligible and outcome stages. The 50k NLP stages and elastic output are registered with `skip_by_default` (ignored on a submanifest stage). Query, full NLP, QA and cube stages are commented out. Client views are generated but not wired.
 - The test suite is 72 passed, 40 failed, 1 collection error. The 47 structured SQL tests pass on DuckDB; the LLM builder tests specify a deployment-discovery design that is not implemented. DuckDB does not reproduce three Athena behaviours the SQL depends on: month arithmetic, `varchar = integer`, and `DATE(varchar)` on a full timestamp.
-- The population SQL applies ages 0–8 at visits, not all ages at diagnosis. It also requires at least two distinct encounter-period ordinals and a minimum 365-day observed encounter span. This filter is not censoring and can remove early deaths or short follow-up. Survival analyses should not inherit this restriction without a justified selection design (workplan 2.7).
+- The population SQL keeps visits at ages 0–120 (widened from 0–8 on 2026-09-30, every age banded in `age_group.csv`). It also requires at least two distinct encounter-period ordinals and a minimum 365-day observed encounter span. This filter is not censoring and can remove early deaths or short follow-up. Survival analyses should not inherit this restriction without a justified selection design (workplan 2.7).
 - Time zero is the first study-population encounter with a tier 1 medulloblastoma casedef code. The casedef stage keeps a second anchor (first casedef encounter of any tier or subtype) for note sampling, so a subject can have two time zeros. The Condition's own onset and recorded dates are not consulted. Subjects whose only tier 1 evidence is an sPNET subtype, or an ICD-O-3 morphology code (absent from casedef.csv), never get a time zero.
-- Three eligible-stage defects change the trial-like cohort: a NULL time zero turns the two prior-therapy exclusions into TRUE; the trial view requires positive radiation and chemotherapy evidence rather than absence of prior evidence, which selects on post-baseline treatment; and SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in dx_brain_cancer.csv (workplan 2.1–2.3).
-- Structured exposure is orders (MedicationRequest), pharmacy dispenses (MedicationDispense) and procedure or encounter codes, not administration; LLM `ADMINISTERED` mentions are the only receipt evidence. Every administered LLM agent counts as chemotherapy while methotrexate orders do not. Methotrexate serum levels and leucovorin, the strongest structured markers of high-dose methotrexate, have no valueset.
+- One eligible-stage defect changes the trial-like cohort (the NULL time zero and "requires treatment evidence" defects were fixed on 2026-09-30, when age, prior methotrexate, prior chemotherapy and prior radiation became yes/no flags on `pcx__eligible`): SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in dx_brain_cancer.csv (workplan 2.1–2.3).
+- Structured exposure is orders (MedicationRequest), pharmacy dispenses (MedicationDispense) and procedure or encounter codes, not administration; LLM `ADMINISTERED` mentions are the only receipt evidence. Every administered LLM agent counts as chemotherapy while methotrexate orders do not (the trial view excludes prior methotrexate from every source through `methotrexate_prior_to_t0_bool`). Methotrexate serum levels and leucovorin, the strongest structured markers of high-dose methotrexate, have no valueset.
 - Vital status reads raw `patient.deceasedBoolean` / `deceasedDateTime`, the last study-population encounter and LLM vital-status mentions; the earliest death and latest alive dates win without cross-checking. A death recorded only by the event task reaches EFS but not OS. Coarse LLM dates (month or year precision) are consumed as exact days.
 - The column dictionary covers the cohort, casedef, sample, eligible and outcome tables; client columns live in `client_dictionary.csv`; the LLM wide-table columns and warn tables are in neither.
 - Lab valuesets include expanded AST, ALT and platelet LOINCs and local AST/ALT/creatinine codes. Creatinine still contains only one LOINC; proposed multi-site additions remain unimplemented. Hemoglobin still includes local reticulocyte hemoglobin code 923. Estimated and special-context measurements need explicit pooling decisions. No eligible or outcome SQL reads a lab table.
@@ -40,17 +40,16 @@ Source: [Mazewski, Leary et al., ACNS0334 report](https://pmc.ncbi.nlm.nih.gov/a
 
 **Gap:** The paper uses age under 36 months at definitive surgery and additional eligibility
 criteria, including disease risk, prior treatment and organ function. The repository now
-has both a discovery cohort (`pcx__eligible`, all ages, every criterion as met / not met /
-unknown) and a trial-like cohort (`pcx__eligible_trial`), but the trial view is affected by
-the three defects above, the sPNET arm never enters it, organ-function criteria are not
-applied, and the definitive operation is identified by free text.
+has both a discovery cohort (`pcx__eligible`, all ages, age and prior methotrexate, chemotherapy
+and radiation as yes/no flags, nobody excluded) and a trial-like cohort (`pcx__eligible_trial`), but
+the trial view is affected by the ATRT code defect above, the sPNET arm never enters it,
+organ-function criteria are not applied, and the definitive operation is identified by free text.
 
 **Consequence:** Selecting young patients with a medulloblastoma diagnosis alone does
-not establish comparability with trial participants; the current intersection is both too
-permissive (NULL time zero) and too restrictive (requires treatment evidence).
+not establish comparability with trial participants.
 
-**Resolution:** Keep the two-table design. Fix the NULL handling, treat absence of pre-t0
-evidence as "no prior" once t0 is known, decide whether sPNET is in scope, make the
+**Resolution:** Keep the two-table design. The NULL handling is fixed and absence of pre-t0
+evidence is "no prior" once t0 is known (2026-09-30). Decide whether sPNET is in scope, make the
 definitive-surgery role an enum, and add staging, residual disease and organ-function
 evidence as further nullable criteria. Do not convert undocumented criteria into eligibility.
 
@@ -105,8 +104,8 @@ response state rather than automatically counting it as an adverse EFS event.
 `radiation_prior_to_first_event_bool` flag and the chemotherapy/radiation sequence are
 implemented in `pcx__outcome_exposure` by date comparison only. Radiation receipt rests on
 procedure or encounter codes and LLM administered rounds; the tier 2 "history of irradiation"
-codes are ignored; the LLM `indication` is free text; and the trial-like cohort currently
-requires radiation evidence to exist at all.
+codes are ignored; and the LLM `indication` is free text. Since 2026-09-30 the trial-like
+cohort no longer requires radiation evidence to exist.
 
 **Resolution:** Capture delivery dates, field, dose and indication, distinguishing
 initial management, post-chemotherapy treatment and salvage after relapse (an indication
