@@ -4,7 +4,7 @@ Command-line front end to the study generator of the `cumulus-library-pcx` study
 renders the Athena SQL and the stage `*.toml` submanifests from their sources, writes
 [manifest.toml](cumulus_library_pcx/manifest.toml), and optionally runs `cumulus-library build`.
 
-* See [README.md](README.md) for what each stage computes;
+* See [README.md](README-0.2.md) for what each stage computes;
 * See [llm.md](llm.md) for the NLP stages, which this command lists but does not generate.
 
 ## Contents
@@ -215,5 +215,5 @@ Sources that `make-pcx` reads. Edit these, never the outputs.
   `include_*.csv` is only caught by `cumulus-library build`.
 - **`--list` does not mark hand-written stages.** Naming one on the command line prints a
   "nothing to make" notice and exits 0.
-- **[README.md](README.md#build)** still documents `python3 -m cumulus_library_pcx.tools.study_builder`
+- **[README.md](README-0.2.md#build)** still documents `python3 -m cumulus_library_pcx.tools.study_builder`
   and describes `client_views` and `qa_athena` as unwired; `make-pcx` generates and lists both.

@@ -5,7 +5,7 @@ observed in ACNS0334 are also observed in comparable EHR-derived medulloblastoma
 cohorts, prioritizing Group 3.
 
 The repository now defines a discovery cohort, a trial-like cohort, dated vital status, OS and a
-provisional EFS ([eligible.md](eligible.md), [README](README.md)). It does not yet specify an
+provisional EFS ([eligible.md](eligible.md), [README](README-0.2.md)). It does not yet specify an
 observational treatment-effect analysis. The scientific items below remain gaps with proposed
 resolutions. The implementation findings were checked against the files on 2026-09-11; no patient
 data or completed cross-network analysis was audited. The ordered fix list is [workplan.md](workplan.md).
