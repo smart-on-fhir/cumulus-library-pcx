@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-02 — builder from the v0.5.0 tag; version 0.3.0
+
+- Setup installs cumulus-study-builder from its `v0.5.0` git tag (`git+ssh`, comorbidity
+  repository). Re-validated against the tag: skills check, starter check, build, validate,
+  70 tests.
+- Removed `test_schema_generation_writes_one_schema_per_task`: the tag refuses schema writes
+  outside the study, and `test_migration.py` already checks every built schema's hash.
+- Removed `tests/data/synthetic`, which no test reads.
+- Version 0.3.0 for the first data-only PyPI release (default stages without NLP). The plan
+  is in WORKPLAN.md.
+
 ## 2026-10-02 — study-builder version replaces make-pcx; builder 0.5.0
 
 - This is now the PCX repository's study: the make-pcx version is tag

@@ -16,28 +16,21 @@ must be fixed before the trial cohort is used, the diagnosis task version before
 are used ([§5](PROTOCOL.md#5-clinical-notes)); the treatment-effect analysis is not yet
 specified ([§8](PROTOCOL.md#8-analysis)).
 
-Runs on 0.5.0 with the `cumulus_library_pcx/` package (validated 2026-10-02: `skills check`,
-`starter check`, build, validate, 71 tests).
+Runs on 0.5.0 with the `cumulus_library_pcx/` package (validated 2026-10-02 against the
+`v0.5.0` tag: `skills check`, `starter check`, build, validate, 70 tests).
 
-Next deliverable (DevOps, 2026-10-02): publish PCX to PyPI as a **built-artifact-only**
-package, rendered SQL and data with no Python dependencies, built from the builder tag. NLP
-stages are left out of this round. See "Data-only PyPI release" under Build, tests and docs.
+Next deliverable (DevOps, 2026-10-02): publish PCX 0.3.0 to PyPI as a **built-artifact-only**
+package, rendered SQL and data with no Python dependencies, built from the builder tag. It
+ships the default stages without NLP; see "Data-only PyPI release" under Build, tests and docs.
 
 ## Open questions
 
-- [ ] **What ships in the first data-only release.** DevOps: drop every NLP builder.
-  That removes `llm_schema` (a Python builder), `elastic_upload`, the four `nlp_*` workflows
-  and their guards, and `llm_document_wide` / `llm_clinical_wide`. `eligible`, `outcome`
-  and `client_views` read LLM tables (`eligible*.sql`, `outcome_*.sql`,
-  `client_diagnosis.sql`), so they go too unless rewritten. Proposed release:
-  `study_population`, `study_variable`, `study_variable_wide`, `casedef`, `sample`,
-  `counts`, `study_meta` (the default plan without NLP). Confirm `sample` and `qa_athena`.
 - [ ] **Where the release workflow runs**: a local script, a dispatchable GitHub Action, or
   both (the Action calls the script). PyPI publish rights: the DevOps lead and @msa2984.
-- [ ] **Release version and name.** `pyproject.toml` says 1.0.0. The PyPI name
-  `cumulus-library-pcx`, import `cumulus_library_pcx`. Cumulus Library's allowlist lists the
-  package as study `cancer_mtx`; the planned allowlist PR renames it to `pcx`. Until it
-  merges, sites pass `--study-dir` to the installed package.
+- [ ] **Allowlist name.** Cumulus Library's allowlist maps study `cancer_mtx` to the module
+  `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Discovery finds
+  allowlisted modules and keys them by the manifest prefix, so an installed release may
+  already build as `-t pcx` without `--study-dir`: the release smoke test settles it.
 - [ ] **Prior-therapy observation policy.** "No prior chemotherapy/radiation" is TRUE today
   only when some chemotherapy/radiation evidence exists and none is dated before t0, so an
   ACNS0334-like child never irradiated is NULL and leaves `eligible_trial`. Decide what
@@ -115,16 +108,22 @@ No changes planned.
      (`spreadsheet/` CSVs and `file_upload_*.toml`, `data_dictionary.csv`). Add a minimal
      `pyproject.toml` with no dependencies and an `__init__.py`. Rewrite paths that point
      outside the package (`manifest.toml` `data_dictionary = "../spreadsheet/..."`, the
-     `../../spreadsheet/` upload references).
-  4. Remove the NLP stages, and anything that reads their tables, from `manifest.toml`
-     (open question above). No `.py` file may remain in the package.
+     `../spreadsheet/file_upload_*.toml` references in the casedef, study_population and
+     study_variable TOMLs).
+  4. Keep only the released stages in `manifest.toml`: `study_population`, `study_variable`,
+     `study_variable_wide`, `casedef`, `sample`, `counts`, `study_meta` (the default plan
+     without `llm_schema`). The NLP stages go, and so do `eligible`, `outcome` and
+     `client_views`, which read LLM tables, and the opt-in `qa_athena`. No `.py` file may
+     remain in the package.
   5. Build, then publish to PyPI (the DevOps lead or @msa2984 holds the rights).
   Keep steps 1–4 separable from step 5: DevOps may reuse them for a future automated
   distribution (builder WORKPLAN, "Reusable render step"). The README states the
   Cumulus Library version the release was rendered and tested with.
-  *Done when* the published wheel holds no Python beyond `__init__.py`, a clean venv with
-  only Cumulus Library installs it, and `cumulus-library build -t pcx --study-dir
-  <installed package>` runs the released stages on DuckDB.
+  *Done when* `cumulus-library-pcx` 0.3.0 is on PyPI (TestPyPI first), the wheel holds no
+  Python beyond `__init__.py`, a clean venv with only Cumulus Library installs it, and
+  `cumulus-library build -t pcx` (with `--study-dir` only if the allowlist question above
+  requires it) runs the seven stages on DuckDB. README and PROTOCOL then say how sites
+  install the release.
 - [ ] P2 · tests · **Default plan test.** Assert `StudyManifest.get_stage('all')` contains none
   of the 11 opt-in actions, including with synthetic Elastic inputs.
 - [ ] P3 · `qa_athena` · Optionally replace the study-owned `qa_athena` stage with the shared

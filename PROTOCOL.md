@@ -191,6 +191,11 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   make-pcx version is tagged `0.2-pre-study-builder`, the study-builder version lands on branch
   `andy/study-builder`. The 0.5.0 move is done now, with a flat `cumulus_library_pcx/` package
   (not `src/`), verified against the unreleased 0.5.0 builder checkout. Andy.
+- 2026-10-02 [decided] The first data-only PyPI release is `cumulus-library-pcx` 0.3.0 with the
+  default stages without NLP: `study_population`, `study_variable`, `study_variable_wide`,
+  `casedef`, `sample`, `counts`, `study_meta`. The NLP stages, `eligible`, `outcome`,
+  `client_views` and `qa_athena` wait for a later release. The builder is installed from its
+  `v0.5.0` git tag (`comorbidity/cumulus-study-builder`, SSH). Andy.
 
 ## Agent rules
 

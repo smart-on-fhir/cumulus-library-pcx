@@ -11,8 +11,6 @@ from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministratio
 from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
 from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
 from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
-from cumulus_study_builder.tools import llm_schema_json
-from cumulus_study_builder.stage import llm_schema
 
 EMPTY = dict(has_mention=False, spans=[])
 EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
@@ -99,11 +97,3 @@ def test_vital_timeline_contradictions_rejected():
         VitalStatusMention(**EVIDENCE, vital_status='ALIVE', death_date='2020-01-01', death_date_precision='DAY')
     with pytest.raises(ValidationError):
         VitalStatusMention(**EVIDENCE, vital_status='DECEASED', death_date='2020-01-01', death_date_precision='DAY', last_known_alive_date='2020-01-02', last_known_alive_date_precision='DAY')
-
-
-def test_schema_generation_writes_one_schema_per_task(tmp_path):
-    package = llm_schema.models_package()
-    tasks = llm_schema_json.list_tasks(package)
-    paths = [llm_schema_json.save_schema(llm_schema_json.annotation_model(task, package), tmp_path / f'{task}.json') for task in tasks]
-    assert len(paths) == len(tasks)
-    assert all(path.exists() for path in paths)
