@@ -1,12 +1,13 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
-Open, study-specific work only, assuming cumulus-study-builder **0.5.0**, installed from the
-git tag `v0.5.0` (the builder is not on PyPI yet). Done work is in
+Open, study-specific work only, on cumulus-study-builder **0.5.0**, the git tag `v0.5.0` (not on
+PyPI). Until the builder repository moves to `smart-on-fhir`, install it with
+`pip install "git+ssh://git@github.com/comorbidity/cumulus-study-builder.git@v0.5.0"`, then
+`pip install -e '.[test]'`; the release workflow needs read access to that repository. Done work is in
 [CHANGELOG.md](CHANGELOG.md).
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
-Each entry: priority · `stage` · task. Paths are as on disk today (`study/...`); after the
-0.5.0 move they are under `cumulus_library_pcx/`.
-**P1** before the next warehouse, export or NLP run (and the 0.5.0 move) · **P2** correctness or usability · **P3** cleanup.
+Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
+**P1** before the next warehouse, export or NLP run · **P2** correctness or usability · **P3** cleanup.
 
 Medulloblastoma (Group 3 first): do the ACNS0334 treatment-associated outcome differences
 appear in EHR cohorts? The study builds a discovery cohort and a trial-like cohort
@@ -15,8 +16,8 @@ must be fixed before the trial cohort is used, the diagnosis task version before
 are used ([§5](PROTOCOL.md#5-clinical-notes)); the treatment-effect analysis is not yet
 specified ([§8](PROTOCOL.md#8-analysis)).
 
-Runs on 0.4.1 with the `study/` package (validated 2026-09-22: validate, build, `skills check`,
-71 tests); the 0.5.0 move is the P1 item under Build, tests and docs.
+Runs on 0.5.0 with the `cumulus_library_pcx/` package (validated 2026-10-02: `skills check`,
+`starter check`, build, validate, 71 tests).
 
 Next deliverable (DevOps, 2026-10-02): publish PCX to PyPI as a **built-artifact-only**
 package, rendered SQL and data with no Python dependencies, built from the builder tag. NLP
@@ -68,15 +69,15 @@ No changes planned.
 
 ## Clinical notes
 
-- [ ] P1 · `nlp_clinical_tasks` · **One diagnosis task version.** `study/nlp_clinical_tasks.workflow:43`
-  says 2 and `study/nlp_clinical_tasks_50k.workflow:44` says 3 for the same schema (the v3 shape), so
+- [ ] P1 · `nlp_clinical_tasks` · **One diagnosis task version.** `cumulus_library_pcx/nlp_clinical_tasks.workflow:43`
+  says 2 and `cumulus_library_pcx/nlp_clinical_tasks_50k.workflow:44` says 3 for the same schema (the v3 shape), so
   the projection drops 50k results. Apply the decision above. *Done when* a test fails
   whenever two workflows defining a task disagree with the projection.
 
 ## Eligibility
 
 - [ ] P1 · `eligible` · **Unknown or undated prior therapy stays unknown.**
-  `study/sql/custom/eligible/eligible.sql:34-44` returns TRUE whenever any evidence exists
+  `cumulus_library_pcx/sql/custom/eligible/eligible.sql:34-44` returns TRUE whenever any evidence exists
   and `*_prior_to_t0_bool` is NULL. That happens when `t0_day` is NULL (LLM-only
   medulloblastoma, `eligible_dx.sql:58`) and when an LLM ADMINISTERED row has no date
   (`eligible_rx.sql:47,55,69`, `eligible_radiation.sql:28,38`); `eligible_trial.sql:7-14`
@@ -96,38 +97,17 @@ No changes planned.
 
 - [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only;
   notes with conflicting dates get a NULL `note_author_date` and drop out of
-  `client_diagnosis.sql`. The `_50k` stages run after `client_views` (`study/stage/manifest.py:24-26`).
+  `client_diagnosis.sql`. The `_50k` stages run after `client_views` (`cumulus_library_pcx/stage/manifest.py:20-22`).
 - [ ] P3 · `client_views` · **Use the builder's client views.** The builder's opt-in
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
   `client_timeline_events`; keep only `client_diagnosis`, `client_exposure`, `client_outcome`
-  and overrides in `study/sql/custom/client_views/` (builder rank 17). *Done when* the client
+  and overrides in `cumulus_library_pcx/sql/custom/client_views/` (builder rank 17). *Done when* the client
   tables and `spreadsheet/client_dictionary.csv` columns are unchanged.
 
 ## Build, tests and docs
 
-- [ ] P1 · build · **Move to builder 0.5.0.** Move `study/` to `cumulus_library_pcx/` and set
-  `[study] directory` (`cumulus-study.toml:2`); pin `cumulus-study-builder>=0.5.0,<0.6` and
-  drop the `biostats` extra (`pyproject.toml:5,10`); `packages.find` `where = ["."]`,
-  `include = ["cumulus_library_pcx*"]` (`pyproject.toml:17`); repoint `.gitignore:11-17`; move
-  `study/sql/custom/counts/counts.workflow` to the package root (and the comment at
-  `study/stage/manifest.py:28`); `starter sync` renames the starter record;
-  remove the commented biostats demo (`analysis/exports.toml`, `study/stage/biostats.py`,
-  `study/sql/custom/biostats/`; `spreadsheet/data_dictionary.csv` stays as Cumulus Library's
-  dictionary, `study/manifest.toml:2`); fix the `study` imports and `sys.path` insert
-  (`tests/conftest.py:8,19`, `tests/test_llm_models.py:6-13`, `tests/test_counts.py:12`);
-  update doc paths (README, AGENTS, PROTOCOL, `analysis/README.md`). Remove
-  `Stage(fhir_resource)`, which builder 0.5.0 drops; nothing here reads `pcx__medicationrequest`
-  or `pcx__medicationdispense` (`study/stage/manifest.py:3,7`, `study/manifest.toml:4-8`,
-  `study/fhir_resource.toml`, `PROTOCOL.md:33`). Pin `cumulus-library>=6.3.4,<6.4`
-  (`pyproject.toml:5`; the builder requires it). The builder pin stays a version range:
-  install the builder tag first (`pip install "git+https://github.com/smart-on-fhir/cumulus-study-builder@v0.5.0"`),
-  then `pip install -e '.[test]'`; README setup says so. Then `cumulus-study skills sync` (the synced skills stop citing the
-  builder's removed `fhir_resource` stage). No `[hooks]`, `[paths]` or removed `[builder]`
-  keys to drop. *Done when* `skills check`, `starter check`, `validate`, `build` and pytest pass
-  on 0.5.0 and `requirements-tested.txt` is refreshed.
-- [ ] P1 · release · **Data-only PyPI release** (DevOps, 2026-10-02). After the 0.5.0
-  move. A release workflow, local or a dispatchable GitHub Action:
+- [ ] P1 · release · **Data-only PyPI release** (DevOps, 2026-10-02). A release workflow, local or a dispatchable GitHub Action:
   1. Make an isolated venv with Cumulus Library, the builder tag and PCX installed.
   2. Run `cumulus-study build` to render the artifacts.
   3. Copy into a standalone directory: `manifest.toml`, the stage TOMLs, the rendered
