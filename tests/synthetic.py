@@ -62,6 +62,7 @@ Options
     --include-inputs
                     also keep the upstream tables in OUTPUT_DIR as plain CSV, in the
                     tests/data/warn fixture style, loadable with tests/sqltest.py connect(data_dir).
+                    A table the generator leaves empty (the rx valuesets, dispenses) gets no file.
                     Always on for `make-pcx test-synthetic`.
     --seed S        same seed, same files. Patient N has the same latent truth at any --noise.
 

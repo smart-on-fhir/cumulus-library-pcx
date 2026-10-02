@@ -16,7 +16,8 @@ Generator that simulates a real-world-like cohort and exports the 10 eligible/ou
    cannot drift from the SQL. `date_diff` is overridden with `datesub` so month ages are Athena completed months.
 4. Exports derived tables + `synthetic__truth.csv` (latent truth per subject). `--include-inputs` keeps the upstream
    tables beside them, so `tests/sqltest.py connect(data_dir)` can load the directory in place of tests/data/warn
-   (it loads only schema.sql tables, ignoring the derived CSVs).
+   (it loads only schema.sql tables, ignoring the derived CSVs). Tables the generator leaves empty, such as the
+   `pcx__valueset_rx_*` tables and `core__medicationdispense`, get no CSV: schema.sql still creates them empty.
 Casedef codes are read from spreadsheet/casedef.csv at run time. Refuses to write into tests/data/warn (fixtures p1-p8).
 
 ## Population

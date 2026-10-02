@@ -2,6 +2,15 @@
 
 Short, human-readable notes on what changed and why. Newest first.
 
+## 2026-10-02 (no empty synthetic test files)
+
+- The synthetic generator no longer writes header-only CSVs for tables it
+  leaves empty. The 7 `pcx__valueset_rx_*.csv` files and
+  `core__medicationdispense.csv` in `tests/data/synthetic` go away. schema.sql
+  still creates those tables (empty) because `pcx__eligible_rx` reads them.
+- The dispense test is unchanged: it uses the 2 non-empty valueset fixtures
+  in `tests/data/warn`.
+
 ## 2026-10-02 (.gitignore cleanup)
 
 - `.gitignore` now ignores all of `cumulus_library_pcx/sql/generated`
