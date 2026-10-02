@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-02 — study-builder version replaces make-pcx; builder 0.5.0
+
+- This is now the PCX repository's study: the make-pcx version is tag
+  `0.2-pre-study-builder`, and this backport replaced it on branch `andy/study-builder`.
+- Moved to cumulus-study-builder 0.5.0: the study package `study/` is now
+  `cumulus_library_pcx/` (`cumulus-study.toml`, `.gitignore`, tests), `counts.workflow` sits at
+  the package root, and `pyproject.toml` pins `cumulus-study-builder>=0.5.0,<0.6` and
+  `cumulus-library>=6.3.4,<6.4`. `.gitignore` also ignores the agent folders skills sync
+  creates (`.claude/`, `.codex/`, `.gemini/`).
+- Removed `Stage(fhir_resource)` (medication tables come from Cumulus Library core) and the
+  commented biostats demo (`analysis/`, `stage/biostats.py`, `sql/custom/biostats/`).
+- `cumulus-study starter sync`: the starter record is now `.cumulus-starter-sha256.json`;
+  `AGENTS.md` and `stage/llm_schema.py` follow the 0.5.0 starter.
+- `tests/test_nlp_shapes.py` reads only NLP workflows, since `counts.workflow` now sits next
+  to them.
+- README setup installs the unreleased builder from a checkout (the `v0.5.0` tag once it
+  exists), then builds before validating. `requirements-tested.txt` is refreshed: skills
+  check, starter check, build, validate and 71 tests pass.
+
 ## 2026-09-24 — builder 0.5.0 inputs and docs
 
 - WORKPLAN.md, PROTOCOL.md and MIGRATION.md now target cumulus-study-builder 0.5.0 after a

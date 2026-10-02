@@ -2,19 +2,19 @@
 name = "cumulus-library-pcx"
 version = "1.0.0"
 requires-python = ">=3.11"
-dependencies = ["cumulus-study-builder==0.4.1", "cumulus-library>=6.3.2,<6.4"]
-description = "Migrated pcx study on the shared Cumulus study builder."
+dependencies = ["cumulus-study-builder>=0.5.0,<0.6", "cumulus-library>=6.3.4,<6.4"]
+description = "PCX study on the shared Cumulus study builder."
 
 [project.optional-dependencies]
 test = ["pytest", "duckdb", "sqlglot", "PyYAML"]
-biostats = ["cumulus-study-builder[biostats]==0.4.1"]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["study*", "analysis*"]
+where = ["."]
+include = ["cumulus_library_pcx*"]
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"

@@ -3,14 +3,14 @@ import importlib
 import inspect
 import pytest
 from pydantic import BaseModel, ValidationError
-from study.llm.models.base import SpanAugmentedMention
+from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
 from cumulus_study_builder.tools import filetool
-from study.llm.models.molecular import MolecularReportMention, MolecularAlterationMention
-from study.llm.models.registry_eligibility import TrialEligibilityAnnotation
-from study.llm.models.systemic_therapy import TherapyAdministrationMention, TherapyAgentMention
-from study.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
-from study.llm.models.response import ResponseAssessmentMention
-from study.llm.models.metastasis import MetastaticStagingInputsMention
+from cumulus_library_pcx.llm.models.molecular import MolecularReportMention, MolecularAlterationMention
+from cumulus_library_pcx.llm.models.registry_eligibility import TrialEligibilityAnnotation
+from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministrationMention, TherapyAgentMention
+from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
+from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
+from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
 from cumulus_study_builder.tools import llm_schema_json
 from cumulus_study_builder.stage import llm_schema
 
@@ -21,7 +21,7 @@ EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
 def test_all_model_schemas_generate():
     root = filetool.path_llm('models')
     for path in root.glob('*.py'):
-        module = importlib.import_module('study.llm.models.' + path.stem)
+        module = importlib.import_module('cumulus_library_pcx.llm.models.' + path.stem)
         for _, cls in inspect.getmembers(module, inspect.isclass):
             if issubclass(cls, BaseModel) and cls.__module__ == module.__name__:
                 assert cls.model_json_schema()['type'] == 'object'
@@ -86,7 +86,7 @@ def test_partial_date_and_undated_death_preserved():
 
 
 def test_unsupported_eligibility_and_false_administration_rejected():
-    from study.llm.models.registry_eligibility import TrialCriterionMention
+    from cumulus_library_pcx.llm.models.registry_eligibility import TrialCriterionMention
     with pytest.raises(ValidationError):
         TrialCriterionMention(**EMPTY, status='MET')
     with pytest.raises(ValidationError):
@@ -94,7 +94,7 @@ def test_unsupported_eligibility_and_false_administration_rejected():
 
 
 def test_vital_timeline_contradictions_rejected():
-    from study.llm.models.survival_timeline import VitalStatusMention
+    from cumulus_library_pcx.llm.models.survival_timeline import VitalStatusMention
     with pytest.raises(ValidationError):
         VitalStatusMention(**EVIDENCE, vital_status='ALIVE', death_date='2020-01-01', death_date_precision='DAY')
     with pytest.raises(ValidationError):

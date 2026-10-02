@@ -8,9 +8,9 @@ depend on: keep the numbers and their order, add subsections freely.
 
 Inherited source documents are in `docs/source/`; "workplan N.N" below cites the inherited
 `docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
-open work is in [WORKPLAN.md](WORKPLAN.md). Paths name today's `study/` package, which becomes
-`cumulus_library_pcx/` with builder 0.5.0. Other sites run the study from a clone of this
-repository with `cumulus-library build --study-dir cumulus_library_pcx`; it is not pip-installed.
+open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
+(builder 0.5.0). Other sites run the study from a clone of this repository with
+`cumulus-library build --study-dir cumulus_library_pcx`; it is not pip-installed.
 
 ## 0. Source
 
@@ -30,10 +30,11 @@ repository with `cumulus-library build --study-dir cumulus_library_pcx`; it is n
   boolean) and a trial-like cohort (`pcx__eligible_trial`, strict intersection).
 - [source eligible] Analysis unit: subject; time zero is the first study-population encounter with
   a tier 1 medulloblastoma code.
-- [decided] Prefix `pcx`. Stages in `study/stage/manifest.py`: fhir_resource, study_population,
+- [decided] Prefix `pcx`. Stages in `cumulus_library_pcx/stage/manifest.py`: study_population,
   study_variable, study_variable_wide, casedef, sample, llm_schema, counts, study_meta by default;
   elastic_upload, the four NLP workflows, llm_document_wide, llm_clinical_wide, eligible, outcome,
-  client_views, qa_athena opt-in. A demonstration biostats stage is present but commented out.
+  client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
+  (`core__medicationrequest`, `core__medicationdispense`); there is no `fhir_resource` stage.
 - [decided] Data package version 2.
 
 ## 2. Population
@@ -72,15 +73,15 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 
 ## 5. Clinical notes
 
-- [source llm] 14 extraction models in `study/llm/models/`: diagnosis, document_topic,
+- [source llm] 14 extraction models in `cumulus_library_pcx/llm/models/`: diagnosis, document_topic,
   document_type, event, laboratory, metastasis, molecular, radiation, registry_eligibility,
   response, surgery, survival_timeline, systemic_therapy, transition_of_care (`treatment.py`
   is shared context, not a task). Workflows: `nlp_document_tasks`, `nlp_clinical_tasks` and their `_50k` variants; 23 wide and
-  projection templates in `study/sql/template/`. Deployment `gpt_oss_120b` (`cumulus-study.toml`).
+  projection templates in `cumulus_library_pcx/sql/template/`. Deployment `gpt_oss_120b` (`cumulus-study.toml`).
 - [decided] Sample windows from the shared sampler: pre, peri, post around the casedef anchor;
   10 patients and 50 notes per window (`cumulus-study.toml`).
 - [open] Note selectors: every workflow references `pcx__llm_document_task_<task>` tables that the
-  source study never created (`study/nlp-selection-requirements.json`). Supply reviewed selectors
+  source study never created (`cumulus_library_pcx/nlp-selection-requirements.json`). Supply reviewed selectors
   before running NLP. The 14 tables are declared as site-supplied under `[builder] external_tables`,
   and each workflow's selector guard (`pcx__qa_selector_<workflow>`) stops the stage when a
   selector is missing or empty, since cumulus-library 6.3.1 would otherwise send every note to
@@ -90,7 +91,7 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 
 ## 6. Eligibility
 
-From `docs/source/eligible.md`; SQL in `study/sql/custom/eligible/`, opt-in stage `eligible`.
+From `docs/source/eligible.md`; SQL in `cumulus_library_pcx/sql/custom/eligible/`, opt-in stage `eligible`.
 Every criterion is a nullable boolean: TRUE met, FALSE not met, NULL not evaluable.
 
 - [source] Time zero `t0_day`: first tier 1 medulloblastoma casedef encounter (section 4).
@@ -114,7 +115,7 @@ Every criterion is a nullable boolean: TRUE met, FALSE not met, NULL not evaluab
 
 ## 7. Outcomes
 
-SQL in `study/sql/custom/outcome/`, opt-in stage `outcome`.
+SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 
 - [source limitations] Vital status (`outcome_vital_status.sql`): raw `patient.deceasedBoolean` /
   `deceasedDateTime`, the last study-population encounter, and LLM vital-status mentions; the
@@ -129,13 +130,13 @@ SQL in `study/sql/custom/outcome/`, opt-in stage `outcome`.
 
 ### 8.1 Counts
 
-- [source study/cubes.json] 17 count tables covering the study population, coded
+- [source cubes.json] 17 count tables covering the study population, coded
   variables and case-definition cohort; names, sources and dimensions unchanged since
   the migration. Each table's description states its population and counted unit.
 - [decided] 2026-09-22: defined in `counts.workflow`, built and exported by the shared
-  `counts` stage (counts skill), replacing `study/stage/cube.py` and `study/cubes.json`. The
-  file is in `study/sql/custom/counts/` today and moves to the package root next to
-  `manifest.toml` on 0.5.0. All tables are shared (`export:counts`); no site-only file.
+  `counts` stage (counts skill), replacing the former `stage/cube.py` and `cubes.json`. The
+  file is `cumulus_library_pcx/counts.workflow`, at the package root next to `manifest.toml`.
+  All tables are shared (`export:counts`); no site-only file.
 - [decided] Every table counts distinct patients (`subject_ref`) with the builder floor
   of 10. The encounter, DocumentReference and DiagnosticReport tables count the resource
   through `secondary_id`: a cell needs 10 patients and 10 resources, and `cnt` is the
@@ -150,13 +151,12 @@ SQL in `study/sql/custom/outcome/`, opt-in stage `outcome`.
 ### 8.2 Exports and statistical plan
 
 - [decided] Scope: exports only. The opt-in `client_views` stage produces the flat client tables
-  (`study/sql/custom/client_views/`, dictionary `spreadsheet/client_dictionary.csv`); no new
-  estimand was introduced by the migration.
-- [assumed] The biostats scaffold copied from the 0.4 starter (`analysis/exports.toml`,
-  `study/stage/biostats.py`, `study/sql/custom/biostats/analysis.sql`) is a demonstration only
-  and its stage is commented out; it is removed in the 0.5.0 move. `spreadsheet/data_dictionary.csv`
-  is Cumulus Library's column dictionary (`study/manifest.toml`); the builder's biostats
-  contract would be `spreadsheet/biostats_dictionary.csv`.
+  (`cumulus_library_pcx/sql/custom/client_views/`, dictionary `spreadsheet/client_dictionary.csv`);
+  no new estimand was introduced by the migration.
+- [decided] No biostats stage: the 0.4 starter's demonstration scaffold was removed in the 0.5.0
+  move. `spreadsheet/data_dictionary.csv` is Cumulus Library's column dictionary
+  (`cumulus_library_pcx/manifest.toml`); a builder biostats contract would be
+  `spreadsheet/biostats_dictionary.csv`.
 - [open] No treatment-effect analysis, estimand, covariate set or censoring rule is specified.
 
 ## 9. Open questions
@@ -187,6 +187,10 @@ SQL in `study/sql/custom/outcome/`, opt-in stage `outcome`.
   cumulus_library_pcx/ package, biostats naming, counts workflow at the package root); the code
   move is tracked in WORKPLAN.md. Andy.
 - 2026-09-24 [decided] The builder's biostats module is not used outside IBD yet: the demo biostats scaffold is removed in the 0.5.0 move, not converted. Andy.
+- 2026-10-02 [decided] This study replaces the make-pcx version in the PCX repository: the
+  make-pcx version is tagged `0.2-pre-study-builder`, the study-builder version lands on branch
+  `andy/study-builder`. The 0.5.0 move is done now, with a flat `cumulus_library_pcx/` package
+  (not `src/`), verified against the unreleased 0.5.0 builder checkout. Andy.
 
 ## Agent rules
 

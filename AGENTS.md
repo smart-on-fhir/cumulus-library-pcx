@@ -1,12 +1,12 @@
 # Study repository
 
-Start every session by reading `PROTOCOL.md`. If it has no `[decided]` lines or has `[open]` items, use
+Start every session by reading [PROTOCOL.md](PROTOCOL.md). If it has no `[decided]` lines or has `[open]` items, use
 the `study-builder` skill: it takes a trial document, a PubMed article, a methods section
 or nothing, then interviews the researcher stage by stage and records decisions there.
 
 This repository owns study inputs, models, SQL, tests and stage order. Shared tools come
 from the installed `cumulus-study-builder`. Do not copy builder code into the study.
-Read `cumulus-study.toml`, the study package's `manifest.toml` and `stage/manifest.py`.
+Read [cumulus-study.toml](cumulus-study.toml), the study package's `manifest.toml` and `stage/manifest.py`.
 Skills live in `.agents/skills` (`cumulus-study skills sync`, `cumulus-study skills check`).
 Your own skill folders there are kept by sync.
 
@@ -20,4 +20,4 @@ does not authorize warehouse execution or LLM inference. Keep patient data and
 credentials out of the repository.
 
 Study-specific agent instructions live in the `Agent rules` section at the end of
-`PROTOCOL.md`. Add local rules there, not here: this file is managed by the template.
+`PROTOCOL.md`. Add local rules there, not here: this file is managed by the builder starter.

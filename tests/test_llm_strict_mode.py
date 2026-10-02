@@ -5,8 +5,8 @@ import subprocess
 import sys
 import pytest
 from pydantic import ValidationError
-from study.llm.models import base
-from study.llm.models.diagnosis import DiagnosisDateMention, DiseaseSubtypeMention
+from cumulus_library_pcx.llm.models import base
+from cumulus_library_pcx.llm.models.diagnosis import DiagnosisDateMention, DiseaseSubtypeMention
 
 BAD_SPANS = dict(has_mention=True, spans=[])
 BAD_DATE = dict(has_mention=True, spans=["dx 2020"], diagnosis_date="2020-02-15", diagnosis_date_precision="MONTH")
@@ -21,7 +21,7 @@ def test_default_is_off_unless_environment_says_otherwise(setting, expected):
         env["CUMULUS_PCX_STRICT_MENTIONS"] = setting
     result = subprocess.run(
         [sys.executable, '-c',
-         'from study.llm.models.base import STRICT_MENTIONS; print(STRICT_MENTIONS)'],
+         'from cumulus_library_pcx.llm.models.base import STRICT_MENTIONS; print(STRICT_MENTIONS)'],
         env=env, capture_output=True, text=True, check=True,
     )
     assert result.stdout.strip() == expected

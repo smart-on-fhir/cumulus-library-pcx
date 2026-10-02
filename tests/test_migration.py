@@ -33,14 +33,14 @@ def test_input_and_schema_contracts(generated_study):
         msgspec.toml.decode(path.read_bytes(),type=NlpWorkflow)
         for cfg in expected['tables'].values():
             assert filetool.path_project(cfg['response_schema']).is_file()
-    assert not (ROOT/'study/tools').exists()
-    for path in (ROOT/'study').rglob('*.py'):
+    assert not (ROOT/'cumulus_library_pcx/tools').exists()
+    for path in (ROOT/'cumulus_library_pcx').rglob('*.py'):
         assert 'from cumulus_library_' not in path.read_text(), path
 
 
 def test_cumulus_manifest_and_count_contracts():
     # Export actions name the counts workflow; cumulus-library expands it to its tables.
-    manifest = StudyManifest(ROOT/'study')
+    manifest = StudyManifest(ROOT/'cumulus_library_pcx')
     manifest.materialize_counts_builder_exports()
     counts=[export.name for export in manifest.get_export_table_list() if export.export_type=='cube']
     assert sorted(counts)==sorted(CONTRACT['count_tables'])
@@ -48,19 +48,19 @@ def test_cumulus_manifest_and_count_contracts():
 
 def counts_queries(workflow: Path) -> list[str]:
     """SQL cumulus-library renders from a counts workflow, one CREATE TABLE per table."""
-    manifest=StudyManifest(ROOT/'study')
+    manifest=StudyManifest(ROOT/'cumulus_library_pcx')
     builder=CountsBuilder(manifest,toml_config_path=workflow)
     builder.prepare_queries(config=None,manifest=manifest)
     return builder.queries
 
 
 def _walk(*, default_only=False):
-    study=ROOT/'study'
+    study=ROOT/'cumulus_library_pcx'
     manifest=tomllib.loads((study/'manifest.toml').read_text())
     prefix=manifest['study_prefix']+'__'
     schema={t:dict.fromkeys(cols,'UNKNOWN') for t,cols in json.loads((ROOT/'tests/column_contracts.json').read_text()).items()}
     known=set(CONTRACT['external_selectors'])
-    # Site-supplied selectors carry the columns study/nlp-selection-requirements.json requires.
+    # Site-supplied selectors carry the columns cumulus_library_pcx/nlp-selection-requirements.json requires.
     requirements=json.loads((study/'nlp-selection-requirements.json').read_text())
     for table in requirements['tables']:
         schema[table]=dict.fromkeys(requirements['required_columns'],'UNKNOWN')
@@ -130,7 +130,7 @@ def test_sql_columns_and_execution_order(default_only):
 
 def test_repeat_build_is_stable():
     def snapshot():
-        return {str(p.relative_to(ROOT)):p.read_bytes() for parent in [ROOT/'study/sql/generated', ROOT/'study/llm/schemas'] for p in parent.glob('*') if p.is_file()} | {str(p.relative_to(ROOT)):p.read_bytes() for p in (ROOT/'study').glob('*.toml')}
+        return {str(p.relative_to(ROOT)):p.read_bytes() for parent in [ROOT/'cumulus_library_pcx/sql/generated', ROOT/'cumulus_library_pcx/llm/schemas'] for p in parent.glob('*') if p.is_file()} | {str(p.relative_to(ROOT)):p.read_bytes() for p in (ROOT/'cumulus_library_pcx').glob('*.toml')}
     before=snapshot()
     study_builder.make_study()
     assert snapshot()==before

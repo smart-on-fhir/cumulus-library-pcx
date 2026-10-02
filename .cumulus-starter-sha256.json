@@ -1,12 +1,11 @@
 {
-  "builder_version": "0.4.1",
-  "example": null,
+  "builder_version": "0.5.0",
   "format": 1,
-  "last_sync_digest": "e1e950aa219315628759fb5bcd3bc8e0a2104e5b10b582e6ca9793189243d2e1",
+  "last_sync_digest": "8c0c3c4260bdea77873a465422a0f3fc2940aff0295c192c0597b731b4a86f98",
   "managed": {
-    "AGENTS.md": "8d3582ec984da361a7588a10f32485950aa5dc7f2be55e20f4c98fb060296f4d",
-    "study/sql/template/README.md": "ccb356bb39037bb73c3e513c99ba6fab9d0f005ed87e5a2bb810d0353b1405db",
-    "study/stage/llm_schema.py": "cb64d6401da8050ffc1dfb9b1d182da68a7062a42e0ed2f38ab8c38719764962"
+    "AGENTS.md": "283b86a6d7f06829bc1b47e7cf2667f5f6eabcf330abf2e9fe2e310801f3a62a",
+    "cumulus_library_pcx/sql/template/README.md": "ccb356bb39037bb73c3e513c99ba6fab9d0f005ed87e5a2bb810d0353b1405db",
+    "cumulus_library_pcx/stage/llm_schema.py": "5dae6690545ca0d10c36961e8b1cf294f5350dbec9ff82408ea6133f98ba04e7"
   },
   "source_digest": "a410ea939ea5927caa0b6a1893f70a564e6b905f3f872eff49c4287a99758790",
   "source_files": {
@@ -54,5 +53,5 @@
     "study/stage/outcome.py": "a20370ac9a41694e2c423a33581776f9c7d2d421ba47e8c4cdc45db05675b90d",
     "tests/test_study.py": "35af92193dd27a9e0942ae467889c2d389e326241e84924f4632861490a4d268"
   },
-  "template": "../../cumulus-study-template"
+  "starter": "builtin"
 }

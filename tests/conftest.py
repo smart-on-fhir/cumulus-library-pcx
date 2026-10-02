@@ -16,7 +16,7 @@ def generated_study():
     make_study()
     return ROOT
 
-from study.llm.models import base
+from cumulus_library_pcx.llm.models import base
 @pytest.fixture(autouse=True)
 def strict_mentions(monkeypatch):
     monkeypatch.setattr(base, "STRICT_MENTIONS", True)

@@ -42,7 +42,10 @@ def test_all_raw_projections_bind_and_reject_unknown_versions():
     prefix = tomllib.loads((root/'manifest.toml').read_text())['study_prefix']
     sources = {}
     for workflow in root.glob('*.workflow'):
-        for task, cfg in tomllib.loads(workflow.read_text())['tables'].items():
+        config = tomllib.loads(workflow.read_text())
+        if config['config_type'] != 'nlp':     # counts.workflow sits here too since builder 0.5.0
+            continue
+        for task, cfg in config['tables'].items():
             entry = sources.setdefault(task, dict(schema=cfg['response_schema'], versions=set()))
             entry['versions'].add(cfg['version'])
     with duckdb.connect() as db:

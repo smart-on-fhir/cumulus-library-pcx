@@ -1,5 +1,5 @@
 [study]
-directory = "study"
+directory = "cumulus_library_pcx"
 manifest = "stage/manifest.py"
 
 [builder]
@@ -7,7 +7,7 @@ sample_patient_limit = 10
 sample_note_limit = 50
 data_package_version = 2
 nlp_deployments = ["gpt_oss_120b"]
-# Note-selection tables the site supplies (study/nlp-selection-requirements.json): no stage
+# Note-selection tables the site supplies (cumulus_library_pcx/nlp-selection-requirements.json): no stage
 # builds them, so validate accepts them as NLP selectors and the workflow guards count them.
 external_tables = [
     "pcx__llm_document_task_diagnosis",

@@ -9,8 +9,8 @@ ENC_COLS = ['age_at_visit', 'age_group', 'enc_class_display', 'enc_period_start_
 
 
 def count_sql(table: str) -> str:
-    manifest = StudyManifest(ROOT / 'study')
-    builder = CountsBuilder(manifest, toml_config_path=ROOT / 'study/sql/generated/pcx__counts.workflow')
+    manifest = StudyManifest(ROOT / 'cumulus_library_pcx')
+    builder = CountsBuilder(manifest, toml_config_path=ROOT / 'cumulus_library_pcx/sql/generated/pcx__counts.workflow')
     builder.prepare_queries(config=None, manifest=manifest)
     for sql in builder.queries:
         if sql.startswith(f'CREATE TABLE {table} '):

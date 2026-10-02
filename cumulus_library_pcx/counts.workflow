@@ -1,4 +1,4 @@
-# pcx shared count cubes (counts skill; replaces study/stage/cube.py and study/cubes.json).
+# pcx shared count cubes (counts skill; replaces the former stage/cube.py and cubes.json).
 # Rendered by the shared Stage(counts) into sql/generated/pcx__counts.workflow and exported.
 # Every table counts distinct patients (primary_id = subject_ref, the default), and the
 # builder floor min_subject = 10 applies. Encounter, document and report tables count the
