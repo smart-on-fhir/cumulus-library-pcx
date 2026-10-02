@@ -2,6 +2,13 @@
 
 Short, human-readable notes on what changed and why. Newest first.
 
+## 2026-10-02 (.gitignore cleanup)
+
+- `.gitignore` now ignores all of `cumulus_library_pcx/sql/generated`
+  (was only `pcx__llm_*.sql`). Regenerate, do not commit.
+- `.gitignore` also ignores `.DS_Store`, `__pycache__/`, `*~` editor backups
+  and the `ve/` and `.venv/` virtualenvs.
+
 ## 2026-09-30 (relaxed eligibility: flags, not exclusions)
 
 - PCX is broader than the ACNS0334 trial. Three criteria are now yes/no flags on
