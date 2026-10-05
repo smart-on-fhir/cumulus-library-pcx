@@ -9,9 +9,9 @@
 config_type = "counts"
 
 [tables.cube_encounter_study_population_enc]
-description = "Patients and encounters in the study population by age at visit, age group, encounter class, start year, service type and type. cnt is encounters."
+description = "Patients and encounters in the study population by age group, encounter class, start year, service type and type. cnt is encounters."
 source_table = "{{ prefix }}__cohort_study_population_enc"
-table_cols = ["age_at_visit", "age_group", "enc_class_display", "enc_period_start_year", "enc_servicetype_display", "enc_type_display"]
+table_cols = ["age_group", "enc_class_display", "enc_period_start_year", "enc_servicetype_display", "enc_type_display"]
 secondary_id = "encounter_ref"
 
 [tables.cube_patient_study_population]

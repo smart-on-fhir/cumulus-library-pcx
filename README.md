@@ -1,6 +1,6 @@
 # pcx
 
-Pediatric embryonal brain tumors (ages 0-8, encounters from 2008 with history), Cumulus table
+Embryonal brain tumors (all ages, encounters from 2008 with history), Cumulus table
 prefix `pcx`, emulating the ACNS0334 trial population. A coded case definition (medulloblastoma,
 ATRT, CNS embryonal, ETMR, pineoblastoma), chemotherapy, laboratory toxicity, craniotomy and
 radiation variables, note samples, 14 LLM chart-review schemas with 23 projections, opt-in

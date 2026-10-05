@@ -1,10 +1,16 @@
 --  =====================================================================
 --  Eligibility: one row per case-definition subject with every ACNS0334
---  criterion as its own nullable column. NULL means not evaluable from the
+--  criterion as its own column. NULL means not evaluable from the
 --  evidence on hand, never "met" and never "not met".
 --
---  This is the DISCOVERY cohort (all ages). {{ prefix }}__eligible_trial applies
---  the strict trial-like intersection on top of it.
+--  This is the DISCOVERY cohort (all ages). Age, prior methotrexate, prior
+--  chemotherapy and prior radiation are yes/no FLAGS here, not exclusions:
+--  a subject diagnosed at 36 months or older, or exposed to methotrexate or
+--  radiation before t0, is still in {{ prefix }}__eligible.
+--    age_under_36_months_at_t0 / _at_definitive_surgery   NULL without a day or birthdate
+--    *_prior_to_t0_bool   TRUE = dated exposure before t0_day, NULL without t0
+--    *_any_bool           TRUE = exposure at any time, FALSE = no evidence
+--  {{ prefix }}__eligible_trial applies the strict trial-like intersection on top of it.
 --  =====================================================================
 CREATE  TABLE   {{ prefix }}__eligible AS
 SELECT  dx.subject_ref,
@@ -25,23 +31,17 @@ SELECT  dx.subject_ref,
         -- ACNS0334 criteria, structurally evaluable
         dx.medulloblastoma_tier1_bool,
         dx.llm_medulloblastoma_bool,
-        surgery.age_under_36_months_at_definitive_surgery,
         CASE
             WHEN dx.atrt_tier1_bool                                     THEN TRUE
             WHEN dx.llm_atrt_bool                                       THEN TRUE
             ELSE FALSE
         END                                                             AS atrt_confirmed_bool,
-        CASE
-            WHEN rx.chemo_prior_to_t0_bool                              THEN FALSE
-            WHEN rx.chemo_any_bool                                      THEN TRUE
-            ELSE NULL
-        END                                                             AS no_prior_chemotherapy_bool,
-        CASE
-            WHEN radiation.radiation_prior_to_t0_bool                   THEN FALSE
-            WHEN radiation.radiation_any_bool                           THEN TRUE
-            WHEN radiation.llm_explicitly_not_received_bool             THEN TRUE
-            ELSE NULL
-        END                                                             AS no_prior_radiation_bool,
+        -- relaxed criteria: flags only, {{ prefix }}__eligible_trial excludes on them
+        dx.age_under_36_months_at_t0,
+        surgery.age_under_36_months_at_definitive_surgery,
+        rx.methotrexate_prior_to_t0_bool,
+        rx.chemo_prior_to_t0_bool,
+        radiation.radiation_prior_to_t0_bool,
         -- high-risk stratum inputs (adjudicate downstream)
         dx.llm_metastatic_bool,
         dx.llm_anaplastic_bool,

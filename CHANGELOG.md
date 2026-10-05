@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-05 — medications from core, eligibility flags, ages 0-120
+
+Ported from tag `0.2-pre-study-builder`:
+- MedicationDispense hand-overs are structured evidence beside MedicationRequest orders in
+  `eligible_rx.sql` and `client_exposure.sql` (new `*_dispense_first_day` columns). A dispense
+  is not receipt.
+- `pcx__eligible` keeps every subject: age under 36 months (at t0 and at surgery) and prior
+  methotrexate, chemotherapy and radiation are flags. `pcx__eligible_trial` excludes on them,
+  methotrexate included. Undated evidence is "not prior" (FALSE), and a missing t0 is NULL.
+  `no_prior_chemotherapy_bool` and `no_prior_radiation_bool` are gone.
+- Ages 0-120 (was 0-8) with adult age groups. The data and client dictionaries, three warn
+  queries, test fixtures and contracts follow.
+
+Also:
+- The encounter count table drops `age_at_visit` and keeps `age_group`.
+- PROTOCOL now cites `docs/source/README-0.2.md`.
+
 ## 2026-10-02 — builder from the v0.5.0 tag; version 0.3.0
 
 - Setup installs cumulus-study-builder from its `v0.5.0` git tag (`git+ssh`, comorbidity

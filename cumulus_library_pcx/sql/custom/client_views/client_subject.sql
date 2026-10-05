@@ -60,10 +60,12 @@ SELECT  elig.subject_ref,
         elig.llm_medulloblastoma_bool,
         elig.atrt_confirmed_bool,
 
-        -- ACNS0334 criteria as columns, NULL = not evaluable
+        -- ACNS0334 criteria as yes/no flags, NULL = not evaluable
+        elig.age_under_36_months_at_t0,
         elig.age_under_36_months_at_definitive_surgery,
-        elig.no_prior_chemotherapy_bool,
-        elig.no_prior_radiation_bool,
+        elig.methotrexate_prior_to_t0_bool,
+        elig.chemo_prior_to_t0_bool,
+        elig.radiation_prior_to_t0_bool,
         (trial.subject_ref IS NOT NULL)                 AS trial_eligible_bool,
 
         -- high-risk stratum inputs, adjudicate downstream

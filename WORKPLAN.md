@@ -11,13 +11,12 @@ Each entry: priority · `stage` · task. Paths are under the study package `cumu
 
 Medulloblastoma (Group 3 first): do the ACNS0334 treatment-associated outcome differences
 appear in EHR cohorts? The study builds a discovery cohort and a trial-like cohort
-([§1](PROTOCOL.md#1-objective), [§6](PROTOCOL.md#6-eligibility)). The prior-therapy criteria
-must be fixed before the trial cohort is used, the diagnosis task version before NLP results
-are used ([§5](PROTOCOL.md#5-clinical-notes)); the treatment-effect analysis is not yet
-specified ([§8](PROTOCOL.md#8-analysis)).
+([§1](PROTOCOL.md#1-objective), [§6](PROTOCOL.md#6-eligibility)). The diagnosis task version
+must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
+treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
 Runs on 0.5.0 with the `cumulus_library_pcx/` package (validated 2026-10-02 against the
-`v0.5.0` tag: `skills check`, `starter check`, build, validate, 70 tests).
+`v0.5.0` tag: `skills check`, `starter check`, build, validate, 73 tests).
 
 Next deliverable (DevOps, 2026-10-02): publish PCX 0.3.0 to PyPI as a **built-artifact-only**
 package, rendered SQL and data with no Python dependencies, built from the builder tag. It
@@ -31,17 +30,11 @@ ships the default stages without NLP; see "Data-only PyPI release" under Build, 
   `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Discovery finds
   allowlisted modules and keys them by the manifest prefix, so an installed release may
   already build as `-t pcx` without `--study-dir`: the release smoke test settles it.
-- [ ] **Prior-therapy observation policy.** "No prior chemotherapy/radiation" is TRUE today
-  only when some chemotherapy/radiation evidence exists and none is dated before t0, so an
-  ACNS0334-like child never irradiated is NULL and leaves `eligible_trial`. Decide what
-  observation proves "no prior": e.g. t0 known, dated evidence only, and a documented
-  lookback (encounter coverage alone is not enough). Recommended minimum: t0 NULL or any
-  undated evidence → NULL ([§6](PROTOCOL.md#6-eligibility)).
 - [ ] **Diagnosis version.** Recommended: set the full workflow to version 3 and regenerate;
   version-2 rows already in a warehouse are then excluded ([§5](PROTOCOL.md#5-clinical-notes)).
 - [ ] Note-selection inputs (query-topic TSVs and `reviews/`) were not migrated: restore or
   record as dropped ([§5](PROTOCOL.md#5-clinical-notes)).
-- [ ] Inherited items 1.7, 1.8, 2.1–2.7, 3.4, 3.5 of `docs/source/workplan.md` cited in
+- [ ] Inherited items 1.7, 1.8, 2.3–2.7, 3.4, 3.5 of `docs/source/workplan.md` cited in
   [§9](PROTOCOL.md#9-open-questions): keep, schedule or close.
 
 ## Objective
@@ -69,15 +62,6 @@ No changes planned.
 
 ## Eligibility
 
-- [ ] P1 · `eligible` · **Unknown or undated prior therapy stays unknown.**
-  `cumulus_library_pcx/sql/custom/eligible/eligible.sql:34-44` returns TRUE whenever any evidence exists
-  and `*_prior_to_t0_bool` is NULL. That happens when `t0_day` is NULL (LLM-only
-  medulloblastoma, `eligible_dx.sql:58`) and when an LLM ADMINISTERED row has no date
-  (`eligible_rx.sql:47,55,69`, `eligible_radiation.sql:28,38`); `eligible_trial.sql:7-14`
-  has no t0 requirement. `llm_explicitly_not_received_bool` (`eligible.sql:42`) is not
-  dated against t0. Apply the policy above. *Done when* `tests/test_eligible_outcome_sql.py`
-  shows t0 NULL → both flags NULL and absent from `eligible_trial`; undated evidence → NULL;
-  evidence before t0 → FALSE.
 - [ ] P3 · `eligible` · `t0_source` is `'casedef_tier1_medulloblastoma'` even when `t0_day`
   is NULL (`eligible_dx.sql:59`); the header says tiers 2 and 3 (`eligible_dx.sql:6`),
   casedef has tiers 1-2.

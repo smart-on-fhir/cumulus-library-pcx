@@ -18,7 +18,7 @@ open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_librar
   (NCT00336024; Mazewski, Leary et al., PMC12833527): high-dose methotrexate added to an intensive
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); file hashes in
-  `docs/source_inventory.json`. Inherited design notes: `docs/source/{README,eligible,limitations,
+  `docs/source_inventory.json`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
   workplan,llm,laboratory,deferred}.md` as of 2026-09-11.
 
 ## 1. Objective
@@ -39,10 +39,13 @@ open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_librar
 
 ## 2. Population
 
-- [source eligible] Encounters from 2008-01-01 with prior history; ages 0-8 at the visit;
-  all genders; 2 or more distinct encounter periods spanning 365 or more days; laboratory
-  Observations; all DiagnosticReport categories. Files: `spreadsheet/include_*.csv`.
-- [decided] Age groups: Infant (0), Early childhood (1-4), Childhood (5-8) in `age_group.csv`.
+- [source eligible] Encounters from 2008-01-01 with prior history; all genders; 2 or more
+  distinct encounter periods spanning 365 or more days; laboratory Observations; all
+  DiagnosticReport categories. Files: `spreadsheet/include_*.csv`.
+- [decided] 2026-09-30, Andy: ages 0-120 at the visit (was 0-8), so the population has no
+  upper age limit. Age is an eligibility flag (section 6), not a population filter.
+- [decided] Age groups in `age_group.csv`: Infant (0), Early childhood (1-4), Childhood (5-11),
+  Adolescent (12-17), Young adult (18-25), Adult (26-64), Older adult (65-120).
 - [source limitations] The utilization filter is a follow-up filter, not censoring; it can remove
   early deaths. Survival analyses should not inherit it without a selection design (workplan 2.7).
 
@@ -92,24 +95,38 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 ## 6. Eligibility
 
 From `docs/source/eligible.md`; SQL in `cumulus_library_pcx/sql/custom/eligible/`, opt-in stage `eligible`.
-Every criterion is a nullable boolean: TRUE met, FALSE not met, NULL not evaluable.
+`pcx__eligible` is the discovery cohort: every criterion is a yes/no flag, never an exclusion.
+`pcx__eligible_trial` applies the strict ACNS0334 intersection on top of it.
 
 - [source] Time zero `t0_day`: first tier 1 medulloblastoma casedef encounter (section 4).
 - [source] I1 Diagnosis: tier 1 medulloblastoma casedef code OR an LLM diagnosis of
   MEDULLOBLASTOMA (`pcx__llm_diagnosis_wide`).
 - [source] I2 Definitive surgery under 36 months of age: earliest LLM resection (gross total,
   near total, partial) else first tier 1 craniotomy procedure; required in the trial view.
+- [decided] 2026-09-30, Andy: age is two flags, `age_under_36_months_at_t0` and
+  `age_under_36_months_at_definitive_surgery` (NULL without a date or birthdate). Only the
+  surgery flag is a trial criterion.
 - [source] E1 ATRT: tier 1 atrt casedef code or any single LLM note with subtype ATRT.
-- [source] E2 Prior chemotherapy before t0: earliest chemotherapy order or LLM-administered agent.
+- [source] E2 Prior chemotherapy before t0: earliest chemotherapy order, pharmacy dispense or
+  LLM-administered agent.
 - [source] E3 Prior radiation before t0: earliest tier 1 radiation procedure, tier 1 radiation
-  encounter code, or LLM-administered radiation; `EXPLICITLY_NOT_RECEIVED` sets no-prior TRUE.
+  encounter code, or LLM-administered radiation.
+- [decided] 2026-09-30, Andy: prior therapy is three flags, `methotrexate_prior_to_t0_bool`,
+  `chemo_prior_to_t0_bool` and `radiation_prior_to_t0_bool`. TRUE = dated exposure before
+  `t0_day`. FALSE = t0 known and nothing dated before it, including no evidence or only undated
+  evidence. NULL only when `t0_day` is NULL, which keeps the subject out of the trial view.
+  `*_any_bool` is exposure at any time, FALSE when there is no evidence.
+- [decided] 2026-09-30, Andy: ACNS0334 excludes any prior chemotherapy, so prior methotrexate
+  excludes from `pcx__eligible_trial` like the six backbone agents.
+- [decided] 2026-09-30, Andy: MedicationDispense hand-overs (`core__medicationdispense`
+  `whenhandedover_day`, cancelled and declined dropped) are structured evidence beside
+  MedicationRequest orders. A dispense is closer to receipt than an order but is not proof of
+  administration.
 - [source] Not computable: organ-function laboratories, staging and residual disease as criteria
   (reported, not applied); sPNET arm never enters the trial view.
-- [open] Workplan 2.1-2.2: when any chemotherapy or radiation evidence exists, a NULL time zero
-  or an undated LLM record makes the no-prior flag TRUE (`eligible.sql`); with no evidence it is
-  NULL, so the trial view requires positive therapy evidence rather than a documented absence.
-  ACNS0334 arms give no radiation (NCT00336024), so a child never irradiated leaves the trial
-  view unless a note says radiation was not received. "No prior" needs an observation policy.
+- [decided] Workplan 2.1-2.2 closed by the flags above: a child with t0 and no therapy records
+  counts as "no prior therapy" and can enter the trial view. This is an absence of records, not
+  a documented absence, so it depends on how complete the site's medication and procedure data are.
 - [open] Workplan 1.7-1.8: month arithmetic, `varchar = integer` and `DATE(varchar)` behave
   differently on DuckDB and Athena.
 
@@ -123,8 +140,9 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS; a death
   recorded only by the event task reaches EFS but not OS. Coarse LLM dates are consumed as exact days.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
-  source. Structured exposure is orders, not administration; LLM ADMINISTERED mentions are the
-  only receipt evidence, and every administered agent counts as chemotherapy (workplan 3.4).
+  source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
+  ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
+  chemotherapy (workplan 3.4).
 
 ## 8. Analysis
 
@@ -145,6 +163,8 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   study-population encounter (join on `encounter_ref_link`); evidence without a linked
   encounter is not counted, as before. `cube_patient_casedef` reads age group and gender
   from `cohort_casedef` itself; the former `_source` join tables are gone.
+- [decided] 2026-10-05, Andy: `cube_encounter_study_population_enc` drops `age_at_visit` and
+  keeps `age_group`. With ages 0-120, single years would add many small suppressed cells.
 - [open] Output column order changed for `cube_patient_variable_union` (`age_group` is now
   last); the values and names are the same. Counts have not been run in the warehouse.
 
@@ -161,9 +181,9 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 
 ## 9. Open questions
 
-- [open] Prior-therapy observation policy (section 6) and the diagnosis task version (section 5).
+- [open] The diagnosis task version (section 5).
 - [open] The original note-selection inputs (query-topic TSVs and `reviews/`) were not migrated.
-- [open] Inherited workplan 1.7, 1.8, 2.1-2.7, 3.4, 3.5 (sections 3-7): keep, schedule or close.
+- [open] Inherited workplan 1.7, 1.8, 2.3-2.7, 3.4, 3.5 (sections 3-7): keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md: the `_50k` stages run after client_views;
   encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL
   `note_author_date` and drop out of `client_diagnosis.sql`. The builder `cohort_casedef`
@@ -196,6 +216,11 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   `casedef`, `sample`, `counts`, `study_meta`. The NLP stages, `eligible`, `outcome`,
   `client_views` and `qa_athena` wait for a later release. The builder is installed from its
   `v0.5.0` git tag (`comorbidity/cumulus-study-builder`, SSH). Andy.
+- 2026-10-05 [decided] Ported from tag `0.2-pre-study-builder`: medications from Cumulus Library
+  core with MedicationDispense as structured evidence, eligibility criteria as flags with the
+  strict trial view (methotrexate counts as prior chemotherapy), prior-therapy flags FALSE for
+  undated evidence and NULL only without a t0, ages 0-120 with adult age groups. The encounter
+  count table drops `age_at_visit`. Andy.
 
 ## Agent rules
 

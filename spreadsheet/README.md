@@ -1,8 +1,9 @@
 # Inputs
 
-- `include_*.csv`: encounters from 2008-01-01 with history, ages 0-8, all genders, 2 or more
+- `include_*.csv`: encounters from 2008-01-01 with history, ages 0-120, all genders, 2 or more
   encounters over 365 or more days, laboratory Observations. See PROTOCOL.md section 2.
-- `age_group.csv`: Infant (0), Early childhood (1-4), Childhood (5-8).
+- `age_group.csv`: Infant (0), Early childhood (1-4), Childhood (5-11), Adolescent (12-17),
+  Young adult (18-25), Adult (26-64), Older adult (65-120).
 - `casedef.csv`: `subtype,system,code,display,tier` with subtypes medulloblastoma, atrt,
   cns_embryonal, etmr, pineoblastoma and tiers 1-2.
 - `dx_*`, `rx_chemo_*`, `rx_contrast_methotrexate`, `lab_*`, `proc_*`: brain-tumor diagnoses,

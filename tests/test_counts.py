@@ -4,8 +4,11 @@ from cumulus_library import CountsBuilder, StudyManifest
 
 from tests.conftest import ROOT
 
+# pcx__cohort_study_population_enc columns, then the encounter cube's breakdown (age_group, not age_at_visit)
 ENC_COLS = ['age_at_visit', 'age_group', 'enc_class_display', 'enc_period_start_year',
             'enc_servicetype_display', 'enc_type_display']
+ENC_CUBE_COLS = ['age_group', 'enc_class_display', 'enc_period_start_year',
+                 'enc_servicetype_display', 'enc_type_display']
 
 
 def count_sql(table: str) -> str:
@@ -52,7 +55,7 @@ def test_encounter_cube_suppresses_on_patients_not_encounters():
     con.execute(f'DROP TABLE {table}')
     encounters(con, patients=10, per_patient=2)     # at the floor: cnt is encounters
     con.execute(sql)
-    assert grand_total(con, table, ENC_COLS) == [(20,)]
+    assert grand_total(con, table, ENC_CUBE_COLS) == [(20,)]
 
 
 def test_variable_union_counts_only_evidence_with_a_linked_encounter():

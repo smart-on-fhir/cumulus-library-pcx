@@ -42,6 +42,13 @@
     "encounter_ref",
     "requester_ref"
   ],
+  "core__medicationdispense": [
+    "subject_ref",
+    "status",
+    "medication_system",
+    "medication_code",
+    "whenhandedover_day"
+  ],
   "medicationdispense": [
     "id",
     "status",
