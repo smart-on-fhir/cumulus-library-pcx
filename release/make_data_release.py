@@ -36,7 +36,7 @@ ROOT = filetool.path_root()
 STUDY = filetool.path_project()
 PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
-BUILDER = 'git+ssh://git@github.com/comorbidity/cumulus-study-builder.git@v0.5.0'
+BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.0'
 
 # The default stages without NLP (PROTOCOL.md decision log, 2026-10-02), in manifest order.
 RELEASED_STAGES = ['study_population', 'study_variable', 'study_variable_wide', 'casedef',

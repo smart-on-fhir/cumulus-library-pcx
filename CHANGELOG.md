@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-07 — builder repository is smart-on-fhir
+
+- The builder install URL is now `smart-on-fhir/cumulus-study-builder` (was `comorbidity/`)
+  in the release script, README and WORKPLAN. Tag `v0.5.0` is the same commit there.
+
 ## 2026-10-07 — migration scaffolding removed
 
 - PCX has no released version to migrate from, so the migration pins are gone: Andy deleted

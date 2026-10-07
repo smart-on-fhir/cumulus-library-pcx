@@ -1,8 +1,8 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
 Open, study-specific work only, on cumulus-study-builder **0.5.0**, the git tag `v0.5.0` (not on
-PyPI). Until the builder repository moves to `smart-on-fhir`, install it with
-`pip install "git+ssh://git@github.com/comorbidity/cumulus-study-builder.git@v0.5.0"`, then
+PyPI). Install it from `smart-on-fhir` with
+`pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.0"`, then
 `pip install -e '.[test]'`; the release workflow needs read access to that repository. Done work is in
 [CHANGELOG.md](CHANGELOG.md).
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.

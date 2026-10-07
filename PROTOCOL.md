@@ -227,6 +227,8 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   (venv, render, assemble, check, build) and published by hand with twine straight to PyPI,
   without TestPyPI, from `andy/study-builder` before the PR merges. The DuckDB smoke test of
   the installed package is deferred to a later release. Andy.
+- 2026-10-07 [decided] The builder repository moved to `smart-on-fhir/cumulus-study-builder`;
+  install and release use that URL. Tag `v0.5.0` is the same commit (7fc9700). Andy.
 
 ## Agent rules
 
