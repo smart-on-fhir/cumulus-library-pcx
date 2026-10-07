@@ -4,11 +4,11 @@
 --  Methotrexate is the causal contrast, the six backbone agents are chemo.
 --  Structured evidence is cumulus core, matched to the rx_* valuesets:
 --    rx_order     MedicationRequest authoredOn, an ORDER, not proof of receipt
---                 ({{ prefix }}__cohort_variable_union_rx, built on core__medicationrequest)
+--                 (pcx__cohort_variable_union_rx, built on core__medicationrequest)
 --    rx_dispense  core__medicationdispense whenHandedOver, the pharmacy handed
 --                 it over. Closer to receipt, still not administration. Epic
 --                 dispensing is where infusion-center and inpatient doses appear.
---  LLM evidence is {{ prefix }}__llm_systemic_therapy_agent with
+--  LLM evidence is pcx__llm_systemic_therapy_agent with
 --  delivery_status = ADMINISTERED, which is receipt.
 --  Every dated candidate is unioned with its source, then the earliest date per
 --  exposure is taken, so adding a source is one more UNION branch.
@@ -19,39 +19,39 @@
 --    *_prior_to_t0_bool  first dated exposure before t0_day. FALSE when t0 is
 --                        known and nothing is dated before it (including no
 --                        evidence at all), NULL only when t0_day is NULL
---  {{ prefix }}__eligible_trial applies the prior-to-t0 flags as the ACNS0334
+--  pcx__eligible_trial applies the prior-to-t0 flags as the ACNS0334
 --  no-prior-chemotherapy criterion, methotrexate included.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__eligible_rx AS
+CREATE  TABLE   pcx__eligible_rx AS
 WITH
 rx_valueset AS (
-    SELECT  'methotrexate' AS exposure, "system", code FROM {{ prefix }}__valueset_rx_contrast_methotrexate
+    SELECT  'methotrexate' AS exposure, "system", code FROM pcx__valueset_rx_contrast_methotrexate
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_carboplatin
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_carboplatin
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_cisplatin
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_cisplatin
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_cyclophosphamide
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_cyclophosphamide
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_etoposide
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_etoposide
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_thiotepa
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_thiotepa
     UNION ALL
-    SELECT  'chemo', "system", code FROM {{ prefix }}__valueset_rx_chemo_vincristine
+    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_vincristine
 ),
 candidate AS (
     SELECT  subject_ref,
             'methotrexate'              AS exposure,
             'rx_order'                  AS source,
             rx_authoredon_date          AS exposure_day
-    FROM    {{ prefix }}__cohort_variable_union_rx
+    FROM    pcx__cohort_variable_union_rx
     WHERE   variable = 'rx_contrast_methotrexate'
     UNION ALL
     SELECT  subject_ref,
             'chemo'                     AS exposure,
             'rx_order'                  AS source,
             rx_authoredon_date          AS exposure_day
-    FROM    {{ prefix }}__cohort_variable_union_rx
+    FROM    pcx__cohort_variable_union_rx
     WHERE   variable LIKE 'rx_chemo_%'
     UNION ALL
     -- core__medicationdispense already drops entered-in-error
@@ -70,7 +70,7 @@ candidate AS (
             'methotrexate'              AS exposure,
             'llm_administered'          AS source,
             CAST(therapy_start_date AS DATE) AS exposure_day
-    FROM    {{ prefix }}__llm_systemic_therapy_agent
+    FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
     AND     (LOWER(agent_name) LIKE '%methotrexate%' OR LOWER(agent_name) LIKE '%mtx%')
     UNION ALL
@@ -78,7 +78,7 @@ candidate AS (
             'chemo'                     AS exposure,
             'llm_administered'          AS source,
             CAST(therapy_start_date AS DATE) AS exposure_day
-    FROM    {{ prefix }}__llm_systemic_therapy_agent
+    FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
 ),
 first_day AS (
@@ -120,6 +120,6 @@ SELECT  dx.subject_ref,
             WHEN first_day.chemo_first_day < dx.t0_day                      THEN TRUE
             ELSE                                                                 FALSE
         END                                                                 AS chemo_prior_to_t0_bool
-FROM    {{ prefix }}__eligible_dx   AS dx
+FROM    pcx__eligible_dx   AS dx
 LEFT JOIN first_day                 ON first_day.subject_ref = dx.subject_ref
 ;

@@ -4,13 +4,13 @@
 -- Long form of the outcome stage for every client subject. Survival rows
 -- carry the origin as outcome_date and the end as outcome_end_date so the
 -- duration is reproducible from the row itself. Nothing here is re-derived:
--- every value comes from {{ prefix }}__outcome and its component tables.
+-- every value comes from pcx__outcome and its component tables.
 -- ============================================================================
-CREATE TABLE {{ prefix }}__client_outcome AS
+CREATE TABLE pcx__client_outcome AS
 WITH events AS (
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome (overall survival, README section 3)
+-- pcx__outcome (overall survival, README section 3)
 --   outcome_date = t0_day, outcome_end_date = death or last known alive
 --   value_number = os_days, value_boolean = died, value_text = end reason
 -- ------------------------------------------------------------------------
@@ -23,14 +23,14 @@ SELECT  subject_ref,
         CAST(os_days AS DOUBLE)             AS value_number,
         os_event_bool                       AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
-        '{{ prefix }}__outcome'                      AS source_table
-FROM    {{ prefix }}__outcome
+        'pcx__outcome'                      AS source_table
+FROM    pcx__outcome
 WHERE   t0_day IS NOT NULL
 
 UNION ALL
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome (event-free survival, README section 5, PROVISIONAL)
+-- pcx__outcome (event-free survival, README section 5, PROVISIONAL)
 --   value_text = efs_censor_source, which says provisional on censored rows
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
@@ -41,14 +41,14 @@ SELECT  subject_ref,
         CAST(efs_days AS DOUBLE)            AS value_number,
         efs_event_bool                      AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
-        '{{ prefix }}__outcome'                      AS source_table
-FROM    {{ prefix }}__outcome
+        'pcx__outcome'                      AS source_table
+FROM    pcx__outcome
 WHERE   t0_day IS NOT NULL
 
 UNION ALL
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome_vital_status (death)
+-- pcx__outcome_vital_status (death)
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
         'death'                             AS variable,
@@ -58,14 +58,14 @@ SELECT  subject_ref,
         CAST(NULL AS DOUBLE)                AS value_number,
         deceased_bool                       AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
-        '{{ prefix }}__outcome_vital_status'         AS source_table
-FROM    {{ prefix }}__outcome_vital_status
+        'pcx__outcome_vital_status'         AS source_table
+FROM    pcx__outcome_vital_status
 WHERE   deceased_bool
 
 UNION ALL
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome_vital_status (last known alive)
+-- pcx__outcome_vital_status (last known alive)
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
         'last_known_alive'                  AS variable,
@@ -75,14 +75,14 @@ SELECT  subject_ref,
         CAST(NULL AS DOUBLE)                AS value_number,
         TRUE                                AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
-        '{{ prefix }}__outcome_vital_status'         AS source_table
-FROM    {{ prefix }}__outcome_vital_status
+        'pcx__outcome_vital_status'         AS source_table
+FROM    pcx__outcome_vital_status
 WHERE   last_known_alive_day IS NOT NULL
 
 UNION ALL
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome_first_event (first EFS-type event)
+-- pcx__outcome_first_event (first EFS-type event)
 --   value_text = event type(s) on that day, value_number = days from t0
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
@@ -94,20 +94,20 @@ SELECT  subject_ref,
                                             AS value_number,
         any_event_bool                      AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
-        '{{ prefix }}__outcome_first_event'          AS source_table
-FROM    {{ prefix }}__outcome_first_event
+        'pcx__outcome_first_event'          AS source_table
+FROM    pcx__outcome_first_event
 WHERE   first_event_day IS NOT NULL
 
 UNION ALL
 
 -- ------------------------------------------------------------------------
--- {{ prefix }}__outcome_first_event (per-type first days)
+-- pcx__outcome_first_event (per-type first days)
 -- ------------------------------------------------------------------------
 SELECT  subject_ref, 'progression' AS variable, progression_first_day AS outcome_date,
         CAST(NULL AS DATE) AS outcome_end_date, CAST(NULL AS VARCHAR) AS value_text,
         CAST(NULL AS DOUBLE) AS value_number, TRUE AS value_boolean,
-        CAST(NULL AS BIGINT) AS episode_number, '{{ prefix }}__outcome_first_event' AS source_table
-FROM    {{ prefix }}__outcome_first_event
+        CAST(NULL AS BIGINT) AS episode_number, 'pcx__outcome_first_event' AS source_table
+FROM    pcx__outcome_first_event
 WHERE   progression_first_day IS NOT NULL
 
 UNION ALL
@@ -115,8 +115,8 @@ UNION ALL
 SELECT  subject_ref, 'recurrence' AS variable, recurrence_first_day AS outcome_date,
         CAST(NULL AS DATE) AS outcome_end_date, CAST(NULL AS VARCHAR) AS value_text,
         CAST(NULL AS DOUBLE) AS value_number, TRUE AS value_boolean,
-        CAST(NULL AS BIGINT) AS episode_number, '{{ prefix }}__outcome_first_event' AS source_table
-FROM    {{ prefix }}__outcome_first_event
+        CAST(NULL AS BIGINT) AS episode_number, 'pcx__outcome_first_event' AS source_table
+FROM    pcx__outcome_first_event
 WHERE   recurrence_first_day IS NOT NULL
 
 UNION ALL
@@ -124,8 +124,8 @@ UNION ALL
 SELECT  subject_ref, 'second_malignancy' AS variable, second_malignancy_first_day AS outcome_date,
         CAST(NULL AS DATE) AS outcome_end_date, CAST(NULL AS VARCHAR) AS value_text,
         CAST(NULL AS DOUBLE) AS value_number, TRUE AS value_boolean,
-        CAST(NULL AS BIGINT) AS episode_number, '{{ prefix }}__outcome_first_event' AS source_table
-FROM    {{ prefix }}__outcome_first_event
+        CAST(NULL AS BIGINT) AS episode_number, 'pcx__outcome_first_event' AS source_table
+FROM    pcx__outcome_first_event
 WHERE   second_malignancy_first_day IS NOT NULL
 )
 
@@ -154,6 +154,6 @@ SELECT  events.subject_ref,
         events.episode_number,
         events.source_table
 FROM    events
-JOIN    {{ prefix }}__client_subject AS subject
+JOIN    pcx__client_subject AS subject
   ON    events.subject_ref = subject.subject_ref
 ;

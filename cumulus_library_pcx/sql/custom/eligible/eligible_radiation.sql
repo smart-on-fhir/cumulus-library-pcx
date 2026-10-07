@@ -2,36 +2,36 @@
 --  Eligibility: radiation
 --
 --  Structured evidence (candidate valuesets, verify before trusting):
---    {{ prefix }}__cohort_proc_radiation tier 1 = delivery or management procedure
---    {{ prefix }}__cohort_dx_radiation   tier 1 = radiotherapy encounter code
---  LLM evidence is {{ prefix }}__llm_radiation_wide with delivery_status = ADMINISTERED.
+--    pcx__cohort_proc_radiation tier 1 = delivery or management procedure
+--    pcx__cohort_dx_radiation   tier 1 = radiotherapy encounter code
+--  LLM evidence is pcx__llm_radiation_wide with delivery_status = ADMINISTERED.
 --  Same candidate-union shape and the same yes/no flags as eligible_rx:
 --    radiation_any_bool          ever radiated, FALSE = no evidence
 --    radiation_prior_to_t0_bool  first dated radiation before t0_day. FALSE when
 --                                t0 is known and nothing is dated before it,
 --                                NULL only when t0_day is NULL
---  {{ prefix }}__eligible_trial applies radiation_prior_to_t0_bool as the ACNS0334
+--  pcx__eligible_trial applies radiation_prior_to_t0_bool as the ACNS0334
 --  no-prior-radiation criterion.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__eligible_radiation AS
+CREATE  TABLE   pcx__eligible_radiation AS
 WITH
 candidate AS (
     SELECT  subject_ref,
             'proc_radiation'            AS source,
             proc_performed_day          AS exposure_day
-    FROM    {{ prefix }}__cohort_proc_radiation
+    FROM    pcx__cohort_proc_radiation
     WHERE   CAST(tier AS INTEGER) = 1
     UNION ALL
     SELECT  subject_ref,
             'dx_radiation'              AS source,
             dx_recorded_date            AS exposure_day
-    FROM    {{ prefix }}__cohort_dx_radiation
+    FROM    pcx__cohort_dx_radiation
     WHERE   CAST(tier AS INTEGER) = 1
     UNION ALL
     SELECT  subject_ref,
             'llm_administered'          AS source,
             CAST(radiation_start_date AS DATE) AS exposure_day
-    FROM    {{ prefix }}__llm_radiation_wide
+    FROM    pcx__llm_radiation_wide
     WHERE   delivery_status = 'ADMINISTERED'
 ),
 first_day AS (
@@ -49,7 +49,7 @@ llm_field AS (
             BOOL_OR(radiation_field IN ('CRANIOSPINAL', 'CRANIOSPINAL_WITH_FOCAL_BOOST'))  AS llm_craniospinal_bool,
             BOOL_OR(radiation_method = 'PROTON')                                        AS llm_proton_bool,
             BOOL_OR(delivery_status = 'EXPLICITLY_NOT_RECEIVED')                        AS llm_explicitly_not_received_bool
-    FROM    {{ prefix }}__llm_radiation_wide
+    FROM    pcx__llm_radiation_wide
     GROUP BY subject_ref
 )
 SELECT  dx.subject_ref,
@@ -68,7 +68,7 @@ SELECT  dx.subject_ref,
             WHEN first_day.radiation_first_day < dx.t0_day                  THEN TRUE
             ELSE                                                                 FALSE
         END                                                                 AS radiation_prior_to_t0_bool
-FROM    {{ prefix }}__eligible_dx   AS dx
+FROM    pcx__eligible_dx   AS dx
 LEFT JOIN first_day                 ON first_day.subject_ref = dx.subject_ref
 LEFT JOIN llm_field                 ON llm_field.subject_ref = dx.subject_ref
 ;

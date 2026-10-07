@@ -7,18 +7,18 @@
 --  so a subject with no tier 1 code has a NULL t0_day and stays a candidate.
 --  Age is in completed months from core__patient.birthdate, because the
 --  ACNS0334 criterion is under 36 months and integer years cannot express it.
---  LLM diagnosis evidence comes from {{ prefix }}__llm_diagnosis_wide and is
+--  LLM diagnosis evidence comes from pcx__llm_diagnosis_wide and is
 --  reported beside the structured evidence, never merged into it.
 --  ATRT is an ACNS0334 exclusion, not a case. Its casedef rows exist only so
 --  the exclusion can be evaluated and a medulloblastoma later reclassified
 --  as ATRT stays visible (atrt_tier1_bool). A subject whose ONLY casedef
 --  evidence is ATRT is therefore not a case-definition subject here.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__eligible_dx AS
+CREATE  TABLE   pcx__eligible_dx AS
 WITH
 casedef_subject AS (
     SELECT  DISTINCT subject_ref
-    FROM    {{ prefix }}__cohort_casedef
+    FROM    pcx__cohort_casedef
     WHERE   subtype IS NOT NULL
     AND     subtype <> 'atrt'
 ),
@@ -26,7 +26,7 @@ casedef_tier1 AS (
     SELECT  subject_ref,
             subtype,
             MIN(enc_period_start_day)   AS first_day
-    FROM    {{ prefix }}__cohort_casedef
+    FROM    pcx__cohort_casedef
     WHERE   tier = 1
     GROUP BY subject_ref, subtype
 ),
@@ -49,7 +49,7 @@ llm_diagnosis AS (
             MIN(age_at_diagnosis_months)                            AS llm_age_at_diagnosis_months_min,
             BOOL_OR(chang_m_stage IN ('M1', 'M2', 'M3', 'M4'))      AS llm_metastatic_bool,
             BOOL_OR(medulloblastoma_histology = 'LARGE_CELL_ANAPLASTIC') AS llm_anaplastic_bool
-    FROM    {{ prefix }}__llm_diagnosis_wide
+    FROM    pcx__llm_diagnosis_wide
     GROUP BY subject_ref
 )
 SELECT  subj.subject_ref,

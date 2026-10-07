@@ -5,13 +5,13 @@
 --  the subject here, which is the conservative choice for a trial emulation.
 --  The prior-to-t0 flags are NULL without a t0, so no t0 means not eligible.
 --
---  {{ prefix }}__eligible keeps every subject and carries these criteria as flags.
+--  pcx__eligible keeps every subject and carries these criteria as flags.
 --  ACNS0334 excludes ANY prior chemotherapy, so prior methotrexate excludes
 --  here the same way the six backbone agents do.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__eligible_trial AS
+CREATE  TABLE   pcx__eligible_trial AS
 SELECT  *
-FROM    {{ prefix }}__eligible
+FROM    pcx__eligible
 WHERE   (medulloblastoma_tier1_bool OR llm_medulloblastoma_bool)
 AND     age_under_36_months_at_definitive_surgery
 AND     NOT atrt_confirmed_bool

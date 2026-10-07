@@ -1,5 +1,5 @@
 -- ============================================================================
--- Grain: one row per {{ prefix }}__client_timeline.variable observed at this site.
+-- Grain: one row per pcx__client_timeline.variable observed at this site.
 --
 -- The census, not the schema. spreadsheet/client_dictionary.csv is the
 -- authored dictionary: it says which variables EXIST and what they mean, and
@@ -15,7 +15,7 @@
 -- (minimum observation and binary-count thresholds), and knowing that here is
 -- cheaper than discovering it in a skipped-feature report.
 --
--- Undeclared variables: this table is built from {{ prefix }}__client_timeline alone,
+-- Undeclared variables: this table is built from pcx__client_timeline alone,
 -- with no join to the registry, so a variable emitted by an upstream builder
 -- that nobody declared in the dictionary CSV still appears. That is deliberate
 -- - it is the drift detector. Reconciling the two is a set difference on
@@ -27,7 +27,7 @@
 -- DuckDB rejects, while DuckDB's LISTAGG(DISTINCT ...) is not valid Trino. The
 -- parse-only DuckDB compatibility test does not catch this.
 -- ============================================================================
-CREATE TABLE {{ prefix }}__client_dictionary_coverage AS
+CREATE TABLE pcx__client_dictionary_coverage AS
 
 SELECT  timeline.variable,
 
@@ -82,7 +82,7 @@ SELECT  timeline.variable,
                      THEN 'NONE_OF_THE_ABOVE' END)
         END                                         AS allowed_values
 
-FROM    {{ prefix }}__client_timeline AS timeline
+FROM    pcx__client_timeline AS timeline
 GROUP BY
         timeline.variable
 ;

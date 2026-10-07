@@ -9,13 +9,13 @@
 --  even when no note names it. Events without a date cannot be first events
 --  but are counted in undated_event_cnt so their presence is visible.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__outcome_first_event AS
+CREATE  TABLE   pcx__outcome_first_event AS
 WITH
 llm_event AS (
     SELECT  subject_ref,
             event_type,
             CAST(event_date AS DATE)    AS event_day
-    FROM    {{ prefix }}__llm_event_wide
+    FROM    pcx__llm_event_wide
     WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY', 'DECEASED')
 ),
 candidate AS (
@@ -24,7 +24,7 @@ candidate AS (
     WHERE   event_day IS NOT NULL
     UNION ALL
     SELECT  subject_ref, 'DECEASED' AS event_type, death_day AS event_day
-    FROM    {{ prefix }}__outcome_vital_status
+    FROM    pcx__outcome_vital_status
     WHERE   death_day IS NOT NULL
 ),
 first_day AS (
@@ -69,8 +69,8 @@ SELECT  elig.subject_ref,
         vital.death_day,
         undated.undated_event_cnt,
         DATE_DIFF('day', elig.t0_day, first_day.first_event_day)                    AS days_t0_to_first_event
-FROM    {{ prefix }}__eligible              AS elig
-LEFT JOIN {{ prefix }}__outcome_vital_status AS vital ON vital.subject_ref      = elig.subject_ref
+FROM    pcx__eligible              AS elig
+LEFT JOIN pcx__outcome_vital_status AS vital ON vital.subject_ref      = elig.subject_ref
 LEFT JOIN first_day                                   ON first_day.subject_ref  = elig.subject_ref
 LEFT JOIN first_type                                  ON first_type.subject_ref = elig.subject_ref
 LEFT JOIN undated                                     ON undated.subject_ref    = elig.subject_ref

@@ -2,12 +2,12 @@
 -- Grain: one row per subject_ref x encounter_ref.
 --
 -- Encounter spine for client subjects, placed relative to time zero, with
--- per-encounter coded-evidence flags from {{ prefix }}__cohort_variable_wide (one row
+-- per-encounter coded-evidence flags from pcx__cohort_variable_wide (one row
 -- per encounter_ref_link, TRUE or NULL per variable). PCX has no encounter
 -- class/type valuesets, so utilization here is disease-specific evidence,
 -- not admit/ED/outpatient classification.
 -- ================================================
-CREATE TABLE {{ prefix }}__client_encounter AS
+CREATE TABLE pcx__client_encounter AS
 WITH
 encounter AS (
     SELECT  sp.subject_ref,
@@ -17,8 +17,8 @@ encounter AS (
             MAX(sp.enc_period_end_day)          AS enc_period_end_day,
             MAX(sp.enc_period_end_day_filled)   AS enc_period_end_day_filled,
             MIN(sp.age_at_visit)                AS age_at_visit
-    FROM    {{ prefix }}__cohort_study_population AS sp
-    JOIN    {{ prefix }}__client_subject AS subject
+    FROM    pcx__cohort_study_population AS sp
+    JOIN    pcx__client_subject AS subject
       ON    sp.subject_ref = subject.subject_ref
     WHERE   sp.encounter_ref IS NOT NULL
     AND     sp.enc_period_start_day IS NOT NULL
@@ -33,7 +33,7 @@ casedef AS (
             encounter_ref_link,
             MIN(days_since)                     AS casedef_days_since,
             MIN(casedef_period)                 AS casedef_period
-    FROM    {{ prefix }}__cohort_casedef
+    FROM    pcx__cohort_casedef
     GROUP BY subject_ref, encounter_ref_link
 ),
 
@@ -53,7 +53,7 @@ evidence AS (
             (wide.lab_absolute_neutrophil_count OR wide.lab_alt OR wide.lab_ast OR wide.lab_creatinine
              OR wide.lab_hemoglobin OR wide.lab_platelets OR wide.lab_total_bilirubin)
                                                                         AS lab_organ_function_bool
-    FROM    {{ prefix }}__cohort_variable_wide AS wide
+    FROM    pcx__cohort_variable_wide AS wide
 )
 
 SELECT  encounter.subject_ref,
@@ -66,7 +66,7 @@ SELECT  encounter.subject_ref,
         DATE_DIFF('day', subject.t0_day, encounter.enc_period_start_day)    AS days_since_t0,
         casedef.casedef_days_since,
         casedef.casedef_period,
-        -- coded evidence, TRUE or NULL as in {{ prefix }}__cohort_variable_wide
+        -- coded evidence, TRUE or NULL as in pcx__cohort_variable_wide
         evidence.dx_medulloblastoma_bool,
         evidence.dx_atrt_bool,
         evidence.dx_brain_cancer_bool,
@@ -78,7 +78,7 @@ SELECT  encounter.subject_ref,
         evidence.proc_radiation_bool,
         evidence.lab_organ_function_bool
 FROM    encounter
-JOIN    {{ prefix }}__client_subject AS subject
+JOIN    pcx__client_subject AS subject
   ON    encounter.subject_ref = subject.subject_ref
 LEFT JOIN casedef
   ON    encounter.subject_ref  = casedef.subject_ref

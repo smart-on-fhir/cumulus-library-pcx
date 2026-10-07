@@ -1,7 +1,7 @@
 -- ==========================================================================
 -- Grain: one row per subject_ref x variable x rx_class.
 -- ==========================================================================
-CREATE OR REPLACE VIEW {{ prefix }}__client_timeline_latest AS
+CREATE OR REPLACE VIEW pcx__client_timeline_latest AS
 WITH
 
 -- Events that can answer a "latest value" question. Filtering BEFORE
@@ -9,7 +9,7 @@ WITH
 -- Missing interpretation/status is NOT unusable - it is reported as-is.
 usable_events AS (
     SELECT  timeline.*
-    FROM    {{ prefix }}__client_timeline AS timeline
+    FROM    pcx__client_timeline AS timeline
     -- some value payload is present
     WHERE   (
                 timeline.value_text       IS NOT NULL

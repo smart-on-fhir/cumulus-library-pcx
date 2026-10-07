@@ -9,15 +9,15 @@
 --  both restricted to before the first event (Sarah's stratifier).
 --  protocol_names is every distinct protocol named in regimen or anchor evidence.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__outcome_exposure AS
+CREATE  TABLE   pcx__outcome_exposure AS
 WITH
 protocol_candidate AS (
     SELECT  subject_ref, protocol_name_verbatim AS protocol_name
-    FROM    {{ prefix }}__llm_systemic_therapy_regimen
+    FROM    pcx__llm_systemic_therapy_regimen
     WHERE   protocol_name_verbatim IS NOT NULL
     UNION
     SELECT  subject_ref, protocol_name
-    FROM    {{ prefix }}__llm_survival_timeline_anchor
+    FROM    pcx__llm_survival_timeline_anchor
     WHERE   protocol_name IS NOT NULL
 ),
 protocol AS (
@@ -49,8 +49,8 @@ timing AS (
                 WHEN event.first_event_day IS NULL          THEN TRUE
                 ELSE elig.radiation_first_day < event.first_event_day
             END                                                                 AS radiation_prior_to_first_event_bool
-    FROM    {{ prefix }}__eligible              AS elig
-    LEFT JOIN {{ prefix }}__outcome_first_event AS event ON event.subject_ref = elig.subject_ref
+    FROM    pcx__eligible              AS elig
+    LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref = elig.subject_ref
 )
 SELECT  timing.*,
         CASE

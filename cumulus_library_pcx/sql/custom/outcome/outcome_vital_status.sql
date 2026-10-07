@@ -5,11 +5,11 @@
 --  and the latest alive evidence:
 --    raw FHIR patient   deceasedBoolean / deceasedDateTime (site ETL must expose them)
 --    study population   latest encounter end day
---    LLM survival_timeline task {{ prefix }}__llm_survival_timeline_wide vital_status, death_date, last_known_alive_date
+--    LLM survival_timeline task pcx__llm_survival_timeline_wide vital_status, death_date, last_known_alive_date
 --  A deceased flag without a date gives deceased_bool TRUE and death_day NULL,
 --  which the OS table treats as not computable (README section 3).
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__outcome_vital_status AS
+CREATE  TABLE   pcx__outcome_vital_status AS
 WITH
 fhir_patient AS (
     SELECT  CONCAT('Patient/', id)          AS subject_ref,
@@ -20,7 +20,7 @@ fhir_patient AS (
 last_encounter AS (
     SELECT  subject_ref,
             MAX(enc_period_end_day_filled)  AS last_encounter_day
-    FROM    {{ prefix }}__cohort_study_population
+    FROM    pcx__cohort_study_population
     GROUP BY subject_ref
 ),
 llm AS (
@@ -28,7 +28,7 @@ llm AS (
             BOOL_OR(vital_status = 'DECEASED')                              AS llm_deceased_bool,
             MIN(CAST(death_date AS DATE))                                   AS llm_death_day,
             MAX(CAST(last_known_alive_date AS DATE))                        AS llm_last_known_alive_day
-    FROM    {{ prefix }}__llm_survival_timeline_wide
+    FROM    pcx__llm_survival_timeline_wide
     GROUP BY subject_ref
 ),
 death_candidate AS (
@@ -63,7 +63,7 @@ SELECT  elig.subject_ref,
         llm.llm_deceased_bool,
         llm.llm_death_day,
         llm.llm_last_known_alive_day
-FROM    {{ prefix }}__eligible  AS elig
+FROM    pcx__eligible  AS elig
 LEFT JOIN fhir_patient          AS fhir           ON fhir.subject_ref           = elig.subject_ref
 LEFT JOIN last_encounter                          ON last_encounter.subject_ref = elig.subject_ref
 LEFT JOIN llm                                     ON llm.subject_ref            = elig.subject_ref

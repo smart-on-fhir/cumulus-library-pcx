@@ -15,7 +15,7 @@
 -- malformed value fails the build instead of vanishing.
 -- Document routing tasks (document_type, document_topic) are not events.
 -- ============================================================================
-CREATE TABLE {{ prefix }}__client_timeline AS
+CREATE TABLE pcx__client_timeline AS
 WITH
 events AS (
 
@@ -24,7 +24,7 @@ events AS (
 -- ========================================================================
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__cohort_variable_union_lab
+-- pcx__cohort_variable_union_lab
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -47,14 +47,14 @@ SELECT  DISTINCT
         src.observation_ref                                          AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__cohort_variable_union_lab       AS src
-LEFT JOIN {{ prefix }}__cohort_study_population AS sp
+FROM    pcx__cohort_variable_union_lab       AS src
+LEFT JOIN pcx__cohort_study_population AS sp
   ON    src.encounter_ref_link = sp.encounter_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__cohort_variable_union_dx
+-- pcx__cohort_variable_union_dx
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -77,14 +77,14 @@ SELECT  DISTINCT
         src.condition_ref                                            AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__cohort_variable_union_dx        AS src
-LEFT JOIN {{ prefix }}__cohort_study_population AS sp
+FROM    pcx__cohort_variable_union_dx        AS src
+LEFT JOIN pcx__cohort_study_population AS sp
   ON    src.encounter_ref_link = sp.encounter_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__cohort_variable_union_rx
+-- pcx__cohort_variable_union_rx
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -107,14 +107,14 @@ SELECT  DISTINCT
         src.medicationrequest_ref                                    AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CASE WHEN src.variable = 'rx_contrast_methotrexate' THEN 'METHOTREXATE' WHEN src.variable LIKE 'rx_chemo_%' THEN 'CHEMOTHERAPY' END AS rx_class
-FROM    {{ prefix }}__cohort_variable_union_rx        AS src
-LEFT JOIN {{ prefix }}__cohort_study_population AS sp
+FROM    pcx__cohort_variable_union_rx        AS src
+LEFT JOIN pcx__cohort_study_population AS sp
   ON    src.encounter_ref_link = sp.encounter_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__cohort_variable_union_proc
+-- pcx__cohort_variable_union_proc
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -137,14 +137,14 @@ SELECT  DISTINCT
         src.procedure_ref                                            AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__cohort_variable_union_proc      AS src
-LEFT JOIN {{ prefix }}__cohort_study_population AS sp
+FROM    pcx__cohort_variable_union_proc      AS src
+LEFT JOIN pcx__cohort_study_population AS sp
   ON    src.encounter_ref_link = sp.encounter_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__cohort_casedef
+-- pcx__cohort_casedef
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -167,17 +167,17 @@ SELECT  DISTINCT
         src.resource_ref                                             AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__cohort_casedef                  AS src
+FROM    pcx__cohort_casedef                  AS src
 WHERE   src.subtype IS NOT NULL
 
 UNION ALL
 
 -- ========================================================================
--- SECTION: LLM CHART REVIEW (note dates from {{ prefix }}__sample_casedef_author)
+-- SECTION: LLM CHART REVIEW (note dates from pcx__sample_casedef_author)
 -- ========================================================================
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.disease_subtype
+-- pcx__llm_diagnosis_wide.disease_subtype
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -200,8 +200,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.disease_subtype <> 'NONE_OF_THE_ABOVE'
@@ -209,7 +209,7 @@ WHERE   src.disease_subtype <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.medulloblastoma_histology
+-- pcx__llm_diagnosis_wide.medulloblastoma_histology
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -232,8 +232,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.medulloblastoma_histology <> 'NONE_OF_THE_ABOVE'
@@ -241,7 +241,7 @@ WHERE   src.medulloblastoma_histology <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.chang_m_stage
+-- pcx__llm_diagnosis_wide.chang_m_stage
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -264,8 +264,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.chang_m_stage <> 'NONE_OF_THE_ABOVE'
@@ -273,7 +273,7 @@ WHERE   src.chang_m_stage <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.age_at_diagnosis_months
+-- pcx__llm_diagnosis_wide.age_at_diagnosis_months
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -296,8 +296,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.age_at_diagnosis_months IS NOT NULL
@@ -305,7 +305,7 @@ WHERE   src.age_at_diagnosis_months IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.diagnosis_date
+-- pcx__llm_diagnosis_wide.diagnosis_date
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -328,8 +328,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.diagnosis_date IS NOT NULL
@@ -337,7 +337,7 @@ WHERE   src.diagnosis_date IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_diagnosis_wide.diagnosis_date_gold
+-- pcx__llm_diagnosis_wide.diagnosis_date_gold
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -360,8 +360,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_diagnosis_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_diagnosis_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.diagnosis_date_gold IS NOT NULL
@@ -369,7 +369,7 @@ WHERE   src.diagnosis_date_gold IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_surgery_wide (surgery)
+-- pcx__llm_surgery_wide (surgery)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -392,15 +392,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_surgery_wide                AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_surgery_wide                AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_surgery_wide (residual tumor area)
+-- pcx__llm_surgery_wide (residual tumor area)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -423,8 +423,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_surgery_wide                AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_surgery_wide                AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.residual_tumor_area_cm2 IS NOT NULL
@@ -432,7 +432,7 @@ WHERE   src.residual_tumor_area_cm2 IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_radiation_wide (round)
+-- pcx__llm_radiation_wide (round)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -455,15 +455,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_radiation_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_radiation_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_radiation_wide (craniospinal dose)
+-- pcx__llm_radiation_wide (craniospinal dose)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -486,8 +486,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_radiation_wide              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_radiation_wide              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.craniospinal_dose IS NOT NULL
@@ -495,7 +495,7 @@ WHERE   src.craniospinal_dose IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_event_wide
+-- pcx__llm_event_wide
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -518,8 +518,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_event_wide                  AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_event_wide                  AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.event_type <> 'NONE_OF_THE_ABOVE'
@@ -527,7 +527,7 @@ WHERE   src.event_type <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_survival_timeline_wide (death)
+-- pcx__llm_survival_timeline_wide (death)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -550,8 +550,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_survival_timeline_wide                AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_survival_timeline_wide                AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.vital_status = 'DECEASED'
@@ -559,7 +559,7 @@ WHERE   src.vital_status = 'DECEASED'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_survival_timeline_wide (last known alive)
+-- pcx__llm_survival_timeline_wide (last known alive)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -582,8 +582,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_survival_timeline_wide                AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_survival_timeline_wide                AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.last_known_alive_date IS NOT NULL
@@ -591,7 +591,7 @@ WHERE   src.last_known_alive_date IS NOT NULL
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_survival_timeline_anchor
+-- pcx__llm_survival_timeline_anchor
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -614,15 +614,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_survival_timeline_anchor              AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_survival_timeline_anchor              AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_survival_timeline_follow_up
+-- pcx__llm_survival_timeline_follow_up
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -645,15 +645,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_survival_timeline_follow_up           AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_survival_timeline_follow_up           AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_agent
+-- pcx__llm_systemic_therapy_agent
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -676,15 +676,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CASE WHEN LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%' THEN 'METHOTREXATE' WHEN src.agent_name IS NOT NULL THEN 'CHEMOTHERAPY' END AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_agent      AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_agent      AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_regimen
+-- pcx__llm_systemic_therapy_regimen
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -707,15 +707,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_regimen    AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_regimen    AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_administration
+-- pcx__llm_systemic_therapy_administration
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -738,15 +738,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_administration AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_administration AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_cycle
+-- pcx__llm_systemic_therapy_cycle
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -769,15 +769,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_cycle      AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_cycle      AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_stem_cell_infusion
+-- pcx__llm_systemic_therapy_stem_cell_infusion
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -800,15 +800,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_stem_cell_infusion AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_stem_cell_infusion AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_response_wide
+-- pcx__llm_response_wide
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -831,8 +831,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_response_wide               AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_response_wide               AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.response <> 'NONE_OF_THE_ABOVE' OR src.radiologically_evaluable IS NOT NULL OR src.cytologically_evaluable IS NOT NULL
@@ -840,7 +840,7 @@ WHERE   src.response <> 'NONE_OF_THE_ABOVE' OR src.radiologically_evaluable IS N
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_metastasis_wide.csf_cytology
+-- pcx__llm_metastasis_wide.csf_cytology
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -863,8 +863,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_metastasis_wide             AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_metastasis_wide             AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.csf_cytology <> 'NONE_OF_THE_ABOVE'
@@ -872,7 +872,7 @@ WHERE   src.csf_cytology <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_metastasis_wide.spine_mri_findings
+-- pcx__llm_metastasis_wide.spine_mri_findings
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -895,8 +895,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_metastasis_wide             AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_metastasis_wide             AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.spine_mri_findings <> 'NONE_OF_THE_ABOVE'
@@ -904,7 +904,7 @@ WHERE   src.spine_mri_findings <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_metastasis_wide.brain_mri_findings
+-- pcx__llm_metastasis_wide.brain_mri_findings
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -927,8 +927,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_metastasis_wide             AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_metastasis_wide             AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.brain_mri_findings <> 'NONE_OF_THE_ABOVE'
@@ -936,7 +936,7 @@ WHERE   src.brain_mri_findings <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_metastasis_wide.extraneural_metastasis
+-- pcx__llm_metastasis_wide.extraneural_metastasis
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -959,8 +959,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_metastasis_wide             AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_metastasis_wide             AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.extraneural_metastasis <> 'NONE_OF_THE_ABOVE'
@@ -968,7 +968,7 @@ WHERE   src.extraneural_metastasis <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_metastasis_site
+-- pcx__llm_metastasis_site
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -991,8 +991,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_metastasis_site             AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_metastasis_site             AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.site <> 'NONE_OF_THE_ABOVE'
@@ -1000,7 +1000,7 @@ WHERE   src.site <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_molecular_report.molecular_group
+-- pcx__llm_molecular_report.molecular_group
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1023,8 +1023,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_molecular_report            AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_molecular_report            AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
@@ -1032,7 +1032,7 @@ WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_systemic_therapy_agent (methotrexate, any dose)
+-- pcx__llm_systemic_therapy_agent (methotrexate, any dose)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1055,8 +1055,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         'METHOTREXATE'                                               AS rx_class
-FROM    {{ prefix }}__llm_systemic_therapy_agent      AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_systemic_therapy_agent      AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   (LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%')
@@ -1065,7 +1065,7 @@ AND     src.delivery_status IN ('ADMINISTERED', 'EXPLICITLY_NOT_RECEIVED')
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.age_under_36_months_at_definitive_surgery
+-- pcx__llm_registry_eligibility_wide.age_under_36_months_at_definitive_surgery
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1088,8 +1088,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.age_under_36_months_at_definitive_surgery_status <> 'NONE_OF_THE_ABOVE'
@@ -1097,7 +1097,7 @@ WHERE   src.age_under_36_months_at_definitive_surgery_status <> 'NONE_OF_THE_ABO
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.newly_diagnosed_embryonal_tumor
+-- pcx__llm_registry_eligibility_wide.newly_diagnosed_embryonal_tumor
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1120,8 +1120,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.newly_diagnosed_embryonal_tumor_status <> 'NONE_OF_THE_ABOVE'
@@ -1129,7 +1129,7 @@ WHERE   src.newly_diagnosed_embryonal_tumor_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.high_risk_disease
+-- pcx__llm_registry_eligibility_wide.high_risk_disease
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1152,8 +1152,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.high_risk_disease_status <> 'NONE_OF_THE_ABOVE'
@@ -1161,7 +1161,7 @@ WHERE   src.high_risk_disease_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.atrt_excluded
+-- pcx__llm_registry_eligibility_wide.atrt_excluded
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1184,8 +1184,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.atrt_excluded_status <> 'NONE_OF_THE_ABOVE'
@@ -1193,7 +1193,7 @@ WHERE   src.atrt_excluded_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.no_prior_chemotherapy
+-- pcx__llm_registry_eligibility_wide.no_prior_chemotherapy
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1216,8 +1216,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.no_prior_chemotherapy_status <> 'NONE_OF_THE_ABOVE'
@@ -1225,7 +1225,7 @@ WHERE   src.no_prior_chemotherapy_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.no_prior_radiation
+-- pcx__llm_registry_eligibility_wide.no_prior_radiation
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1248,8 +1248,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.no_prior_radiation_status <> 'NONE_OF_THE_ABOVE'
@@ -1257,7 +1257,7 @@ WHERE   src.no_prior_radiation_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.adequate_renal_function
+-- pcx__llm_registry_eligibility_wide.adequate_renal_function
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1280,8 +1280,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_renal_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1289,7 +1289,7 @@ WHERE   src.adequate_renal_function_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.adequate_hepatic_function
+-- pcx__llm_registry_eligibility_wide.adequate_hepatic_function
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1312,8 +1312,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_hepatic_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1321,7 +1321,7 @@ WHERE   src.adequate_hepatic_function_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.adequate_cardiac_function
+-- pcx__llm_registry_eligibility_wide.adequate_cardiac_function
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1344,8 +1344,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_cardiac_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1353,7 +1353,7 @@ WHERE   src.adequate_cardiac_function_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.adequate_pulmonary_function
+-- pcx__llm_registry_eligibility_wide.adequate_pulmonary_function
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1376,8 +1376,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_pulmonary_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1385,7 +1385,7 @@ WHERE   src.adequate_pulmonary_function_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_registry_eligibility_wide.adequate_marrow_function
+-- pcx__llm_registry_eligibility_wide.adequate_marrow_function
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1408,8 +1408,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_registry_eligibility_wide   AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_registry_eligibility_wide   AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_marrow_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1417,7 +1417,7 @@ WHERE   src.adequate_marrow_function_status <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_transition_of_care_wide.transfer_in
+-- pcx__llm_transition_of_care_wide.transfer_in
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1440,8 +1440,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_transition_of_care_wide     AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_transition_of_care_wide     AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.transfer_in_timing <> 'NONE_OF_THE_ABOVE'
@@ -1449,7 +1449,7 @@ WHERE   src.transfer_in_timing <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_transition_of_care_wide.diagnosis_setting
+-- pcx__llm_transition_of_care_wide.diagnosis_setting
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1472,8 +1472,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_transition_of_care_wide     AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_transition_of_care_wide     AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.diagnosis_setting <> 'NONE_OF_THE_ABOVE' OR src.imaging_detected_externally IS NOT NULL
@@ -1481,7 +1481,7 @@ WHERE   src.diagnosis_setting <> 'NONE_OF_THE_ABOVE' OR src.imaging_detected_ext
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_transition_of_care_wide.surgery_setting
+-- pcx__llm_transition_of_care_wide.surgery_setting
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1504,8 +1504,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_transition_of_care_wide     AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_transition_of_care_wide     AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.surgery_setting <> 'NONE_OF_THE_ABOVE'
@@ -1513,7 +1513,7 @@ WHERE   src.surgery_setting <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_transition_of_care_wide.prior_therapy_at_entry
+-- pcx__llm_transition_of_care_wide.prior_therapy_at_entry
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1536,8 +1536,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_transition_of_care_wide     AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_transition_of_care_wide     AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.prior_therapy_exposure <> 'NONE_OF_THE_ABOVE'
@@ -1545,7 +1545,7 @@ WHERE   src.prior_therapy_exposure <> 'NONE_OF_THE_ABOVE'
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_laboratory_result
+-- pcx__llm_laboratory_result
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1568,15 +1568,15 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_laboratory_result           AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_laboratory_result           AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__llm_laboratory_toxicity
+-- pcx__llm_laboratory_toxicity
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1599,8 +1599,8 @@ SELECT  DISTINCT
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__llm_laboratory_toxicity         AS src
-LEFT JOIN {{ prefix }}__sample_casedef_author AS note_day
+FROM    pcx__llm_laboratory_toxicity         AS src
+LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -1611,7 +1611,7 @@ UNION ALL
 -- ========================================================================
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__eligible (time zero)
+-- pcx__eligible (time zero)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1634,13 +1634,13 @@ SELECT  DISTINCT
         CAST(NULL AS VARCHAR)                                        AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__eligible                        AS src
+FROM    pcx__eligible                        AS src
 WHERE   src.t0_day IS NOT NULL
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__eligible (definitive surgery)
+-- pcx__eligible (definitive surgery)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1663,13 +1663,13 @@ SELECT  DISTINCT
         CAST(NULL AS VARCHAR)                                        AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__eligible                        AS src
+FROM    pcx__eligible                        AS src
 WHERE   src.definitive_surgery_day IS NOT NULL
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__outcome_first_event
+-- pcx__outcome_first_event
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1692,13 +1692,13 @@ SELECT  DISTINCT
         CAST(NULL AS VARCHAR)                                        AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__outcome_first_event             AS src
+FROM    pcx__outcome_first_event             AS src
 WHERE   src.first_event_day IS NOT NULL
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__outcome_vital_status (death)
+-- pcx__outcome_vital_status (death)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1721,13 +1721,13 @@ SELECT  DISTINCT
         CAST(NULL AS VARCHAR)                                        AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__outcome_vital_status            AS src
+FROM    pcx__outcome_vital_status            AS src
 WHERE   src.deceased_bool
 
 UNION ALL
 
 -- ----------------------------------------------------------------------
--- {{ prefix }}__outcome_vital_status (last known alive)
+-- pcx__outcome_vital_status (last known alive)
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -1750,7 +1750,7 @@ SELECT  DISTINCT
         CAST(NULL AS VARCHAR)                                        AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
-FROM    {{ prefix }}__outcome_vital_status            AS src
+FROM    pcx__outcome_vital_status            AS src
 WHERE   src.last_known_alive_day IS NOT NULL
 ),
 
@@ -1759,7 +1759,7 @@ WHERE   src.last_known_alive_day IS NOT NULL
 -- placeholder, a typo, or a mis-parsed partial date - so it is reported as
 -- unknown rather than passed to downstream date arithmetic. Applying it here,
 -- before the fingerprint, keeps event_id consistent with the row it names, and
--- lets {{ prefix }}__client_timeline_latest and {{ prefix }}__client_dictionary_coverage inherit
+-- lets pcx__client_timeline_latest and pcx__client_dictionary_coverage inherit
 -- the rule instead of restating it. Rows are never dropped, only their dates
 -- are cleared.
 guarded AS (
@@ -1824,6 +1824,6 @@ SELECT  TO_HEX(SHA1(CAST(CONCAT_WS(CHR(31),
         AS event_id,
         guarded.*
 FROM    guarded
-JOIN    {{ prefix }}__client_subject AS subject
+JOIN    pcx__client_subject AS subject
   ON    guarded.subject_ref = subject.subject_ref
 ;

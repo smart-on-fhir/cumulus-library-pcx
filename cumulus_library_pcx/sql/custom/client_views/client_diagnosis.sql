@@ -11,7 +11,7 @@
 -- Chang M-stage resolves to the MOST SEVERE documented value, because staging
 -- is cumulative. Conflicts are counted rather than hidden.
 -- ==========================================================================
-CREATE TABLE {{ prefix }}__client_diagnosis AS
+CREATE TABLE pcx__client_diagnosis AS
 WITH
 diagnosis_note AS (
     SELECT  src.subject_ref,
@@ -32,11 +32,11 @@ diagnosis_note AS (
                 ELSE -1
             END                                         AS m_stage_rank,
             src.age_at_diagnosis_months
-    FROM    {{ prefix }}__llm_diagnosis_wide     AS src
-    JOIN    {{ prefix }}__sample_casedef_author  AS note_day
+    FROM    pcx__llm_diagnosis_wide     AS src
+    JOIN    pcx__sample_casedef_author  AS note_day
       ON    src.subject_ref = note_day.subject_ref
      AND    src.note_ref    = note_day.note_ref
-    JOIN    {{ prefix }}__eligible               AS elig
+    JOIN    pcx__eligible               AS elig
       ON    src.subject_ref = elig.subject_ref
 ),
 
@@ -85,11 +85,11 @@ molecular_note AS (
                                                         AS in_baseline,
             src.molecular_group,
             src.methods
-    FROM    {{ prefix }}__llm_molecular_report       AS src
-    JOIN    {{ prefix }}__sample_casedef_author      AS note_day
+    FROM    pcx__llm_molecular_report       AS src
+    JOIN    pcx__sample_casedef_author      AS note_day
       ON    src.subject_ref = note_day.subject_ref
      AND    src.note_ref    = note_day.note_ref
-    JOIN    {{ prefix }}__eligible                   AS elig
+    JOIN    pcx__eligible                   AS elig
       ON    src.subject_ref = elig.subject_ref
     WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
 ),
@@ -114,7 +114,7 @@ molecular AS (
 casedef AS (
     SELECT  subject_ref,
             ARRAY_JOIN(ARRAY_SORT(ARRAY_AGG(DISTINCT subtype)), '|')    AS casedef_subtypes_tier1
-    FROM    {{ prefix }}__cohort_casedef
+    FROM    pcx__cohort_casedef
     WHERE   tier = 1
     GROUP BY subject_ref
 )
@@ -146,8 +146,8 @@ SELECT  elig.subject_ref,
         molecular.molecular_group_method,
         molecular.molecular_group_distinct_count,
         molecular.group_3_ever_bool
-FROM    {{ prefix }}__eligible           AS elig
-JOIN    {{ prefix }}__eligible_dx        AS dx           ON dx.subject_ref        = elig.subject_ref
+FROM    pcx__eligible           AS elig
+JOIN    pcx__eligible_dx        AS dx           ON dx.subject_ref        = elig.subject_ref
 LEFT JOIN casedef                               ON casedef.subject_ref   = elig.subject_ref
 LEFT JOIN diagnosis                             ON diagnosis.subject_ref = elig.subject_ref
 LEFT JOIN molecular                             ON molecular.subject_ref = elig.subject_ref

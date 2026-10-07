@@ -8,7 +8,7 @@
 --  last_known_alive_day as a PROVISIONAL stand-in until dated event-free
 --  follow-up is adjudicated, so efs_censor_source says so on every row.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__outcome AS
+CREATE  TABLE   pcx__outcome AS
 SELECT  elig.subject_ref,
         elig.gender,
         elig.age_band_at_t0,
@@ -51,8 +51,8 @@ SELECT  elig.subject_ref,
         exposure.methotrexate_first_day,
         exposure.chemo_first_day,
         exposure.radiation_first_day
-FROM    {{ prefix }}__eligible                  AS elig
-LEFT JOIN {{ prefix }}__outcome_vital_status    AS vital    ON vital.subject_ref    = elig.subject_ref
-LEFT JOIN {{ prefix }}__outcome_first_event     AS event    ON event.subject_ref    = elig.subject_ref
-LEFT JOIN {{ prefix }}__outcome_exposure        AS exposure ON exposure.subject_ref = elig.subject_ref
+FROM    pcx__eligible                  AS elig
+LEFT JOIN pcx__outcome_vital_status    AS vital    ON vital.subject_ref    = elig.subject_ref
+LEFT JOIN pcx__outcome_first_event     AS event    ON event.subject_ref    = elig.subject_ref
+LEFT JOIN pcx__outcome_exposure        AS exposure ON exposure.subject_ref = elig.subject_ref
 ;

@@ -6,13 +6,13 @@
 --  This is the DISCOVERY cohort (all ages). Age, prior methotrexate, prior
 --  chemotherapy and prior radiation are yes/no FLAGS here, not exclusions:
 --  a subject diagnosed at 36 months or older, or exposed to methotrexate or
---  radiation before t0, is still in {{ prefix }}__eligible.
+--  radiation before t0, is still in pcx__eligible.
 --    age_under_36_months_at_t0 / _at_definitive_surgery   NULL without a day or birthdate
 --    *_prior_to_t0_bool   TRUE = dated exposure before t0_day, NULL without t0
 --    *_any_bool           TRUE = exposure at any time, FALSE = no evidence
---  {{ prefix }}__eligible_trial applies the strict trial-like intersection on top of it.
+--  pcx__eligible_trial applies the strict trial-like intersection on top of it.
 --  =====================================================================
-CREATE  TABLE   {{ prefix }}__eligible AS
+CREATE  TABLE   pcx__eligible AS
 SELECT  dx.subject_ref,
         dx.gender,
         dx.birthdate,
@@ -36,7 +36,7 @@ SELECT  dx.subject_ref,
             WHEN dx.llm_atrt_bool                                       THEN TRUE
             ELSE FALSE
         END                                                             AS atrt_confirmed_bool,
-        -- relaxed criteria: flags only, {{ prefix }}__eligible_trial excludes on them
+        -- relaxed criteria: flags only, pcx__eligible_trial excludes on them
         dx.age_under_36_months_at_t0,
         surgery.age_under_36_months_at_definitive_surgery,
         rx.methotrexate_prior_to_t0_bool,
@@ -57,8 +57,8 @@ SELECT  dx.subject_ref,
         radiation.radiation_first_day,
         radiation.llm_craniospinal_bool,
         radiation.llm_proton_bool
-FROM    {{ prefix }}__eligible_dx           AS dx
-LEFT JOIN {{ prefix }}__eligible_surgery    AS surgery   ON surgery.subject_ref   = dx.subject_ref
-LEFT JOIN {{ prefix }}__eligible_rx         AS rx        ON rx.subject_ref        = dx.subject_ref
-LEFT JOIN {{ prefix }}__eligible_radiation  AS radiation ON radiation.subject_ref = dx.subject_ref
+FROM    pcx__eligible_dx           AS dx
+LEFT JOIN pcx__eligible_surgery    AS surgery   ON surgery.subject_ref   = dx.subject_ref
+LEFT JOIN pcx__eligible_rx         AS rx        ON rx.subject_ref        = dx.subject_ref
+LEFT JOIN pcx__eligible_radiation  AS radiation ON radiation.subject_ref = dx.subject_ref
 ;

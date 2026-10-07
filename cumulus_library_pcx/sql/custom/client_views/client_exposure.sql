@@ -2,11 +2,11 @@
 -- Grain: one row per subject_ref x exposure (METHOTREXATE, CHEMOTHERAPY, RADIATION).
 --
 -- Long form of the treatment exposures the study compares. Every date comes
--- from {{ prefix }}__eligible_rx / {{ prefix }}__eligible_radiation and every first-event flag
--- from {{ prefix }}__outcome_exposure, so this view adds no new rules. Subject-level
--- sequence and protocol names live on {{ prefix }}__client_subject.
+-- from pcx__eligible_rx / pcx__eligible_radiation and every first-event flag
+-- from pcx__outcome_exposure, so this view adds no new rules. Subject-level
+-- sequence and protocol names live on pcx__client_subject.
 -- ==========================================================================
-CREATE TABLE {{ prefix }}__client_exposure AS
+CREATE TABLE pcx__client_exposure AS
 WITH
 exposure AS (
     SELECT  rx.subject_ref,
@@ -19,8 +19,8 @@ exposure AS (
             rx.methotrexate_administered_bool       AS administered_bool,
             rx.methotrexate_prior_to_t0_bool        AS prior_to_t0_bool,
             outcome.methotrexate_prior_to_first_event_bool AS prior_to_first_event_bool
-    FROM    {{ prefix }}__eligible_rx            AS rx
-    LEFT JOIN {{ prefix }}__outcome_exposure     AS outcome ON outcome.subject_ref = rx.subject_ref
+    FROM    pcx__eligible_rx            AS rx
+    LEFT JOIN pcx__outcome_exposure     AS outcome ON outcome.subject_ref = rx.subject_ref
     UNION ALL
     SELECT  rx.subject_ref,
             'CHEMOTHERAPY'                          AS exposure,
@@ -32,8 +32,8 @@ exposure AS (
             (rx.chemo_administered_first_day IS NOT NULL),
             rx.chemo_prior_to_t0_bool,
             outcome.chemo_prior_to_first_event_bool
-    FROM    {{ prefix }}__eligible_rx            AS rx
-    LEFT JOIN {{ prefix }}__outcome_exposure     AS outcome ON outcome.subject_ref = rx.subject_ref
+    FROM    pcx__eligible_rx            AS rx
+    LEFT JOIN pcx__outcome_exposure     AS outcome ON outcome.subject_ref = rx.subject_ref
     UNION ALL
     SELECT  rt.subject_ref,
             'RADIATION'                             AS exposure,
@@ -45,8 +45,8 @@ exposure AS (
             rt.radiation_administered_bool,
             rt.radiation_prior_to_t0_bool,
             outcome.radiation_prior_to_first_event_bool
-    FROM    {{ prefix }}__eligible_radiation     AS rt
-    LEFT JOIN {{ prefix }}__outcome_exposure     AS outcome ON outcome.subject_ref = rt.subject_ref
+    FROM    pcx__eligible_radiation     AS rt
+    LEFT JOIN pcx__outcome_exposure     AS outcome ON outcome.subject_ref = rt.subject_ref
 )
 
 SELECT  exposure.subject_ref,
@@ -61,6 +61,6 @@ SELECT  exposure.subject_ref,
         exposure.prior_to_t0_bool,
         exposure.prior_to_first_event_bool
 FROM    exposure
-JOIN    {{ prefix }}__client_subject AS subject
+JOIN    pcx__client_subject AS subject
   ON    exposure.subject_ref = subject.subject_ref
 ;

@@ -2,18 +2,18 @@
 -- Grain: one row per subject_ref.
 --
 -- The client contract is the all-ages discovery cohort (every case-definition
--- subject in {{ prefix }}__eligible). The ACNS0334 criteria ride along as columns so
+-- subject in pcx__eligible). The ACNS0334 criteria ride along as columns so
 -- the trial-like subset is a filter downstream, never a different table.
--- Survival and exposure summaries come from {{ prefix }}__outcome, never re-derived.
+-- Survival and exposure summaries come from pcx__outcome, never re-derived.
 -- ==========================================================================
-CREATE TABLE {{ prefix }}__client_subject AS
+CREATE TABLE pcx__client_subject AS
 WITH
 -- Observability window per subject, across all study-window encounters.
 followup AS (
     SELECT  subject_ref,
             MIN(period_start_day)                       AS observation_start_date,
             MAX(period_end_day)                         AS observation_end_date
-    FROM    {{ prefix }}__cohort_study_period
+    FROM    pcx__cohort_study_period
     GROUP BY subject_ref
 ),
 
@@ -31,13 +31,13 @@ demographics AS (
                 FILTER (WHERE NULLIF(TRIM(sp.ethnicity_display), '') IS NOT NULL)
                                                         AS ethnicity_display,
             COUNT(DISTINCT sp.encounter_ref)            AS encounter_count
-    FROM    {{ prefix }}__cohort_study_population AS sp
+    FROM    pcx__cohort_study_population AS sp
     GROUP BY sp.subject_ref
 ),
 
 trial AS (
     SELECT  DISTINCT subject_ref
-    FROM    {{ prefix }}__eligible_trial
+    FROM    pcx__eligible_trial
 )
 
 SELECT  elig.subject_ref,
@@ -102,8 +102,8 @@ SELECT  elig.subject_ref,
         followup.observation_end_date,
         demographics.encounter_count
 
-FROM    {{ prefix }}__eligible               AS elig
-LEFT JOIN {{ prefix }}__outcome              AS outcome      ON outcome.subject_ref      = elig.subject_ref
+FROM    pcx__eligible               AS elig
+LEFT JOIN pcx__outcome              AS outcome      ON outcome.subject_ref      = elig.subject_ref
 LEFT JOIN demographics                              ON demographics.subject_ref = elig.subject_ref
 LEFT JOIN followup                                  ON followup.subject_ref     = elig.subject_ref
 LEFT JOIN trial                                     ON trial.subject_ref        = elig.subject_ref
