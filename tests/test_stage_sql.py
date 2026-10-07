@@ -1,49 +1,24 @@
-"""Portable migration contracts. Only synthetic inputs and local generation are used."""
+"""Checks on the built study as a whole: inputs validate, every stage's SQL reads only tables and
+columns that exist by then, and a repeat build changes nothing. Local generation only."""
 import csv
-import hashlib
 import json
 import tomllib
 from pathlib import Path
 
-import msgspec
 import pytest
 import sqlglot
 from sqlglot import exp
 from sqlglot.optimizer.qualify import qualify
 from cumulus_library import CountsBuilder, StudyManifest
-from cumulus_library.builders.nlp.workflow import NlpWorkflow
 from cumulus_study_builder.config import get_config
 from cumulus_study_builder.tools import filetool, study_builder
 from cumulus_study_builder.validation import validate_inputs
 
-ROOT = Path(__file__).resolve().parents[1]
-CONTRACT = json.loads((ROOT / 'tests/legacy_contract.json').read_text())
+ROOT = filetool.path_root()
 
 
-def test_input_and_schema_contracts(generated_study):
+def test_inputs_validate(generated_study):
     assert validate_inputs() == []
-    for name, digest in CONTRACT['input_sha256'].items():
-        assert hashlib.sha256((ROOT/name).read_bytes()).hexdigest() == digest, name
-    for name, digest in CONTRACT['schema_sha256'].items():
-        content = json.loads(filetool.path_llm('schemas/'+name).read_text())
-        assert hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest() == digest, name
-    for name, expected in CONTRACT['workflows'].items():
-        path = filetool.path_project(name)
-        assert tomllib.loads(path.read_text()) == expected, name
-        msgspec.toml.decode(path.read_bytes(),type=NlpWorkflow)
-        for cfg in expected['tables'].values():
-            assert filetool.path_project(cfg['response_schema']).is_file()
-    assert not (ROOT/'cumulus_library_pcx/tools').exists()
-    for path in (ROOT/'cumulus_library_pcx').rglob('*.py'):
-        assert 'from cumulus_library_' not in path.read_text(), path
-
-
-def test_cumulus_manifest_and_count_contracts():
-    # Export actions name the counts workflow; cumulus-library expands it to its tables.
-    manifest = StudyManifest(ROOT/'cumulus_library_pcx')
-    manifest.materialize_counts_builder_exports()
-    counts=[export.name for export in manifest.get_export_table_list() if export.export_type=='cube']
-    assert sorted(counts)==sorted(CONTRACT['count_tables'])
 
 
 def counts_queries(workflow: Path) -> list[str]:
@@ -59,7 +34,8 @@ def _walk(*, default_only=False):
     manifest=tomllib.loads((study/'manifest.toml').read_text())
     prefix=manifest['study_prefix']+'__'
     schema={t:dict.fromkeys(cols,'UNKNOWN') for t,cols in json.loads((ROOT/'tests/column_contracts.json').read_text()).items()}
-    known=set(CONTRACT['external_selectors'])
+    # Tables the site supplies (cumulus-study.toml external_tables): no stage builds them.
+    known=set(get_config().external_tables)
     # Site-supplied selectors carry the columns cumulus_library_pcx/nlp-selection-requirements.json requires.
     requirements=json.loads((study/'nlp-selection-requirements.json').read_text())
     for table in requirements['tables']:

@@ -19,7 +19,7 @@ Data package version: **1 → 2**. Existing flat client CSV exports are retained
 
 ## Shared migration contract
 
-- The make-pcx version is git tag `0.2-pre-study-builder` of this repository; the backport replaced it on branch `andy/study-builder` (2026-10-02). `docs/source_inventory.json` records the source file hashes as of 2026-09-19, the point the backport was taken from; `tests/legacy_contract.json` pins migrated input, workflow, schema and count-output contracts.
+- The make-pcx version is git tag `0.2-pre-study-builder` of this repository; the backport replaced it on branch `andy/study-builder` (2026-10-02). The tag is the record of the source files; the backport was taken from them as of 2026-09-19.
 - Shared stages and tools come from cumulus-study-builder **0.5.0**, not copies in the study. Researcher-owned SQL stays in `sql/custom`, overrides of builder Jinja templates in `sql/template`, and generated SQL in `sql/generated`, all inside the study package `cumulus_library_pcx/`.
 - Existing study prefixes, clinical code membership and authored clinical SQL are retained except for the explicit changes documented here. CSV metadata header corrections do not change any code/system rows.
 - Current builder population/encounter handling applies: date fallback can attach evidence whose explicit encounter link is absent, encounters can have no end date, subject identity is checked on evidence joins, and note limits rank distinct subject/note pairs. Results are not claimed patient-for-patient equivalent to the older builder.

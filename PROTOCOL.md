@@ -10,15 +10,17 @@ Inherited source documents are in `docs/source/`; "workplan N.N" below cites the
 `docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
 (builder 0.5.0). Other sites run the study from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`; it is not pip-installed.
+`cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the seven default stages
+without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
+(`release/make_data_release.py`).
 
 ## 0. Source
 
 - [source README] Retrospective, proof-of-concept EHR emulation of clinical trial ACNS0334
   (NCT00336024; Mazewski, Leary et al., PMC12833527): high-dose methotrexate added to an intensive
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
-- [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); file hashes in
-  `docs/source_inventory.json`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
+- [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
+  git tag `0.2-pre-study-builder`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
   workplan,llm,laboratory,deferred}.md` as of 2026-09-11.
 
 ## 1. Objective
@@ -221,6 +223,10 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   strict trial view (methotrexate counts as prior chemotherapy), prior-therapy flags FALSE for
   undated evidence and NULL only without a t0, ages 0-120 with adult age groups. The encounter
   count table drops `age_at_visit`. Andy.
+- 2026-10-05 [decided] Release 0.3.0 is built by the local script `release/make_data_release.py`
+  (venv, render, assemble, check, build) and published by hand with twine straight to PyPI,
+  without TestPyPI, from `andy/study-builder` before the PR merges. The DuckDB smoke test of
+  the installed package is deferred to a later release. Andy.
 
 ## Agent rules
 

@@ -12,6 +12,8 @@ eligibility, outcome, client-export and QA stages, and 17 count tables. NLP prer
   The pre-builder (make-pcx) version is git tag `0.2-pre-study-builder`.
 - [WORKPLAN.md](WORKPLAN.md): open tasks.
 - [CHANGELOG.md](CHANGELOG.md): short history of changes.
+- [release/make_data_release.py](release/make_data_release.py): builds the data-only PyPI
+  package ([Release](#release)).
 
 ## Set up
 
@@ -44,3 +46,21 @@ NLP stages need `builder.nlp_deployments` in `cumulus-study.toml` and are opt-in
 After site review, `cumulus-library build --study-dir cumulus_library_pcx` in a configured
 Cumulus environment.
 Opt-in stages run only when named; local generation never runs NLP, exports or queries.
+
+## Release
+
+The PyPI package `cumulus-library-pcx` is data-only: the rendered SQL and data files of the
+seven default stages without NLP, no Python code and no dependencies. Sites install it next
+to Cumulus Library and run `cumulus-library build -t pcx`.
+
+```sh
+python release/make_data_release.py     # needs SSH read access to the builder repository
+```
+
+Run it with the development venv from [Set up](#set-up) active: the script finds the repository
+through the builder's `filetool`, so the builder must be installed in the Python that runs it.
+
+The script works in `build/release/` (remove it before the next run): a venv with the
+builder tag, `cumulus-study build` and `validate`, the assembled package, checks, then the
+wheel and sdist in `build/release/dist/`. The version comes from `pyproject.toml`. It never
+uploads or runs git: it prints the `twine upload` command for the person publishing.

@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-07 — migration scaffolding removed
+
+- PCX has no released version to migrate from, so the migration pins are gone: Andy deleted
+  `tests/legacy_contract.json` and `docs/source_inventory.json`. The old repo is kept as git
+  tag `0.2-pre-study-builder`. `spreadsheet/README.md`, MIGRATION and PROTOCOL no longer cite
+  the deleted files.
+- `tests/test_migration.py` is now `tests/test_stage_sql.py`. Kept: inputs validate, the
+  stage-order SQL column check, the repeat-build check. Removed: the CSV, schema, workflow
+  and count-table pins. Site-supplied tables come from `external_tables` in
+  `cumulus-study.toml`.
+
+## 2026-10-06 — release script uses filetool
+
+- `release/make_data_release.py` finds the repository, the study package and the spreadsheet
+  folder with the builder's `filetool` (`path_root`, `path_project`, `path_spreadsheet`), not
+  `Path(__file__).parents[1]`. It now has to run from a Python with cumulus-study-builder
+  installed (the development venv). README Release section says so.
+
+## 2026-10-05 — data-only release script
+
+- New `release/make_data_release.py` builds the data-only PyPI package: a venv with the
+  builder tag, render and validate, then the seven default stages without NLP assembled into
+  `build/release/package/` (`../spreadsheet/` paths moved inside the package), checked (no
+  Python but `__init__.py`, no LLM or NLP tables) and built with flit into
+  `build/release/dist/`. It prints the `twine upload` command and never uploads.
+- README has a Release section. PROTOCOL and WORKPLAN record the release decisions: no
+  TestPyPI, release from the branch, smoke test deferred.
+
 ## 2026-10-05 — medications from core, eligibility flags, ages 0-120
 
 Ported from tag `0.2-pre-study-builder`:

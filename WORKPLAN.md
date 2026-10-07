@@ -24,12 +24,11 @@ ships the default stages without NLP; see "Data-only PyPI release" under Build, 
 
 ## Open questions
 
-- [ ] **Where the release workflow runs**: a local script, a dispatchable GitHub Action, or
-  both (the Action calls the script). PyPI publish rights: the DevOps lead and @msa2984.
 - [ ] **Allowlist name.** Cumulus Library's allowlist maps study `cancer_mtx` to the module
-  `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Discovery finds
-  allowlisted modules and keys them by the manifest prefix, so an installed release may
-  already build as `-t pcx` without `--study-dir`: the release smoke test settles it.
+  `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Cumulus Library 6.3.4
+  discovery (`cli.get_study_dict`) imports allowlisted modules and keys them by the manifest
+  prefix, so the installed release should build as `-t pcx` without `--study-dir`. Read in
+  the code, not yet run: the deferred release smoke test (below) confirms it.
 - [ ] **Diagnosis version.** Recommended: set the full workflow to version 3 and regenerate;
   version-2 rows already in a warehouse are then excluded ([§5](PROTOCOL.md#5-clinical-notes)).
 - [ ] Note-selection inputs (query-topic TSVs and `reviews/`) were not migrated: restore or
@@ -84,30 +83,19 @@ No changes planned.
 
 ## Build, tests and docs
 
-- [ ] P1 · release · **Data-only PyPI release** (DevOps, 2026-10-02). A release workflow, local or a dispatchable GitHub Action:
-  1. Make an isolated venv with Cumulus Library, the builder tag and PCX installed.
-  2. Run `cumulus-study build` to render the artifacts.
-  3. Copy into a standalone directory: `manifest.toml`, the stage TOMLs, the rendered
-     `sql/generated/` SQL and workflows (including counts), and the data files
-     (`spreadsheet/` CSVs and `file_upload_*.toml`, `data_dictionary.csv`). Add a minimal
-     `pyproject.toml` with no dependencies and an `__init__.py`. Rewrite paths that point
-     outside the package (`manifest.toml` `data_dictionary = "../spreadsheet/..."`, the
-     `../spreadsheet/file_upload_*.toml` references in the casedef, study_population and
-     study_variable TOMLs).
-  4. Keep only the released stages in `manifest.toml`: `study_population`, `study_variable`,
-     `study_variable_wide`, `casedef`, `sample`, `counts`, `study_meta` (the default plan
-     without `llm_schema`). The NLP stages go, and so do `eligible`, `outcome` and
-     `client_views`, which read LLM tables, and the opt-in `qa_athena`. No `.py` file may
-     remain in the package.
-  5. Build, then publish to PyPI (the DevOps lead or @msa2984 holds the rights).
-  Keep steps 1–4 separable from step 5: DevOps may reuse them for a future automated
-  distribution (builder WORKPLAN, "Reusable render step"). The README states the
-  Cumulus Library version the release was rendered and tested with.
-  *Done when* `cumulus-library-pcx` 0.3.0 is on PyPI (TestPyPI first), the wheel holds no
-  Python beyond `__init__.py`, a clean venv with only Cumulus Library installs it, and
-  `cumulus-library build -t pcx` (with `--study-dir` only if the allowlist question above
-  requires it) runs the seven stages on DuckDB. README and PROTOCOL then say how sites
-  install the release.
+- [ ] P1 · release · **Publish 0.3.0 to PyPI** (DevOps, 2026-10-02). `release/make_data_release.py`
+  makes a venv with the builder tag and the tested pins, renders, assembles the seven
+  default stages without NLP into a Python-free package, checks it and builds the wheel and
+  sdist into `build/release/dist/` ([README](README.md#release)). Publishing stays manual:
+  Andy or @msa2984 runs the printed `twine upload` straight to PyPI (no TestPyPI), from
+  `andy/study-builder` before the PR merges, then tags the release commit `v0.3.0`.
+  *Done when* 0.3.0 is on PyPI and tagged.
+- [ ] P2 · release · **Release smoke test** (deferred 2026-10-05). A clean venv with only
+  Cumulus Library installs the wheel and `cumulus-library build -t pcx` runs the seven stages
+  on DuckDB. Needs the core tables and the site tables the stages read
+  (`tests/column_contracts.json`), with or without rows. Settles the allowlist question above.
+- [ ] P3 · release · Optionally, a dispatchable GitHub Action that calls the script. It needs
+  read access to the builder repository and a PyPI token or trusted publishing.
 - [ ] P2 · tests · **Default plan test.** Assert `StudyManifest.get_stage('all')` contains none
   of the 11 opt-in actions, including with synthetic Elastic inputs.
 - [ ] P3 · `qa_athena` · Optionally replace the study-owned `qa_athena` stage with the shared
