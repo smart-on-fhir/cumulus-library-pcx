@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-07 — release plan: data-only, with NLP stages
+
+- WORKPLAN: the PyPI release stays data-only (SQL, TOML, JSON) and now includes the NLP
+  stages, so CHOP can run the LLM locally with stock Cumulus Library. New release items
+  (script, smoke test) and open questions (CHOP note selection, model, further stages).
+  PROTOCOL records the decision. Docs only: the release script is unchanged.
+
 ## 2026-10-07 — builder repository is smart-on-fhir
 
 - The builder install URL is now `smart-on-fhir/cumulus-study-builder` (was `comorbidity/`)
