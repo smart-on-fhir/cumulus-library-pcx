@@ -89,13 +89,14 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   note in `pcx__sample_task`, the casedef notes plus the Elasticsearch notes, which the `sample`
   stage builds at every site.
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
-  source study never created (`cumulus_library_pcx/nlp-selection-requirements.json`). Supply reviewed selectors
+  source study never created. Supply reviewed selectors, each with a `note_ref` column,
   before running it. The 12 tables are declared as site-supplied under `[builder] external_tables`,
   and each workflow's selector guard (`pcx__qa_selector_<workflow>`) stops the stage when a
   selector is missing or empty, since cumulus-library 6.3.1 would otherwise send every note to
   the LLM.
-- [open] Full diagnosis workflow is version 2, the limited workflow version 3; the projections
-  consume version 2. Decide the version before production. `HOME_INSTITUTION` is site-specific.
+- [open] The diagnosis task is version 2 and the projections consume version 2. The removed
+  `_50k` workflow ran it as version 3. Confirm the version before production.
+  `HOME_INSTITUTION` is site-specific.
 
 ## 6. Eligibility
 

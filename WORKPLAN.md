@@ -105,8 +105,8 @@ No changes planned.
 - [ ] P1 · release · **Add the NLP stages to the release script.** `release/make_data_release.py`
   assembles only the eight default stages and rejects anything else. Add `nlp_document_tasks`,
   `llm_document_wide`, `nlp_clinical_tasks` and `llm_clinical_wide`, still opt-in: their
-  guard TOMLs, the `.workflow` files, the JSON schemas they name (`llm/schemas/`),
-  `nlp-selection-requirements.json` and the wide SQL. Leave out `llm_schema`, the only stage
+  guard TOMLs, the `.workflow` files, the JSON schemas they name (`llm/schemas/`)
+  and the wide SQL. Leave out `llm_schema`, the only stage
   that runs Python (the schemas ship already built). The check that
   rejects SQL reading LLM or NLP tables becomes: no Python but `__init__.py`, and every file a
   stage names is in the package. *Done when* the wheel holds those stages and no Python.

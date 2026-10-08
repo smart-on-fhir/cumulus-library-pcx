@@ -35,11 +35,10 @@ def _walk(*, default_only=False):
     prefix=manifest['study_prefix']+'__'
     schema={t:dict.fromkeys(cols,'UNKNOWN') for t,cols in json.loads((ROOT/'tests/column_contracts.json').read_text()).items()}
     # Tables the site supplies (cumulus-study.toml external_tables): no stage builds them.
+    # They are NLP note selectors, read for their note_ref column.
     known=set(get_config().external_tables)
-    # Site-supplied selectors carry the columns cumulus_library_pcx/nlp-selection-requirements.json requires.
-    requirements=json.loads((study/'nlp-selection-requirements.json').read_text())
-    for table in requirements['tables']:
-        schema[table]=dict.fromkeys(requirements['required_columns'],'UNKNOWN')
+    for table in get_config().external_tables:
+        schema[table]={'note_ref':'UNKNOWN'}
     raw_columns=['note_ref','subject_ref','encounter_ref','generated_on','task_version','system_fingerprint','result']
 
     def check_sql(text,source_file):

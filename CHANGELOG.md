@@ -7,6 +7,8 @@
   `pcx__llm_document_task_document_*` names left `external_tables`.
 - Both `_50k` workflows and their stages are removed. The document one was a copy of
   `nlp_document_tasks.workflow`.
+- Removed `cumulus_library_pcx/nlp-selection-requirements.json`: it repeated the
+  `external_tables` list in `cumulus-study.toml`, which is now the one place for it.
 
 ## 2026-10-08 — builder 0.5.4, pcx__sample_task
 
