@@ -46,13 +46,6 @@ files = [
 
 [[stages.nlp_document_tasks]]
 skip_by_default = true
-type = "submanifest"
-files = [
-    "nlp_document_tasks_guard.toml",
-]
-
-[[stages.nlp_document_tasks]]
-skip_by_default = true
 files = [
     "nlp_document_tasks.workflow",
 ]
@@ -62,13 +55,6 @@ skip_by_default = true
 type = "submanifest"
 files = [
     "llm_document_wide.toml",
-]
-
-[[stages.nlp_clinical_tasks]]
-skip_by_default = true
-type = "submanifest"
-files = [
-    "nlp_clinical_tasks_guard.toml",
 ]
 
 [[stages.nlp_clinical_tasks]]

@@ -20,7 +20,7 @@ Data package version: **1 → 2**. Existing flat client CSV exports are retained
 ## Shared migration contract
 
 - The make-pcx version is git tag `0.2-pre-study-builder` of this repository; the backport replaced it on branch `andy/study-builder` (2026-10-02). The tag is the record of the source files; the backport was taken from them as of 2026-09-19.
-- Shared stages and tools come from cumulus-study-builder **0.5.4**, not copies in the study. Researcher-owned SQL stays in `sql/custom`, overrides of builder Jinja templates in `sql/template`, and generated SQL in `sql/generated`, all inside the study package `cumulus_library_pcx/`.
+- Shared stages and tools come from cumulus-study-builder **0.5.5**, not copies in the study. Researcher-owned SQL stays in `sql/custom`, overrides of builder Jinja templates in `sql/template`, and generated SQL in `sql/generated`, all inside the study package `cumulus_library_pcx/`.
 - Existing study prefixes, clinical code membership and authored clinical SQL are retained except for the explicit changes documented here. CSV metadata header corrections do not change any code/system rows.
 - Current builder population/encounter handling applies: date fallback can attach evidence whose explicit encounter link is absent, encounters can have no end date, subject identity is checked on evidence joins, and note limits rank distinct subject/note pairs. Results are not claimed patient-for-patient equivalent to the older builder.
 - Coded evidence tables retain raw links and selected links. Count adapters join demographics from the encounter spine where required; count table names, dimensions and floors are explicit in `counts.workflow` (the shared `counts` stage since 2026-09-22; the original `cubes.json` is retired). The workflow sits at the package root next to `manifest.toml`.
@@ -32,7 +32,7 @@ Data package version: **1 → 2**. Existing flat client CSV exports are retained
 
 Run `cumulus-study skills check`, `cumulus-study starter check`, `cumulus-study validate`, `cumulus-study build`, then `python -m pytest -q` from this checkout. The suite includes all-stage and default-stage SQL dependency/column checks, Cumulus manifest parsing and repeat-build checks.
 
-`requirements-tested.txt` records the last passing run (cumulus-study-builder 0.5.4, cumulus-library 6.3.4, 2026-10-08); use it as constraints. Regenerate before accepting changed CSV or schema contracts.
+`requirements-tested.txt` records the last passing run (cumulus-study-builder 0.5.5, cumulus-library 6.3.4, 2026-10-08); use it as constraints. Regenerate before accepting changed CSV or schema contracts.
 
 ## Moving to 0.5.0 (done 2026-10-02)
 

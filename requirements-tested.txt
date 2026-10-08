@@ -1,7 +1,7 @@
-# Versions used for the 2026-10-08 run against cumulus-study-builder 0.5.4 (git tag v0.5.4,
+# Versions used for the 2026-10-08 run against cumulus-study-builder 0.5.5 (git tag v0.5.5,
 # not on PyPI; Linux, Python 3.11.16): skills check, starter check, build, validate and
 # pytest (72 passed).
-cumulus-study-builder==0.5.4
+cumulus-study-builder==0.5.5
 cumulus-library==6.3.4
 pydantic==2.13.5
 Jinja2==3.1.6

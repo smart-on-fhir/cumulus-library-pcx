@@ -9,7 +9,7 @@ depend on: keep the numbers and their order, add subsections freely.
 Inherited source documents are in `docs/source/`; "workplan N.N" below cites the inherited
 `docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
-(builder 0.5.4). Other sites run the study from a clone of this repository with
+(builder 0.5.5). Other sites run the study from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
 without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
 (`release/make_data_release.py`).
@@ -90,10 +90,9 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   stage builds at every site.
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created. Supply reviewed selectors, each with a `note_ref` column,
-  before running it. The 12 tables are declared as site-supplied under `[builder] external_tables`,
-  and each workflow's selector guard (`pcx__qa_selector_<workflow>`) stops the stage when a
-  selector is missing or empty, since cumulus-library 6.3.1 would otherwise send every note to
-  the LLM.
+  before running it. The 12 tables are declared as site-supplied under `[builder] external_tables`.
+  Nothing stops the stage when a selector is empty (no selector guard since builder 0.5.5), and
+  cumulus-library 6.3.4 then sends every note to the LLM: check each selector has rows first.
 - [open] The diagnosis task is version 2 and the projections consume version 2. The removed
   `_50k` workflow ran it as version 3. Confirm the version before production.
   `HOME_INSTITUTION` is site-specific.
@@ -252,10 +251,16 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   version. Andy.
 - 2026-10-08 [decided] Release 0.3.0 ships the eight default stages, built on builder 0.5.4.
   The NLP stages follow in a later release. Andy.
+- 2026-10-08 [decided] The study moves to builder 0.5.5, which removes the NLP selector guard:
+  each workflow is one manifest entry. The document tasks select from `pcx__sample_task`, which
+  always has rows because `pcx__sample_casedef` is never empty. Andy.
 - 2026-10-08 [decided] CHOP runs `gpt-oss-120b` on Bedrock, the same model as BCH, so the
   rendered wide SQL needs no site variant. Andy.
 - 2026-10-08 [decided] Each clinical task selects the notes the LLM marked relevant to its
   topic (`document_topic` results). The selector tables are not built yet. Andy.
+- 2026-10-08 [decided] Release 0.4.0 is the first with an LLM workflow, and its scope is
+  `nlp_document_tasks.workflow` only (`document_type`, `document_topic`). The clinical
+  workflow waits for a later release. Andy.
 - 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
   stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
   Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.

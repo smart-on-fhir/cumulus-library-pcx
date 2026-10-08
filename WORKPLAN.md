@@ -1,8 +1,8 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
-Open, study-specific work only, on cumulus-study-builder **0.5.4**, the git tag `v0.5.4` (not on
+Open, study-specific work only, on cumulus-study-builder **0.5.5**, the git tag `v0.5.5` (not on
 PyPI). Install it from `smart-on-fhir` with
-`pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.4"`, then
+`pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5"`, then
 `pip install -e '.[test]'`; the release workflow needs read access to that repository. Done work is in
 [CHANGELOG.md](CHANGELOG.md).
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
@@ -15,17 +15,67 @@ appear in EHR cohorts? The study builds a discovery cohort and a trial-like coho
 must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
 treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
-Runs on 0.5.4 with the `cumulus_library_pcx/` package (validated 2026-10-08 against the
-`v0.5.4` tag: `skills check`, `starter check`, build, validate, 72 tests).
+Runs on 0.5.5 with the `cumulus_library_pcx/` package (validated 2026-10-08 against the
+`v0.5.5` tag: `skills check`, `starter check`, build, validate, 72 tests).
 
-Next deliverable: publish PCX 0.3.0 to PyPI as a **built-artifact-only** package: rendered
-SQL, TOML and JSON with no Python code and no dependencies, built from the builder tag
-(DevOps, 2026-10-02). 0.3.0 ships the eight default stages (decided 2026-10-08). The NLP
-stages follow in the next release, because CHOP must run the LLM on its own notes (no PHI
-leaves the site; CHOP has the Cumulus core tables and AWS Bedrock, and will run
-`gpt-oss-120b`). Cumulus Library runs the LLM from the released workflow files, so neither
-CHOP nor the package needs cumulus-study-builder. See the release items under Build, tests
-and docs.
+Releases are **built-artifact-only** PyPI packages: rendered SQL, TOML and JSON with no Python
+code and no dependencies, built from the builder tag (DevOps, 2026-10-02). Sites install one
+next to Cumulus Library, so neither the site nor the package needs cumulus-study-builder.
+
+- **0.3.0**: the eight default stages. Tagged `v0.3.0`; the PyPI upload is the open item under
+  Build, tests and docs.
+- **0.4.0**: the first LLM workflow. Planned below.
+
+## Release 0.4.0: document LLM tasks
+
+CHOP must run the LLM on its own notes (no PHI leaves the site; CHOP has the Cumulus core
+tables and AWS Bedrock, and runs `gpt-oss-120b`, the same model as BCH).
+
+In scope: `nlp_document_tasks.workflow`, with its two tasks `document_type` and
+`document_topic` (both version 2). They select their notes from `pcx__sample_task`, which the
+default `sample` stage builds at every site: casedef notes at CHOP, casedef plus Elasticsearch
+notes at BCH.
+
+Out of scope: `nlp_clinical_tasks.workflow` and its 12 selector tables, `llm_clinical_wide`,
+`eligible`, `outcome`, `client_views`, `qa_athena`, and `llm_schema` (the only stage that runs
+Python: the schemas ship already built).
+
+In order:
+
+- [ ] P1 · external · **Cumulus Library must authorise `pcx` to run NLP.** Against Athena,
+  Cumulus Library 6.3.4 refuses NLP for a study whose prefix is not a key of its allowlist
+  (`module_allowlist.json`), and the key there is `cancer_mtx`, not `pcx`. Read in the
+  installed code, not yet run. Andy changes the entry to `"pcx": "cumulus_library_pcx"` in
+  Cumulus Library (assumed possible, 2026-10-08). The study keeps the prefix `pcx`. Name the
+  first Cumulus Library version that has the change in the release README. *Done when* a
+  Cumulus Library release lists `pcx`.
+- [ ] P1 · decision · **Ship `llm_document_wide` too?** Its two SQL files turn the raw LLM
+  output into `pcx__llm_document_topic_wide` and `pcx__llm_document_type_wide`. Without it a
+  site gets only the raw result tables. Recommended: ship it, still opt-in.
+- [ ] P1 · `nlp_document_tasks` · **Run both tasks at BCH first.** Finish the Elasticsearch
+  export (17 topics), build `pcx__sample_task`, and run the workflow on `gpt-oss-120b`.
+  Record the note count, cost and failure count in PROTOCOL section 5, and confirm version 2
+  is the version to release. *Done when* both wide tables are populated at BCH.
+- [ ] P1 · release · **Ship the document workflow in the release script.**
+  `release/make_data_release.py` assembles only default stages and rejects anything else.
+  Add the opt-in `nlp_document_tasks` stage: the `.workflow` file (one manifest entry, no
+  selector guard since builder 0.5.5) and the two schemas it
+  names (`llm/schemas/pcx-document-type-annotation.json`,
+  `pcx-document-topic-annotation.json`), which are not listed in any stage TOML. The check
+  that rejects SQL reading LLM or NLP tables becomes: no Python but `__init__.py`, and every
+  file a stage or workflow names is in the package. *Done when* the wheel holds the
+  workflow, both schemas and no Python.
+- [ ] P1 · release · **Smoke test from the wheel.** A clean venv with only Cumulus Library
+  installs the wheel. `cumulus-library build -t pcx` runs the eight default stages on DuckDB,
+  and the document workflow runs against Bedrock on synthetic notes. Needs the core tables
+  and the site tables the stages read (`tests/column_contracts.json`), with or without rows.
+  Settles the "Stock Cumulus Library" and "Allowlist name" questions below.
+- [ ] P2 · docs · **Site run instructions.** In the README and the package README: the stage
+  to name, and the options a site passes (`--note-dir`, `--etl-phi-dir`,
+  `--nlp-provider bedrock`, `--nlp-model gpt-oss-120b`), with the Cumulus Library version
+  from the first item.
+- [ ] P1 · release · **Publish 0.4.0.** Set the version in `pyproject.toml`, build with the
+  script, upload, tag `v0.4.0`. *Done when* 0.4.0 is on PyPI and tagged.
 
 ## Open questions
 
@@ -33,11 +83,12 @@ and docs.
   `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Cumulus Library 6.3.4
   discovery (`cli.get_study_dict`) imports allowlisted modules and keys them by the manifest
   prefix, so the installed release should build as `-t pcx` without `--study-dir`. Read in
-  the code, not yet run: the deferred release smoke test (below) confirms it.
+  the code, not yet run: the 0.4.0 smoke test confirms it. Running NLP needs more: see the
+  first 0.4.0 item.
 - [ ] **Stock Cumulus Library runs the NLP stages.** Cumulus Library 6.3.4 has an NLP runner
   with a Bedrock provider (`--nlp-provider bedrock`, `--nlp-model`) and PCX's NLP stages are
   `config_type = "nlp"` workflows plus JSON schemas. Read in the installed package, not yet
-  run: the release smoke test (below) confirms it. If it fails, the stopgap is a source
+  run: the 0.4.0 smoke test confirms it. If it fails, the stopgap is a source
   install of PCX and the builder at CHOP. A builder dependency in the package needs the
   builder on PyPI first.
 - [ ] **Clinical-task selectors.** Decided 2026-10-08: each clinical task gets the notes the
@@ -98,22 +149,11 @@ No changes planned.
 
 ## Build, tests and docs
 
-- [ ] P2 · release · **Add the NLP stages to the release script** (for the release after 0.3.0). `release/make_data_release.py`
-  assembles only the eight default stages and rejects anything else. Add `nlp_document_tasks`,
-  `llm_document_wide`, `nlp_clinical_tasks` and `llm_clinical_wide`, still opt-in: their
-  guard TOMLs, the `.workflow` files, the JSON schemas they name (`llm/schemas/`)
-  and the wide SQL. Leave out `llm_schema`, the only stage
-  that runs Python (the schemas ship already built). The check that
-  rejects SQL reading LLM or NLP tables becomes: no Python but `__init__.py`, and every file a
-  stage names is in the package. *Done when* the wheel holds those stages and no Python.
-- [ ] P2 · release · **Release smoke test** (deferred 2026-10-05; gates the NLP release, not 0.3.0).
-  A clean venv with only Cumulus Library installs the wheel. `cumulus-library build -t pcx`
-  runs the eight default stages on DuckDB, and one NLP stage runs against Bedrock on
-  synthetic notes. Needs the core tables and the site tables the stages read
-  (`tests/column_contracts.json`), with or without rows. Settles the allowlist and
-  stock-Cumulus-Library questions above.
+- [ ] P2 · release · **Clinical workflow in a later release.** After 0.4.0: ship
+  `nlp_clinical_tasks` and `llm_clinical_wide` once the 12 clinical-task selectors are built
+  (open question above).
 - [ ] P1 · release · **Publish 0.3.0 to PyPI** (DevOps, 2026-10-02): the eight default
-  stages, on builder 0.5.4. The script makes a venv with the builder tag and the tested pins, renders,
+  stages, on builder 0.5.5. The script makes a venv with the builder tag and the tested pins, renders,
   assembles, checks and builds the wheel and sdist into `build/release/dist/`
   ([README](README.md#release)). Publishing stays manual: Andy or @msa2984 runs the printed
   `twine upload` straight to PyPI (no TestPyPI), from `andy/study-builder` before the PR

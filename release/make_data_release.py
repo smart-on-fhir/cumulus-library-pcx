@@ -39,11 +39,17 @@ ROOT = filetool.path_root()
 STUDY = filetool.path_project()
 PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
-BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.4'
+BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5'
 
 # The default stages (PROTOCOL.md decision log, 2026-10-02 and 2026-10-08), in manifest order.
-RELEASED_STAGES = ['study_population', 'study_variable', 'study_variable_wide', 'casedef',
-                   'elastic_upload', 'sample', 'counts', 'study_meta']
+RELEASED_STAGES = ['study_population',
+                   'study_variable',
+                   'study_variable_wide',
+                   'casedef',
+                   'elastic_upload',
+                   'sample',
+                   'counts',
+                   'study_meta']
 # Where a site keeps its Elasticsearch export. The release is rendered without one.
 EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')

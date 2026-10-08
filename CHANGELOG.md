@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-08 — builder 0.5.5, selector guards removed
+
+- The study requires cumulus-study-builder `>=0.5.5,<0.6` and installs the `v0.5.5` tag.
+- The NLP selector guards are gone: no `nlp_<workflow>_guard.toml`, no
+  `pcx__qa_selector_<workflow>.sql`, and each workflow is one entry in `manifest.toml`.
+- An empty selector table now sends every note to the LLM. `pcx__sample_task` always has
+  rows. The 12 clinical selectors must be checked by hand before `nlp_clinical_tasks` runs.
+
+## 2026-10-08 — plan for release 0.4.0
+
+- WORKPLAN has a "Release 0.4.0" section: the first LLM workflow, scoped to
+  `document_type` and `document_topic` in `nlp_document_tasks.workflow`, with the ordered
+  work to get there. PROTOCOL records the scope. Docs only.
+
 ## 2026-10-08 — release plan for 0.3.0
 
 - 0.3.0 ships the eight default stages on builder 0.5.4. The NLP stages and the release smoke
