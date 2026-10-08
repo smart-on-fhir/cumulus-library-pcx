@@ -2,7 +2,7 @@
 name = "cumulus-library-pcx"
 version = "0.3.0"
 requires-python = ">=3.11"
-dependencies = ["cumulus-study-builder>=0.5.3,<0.6", "cumulus-library>=6.3.4,<6.4"]
+dependencies = ["cumulus-study-builder>=0.5.4,<0.6", "cumulus-library>=6.3.4,<6.4"]
 description = "PCX study on the shared Cumulus study builder."
 
 [project.optional-dependencies]

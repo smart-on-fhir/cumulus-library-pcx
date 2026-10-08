@@ -9,7 +9,7 @@ depend on: keep the numbers and their order, add subsections freely.
 Inherited source documents are in `docs/source/`; "workplan N.N" below cites the inherited
 `docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
-(builder 0.5.3). Other sites run the study from a clone of this repository with
+(builder 0.5.4). Other sites run the study from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
 without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
 (`release/make_data_release.py`).
@@ -81,13 +81,16 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [source llm] 14 extraction models in `cumulus_library_pcx/llm/models/`: diagnosis, document_topic,
   document_type, event, laboratory, metastasis, molecular, radiation, registry_eligibility,
   response, surgery, survival_timeline, systemic_therapy, transition_of_care (`treatment.py`
-  is shared context, not a task). Workflows: `nlp_document_tasks`, `nlp_clinical_tasks` and their `_50k` variants; 23 wide and
+  is shared context, not a task). Workflows: `nlp_document_tasks` and `nlp_clinical_tasks`; 23 wide and
   projection templates in `cumulus_library_pcx/sql/template/`. Deployment `gpt_oss_120b` (`cumulus-study.toml`).
 - [decided] Sample windows from the shared sampler: pre, peri, post around the casedef anchor;
   10 patients and 50 notes per window (`cumulus-study.toml`).
-- [open] Note selectors: every workflow references `pcx__llm_document_task_<task>` tables that the
+- [decided] 2026-10-08, Andy: the document tasks (`document_topic`, `document_type`) select every
+  note in `pcx__sample_task`, the casedef notes plus the Elasticsearch notes, which the `sample`
+  stage builds at every site.
+- [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created (`cumulus_library_pcx/nlp-selection-requirements.json`). Supply reviewed selectors
-  before running NLP. The 14 tables are declared as site-supplied under `[builder] external_tables`,
+  before running it. The 12 tables are declared as site-supplied under `[builder] external_tables`,
   and each workflow's selector guard (`pcx__qa_selector_<workflow>`) stops the stage when a
   selector is missing or empty, since cumulus-library 6.3.1 would otherwise send every note to
   the LLM.
@@ -188,7 +191,7 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   `<topic>.txt` per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`
   (2026-10-08).
 - [open] Inherited workplan 1.7, 1.8, 2.3-2.7, 3.4, 3.5 (sections 3-7): keep, schedule or close.
-- [open] Review 2026-09-19, tracked in WORKPLAN.md: the `_50k` stages run after client_views;
+- [open] Review 2026-09-19, tracked in WORKPLAN.md:
   encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL
   `note_author_date` and drop out of `client_diagnosis.sql`. The builder `cohort_casedef`
   duplicate `subject_ref` defect was not re-checked against 0.5.0.
@@ -240,6 +243,12 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] `elastic_upload` is a default stage, placed before `sample`, and ships in
   the release rendered without an export: CHOP gets the empty `pcx__elastic_union`. At a site
   with an export, a default build uploads the export CSVs. `llm_schema` is opt-in. Andy.
+- 2026-10-08 [decided] The study moves to builder 0.5.4 (`>=0.5.4,<0.6`): the `sample` stage
+  builds `pcx__sample_task`, every casedef note (topic `casedef`) plus every Elasticsearch
+  note (its search topic). Andy.
+- 2026-10-08 [decided] Both `_50k` workflows are removed. `nlp_document_tasks_50k.workflow` was
+  identical to `nlp_document_tasks.workflow`. Each task now has one definition and one
+  version. Andy.
 - 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
   stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
   Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.

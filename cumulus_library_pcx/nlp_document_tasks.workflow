@@ -37,13 +37,13 @@ Clinical document:
 # Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
 # Version 2 (2026-09-10): PCX task-selector types replace the CCDA-era list.
 response_schema = "llm/schemas/pcx-document-topic-annotation.json"
-select_by_table = "pcx__llm_document_task_document_topic"
+select_by_table = "pcx__sample_task"
 version = 2
 
 [tables.document_type]
 # Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
 # Version 2 (2026-09-10): PCX task-selector types replace the CCDA-era list.
 response_schema = "llm/schemas/pcx-document-type-annotation.json"
-select_by_table = "pcx__llm_document_task_document_type"
+select_by_table = "pcx__sample_task"
 version = 2
 

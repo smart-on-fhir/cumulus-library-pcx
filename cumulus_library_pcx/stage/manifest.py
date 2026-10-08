@@ -38,10 +38,6 @@ STAGES = [
           skip_by_default=True),
     Stage(client_views,
           skip_by_default=True),
-    Stage('nlp_document_tasks_50k.workflow',
-          skip_by_default=True),
-    Stage('nlp_clinical_tasks_50k.workflow',
-          skip_by_default=True),
     Stage(qa_athena,
           skip_by_default=True),
     Stage(counts),  # counts.workflow at the package root

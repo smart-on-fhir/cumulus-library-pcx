@@ -105,32 +105,6 @@ files = [
     "client_views.toml",
 ]
 
-[[stages.nlp_document_tasks_50k]]
-skip_by_default = true
-type = "submanifest"
-files = [
-    "nlp_document_tasks_50k_guard.toml",
-]
-
-[[stages.nlp_document_tasks_50k]]
-skip_by_default = true
-files = [
-    "nlp_document_tasks_50k.workflow",
-]
-
-[[stages.nlp_clinical_tasks_50k]]
-skip_by_default = true
-type = "submanifest"
-files = [
-    "nlp_clinical_tasks_50k_guard.toml",
-]
-
-[[stages.nlp_clinical_tasks_50k]]
-skip_by_default = true
-files = [
-    "nlp_clinical_tasks_50k.workflow",
-]
-
 [[stages.qa_athena]]
 skip_by_default = true
 type = "submanifest"

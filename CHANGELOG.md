@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-08 — document tasks select from pcx__sample_task
+
+- `nlp_document_tasks.workflow` selects its notes from `pcx__sample_task` (casedef notes plus
+  Elasticsearch notes), so the document tasks need no site-supplied table. The two
+  `pcx__llm_document_task_document_*` names left `external_tables`.
+- Both `_50k` workflows and their stages are removed. The document one was a copy of
+  `nlp_document_tasks.workflow`.
+
+## 2026-10-08 — builder 0.5.4, pcx__sample_task
+
+- The study requires cumulus-study-builder `>=0.5.4,<0.6` and installs the `v0.5.4` tag.
+- New table `pcx__sample_task`, built by the `sample` stage: every casedef note (topic
+  `casedef`) plus every Elasticsearch note (its search topic). A note appears once per topic.
+
 ## 2026-10-08 — elastic_upload is a default stage
 
 - `elastic_upload` runs by default, before `sample`, so every site has `pcx__elastic_union`:

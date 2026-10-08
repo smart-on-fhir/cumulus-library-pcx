@@ -1,8 +1,8 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
-Open, study-specific work only, on cumulus-study-builder **0.5.3**, the git tag `v0.5.3` (not on
+Open, study-specific work only, on cumulus-study-builder **0.5.4**, the git tag `v0.5.4` (not on
 PyPI). Install it from `smart-on-fhir` with
-`pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.3"`, then
+`pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.4"`, then
 `pip install -e '.[test]'`; the release workflow needs read access to that repository. Done work is in
 [CHANGELOG.md](CHANGELOG.md).
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
@@ -15,9 +15,8 @@ appear in EHR cohorts? The study builds a discovery cohort and a trial-like coho
 must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
 treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
-Runs on 0.5.3 with the `cumulus_library_pcx/` package (validated 2026-10-08 against the
-`v0.5.3` tag: `starter check`, build, validate, 72 tests. `skills check` asks for a
-`skills sync`).
+Runs on 0.5.4 with the `cumulus_library_pcx/` package (validated 2026-10-08 against the
+`v0.5.4` tag: `skills check`, `starter check`, build, validate, 72 tests).
 
 Next deliverable: publish PCX 0.3.0 to PyPI as a **built-artifact-only** package: rendered
 SQL, TOML and JSON with no Python code and no dependencies, built from the builder tag
@@ -39,16 +38,19 @@ the package needs cumulus-study-builder. See the release items under Build, test
   run: the release smoke test (below) confirms it. If it fails, the stopgap is a source
   install of PCX and the builder at CHOP. A builder dependency in the package needs the
   builder on PyPI first.
-- [ ] **CHOP note selection.** The NLP workflows select notes from the 14 site-supplied
-  `pcx__llm_document_task_*` tables (`external_tables` in `cumulus-study.toml`), which no
-  stage builds. At BCH they come from the Elasticsearch queries. Decide how CHOP builds them.
+- [ ] **CHOP note selection for the clinical tasks.** The document tasks select from
+  `pcx__sample_task`, built at every site (2026-10-08). The clinical workflow still selects
+  from 12 site-supplied `pcx__llm_document_task_*` tables (`external_tables` in
+  `cumulus-study.toml`), which no stage builds. Decide how they are built, presumably from the
+  `document_topic` results.
 - [ ] **CHOP model.** The rendered wide SQL reads `pcx__nlp_<task>_gpt_oss_120b`
   (`nlp_deployments` in `cumulus-study.toml`). CHOP must run `gpt-oss-120b` on Bedrock, or
   the release is rendered for the model CHOP runs.
 - [ ] **Stages beyond NLP.** Decide whether the release also ships `eligible`, `outcome`,
-  `client_views`, `qa_athena` and the `_50k` workflows, which read the LLM tables.
-- [ ] **Diagnosis version.** Recommended: set the full workflow to version 3 and regenerate;
-  version-2 rows already in a warehouse are then excluded ([§5](PROTOCOL.md#5-clinical-notes)).
+  `client_views` and `qa_athena`, which read the LLM tables.
+- [ ] **Diagnosis version.** The removed `_50k` workflow ran diagnosis as version 3 and the
+  remaining workflow says version 2, so version-3 rows already in a warehouse are excluded by
+  the projection. Confirm 2 is the version to keep ([§5](PROTOCOL.md#5-clinical-notes)).
 - [ ] `reviews/` was not migrated: restore or record as dropped
   ([§5](PROTOCOL.md#5-clinical-notes)). The query topics are restored, as one `<topic>.txt`
   per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`.
@@ -73,10 +75,8 @@ No changes planned.
 
 ## Clinical notes
 
-- [ ] P1 · `nlp_clinical_tasks` · **One diagnosis task version.** `cumulus_library_pcx/nlp_clinical_tasks.workflow:43`
-  says 2 and `cumulus_library_pcx/nlp_clinical_tasks_50k.workflow:44` says 3 for the same schema (the v3 shape), so
-  the projection drops 50k results. Apply the decision above. *Done when* a test fails
-  whenever two workflows defining a task disagree with the projection.
+No changes planned beyond the open questions above. The two `_50k` workflows were removed
+2026-10-08, so each task has one definition and one version.
 
 ## Eligibility
 
@@ -92,7 +92,7 @@ No changes planned.
 
 - [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only;
   notes with conflicting dates get a NULL `note_author_date` and drop out of
-  `client_diagnosis.sql`. The `_50k` stages run after `client_views` (`cumulus_library_pcx/stage/manifest.py:20-22`).
+  `client_diagnosis.sql`.
 - [ ] P3 · `client_views` · **Use the builder's client views.** The builder's opt-in
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
