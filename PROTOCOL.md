@@ -20,8 +20,9 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   (NCT00336024; Mazewski, Leary et al., PMC12833527): high-dose methotrexate added to an intensive
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
-  git tag `0.2-pre-study-builder`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
-  laboratory,deferred}.md` as of 2026-09-11. The model reference is [LLM.md](LLM.md).
+  git tag `0.2-pre-study-builder`. Design notes at the repository root: [eligible.md](eligible.md),
+  [laboratory.md](laboratory.md), [LIMITATIONS.md](limitations.md). Inherited notes still in
+  `docs/source/`: `README-0.2`, `deferred`, `make-pcx`, `query_topics`, `synthetic`. The model reference is [LLM.md](LLM.md).
 
 ## 1. Objective
 
@@ -63,7 +64,7 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [source laboratory] Toxicity laboratories: `lab_{absolute_neutrophil_count,alt,ast,creatinine,
   hemoglobin,platelets,total_bilirubin}`; no eligible or outcome SQL reads a lab table yet.
 - [open] Creatinine has one LOINC; hemoglobin still includes local reticulocyte code 923;
-  methotrexate serum levels and leucovorin have no valueset (limitations.md).
+  methotrexate serum levels and leucovorin have no valueset ([LIMITATIONS.md](limitations.md)).
 
 ## 4. Case definition
 
@@ -100,7 +101,7 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 
 ## 6. Eligibility
 
-From `docs/source/eligible.md`; SQL in `cumulus_library_pcx/sql/custom/eligible/`, opt-in stage `eligible`.
+From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/eligible/`, opt-in stage `eligible`.
 `pcx__eligible` is the discovery cohort: every criterion is a yes/no flag, never an exclusion.
 `pcx__eligible_trial` applies the strict ACNS0334 intersection on top of it.
 
@@ -208,7 +209,7 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   laboratory `result` alias renamed; data package version 1 -> 2.
 - [source migration record] 2026-09-21, Andy: re-align with the current builder and its starter
   (rebuilt 0.4.0 wheel); keep `==0.4.0` pins; add the biostats scaffold as a commented opt-in
-  stage; adopt the numbered protocol sections; keep review findings unapplied. See CHANGELOG.md.
+  stage; adopt the numbered protocol sections; keep review findings unapplied. See changelog.md.
 - [decided] 2026-09-22, Andy (implemented by agent): align this protocol with the study-builder
   protocol conventions: Objective, Clinical notes, and Analysis with separate Counts and Exports
   and statistical plan subsections.
@@ -256,6 +257,8 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] The study moves to builder 0.5.5, which removes the NLP selector guard:
   each workflow is one manifest entry. The document tasks select from `pcx__sample_task`, which
   always has rows because `pcx__sample_casedef` is never empty. Andy.
+- 2026-10-08 [decided] Cumulus Library 6.3.5 lists the study as `pcx` in its module allowlist,
+  so the study keeps the prefix `pcx` and NLP against Athena needs 6.3.5 or later. Andy.
 - 2026-10-08 [decided] `docs/source/workplan.md` is removed. Its open items moved to
   WORKPLAN.md. Done and superseded items were dropped. Andy.
 - 2026-10-08 [decided] CHOP runs `gpt-oss-120b` on Bedrock, the same model as BCH, so the

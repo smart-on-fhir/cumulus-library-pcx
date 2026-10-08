@@ -4,7 +4,7 @@ Open, study-specific work only, on cumulus-study-builder **0.5.5**, the git tag 
 PyPI). Install it from `smart-on-fhir` with
 `pip install "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5"`, then
 `pip install -e '.[test]'`; the release workflow needs read access to that repository. Done work is in
-[CHANGELOG.md](CHANGELOG.md).
+[changelog.md](changelog.md).
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
 Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
 **P1** before the next warehouse, export or NLP run · **P2** correctness or usability · **P3** cleanup.
@@ -42,13 +42,10 @@ Python: the schemas ship already built).
 
 In order:
 
-- [ ] P1 · external · **Cumulus Library must authorise `pcx` to run NLP.** Against Athena,
-  Cumulus Library 6.3.4 refuses NLP for a study whose prefix is not a key of its allowlist
-  (`module_allowlist.json`), and the key there is `cancer_mtx`, not `pcx`. Read in the
-  installed code, not yet run. Andy changes the entry to `"pcx": "cumulus_library_pcx"` in
-  Cumulus Library (assumed possible, 2026-10-08). The study keeps the prefix `pcx`. Name the
-  first Cumulus Library version that has the change in the release README. *Done when* a
-  Cumulus Library release lists `pcx`.
+- [x] P1 · external · **Cumulus Library authorises `pcx` to run NLP.** Done 2026-10-08:
+  Cumulus Library 6.3.5 lists `"pcx": "cumulus_library_pcx"` in `module_allowlist.json`
+  (`cancer_mtx` is gone). Sites need Cumulus Library 6.3.5 or later to run the NLP stages
+  against Athena. Not yet run: the smoke test below confirms it.
 - [ ] P1 · decision · **Ship `llm_document_wide` too?** Its two SQL files turn the raw LLM
   output into `pcx__llm_document_topic_wide` and `pcx__llm_document_type_wide`. Without it a
   site gets only the raw result tables. Recommended: ship it, still opt-in.
@@ -79,12 +76,15 @@ In order:
 
 ## Open questions
 
-- [ ] **Allowlist name.** Cumulus Library's allowlist maps study `cancer_mtx` to the module
-  `cumulus_library_pcx`; the planned allowlist PR renames it to `pcx`. Cumulus Library 6.3.4
-  discovery (`cli.get_study_dict`) imports allowlisted modules and keys them by the manifest
-  prefix, so the installed release should build as `-t pcx` without `--study-dir`. Read in
-  the code, not yet run: the 0.4.0 smoke test confirms it. Running NLP needs more: see the
-  first 0.4.0 item.
+- [ ] **Allowlist name.** Cumulus Library 6.3.5 maps `pcx` to the module
+  `cumulus_library_pcx`. Discovery (`cli.get_study_dict`) imports allowlisted modules and
+  keys them by the manifest prefix, so the installed release should build as `-t pcx` without
+  `--study-dir`. Read in the 6.3.4 code, not yet run on 6.3.5: the 0.4.0 smoke test confirms
+  it.
+- [ ] **Move the study to Cumulus Library 6.3.5.** `pyproject.toml` and
+  `requirements-tested.txt` still say 6.3.4, and so does the builder's own pin
+  (`>=6.3.4,<6.4`, which allows 6.3.5). Install 6.3.5, rerun build, validate and the tests,
+  then record it.
 - [ ] **Stock Cumulus Library runs the NLP stages.** Cumulus Library 6.3.4 has an NLP runner
   with a Bedrock provider (`--nlp-provider bedrock`, `--nlp-model`) and PCX's NLP stages are
   `config_type = "nlp"` workflows plus JSON schemas. Read in the installed package, not yet
@@ -216,7 +216,7 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - [ ] P1 · release · **Publish 0.3.0 to PyPI** (DevOps, 2026-10-02): the eight default
   stages, on builder 0.5.5. The script makes a venv with the builder tag and the tested pins, renders,
   assembles, checks and builds the wheel and sdist into `build/release/dist/`
-  ([README](README.md#release)). Publishing stays manual: Andy or @msa2984 runs the printed
+  ([cumulus-study.md](cumulus-study.md#release)). Publishing stays manual: Andy or @msa2984 runs the printed
   `twine upload` straight to PyPI (no TestPyPI), from `andy/study-builder` before the PR
   merges, then tags the release commit `v0.3.0`. *Done when* 0.3.0 is on PyPI and tagged.
 - [ ] P3 · release · Optionally, a dispatchable GitHub Action that calls the script. It needs

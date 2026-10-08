@@ -34,7 +34,7 @@ Casedef codes are read from spreadsheet/casedef.csv at run time. Refuses to writ
 ## Findings worth knowing
 - The utilization screen (2+ encounters, 365+ days) removes ~18% of simulated patients, mostly early deaths:
   derived KM 5y EFS for trial-like MB is ~78% vs 62% with the screen, ~73% vs 51% with `--no-utilization-screen`
-  (paper 68% vs 46%). Quantifies limitations.md / WORKPLAN.md.
+  (paper 68% vs 46%). Quantifies LIMITATIONS.md / WORKPLAN.md.
 - ETMR / pineoblastoma / cns_embryonal subjects get NULL t0 and NULL os_days today (see WORKPLAN.md), ~30% of rows.
 - pcx__eligible_trial is ~30% of pcx__eligible at noise 1, ~46% at noise 0. Main losses: NULL no_prior_radiation
   (no RT evidence and no EXPLICITLY_NOT_RECEIVED note), MONTH-precision LLM chemo dates landing before t0, transfers.

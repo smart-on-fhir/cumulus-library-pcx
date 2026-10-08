@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-08 — cumulus-study.md, README as a table of contents
+
+- `docs/source/make-pcx.md` is replaced by `cumulus-study.md` at the repository root: set up,
+  commands, the stage list, settings, environment, inputs and outputs, and the release,
+  written for `cumulus-study`. The `make-pcx` manual is in git history.
+- README.md is now a short table of contents. Its set up, edit, warehouse and release
+  sections moved to `cumulus-study.md`.
+
+## 2026-10-08 — LIMITATIONS.md at the repository root
+
+- `docs/source/limitations.md` moved to `LIMITATIONS.md`. The dated "Current implementation
+  findings (2026-09-11)" list is removed: most of it was fixed by the builder move and the
+  2026-09-30 eligibility decisions, and what is still open is in WORKPLAN.md. Sentences in
+  sections 1, 4, 5, 6 and 7 that described fixed defects are corrected.
+
+## 2026-10-08 — Cumulus Library 6.3.5 allowlists pcx
+
+- Cumulus Library 6.3.5 lists `"pcx": "cumulus_library_pcx"` in its module allowlist. The
+  first 0.4.0 item in WORKPLAN is done. Moving the study's own pins to 6.3.5 is a new open item.
+
 ## 2026-10-08 — LLM.md at the repository root
 
 - `docs/source/llm.md` moved to `LLM.md` and brought up to date: 12 clinical tasks with

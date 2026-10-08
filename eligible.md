@@ -14,7 +14,7 @@ NULL = not evaluable from the evidence on hand (never "met", never "not met").
 | `pcx__eligible`        | one row per case-definition subject     | **discovery cohort**, all ages: every ACNS0334 criterion as its own column, plus any-time exposure flags                                              |
 | `pcx__eligible_trial`  | subset of `pcx__eligible`               | **trial-like cohort**: MB evidence AND under 36 months at definitive surgery AND NOT ATRT AND no prior chemotherapy AND no prior radiation. A NULL criterion excludes |
 
-⚠️ Three defects in the current SQL change who lands in `pcx__eligible_trial`; they are the first cohort items in [WORKPLAN.md](../../WORKPLAN.md) (2.1–2.3): a NULL time zero makes the two `no_prior_*` criteria read TRUE, the trial view requires positive radiation and chemotherapy evidence rather than absence of prior evidence, and SNOMED 428061005 is tier-1 ATRT in `casedef.csv` but "Malignant tumor of brain" in `dx_brain_cancer.csv`.
+⚠️ Three defects in the current SQL change who lands in `pcx__eligible_trial`; they are the first cohort items in [WORKPLAN.md](WORKPLAN.md) (2.1–2.3): a NULL time zero makes the two `no_prior_*` criteria read TRUE, the trial view requires positive radiation and chemotherapy evidence rather than absence of prior evidence, and SNOMED 428061005 is tier-1 ATRT in `casedef.csv` but "Malignant tumor of brain" in `dx_brain_cancer.csv`.
 
 ## Time zero (t=0)
 
@@ -39,7 +39,7 @@ Applied upstream by the study_population stage, not by eligible.
 | [include_utilization.csv](spreadsheet/include_utilization.csv) | ≥ 2 distinct encounter periods spanning ≥ 365 days              |
 | [include_study_period.csv](spreadsheet/include_study_period.csv) | encounters from 2008-01-01, with prior history                |
 
-This is a follow-up filter, not censoring: it removes early deaths (see [limitations.md](limitations.md)).
+This is a follow-up filter, not censoring: it removes early deaths (see [LIMITATIONS.md](limitations.md)).
 
 ### Patient age
 

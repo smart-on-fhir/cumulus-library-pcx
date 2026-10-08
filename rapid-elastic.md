@@ -6,14 +6,10 @@ points, not measured accuracy.
 
 ## Files and selection
 
-Topics use the rapid-elastic format (since 2026-10-08): a folder with one `<topic>.txt` per
+Topics use the rapid-elastic format a folder with one `<topic>.txt` per
 topic, where the file name is the topic and the whole text is the query.
 
-- `spreadsheet/query_topics/` is a symlink to `spreadsheet/query_topics_ppv/`, the current
-  default.
-- `query_topics_ppv/` holds 17 topics: four shared topics and 13 task-specific `_ppv` topics.
-- `query_topics_recall/` holds 17 topics: the same four shared topics and 13 `_recall` topics.
-- Across both folders there are 30 distinct topic names.
+- `query_topics/` holds 17 topics: four shared topics and 13 task-specific `_ppv` topics.
 
 Each file is one line with no trailing newline. Queries target `note` using
 Lucene query-string syntax, not Kibana KQL. Keep grouping, quotes, wildcard stems

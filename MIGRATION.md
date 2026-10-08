@@ -12,7 +12,7 @@ Document projection now precedes the clinical workflow in the optional pipeline.
 
 - **Note selectors are an inherited gap.** Every workflow references `pcx__llm_document_task_<task>`, but the original repository never created these tables. `[builder] external_tables` in `cumulus-study.toml` lists them as external prerequisites (the document tasks no longer need one: they select from `pcx__sample_task`). Define or supply clinically reviewed selectors before running NLP. This migration does not invent a routing policy, silently process every note, or claim the NLP pipeline is ready without those selectors.
 - Full diagnosis workflow/version **2** and limited workflow/version **3** differ. The full projections intentionally consume version 2, preserving the original projection contract. Running only the limited workflow does not satisfy all full clinical inputs. Resolve this as a versioned study decision before production.
-- OS/EFS limitations, the coded case cohort versus trial-like eligibility distinction, and uncomputable trial criteria remain as documented in `docs/source/limitations.md` and `eligible.md`.
+- OS/EFS limitations, the coded case cohort versus trial-like eligibility distinction, and uncomputable trial criteria remain as documented in `LIMITATIONS.md` and `eligible.md`.
 - Raw FHIR Patient deceased fields and MedicationDispense resources remain site prerequisites.
 
 Data package version: **1 → 2**. Existing flat client CSV exports are retained; no new statistical estimand is introduced.

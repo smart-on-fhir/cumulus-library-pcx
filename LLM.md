@@ -1,6 +1,6 @@
 # PCX extraction models
 
-These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/), prioritizing medulloblastoma and Group 3. They extract evidence from one document, not patient-level eligibility, randomized treatment assignment, survival duration or causal effects. Patient-level derivation happens in the `eligible`, `outcome` and `client_views` SQL stages ([eligible.md](docs/source/eligible.md)). Study decisions are in [PROTOCOL.md](PROTOCOL.md#5-clinical-notes); open work is in [WORKPLAN.md](WORKPLAN.md#clinical-notes).
+These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527/), prioritizing medulloblastoma and Group 3. They extract evidence from one document, not patient-level eligibility, randomized treatment assignment, survival duration or causal effects. Patient-level derivation happens in the `eligible`, `outcome` and `client_views` SQL stages ([eligible.md](eligible.md)). Study decisions are in [PROTOCOL.md](PROTOCOL.md#5-clinical-notes); open work is in [WORKPLAN.md](WORKPLAN.md#clinical-notes).
 
 | Model module (`cumulus_library_pcx/llm/models/`) | Task version | Study purpose |
 |---|---:|---|
@@ -19,7 +19,7 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 
 Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (12 clinical tasks) and [nlp_document_tasks.workflow](cumulus_library_pcx/nlp_document_tasks.workflow) (routing and classification). Bump a task's version whenever its model changes, and regenerate the schema and the wide-table SQL together.
 
-The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([limitations.md](docs/source/limitations.md) §3–§4).
+The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([LIMITATIONS.md](limitations.md) §3–§4).
 
 Routine lab names are informed by the associated trial's [eligibility listing](https://www.mayo.edu/research/clinical-trials/cls-20126460) and registry. The article does not specify the full routine lab schedule. Numeric thresholds, age calculations, staging, dose classification and cohort selection are validated in the SQL stages, not in the models.
 

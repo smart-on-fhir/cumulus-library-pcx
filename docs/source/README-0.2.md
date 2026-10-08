@@ -7,7 +7,7 @@ read about it here [PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC128335
 
 👀 [eligible.md](eligible.md) describes EHR data for emulation of this clinical trial. As a proof of concept study, not all 100% of the trial eligibility criteria will be met in this phase; this study will be refined with more stringent inclusion/exclusion rules as the study matures.
 
-The primary outcome is **patient survival** (censored at last known alive); the secondary outcome is EFS (event free survival), where an event is cancer **progression**, cancer **recurrence**, a **second malignancy**, or **death**. EFS is provisional until event-free follow-up is adjudicated (see [limitations.md](limitations.md)).
+The primary outcome is **patient survival** (censored at last known alive); the secondary outcome is EFS (event free survival), where an event is cancer **progression**, cancer **recurrence**, a **second malignancy**, or **death**. EFS is provisional until event-free follow-up is adjudicated (see [LIMITATIONS.md](../../limitations.md)).
 
 This study uses EHR data from FHIR coded resources as well as clinical narratives (notes).
 
@@ -52,7 +52,7 @@ make-pcx --build
 make-pcx casedef --build
 ```
 
-`make-pcx` is installed by `pip3 install -e .`; see [make-pcx.md](make-pcx.md) for the commands, the stage list and what is generated versus hand-written. Never hand-edit `cumulus_library_pcx/athena/*.sql`, the generated tomls or `manifest.toml`; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/sql/template) and rerun `make-pcx`. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/sql/custom) (eligible, outcome, client views) is hand-written.
+`make-pcx` is installed by `pip3 install -e .`; see [cumulus-study.md](../../cumulus-study.md) for the commands, the stage list and what is generated versus hand-written. Never hand-edit `cumulus_library_pcx/athena/*.sql`, the generated tomls or `manifest.toml`; edit the CSVs in [spreadsheet/](spreadsheet) or the templates in [cumulus_library_pcx/template/](cumulus_library_pcx/sql/template) and rerun `make-pcx`. The SQL under [cumulus_library_pcx/custom/](cumulus_library_pcx/sql/custom) (eligible, outcome, client views) is hand-written.
 
 ### Environment
 
@@ -92,7 +92,7 @@ Beyond the Cumulus `core__` tables, the build reads these objects, which the sit
 | [study_variable_wide](cumulus_library_pcx/study_variable_wide.toml)           | on    | enrich metadata for each **variable cohort** by type (dx, lab, proc, rx)                                                                                                                                                                                  |
 | [casedef](cumulus_library_pcx/casedef.toml)                                   | on    | select patient cohorts matching the coded "case definition" ([casedef.csv](spreadsheet/casedef.csv): medulloblastoma, atrt, etmr, pineoblastoma, cns_embryonal; tier 1 = diagnostic, tier 2 = supporting)                                                  |
 | [sample](cumulus_library_pcx/sample.toml)                                     | on    | from the casedef cohort, get clinical note samples (FHIR DiagnosticReport, FHIR DocumentReference) by pre / peri / post period                                                                                                                             |
-| [elastic_query](cumulus_library_pcx/elastic_query.toml)                       | skip  | (optional) find more patient cases using full text search (requires server and client [rapid-elastic](https://github.com/smart-on-fhir/rapid-elastic)). See [query_topics.md](query_topics.md)                                                             |
+| [elastic_query](cumulus_library_pcx/elastic_query.toml)                       | skip  | (optional) find more patient cases using full text search (requires server and client [rapid-elastic](https://github.com/smart-on-fhir/rapid-elastic)). See [rapid-elastic.md](../../rapid-elastic.md)                                                             |
 | [elastic_upload](cumulus_library_pcx/elastic_upload.toml)                     | on    | (optional) load elastic search results into SQL. Reads `ELASTIC_OUTPUT_DIR` (default `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`); with no results the stage is generated empty                                                                          |
 | [nlp_document_tasks_50k](cumulus_library_pcx/nlp_document_tasks_50k.workflow) | skip  | Notes -> LLM document topic routing (the full [nlp_document_tasks.workflow](cumulus_library_pcx/nlp_document_tasks.workflow) with document type is off). Wired as `submanifest`, which cumulus-library rejects (1.1)                                       |
 | [nlp_clinical_tasks_50k](cumulus_library_pcx/nlp_clinical_tasks_50k.workflow) | skip  | Notes -> LLM for diagnosis and surgery (the full [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) with all 14 tasks is off). Same wiring problem (1.1)                                                                       |
@@ -159,11 +159,11 @@ The SQL tests run the hand-written `custom/` SQL and the `tests/athena/` QA/WARN
 |---------------------------------------------------|-----------------------------------------------------------------------------|
 | [WORKPLAN.md](../../WORKPLAN.md)                        | ordered work items with acceptance criteria                                |
 | [eligible.md](eligible.md)                        | how the trial criteria map onto the eligible stage                          |
-| [limitations.md](limitations.md)                  | scientific gaps between the trial and the EHR emulation, current state      |
+| [LIMITATIONS.md](../../limitations.md)                  | scientific gaps between the trial and the EHR emulation, current state      |
 | [LLM.md](../../LLM.md)                                  | the LLM extraction models                                                   |
 | [deferred.md](deferred.md)                        | model fields deliberately removed                                           |
 | [laboratory.md](laboratory.md)                    | lab valuesets                                                               |
-| [query_topics.md](query_topics.md)                | Elastic full-text retrieval topics                                          |
+| [rapid-elastic.md](../../rapid-elastic.md)                | Elastic full-text retrieval topics                                          |
 | [dx_methotrexate_toxic.md](dx_methotrexate_toxic.md) | methotrexate toxicity diagnosis valueset                                  |
 | [reviews/](reviews)                               | dated code and terminology reviews (historical records, newest first below) |
 
