@@ -7,7 +7,8 @@ unanswered. The numbered headings are the contract the skills and `cumulus-study
 depend on: keep the numbers and their order, add subsections freely.
 
 Inherited source documents are in `docs/source/`. The inherited workplan (2026-09-11) was
-removed 2026-10-08: its open items are in [WORKPLAN.md](WORKPLAN.md). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
+removed 2026-10-08: its open items are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git tag
+`0.2-pre-study-builder`;
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
 (builder 0.5.5). Other sites run the study from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
@@ -21,8 +22,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
   git tag `0.2-pre-study-builder`. Design notes at the repository root: [eligible.md](eligible.md),
-  [laboratory.md](laboratory.md), [LIMITATIONS.md](limitations.md). Inherited notes still in
-  `docs/source/`: `README-0.2`, `deferred`, `make-pcx`, `query_topics`, `synthetic`. The model reference is [LLM.md](LLM.md).
+  [laboratory.md](laboratory.md), [LIMITATIONS.md](limitations.md). The model reference is [LLM.md](LLM.md).
 
 ## 1. Objective
 
@@ -141,9 +141,14 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/eligible
 
 SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 
+- [source] Primary outcome: overall survival, censored at last known alive. Secondary outcome:
+  event-free survival, where an event is progression, recurrence, a second malignancy or
+  death. EFS is provisional until event-free follow-up is adjudicated (limitations.md).
+
 - [source limitations] Vital status (`outcome_vital_status.sql`): raw `patient.deceasedBoolean` /
   `deceasedDateTime`, the last study-population encounter, and LLM vital-status mentions; the
-  earliest death and latest alive dates win without cross-checking.
+  earliest death and latest alive dates win without cross-checking. The raw FHIR Patient
+  deceased fields are a site prerequisite: the site's ETL must expose them.
 - [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS; a death
   recorded only by the event task reaches EFS but not OS. Coarse LLM dates are consumed as exact days.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
@@ -209,7 +214,7 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   laboratory `result` alias renamed; data package version 1 -> 2.
 - [source migration record] 2026-09-21, Andy: re-align with the current builder and its starter
   (rebuilt 0.4.0 wheel); keep `==0.4.0` pins; add the biostats scaffold as a commented opt-in
-  stage; adopt the numbered protocol sections; keep review findings unapplied. See changelog.md.
+  stage; adopt the numbered protocol sections; keep review findings unapplied. See the changelog in WORKPLAN.md.
 - [decided] 2026-09-22, Andy (implemented by agent): align this protocol with the study-builder
   protocol conventions: Objective, Clinical notes, and Analysis with separate Counts and Exports
   and statistical plan subsections.
@@ -257,6 +262,12 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] The study moves to builder 0.5.5, which removes the NLP selector guard:
   each workflow is one manifest entry. The document tasks select from `pcx__sample_task`, which
   always has rows because `pcx__sample_casedef` is never empty. Andy.
+- 2026-10-08 [decided] MIGRATION.md is removed: the move to the study builder finished
+  2026-10-02. Results are not claimed patient-for-patient equivalent to the pre-builder
+  version, because the builder handles population and encounters differently: evidence
+  without an explicit encounter link can attach by date, encounters can have no end date,
+  subject identity is checked on evidence joins, and note limits rank distinct subject and
+  note pairs. Andy.
 - 2026-10-08 [decided] Cumulus Library 6.3.5 lists the study as `pcx` in its module allowlist,
   so the study keeps the prefix `pcx` and NLP against Athena needs 6.3.5 or later. Andy.
 - 2026-10-08 [decided] `docs/source/workplan.md` is removed. Its open items moved to

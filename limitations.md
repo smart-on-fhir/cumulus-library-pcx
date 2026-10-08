@@ -101,7 +101,11 @@ assignment, and its absence does not exclude a subject.
 
 **Gap:** The paper used retrospective methylation-based classification. The `molecular`
 task captures method and provenance, projected to the molecular report and alteration
-tables. Extracted labels have not been validated against source reports.
+tables. Extracted labels have not been validated against source reports. The WHO CNS5
+integrated diagnosis is not extracted, as a classification or as wording, so a documented
+integrated diagnosis cannot be checked against the extracted molecular group. Tumor location,
+laterality and germline predisposition are not extracted either, which rules out anatomical
+comparisons and SHH-specific covariates for now (WORKPLAN.md, Clinical notes).
 
 **Resolution:** Retain classification method, report date,
 source report, supporting spans, uncertainty and conflicting classifications. Validate

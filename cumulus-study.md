@@ -108,6 +108,65 @@ The study prefix `pcx` is set only in `manifest.toml`.
 | `ELASTIC_OUTPUT_DIR` | `$CUMULUS_LIBRARY_DATA_PATH/elastic/output` | where `elastic_upload` looks for Elasticsearch result CSVs. With neither variable set, or no CSVs, the stage builds an empty `pcx__elastic_union` |
 | `CUMULUS_LIBRARY_DATA_PATH` | none | fallback for the folder above; `cumulus-library build` has its own uses for it |
 | `HOME_INSTITUTION` | `Boston Children's Hospital (BCH)` | named in the `transition_of_care` prompts; set it to your site before `llm_schema` |
+| `CUMULUS_PCX_STRICT_MENTIONS` | off | `1` makes the LLM model validators raise on missing evidence spans or bad dates. The default only warns; the test suite forces strict |
+| `CUMULUS_ENCOUNTER_REF` | `encounter_ref_link` | which encounter link the templates use: `encounter_ref_link` (also attaches evidence by date) or `encounter_ref` (the FHIR Encounter reference only) |
+
+## Site requirements
+
+Beyond the Cumulus `core__` tables, the SQL reads these objects, which the site's ETL must
+expose:
+
+| Object | Read by | Purpose |
+|---|---|---|
+| `etl__completion_encounters` | `sample` (default) | note availability per encounter |
+| `rxnorm.rxcui_str_longest` | `study_population` (default) | medication display names |
+| `loinc.consumer_name` | `study_population` (default) | lab and report display names |
+| raw `patient` | `outcome` (opt-in) | `deceasedBoolean`, `deceasedDateTime`, which `core__patient` does not carry |
+| raw `encounter` | `client_views` (opt-in) | encounter class and type |
+| `pcx__nlp_<task>_<deployment>` | `llm_document_wide`, `llm_clinical_wide` (opt-in) | raw LLM results, written by the NLP stages |
+| `pcx__llm_document_task_<task>` | `nlp_clinical_tasks` (opt-in) | note-selection tables; no stage builds them yet ([WORKPLAN.md](WORKPLAN.md)) |
+
+## Tables
+
+Column dictionaries: [data_dictionary.csv](spreadsheet/data_dictionary.csv) for the cohort,
+casedef, sample, eligible and outcome tables, and
+[client_dictionary.csv](spreadsheet/client_dictionary.csv) for the `pcx__client_*` tables.
+
+| Table | Role |
+|---|---|
+| `core__` | simplified FHIR views from Cumulus core |
+| `pcx__include_*` | study period, age and encounter utilization criteria for the study population |
+| `pcx__valueset_*` | CSV files as SQL valuesets (system, code, display, tier or keyword) |
+| `pcx__cohort_study_period` | study period and history flag |
+| `pcx__cohort_study_population*` | eligible encounters and linked FHIR resources (enc, dx, rx, lab, proc, doc, diag, allergy) |
+| `pcx__cohort_dx_*`, `_lab_*`, `_proc_*`, `_rx_*` | coded cohorts matching the CSV valueset of the same name |
+| `pcx__cohort_variable_union*` | all coded evidence in one long table, per aspect |
+| `pcx__cohort_variable_wide*` | one row per resource with typed metadata, per aspect |
+| `pcx__cohort_casedef*` | coded case-definition evidence, per-subject anchor and pre / peri / post periods |
+| `pcx__cohort_timeline` | encounter timeline relative to the casedef anchor |
+| `pcx__elastic_union` | notes found by the Elasticsearch topics; empty at a site without an export |
+| `pcx__sample_*` | candidate clinical notes; `pcx__sample_task` is the casedef notes plus the Elasticsearch notes |
+| `pcx__nlp_<task>_<deployment>` | raw LLM output per task and model deployment |
+| `pcx__llm_*` | LLM chart abstraction flattened to SQL (wide tables, one table per list-valued mention) |
+| `pcx__eligible_*` | per-subject eligibility criteria (`pcx__eligible`, all ages) and the trial-like intersection (`pcx__eligible_trial`) |
+| `pcx__outcome_*` | per-subject vital status, first event, exposure timing, OS and EFS |
+| `pcx__client_*` | timeline of eligibility, outcomes and variables, for export |
+| `pcx__qa_*` | QA tables; their union should have 0 rows |
+| `pcx__warn_*` | data-quality warnings; nonzero rows are findings to look at |
+
+Aliases used in table and column names:
+
+| Alias | FHIR resource |
+|---|---|
+| `enc` | Encounter |
+| `dx` | Condition |
+| `diag` | DiagnosticReport |
+| `doc` | DocumentReference |
+| `note` | DocumentReference or DiagnosticReport |
+| `lab` | Observation (category laboratory) |
+| `proc` | Procedure |
+| `rx` | MedicationRequest |
+| `allergy` | AllergyIntolerance |
 
 ## Input and output
 

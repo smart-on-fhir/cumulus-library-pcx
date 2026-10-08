@@ -6,6 +6,11 @@ ATRT, CNS embryonal, ETMR, pineoblastoma), chemotherapy, laboratory toxicity, cr
 radiation variables, note samples, 14 LLM chart-review schemas with 23 projections, opt-in
 eligibility, outcome, client-export and QA stages, and 17 count tables.
 
+This is a retrospective, proof-of-concept emulation of
+[ACNS0334](https://clinicaltrials.gov/study/NCT00336024)
+([PMC12833527](https://pmc.ncbi.nlm.nih.gov/articles/PMC12833527)). Not every trial
+eligibility criterion is met in this phase ([limitations.md](limitations.md)).
+
 ## Study
 
 - [PROTOCOL.md](PROTOCOL.md): frame, population, variables, decisions and open questions.
@@ -17,19 +22,11 @@ eligibility, outcome, client-export and QA stages, and 17 count tables.
 ## Build and release
 
 - [cumulus-study.md](cumulus-study.md): set up, commands, stages, settings, running in the
-  warehouse, and the data-only PyPI release.
+  warehouse, site requirements, the table glossary, and the data-only PyPI release.
 - [rapid-elastic.md](rapid-elastic.md): the Elasticsearch query topics and how their results are loaded.
 - [spreadsheet/README.md](spreadsheet/README.md): the population and terminology inputs.
 
 ## Status
 
-- [WORKPLAN.md](WORKPLAN.md): open tasks.
-- [changelog.md](changelog.md): short history of changes.
-- [MIGRATION.md](MIGRATION.md): what changed from the pre-builder study. The pre-builder
-  (make-pcx) version is git tag `0.2-pre-study-builder`.
-
-## Older notes
-
-In `docs/source/`, not yet reviewed against the current code:
-[deferred.md](docs/source/deferred.md), [synthetic.md](docs/source/synthetic.md),
-[README-0.2.md](docs/source/README-0.2.md).
+- [WORKPLAN.md](WORKPLAN.md): open tasks, then the changelog.
+- The pre-builder (make-pcx) version is git tag `0.2-pre-study-builder`.
