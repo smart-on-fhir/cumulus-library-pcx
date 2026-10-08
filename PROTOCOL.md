@@ -250,6 +250,12 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] Both `_50k` workflows are removed. `nlp_document_tasks_50k.workflow` was
   identical to `nlp_document_tasks.workflow`. Each task now has one definition and one
   version. Andy.
+- 2026-10-08 [decided] Release 0.3.0 ships the eight default stages, built on builder 0.5.4.
+  The NLP stages follow in a later release. Andy.
+- 2026-10-08 [decided] CHOP runs `gpt-oss-120b` on Bedrock, the same model as BCH, so the
+  rendered wide SQL needs no site variant. Andy.
+- 2026-10-08 [decided] Each clinical task selects the notes the LLM marked relevant to its
+  topic (`document_topic` results). The selector tables are not built yet. Andy.
 - 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
   stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
   Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.

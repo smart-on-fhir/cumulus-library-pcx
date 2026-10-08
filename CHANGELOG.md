@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 — release plan for 0.3.0
+
+- 0.3.0 ships the eight default stages on builder 0.5.4. The NLP stages and the release smoke
+  test move to the following release.
+- Decided: CHOP runs `gpt-oss-120b`, and each clinical task will select the notes the LLM
+  marked relevant to its topic. WORKPLAN and PROTOCOL record both.
+
 ## 2026-10-08 — document tasks select from pcx__sample_task
 
 - `nlp_document_tasks.workflow` selects its notes from `pcx__sample_task` (casedef notes plus
