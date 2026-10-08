@@ -70,7 +70,7 @@ The build order is the `STAGES` list in
 | `casedef` | default | builder | case-definition cohort from [casedef.csv](spreadsheet/casedef.csv) |
 | `elastic_upload` | default | builder | load Elasticsearch results into `pcx__elastic_union`; an empty table when there is no export |
 | `sample` | default | builder | note samples for the casedef cohort, and `pcx__sample_task` |
-| `llm_schema` | opt-in | PCX | JSON schemas and summaries from the models in `llm/models/` ([LLM.md](LLM.md)) |
+| `llm_schema` | opt-in | PCX | JSON schemas and summaries from the models in `llm/models/` ([LLM.md](llm.md)) |
 | `nlp_document_tasks` | opt-in | PCX workflow | notes → LLM document type and topic |
 | `llm_document_wide` | opt-in | builder | document type and topic results → wide SQL |
 | `nlp_clinical_tasks` | opt-in | PCX workflow | notes → the 12 LLM clinical tasks |

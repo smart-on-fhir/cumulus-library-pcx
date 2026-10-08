@@ -16,7 +16,7 @@ eligibility criterion is met in this phase ([limitations.md](limitations.md)).
 - [PROTOCOL.md](PROTOCOL.md): frame, population, variables, decisions and open questions.
 - [eligible.md](eligible.md): eligibility criteria and how each is computed.
 - [laboratory.md](laboratory.md): the toxicity laboratory valuesets.
-- [LLM.md](LLM.md): the LLM extraction models, note selection, schemas and wide tables.
+- [LLM.md](llm.md): the LLM extraction models, note selection, schemas and wide tables.
 - [limitations.md](limitations.md): scientific gaps between ACNS0334 and the EHR emulation.
 
 ## Build and release
