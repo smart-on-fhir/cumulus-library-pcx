@@ -24,12 +24,12 @@ Routine lab names are informed by the associated trial's [eligibility listing](h
 
 ## Extraction conventions
 
-- Diagnosis uses evidence-backed mentions; integrated-diagnosis wording is deferred ([deferred.md](deferred.md)), while historical diagnosis and primary-site wording remain. The shared evidence contract calls for nonempty verbatim spans for a present mention. Enforcement is warn-only by default: `base._mention_validation_issue` warns unless `CUMULUS_PCX_STRICT_MENTIONS=1`, which the test suite sets. Six per-model validators (systemic therapy administration, vital status, trial criterion, and the three compact-model evidence contracts) still raise unconditionally, so production behaviour depends on which field is wrong (workplan 4.6). Explicit negative tests and non-receipt are useful evidence. Silence is unknown.
-- Dates with precision use ISO `YYYY-MM-DD`. Partial dates use first-of-period plus `MONTH`/`YEAR`; never treat those placeholders as exact survival dates. The eligible and outcome SQL currently `CAST(... AS DATE)` without consulting `*_precision` (warn table `pcx__warn_llm_date_coarse`, workplan 3.8). Exact-day-only fields in the compact discovery model keep partial dates null; detailed models preserve precision.
+- Diagnosis uses evidence-backed mentions; integrated-diagnosis wording is deferred ([deferred.md](deferred.md)), while historical diagnosis and primary-site wording remain. The shared evidence contract calls for nonempty verbatim spans for a present mention. Enforcement is warn-only by default: `base._mention_validation_issue` warns unless `CUMULUS_PCX_STRICT_MENTIONS=1`, which the test suite sets. Six per-model validators (systemic therapy administration, vital status, trial criterion, and the three compact-model evidence contracts) still raise unconditionally, so production behaviour depends on which field is wrong (see WORKPLAN.md). Explicit negative tests and non-receipt are useful evidence. Silence is unknown.
+- Dates with precision use ISO `YYYY-MM-DD`. Partial dates use first-of-period plus `MONTH`/`YEAR`; never treat those placeholders as exact survival dates. The eligible and outcome SQL currently `CAST(... AS DATE)` without consulting `*_precision` (warn table `pcx__warn_llm_date_coarse`, WORKPLAN.md). Exact-day-only fields in the compact discovery model keep partial dates null; detailed models preserve precision.
 - Preserve distinct reports/events and disagreements for patient-level adjudication. A documented molecular group is not automatically methylation-confirmed.
 - Planned doses are not actual administration. Protocol names do not establish receipt, full regimen completion or randomization.
 - Actual ATRT diagnoses remain available for exclusion and retrospective reclassification. ATRT is not the required PCX diagnosis.
-- Every `StrEnum` is KEY=VALUE with a sentinel; the sentinel is spelled seven ways across the package (`NONE_OF_THE_ABOVE`, `NOT_DOCUMENTED`, `NOT_AVAILABLE`, `UNAVAILABLE`, `UNKNOWN`, `NOT_REPORTED`, `UNEVALUATED`), some of which carry meaning (workplan 4.7).
+- Every `StrEnum` is KEY=VALUE with a sentinel; the sentinel is spelled seven ways across the package (`NONE_OF_THE_ABOVE`, `NOT_DOCUMENTED`, `NOT_AVAILABLE`, `UNAVAILABLE`, `UNKNOWN`, `NOT_REPORTED`, `UNEVALUATED`), some of which carry meaning (see WORKPLAN.md).
 
 ## Remaining integration gaps
 
@@ -38,12 +38,12 @@ The document-topic model has 11 routing fields for 13 configured clinical tasks.
 their `select_by_table` tables are not automatically supplied by query hits. More importantly,
 **no `pcx__llm_document_task_<task>` selection table is created by anything in the repository**,
 and the document-routing workflow defines its own selection as the union of the clinical
-selections, which is circular. The NLP stages cannot run until a selection stage exists (workplan 4.1).
+selections, which is circular. The NLP stages cannot run until a selection stage exists (see WORKPLAN.md).
 
 `transition_of_care.py` now reads `HOME_INSTITUTION` from `tools/settings.py`, which reads the
 `HOME_INSTITUTION` environment variable. The default in `settings.py` is inside the `os.environ.get()`
 call, so it never applies: with the variable unset, regenerated descriptions say "care moved to None"
-(workplan 1.3). The checked-in schema was generated with the BCH string; two examples in the module
+(see WORKPLAN.md). The checked-in schema was generated with the BCH string; two examples in the module
 still hard-code "BCH". Prior therapy before arrival at a site is distinct from prior therapy before
 trial-like initial treatment.
 
@@ -52,12 +52,12 @@ The treatment-before-first-event flags and the chemotherapy/radiation sequence a
 protocol naming differs across models (`protocol_name_verbatim` vs `protocol_name`), and the compact
 medulloblastoma model cannot retain partial treatment dates. See the
 [2026-09-10 model review](reviews/llm-models-review-2026-09-10/REVIEW.md) for the proposed enums; none
-are implemented yet (workplan 3.6, 4.5, 4.7).
+are implemented yet (see WORKPLAN.md).
 
 `MedulloblastomaGroup` / `MbMolecularGroup`, `EvidenceStatus` / `DeliveryStatus` and the two vital-status
-shapes are still duplicated vocabularies (workplan 4.7). `pcx__client_diagnosis` sources the molecular
+shapes are still duplicated vocabularies (see WORKPLAN.md). `pcx__client_diagnosis` sources the molecular
 group from the compact model's wide table, which cannot be produced; the `molecular` task has no wide
-table at all (workplan 4.5).
+table at all (see WORKPLAN.md).
 
 ## Schema generation and wide outputs
 
@@ -126,7 +126,7 @@ directory. `sql/generated/pcx__llm_*.sql` is build output, not source: it is not
 
 The compact medulloblastoma task is configured but cannot be serialized by the
 reviewed Cumulus 6.3.1 installation: `convert_pydantic_fields_to_pyarrow` rejects its
-`datetime.date` fields (workplan 4.5). A renderable snapshot does not prove inference
+`datetime.date` fields (see WORKPLAN.md). A renderable snapshot does not prove inference
 or export works. Likewise, DuckDB checks do not validate Athena's nested `UNNEST`
 execution; the transition-of-care projection uses `array_join`, which DuckDB lacks.
 

@@ -101,8 +101,10 @@ In order:
 - [ ] `reviews/` was not migrated: restore or record as dropped
   ([§5](PROTOCOL.md#5-clinical-notes)). The query topics are restored, as one `<topic>.txt`
   per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`.
-- [ ] Inherited items 1.7, 1.8, 2.3–2.7, 3.4, 3.5 of `docs/source/workplan.md` cited in
-  [§9](PROTOCOL.md#9-open-questions): keep, schedule or close.
+- [ ] **Inherited items: keep, schedule or close.** The 2026-09-11 workplan
+  (`docs/source/workplan.md`) was removed 2026-10-08. Its items that are still open are listed
+  under their sections below, marked "(was N.N)" with the old item number. The full text is
+  in git history (tag `0.2-pre-study-builder`). None has been scheduled.
 
 ## Objective
 
@@ -110,22 +112,70 @@ No changes planned.
 
 ## Population
 
-No changes planned.
+- [ ] P2 · `study_population` · **Utilization filter removes early deaths** (was 2.7).
+  `include_utilization.csv` still requires 2 encounters spanning 365 days. For a survival
+  population the old plan was 1 encounter and 0 days, with encounter count and span carried
+  as covariates. The age half of 2.7 is done (ages 0-120, 2026-09-30).
 
 ## Variables
 
-No changes planned. `dx_methotrexate_toxic.csv` was deduplicated 2026-10-08 (25 codes, one row each).
+`dx_methotrexate_toxic.csv` was deduplicated 2026-10-08 (25 codes, one row each).
+
+- [ ] P3 · `study_variable` · **High-dose methotrexate markers** (was 3.7). No valueset for
+  methotrexate serum level (LOINC 3618-4, 14836-1, verify) or leucovorin / levoleucovorin.
+  Then add both to `eligible_rx.sql` with their own first-day columns.
+- [ ] P3 · `study_variable` · **Lab coverage** (was 5.8). Candidates to add: LOINC 753-4 to
+  absolute neutrophil count, 42719-5 and 14631-6 to total bilirubin.
 
 ## Case definition
 
-No changes planned.
+- [ ] P2 · `casedef` · **SNOMED 428061005 in two files** (was 2.3). Tier 1 `atrt` in
+  `casedef.csv`, "Malignant tumor of brain" tier 3 in `dx_brain_cancer.csv`. Confirm the
+  concept and keep it in one file. `dx_atrt.csv` still lists the generic C71.9 and 191.9.
+- [ ] P2 · `casedef` · **ICD-O-3 morphology codes** (was 2.4). `dx_medulloblastoma.csv` has
+  9470/3-9474/3. `casedef.csv` has none, so they never set time zero. The old plan: add them
+  to casedef at tier 1 and derive `dx_medulloblastoma.csv` from casedef.
+- [ ] P2 · decision · **sPNET arm** (was 2.5). ETMR, pineoblastoma and CNS embryonal never
+  get a time zero. Either anchor `t0_day` on any non-ATRT tier 1 subtype, or record that this
+  phase is medulloblastoma-only.
+- [ ] P2 · decision · **Two time zeros** (was 2.6, 2.8). `pcx__cohort_casedef` anchors note
+  sampling on the first casedef encounter of any subtype or tier. `eligible_dx.sql` anchors
+  `t0_day` on the first tier 1 medulloblastoma encounter. Make the sampling anchor tier-aware
+  or record that it is deliberately broader. Also undecided: whether time zero should come
+  from the Condition onset or recorded date (`t0_condition_day` does not exist yet).
 
 ## Clinical notes
 
-No changes planned beyond the open questions above. The two `_50k` workflows were removed
+- [ ] P3 · `llm` · **Radiation indication enum** (was 3.6). `radiation.py` `indication` is
+  free text. The old plan was a `RadiationIndication` enum, with a task version bump and
+  regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
+  the earliest resection and has no free-text match.
+- [ ] P3 · `llm` · **One validation switch** (was 4.6). `systemic_therapy.py` and
+  `survival_timeline.py` still `raise ValueError` directly, outside the
+  `CUMULUS_PCX_STRICT_MENTIONS` switch in `base.py`.
+
+Otherwise no changes planned beyond the open questions above. The two `_50k` workflows were removed
 2026-10-08, so each task has one definition and one version.
 
 ## Eligibility
+
+- [ ] P2 · `eligible` · **Completed-months age** (was 1.8). `eligible_dx.sql` and
+  `eligible_surgery.sql` use `DATE_DIFF('month', birthdate, day)`, which DuckDB and Athena
+  may count differently near the 36-month boundary. The old plan: month difference of the
+  truncated months, minus 1 when the day of month is earlier than the birth day.
+- [ ] P2 · `eligible` · **One definition of chemotherapy** (was 3.4). Decided 2026-09-30:
+  prior methotrexate excludes. Still open: the LLM branch of `eligible_rx.sql` counts every
+  administered agent as chemotherapy (ondansetron would count). Restrict it to the seven
+  study agents.
+- [ ] P3 · `eligible` · **Radiation flags not gated on receipt** (was 3.3). `llm_proton_bool`
+  and `llm_craniospinal_bool` in `eligible_radiation.sql` read every radiation row, so a
+  planned proton round sets the flag.
+- [ ] P3 · `eligible` · **History-of-irradiation codes** (was 3.5). The tier 2 codes (Z92.3,
+  V15.3) are not used as prior-radiation evidence.
+- [ ] P3 · decision · **ATRT from one note** (was 2.9). A single LLM note with subtype ATRT
+  excludes. The old plan: require two notes or a pathology-typed note.
+- [ ] P3 · `eligible`, `outcome` · **LLM date precision** (was 3.8). MONTH and YEAR precision
+  dates are cast to exact days.
 
 - [ ] P3 · `eligible` · `t0_source` is `'casedef_tier1_medulloblastoma'` even when `t0_day`
   is NULL (`eligible_dx.sql:59`); the header says tiers 2 and 3 (`eligible_dx.sql:6`),
@@ -133,7 +183,18 @@ No changes planned beyond the open questions above. The two `_50k` workflows wer
 
 ## Outcomes
 
-No changes planned.
+- [ ] P1 · `outcome` · **Death date parsing on Athena** (was 1.7).
+  `outcome_vital_status.sql` uses `DATE(deceasedDateTime)`, which fails on Athena for a
+  timestamp string. The old plan: `CAST(from_iso8601_timestamp(deceasedDateTime) AS DATE)`
+  with a DuckDB macro in the tests. Before the first warehouse run of `outcome`.
+- [ ] P2 · `outcome` · **Event-task death does not reach OS** (was 3.1).
+  `outcome_first_event.sql` takes DECEASED from the event task. `outcome_vital_status.sql`
+  does not, so such a death counts for EFS but not OS.
+- [ ] P2 · `outcome` · **Events before time zero** (was 3.2). First-event candidates are not
+  limited to `event_day >= t0_day`, so `efs_days` can be negative. Not re-checked since
+  2026-09-11 beyond a search of the SQL.
+- [ ] P3 · `outcome` · **Vital-status reconciliation** (was 3.9). The earliest death and
+  latest alive dates win without cross-checking, and `efs_end_day` can exceed `os_end_day`.
 
 ## Analysis
 
@@ -163,5 +224,11 @@ No changes planned.
 - [ ] P2 · tests · **Default plan test.** Assert `StudyManifest.get_stage('all')` contains none
   of the opt-in actions (`llm_schema`, NLP, wide tables, `eligible`, `outcome`, `client_views`,
   `qa_athena`).
+- [ ] P3 · docs · **Stale SQL headers** (was 5.7). Six files in `sql/custom/outcome/` and
+  `sql/custom/client_views/` cite "README section N" of the old README.
+- [ ] P3 · tests · **Not re-checked since the builder move** (were 1.6, 1.10, 4.3, 5.5):
+  `tier` typed INTEGER in the study-variable upload (the SQL casts it itself);
+  `extra="forbid"` on the annotation models (none sets it); `client_timeline.sql` column
+  binding on Athena; duplicated expressions across `eligible` and `client_views`.
 - [ ] P3 · `qa_athena` · Optionally replace the study-owned `qa_athena` stage with the shared
   `Stage(qa)`.

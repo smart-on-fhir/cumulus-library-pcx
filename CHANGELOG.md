@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-08 — old workplan removed
+
+- `docs/source/workplan.md` (2026-09-11) is removed. Its 21 still-open items are now in
+  WORKPLAN.md under their sections, marked "(was N.N)", plus four listed as not re-checked. Done
+  and superseded items were dropped. PROTOCOL and the other `docs/source` notes no longer cite its item numbers.
+
 ## 2026-10-08 — builder 0.5.5, selector guards removed
 
 - The study requires cumulus-study-builder `>=0.5.5,<0.6` and installs the `v0.5.5` tag.

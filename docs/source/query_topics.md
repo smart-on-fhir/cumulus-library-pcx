@@ -135,4 +135,4 @@ The repository also provides `tools/elastic_query_print_tree.py` for inspection 
 printer mentioned in earlier notes does not exist). Local checks of TSV headers, unique names, quotes,
 parentheses and pair inclusion are structural checks, not validation of Elasticsearch execution or
 LLM extraction. `custom/pcx__elastic_casedef.sql` (join on note_ref, no topic filter) and
-`custom/pcx__elastic_task.sql` (a single commented line) are referenced by no toml (workplan 5.1).
+`custom/pcx__elastic_task.sql` (a single commented line) are referenced by no toml (see WORKPLAN.md).

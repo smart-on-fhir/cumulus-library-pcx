@@ -14,18 +14,18 @@ NULL = not evaluable from the evidence on hand (never "met", never "not met").
 | `pcx__eligible`        | one row per case-definition subject     | **discovery cohort**, all ages: every ACNS0334 criterion as its own column, plus any-time exposure flags                                              |
 | `pcx__eligible_trial`  | subset of `pcx__eligible`               | **trial-like cohort**: MB evidence AND under 36 months at definitive surgery AND NOT ATRT AND no prior chemotherapy AND no prior radiation. A NULL criterion excludes |
 
-⚠️ Three defects in the current SQL change who lands in `pcx__eligible_trial`; they are the first cohort items in [workplan.md](workplan.md) (2.1–2.3): a NULL time zero makes the two `no_prior_*` criteria read TRUE, the trial view requires positive radiation and chemotherapy evidence rather than absence of prior evidence, and SNOMED 428061005 is tier-1 ATRT in `casedef.csv` but "Malignant tumor of brain" in `dx_brain_cancer.csv`.
+⚠️ Three defects in the current SQL change who lands in `pcx__eligible_trial`; they are the first cohort items in [WORKPLAN.md](../../WORKPLAN.md) (2.1–2.3): a NULL time zero makes the two `no_prior_*` criteria read TRUE, the trial view requires positive radiation and chemotherapy evidence rather than absence of prior evidence, and SNOMED 428061005 is tier-1 ATRT in `casedef.csv` but "Malignant tumor of brain" in `dx_brain_cancer.csv`.
 
 ## Time zero (t=0)
 
 `t0_day` is the start day of the first study-population encounter that carries a **tier 1 medulloblastoma** code from
 [casedef.csv](spreadsheet/casedef.csv) (`pcx__eligible_dx.sql`). Tier 2 codes (history of brain neoplasm, unspecified brain neoplasm)
 are evidence only: a subject with no tier 1 medulloblastoma code has a NULL `t0_day` and stays a candidate. The `etmr`,
-`pineoblastoma` and `cns_embryonal` subtypes in casedef.csv currently do **not** produce a t0 (workplan 2.5).
+`pineoblastoma` and `cns_embryonal` subtypes in casedef.csv currently do **not** produce a t0 (see WORKPLAN.md).
 
 Age is `DATE_DIFF('month', birthdate, day)` from `core__patient.birthdate`; on Athena this is completed months
-(workplan 1.8 makes it engine-independent). `pcx__cohort_casedef` keeps its own anchor (first casedef encounter of any
-subtype and tier) for note sampling, so a subject can have two different time zeros (workplan 2.6, warn table
+(WORKPLAN.md makes it engine-independent). `pcx__cohort_casedef` keeps its own anchor (first casedef encounter of any
+subtype and tier) for note sampling, so a subject can have two different time zeros (WORKPLAN.md, warn table
 `pcx__warn_eligible_t0_anchor_disagree`).
 
 ## Inclusion criteria ☑️
@@ -56,7 +56,7 @@ Required. The structured and LLM evidence are reported side by side and OR-ed in
 |--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
 | [casedef.csv](spreadsheet/casedef.csv)                       | `medulloblastoma_tier1_bool`: any tier 1 medulloblastoma code (this also sets t0)                          |
 | [diagnosis.py](cumulus_library_pcx/llm/models/diagnosis.py)  | `llm_medulloblastoma_bool`: any note in `pcx__llm_diagnosis_wide` with `disease_subtype = MEDULLOBLASTOMA` |
-| [dx_medulloblastoma.csv](spreadsheet/dx_medulloblastoma.csv) | builds `pcx__cohort_dx_medulloblastoma` for discovery; **not read by the eligible SQL**, and its ICD-O-3 codes are absent from casedef.csv (workplan 2.4) |
+| [dx_medulloblastoma.csv](spreadsheet/dx_medulloblastoma.csv) | builds `pcx__cohort_dx_medulloblastoma` for discovery; **not read by the eligible SQL**, and its ICD-O-3 codes are absent from casedef.csv (see WORKPLAN.md) |
 
 ### Surgery
 
@@ -79,12 +79,12 @@ dated candidate with its source and takes the earliest day per exposure:
 |----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`); not counted as chemotherapy                  |
 | [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** |
-| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate by agent name; **every** administered agent counts as chemotherapy, methotrexate included (asymmetry, workplan 3.4) |
+| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate by agent name; **every** administered agent counts as chemotherapy, methotrexate included (asymmetry, WORKPLAN.md) |
 
 Views by strictness, as implemented:
 
 * `pcx__eligible`: all case-definition subjects, every criterion evaluated, no filter;
-* `pcx__eligible_trial`: the intersection above. Because `no_prior_chemotherapy_bool` is NULL when no chemotherapy is recorded at all, the trial view today also requires 1+ chemotherapy (workplan 2.2 separates "received chemotherapy" from "no prior chemotherapy");
+* `pcx__eligible_trial`: the intersection above. Because `no_prior_chemotherapy_bool` is NULL when no chemotherapy is recorded at all, the trial view today also requires 1+ chemotherapy (WORKPLAN.md separates "received chemotherapy" from "no prior chemotherapy");
 * clinical trial view with organ-function labs and staging: out of scope for the current implementation (see [registry_eligibility.py](cumulus_library_pcx/llm/models/registry_eligibility.py) and [laboratory.md](laboratory.md)).
 
 ----
@@ -113,7 +113,7 @@ no dated chemotherapy or no t0.
 | file                                                        | criteria                                                                                         |
 |-------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | [proc_radiation.csv](spreadsheet/proc_radiation.csv)        | tier 1 procedure `proc_performed_day` (candidate codes, verify)                                  |
-| [dx_radiation.csv](spreadsheet/dx_radiation.csv)            | tier 1 encounter code `dx_recorded_date` (candidate codes; the tier 2 "history of irradiation" codes are ignored, workplan 3.5) |
+| [dx_radiation.csv](spreadsheet/dx_radiation.csv)            | tier 1 encounter code `dx_recorded_date` (candidate codes; the tier 2 "history of irradiation" codes are ignored, WORKPLAN.md) |
 | [radiation.py](cumulus_library_pcx/llm/models/radiation.py) | LLM rounds with `delivery_status = ADMINISTERED`; `EXPLICITLY_NOT_RECEIVED` in any note sets `no_prior_radiation_bool` TRUE |
 
 ---

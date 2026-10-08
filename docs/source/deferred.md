@@ -44,6 +44,6 @@ wording is deferred; historical diagnosis and primary-site wording remain active
 items above is restored, bump the task version in `nlp_clinical_tasks.workflow`, regenerate the schema
 and the wide-table snapshot, and extend the tests together. 
 
-Model changes proposed by the reviews but not yet scheduled here are tracked in [workplan.md](workplan.md)
+Model changes proposed by the reviews but not yet scheduled here are tracked in [WORKPLAN.md](../../WORKPLAN.md)
 (surgery role and radiation indication enums, protocol name naming, sentinel spellings, the compact
 medulloblastoma model's date contract).

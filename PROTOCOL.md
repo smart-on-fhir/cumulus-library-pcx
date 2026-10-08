@@ -6,8 +6,8 @@ writes decisions back. Tags on every line: `[source <doc>]` from a starting docu
 unanswered. The numbered headings are the contract the skills and `cumulus-study validate`
 depend on: keep the numbers and their order, add subsections freely.
 
-Inherited source documents are in `docs/source/`; "workplan N.N" below cites the inherited
-`docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
+Inherited source documents are in `docs/source/`. The inherited workplan (2026-09-11) was
+removed 2026-10-08: its open items are in [WORKPLAN.md](WORKPLAN.md). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
 (builder 0.5.5). Other sites run the study from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
@@ -21,7 +21,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
   git tag `0.2-pre-study-builder`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
-  workplan,llm,laboratory,deferred}.md` as of 2026-09-11.
+  llm,laboratory,deferred}.md` as of 2026-09-11.
 
 ## 1. Objective
 
@@ -49,7 +49,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
 - [decided] Age groups in `age_group.csv`: Infant (0), Early childhood (1-4), Childhood (5-11),
   Adolescent (12-17), Young adult (18-25), Adult (26-64), Older adult (65-120).
 - [source limitations] The utilization filter is a follow-up filter, not censoring; it can remove
-  early deaths. Survival analyses should not inherit it without a selection design (workplan 2.7).
+  early deaths. Survival analyses should not inherit it without a selection design ([WORKPLAN](WORKPLAN.md#population)).
 
 ## 3. Variables
 
@@ -71,10 +71,11 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero; tier 2 codes are evidence.
 - [source eligible] Index event: first study-population encounter carrying a tier 1
   medulloblastoma code (`pcx__eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
-  (first casedef encounter of any subtype or tier) for note sampling (workplan 2.6).
+  (first casedef encounter of any subtype or tier) for note sampling ([WORKPLAN](WORKPLAN.md#case-definition)).
 - [open] SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in
-  dx_brain_cancer.csv (workplan 2.3). ICD-O-3 morphology codes are absent from casedef.csv
-  (workplan 2.4); etmr, pineoblastoma and cns_embryonal never produce a time zero (workplan 2.5).
+  dx_brain_cancer.csv. ICD-O-3 morphology codes are absent from casedef.csv. etmr,
+  pineoblastoma and cns_embryonal never produce a time zero. All three are in
+  [WORKPLAN](WORKPLAN.md#case-definition).
 
 ## 5. Clinical notes
 
@@ -129,10 +130,10 @@ From `docs/source/eligible.md`; SQL in `cumulus_library_pcx/sql/custom/eligible/
   administration.
 - [source] Not computable: organ-function laboratories, staging and residual disease as criteria
   (reported, not applied); sPNET arm never enters the trial view.
-- [decided] Workplan 2.1-2.2 closed by the flags above: a child with t0 and no therapy records
+- [decided] The NULL-safe prior-therapy items of the 2026-09-11 workplan are closed by the flags above: a child with t0 and no therapy records
   counts as "no prior therapy" and can enter the trial view. This is an absence of records, not
   a documented absence, so it depends on how complete the site's medication and procedure data are.
-- [open] Workplan 1.7-1.8: month arithmetic, `varchar = integer` and `DATE(varchar)` behave
+- [open] ([WORKPLAN](WORKPLAN.md#eligibility), [Outcomes](WORKPLAN.md#outcomes)) Month arithmetic, `varchar = integer` and `DATE(varchar)` behave
   differently on DuckDB and Athena.
 
 ## 7. Outcomes
@@ -147,7 +148,7 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
   source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
   ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
-  chemotherapy (workplan 3.4).
+  chemotherapy ([WORKPLAN](WORKPLAN.md#eligibility)).
 
 ## 8. Analysis
 
@@ -190,7 +191,8 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - [open] The original `reviews/` were not migrated. The query topics are back, as one
   `<topic>.txt` per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`
   (2026-10-08).
-- [open] Inherited workplan 1.7, 1.8, 2.3-2.7, 3.4, 3.5 (sections 3-7): keep, schedule or close.
+- [open] Inherited items of the 2026-09-11 workplan, now listed in WORKPLAN.md under their
+  sections: keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md:
   encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL
   `note_author_date` and drop out of `client_diagnosis.sql`. The builder `cohort_casedef`
@@ -254,6 +256,8 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] The study moves to builder 0.5.5, which removes the NLP selector guard:
   each workflow is one manifest entry. The document tasks select from `pcx__sample_task`, which
   always has rows because `pcx__sample_casedef` is never empty. Andy.
+- 2026-10-08 [decided] `docs/source/workplan.md` is removed. Its open items moved to
+  WORKPLAN.md. Done and superseded items were dropped. Andy.
 - 2026-10-08 [decided] CHOP runs `gpt-oss-120b` on Bedrock, the same model as BCH, so the
   rendered wide SQL needs no site variant. Andy.
 - 2026-10-08 [decided] Each clinical task selects the notes the LLM marked relevant to its
