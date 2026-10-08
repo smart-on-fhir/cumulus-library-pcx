@@ -6,24 +6,25 @@ points, not measured accuracy.
 
 ## Files and selection
 
-- [query_topics.tsv](spreadsheet/query_topics.tsv) is a symlink to
-  [query_topics_ppv.tsv](spreadsheet/query_topics_ppv.tsv), the current default.
-- The PPV file contains 18 rows: four shared topics and 14 task-specific `_ppv` topics.
-- [query_topics_recall.tsv](spreadsheet/query_topics_recall.tsv) contains 18 rows:
-  the same four shared topics and 14 `_recall` topics.
-- Across both files there are 32 distinct topic names. The `*.tsv~` files are backups,
-  not the configured input.
+Topics use the rapid-elastic format (since 2026-10-08): a folder with one `<topic>.txt` per
+topic, where the file name is the topic and the whole text is the query.
 
-Both files use exactly `topic` and `query` columns. Queries target `note` using
+- `spreadsheet/query_topics/` is a symlink to `spreadsheet/query_topics_ppv/`, the current
+  default.
+- `query_topics_ppv/` holds 17 topics: four shared topics and 13 task-specific `_ppv` topics.
+- `query_topics_recall/` holds 17 topics: the same four shared topics and 13 `_recall` topics.
+- Across both folders there are 30 distinct topic names.
+
+Each file is one line with no trailing newline. Queries target `note` using
 Lucene query-string syntax, not Kibana KQL. Keep grouping, quotes, wildcard stems
 and phrase proximity intact when editing. Test acceptance and analyzer behavior
 in the deployment environment; a local syntax check cannot establish server limits
 or clinical performance.
 
-The query stage reads only `spreadsheet/query_topics.tsv`; it does not automatically
-run both sets. To select recall, repoint that symlink to `query_topics_recall.tsv`
-and use a fresh result destination. Preserve the chosen file and query version with
-the run. The four shared names are identical between files, so cached output names
+The query stage reads only `spreadsheet/query_topics/`; it does not automatically
+run both sets. To select recall, repoint that symlink to `query_topics_recall`
+and use a fresh result destination. Preserve the chosen folder and query version with
+the run. The four shared names are identical between folders, so cached output names
 alone do not identify which query revision generated them.
 
 ## Topic boundaries
@@ -99,8 +100,8 @@ phrases (tumor/mass/lesion/enhancement/cavity/residual/metastases × stable/unch
 decreased/increased/smaller/larger/progression/progressed/response, slop 5) in place of bare
 `MRI`, `stable`, `response`. The same audit is to be applied to the other pairs only after the
 response counts (documents and distinct patients, globally and within `dx_medulloblastoma OR
-dx_atrt`) show the change worked. The file is now split: `query_topics_ppv.tsv` (the
-`query_topics.tsv` symlink target) and `query_topics_recall.tsv`.
+dx_atrt`) show the change worked. The topics are split: `query_topics_ppv/` (the
+`query_topics` symlink target) and `query_topics_recall/`.
 
 The 509,882-document count records the earlier run reported during development; it
 is not a result for the revised query. No new result counts were verified in this
@@ -117,9 +118,9 @@ clause counts alone do not establish server acceptance.
 
 The entry points are:
 
-- `python -m cumulus_library_pcx.tools.elastic_query [topics.tsv]`: calls the rapid-elastic batch
-  pipeline with the topic file (default `spreadsheet/query_topics.tsv`; `query_topics_ppv.tsv` and
-  `query_topics_recall.tsv` are the precision- and recall-leaning variants) and writes results under
+- `python -m cumulus_study_builder.tools.elastic_query`: runs every topic in
+  `spreadsheet/query_topics/` through rapid-elastic (`query_topics_ppv/` and
+  `query_topics_recall/` are the precision- and recall-leaning variants) and writes results under
   `$ELASTIC_OUTPUT_DIR` (else `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`). It fails at once when
   neither variable is set.
 - `make-pcx elastic_upload`: when result CSVs exist in that directory, writes
