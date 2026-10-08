@@ -5,7 +5,7 @@ renders the Athena SQL and the stage `*.toml` submanifests from their sources, w
 [manifest.toml](cumulus_library_pcx/manifest.toml), and optionally runs `cumulus-library build`.
 
 * See [README.md](README-0.2.md) for what each stage computes;
-* See [llm.md](llm.md) for the NLP stages, which this command lists but does not generate.
+* See [LLM.md](../../LLM.md) for the NLP stages, which this command lists but does not generate.
 
 ## Contents
 

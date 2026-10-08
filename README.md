@@ -10,6 +10,7 @@ eligibility, outcome, client-export and QA stages, and 17 count tables. NLP prer
 - [PROTOCOL.md](PROTOCOL.md): frame, population, variables, decisions and open questions.
 - [MIGRATION.md](MIGRATION.md): what changed from the pre-builder study and how it was verified.
   The pre-builder (make-pcx) version is git tag `0.2-pre-study-builder`.
+- [LLM.md](LLM.md): the LLM extraction models, note selection, schemas and wide tables.
 - [WORKPLAN.md](WORKPLAN.md): open tasks.
 - [CHANGELOG.md](CHANGELOG.md): short history of changes.
 - [release/make_data_release.py](release/make_data_release.py): builds the data-only PyPI

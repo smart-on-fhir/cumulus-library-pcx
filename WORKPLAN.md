@@ -150,8 +150,8 @@ No changes planned.
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
   regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
   the earliest resection and has no free-text match.
-- [ ] P3 · `llm` · **One validation switch** (was 4.6). `systemic_therapy.py` and
-  `survival_timeline.py` still `raise ValueError` directly, outside the
+- [ ] P3 · `llm` · **One validation switch** (was 4.6). `systemic_therapy.py`,
+  `survival_timeline.py` and `registry_eligibility.py` still `raise ValueError` directly, outside the
   `CUMULUS_PCX_STRICT_MENTIONS` switch in `base.py`.
 
 Otherwise no changes planned beyond the open questions above. The two `_50k` workflows were removed

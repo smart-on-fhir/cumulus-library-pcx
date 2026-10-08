@@ -21,7 +21,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
   git tag `0.2-pre-study-builder`. Inherited design notes: `docs/source/{README-0.2,eligible,limitations,
-  llm,laboratory,deferred}.md` as of 2026-09-11.
+  laboratory,deferred}.md` as of 2026-09-11. The model reference is [LLM.md](LLM.md).
 
 ## 1. Objective
 

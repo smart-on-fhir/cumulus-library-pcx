@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 — LLM.md at the repository root
+
+- `docs/source/llm.md` moved to `LLM.md` and brought up to date: 12 clinical tasks with
+  their current versions, `diagnosis` in place of the removed `medulloblastoma` model, no
+  `_50k` workflows, a note-selection section, and `cumulus-study build` in place of
+  `make-pcx`. Resolved integration gaps and dead links to `reviews/` were cut.
+
 ## 2026-10-08 — old workplan removed
 
 - `docs/source/workplan.md` (2026-09-11) is removed. Its 21 still-open items are now in

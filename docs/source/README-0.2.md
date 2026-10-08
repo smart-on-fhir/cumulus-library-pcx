@@ -160,7 +160,7 @@ The SQL tests run the hand-written `custom/` SQL and the `tests/athena/` QA/WARN
 | [WORKPLAN.md](../../WORKPLAN.md)                        | ordered work items with acceptance criteria                                |
 | [eligible.md](eligible.md)                        | how the trial criteria map onto the eligible stage                          |
 | [limitations.md](limitations.md)                  | scientific gaps between the trial and the EHR emulation, current state      |
-| [llm.md](llm.md)                                  | the LLM extraction models                                                   |
+| [LLM.md](../../LLM.md)                                  | the LLM extraction models                                                   |
 | [deferred.md](deferred.md)                        | model fields deliberately removed                                           |
 | [laboratory.md](laboratory.md)                    | lab valuesets                                                               |
 | [query_topics.md](query_topics.md)                | Elastic full-text retrieval topics                                          |
