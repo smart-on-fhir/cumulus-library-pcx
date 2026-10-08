@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 — query topics in the rapid-elastic format
+
+- Query topics are one `<topic>.txt` per topic (file name is the topic, text is the query):
+  `spreadsheet/query_topics_ppv/` and `query_topics_recall/`, 17 topics each, with
+  `spreadsheet/query_topics` a symlink to the PPV folder. The queries are unchanged from the
+  TSVs, which are removed. `docs/source/query_topics.md`, PROTOCOL and WORKPLAN updated.
+
 ## 2026-10-07 — release plan: data-only, with NLP stages
 
 - WORKPLAN: the PyPI release stays data-only (SQL, TOML, JSON) and now includes the NLP

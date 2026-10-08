@@ -184,7 +184,9 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 ## 9. Open questions
 
 - [open] The diagnosis task version (section 5).
-- [open] The original note-selection inputs (query-topic TSVs and `reviews/`) were not migrated.
+- [open] The original `reviews/` were not migrated. The query topics are back, as one
+  `<topic>.txt` per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`
+  (2026-10-08).
 - [open] Inherited workplan 1.7, 1.8, 2.3-2.7, 3.4, 3.5 (sections 3-7): keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md: the `_50k` stages run after client_views;
   encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL

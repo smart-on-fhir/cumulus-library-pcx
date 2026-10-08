@@ -48,8 +48,9 @@ the package needs cumulus-study-builder. See the release items under Build, test
   `client_views`, `qa_athena` and the `_50k` workflows, which read the LLM tables.
 - [ ] **Diagnosis version.** Recommended: set the full workflow to version 3 and regenerate;
   version-2 rows already in a warehouse are then excluded ([§5](PROTOCOL.md#5-clinical-notes)).
-- [ ] Note-selection inputs (query-topic TSVs and `reviews/`) were not migrated: restore or
-  record as dropped ([§5](PROTOCOL.md#5-clinical-notes)).
+- [ ] `reviews/` was not migrated: restore or record as dropped
+  ([§5](PROTOCOL.md#5-clinical-notes)). The query topics are restored, as one `<topic>.txt`
+  per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`.
 - [ ] Inherited items 1.7, 1.8, 2.3–2.7, 3.4, 3.5 of `docs/source/workplan.md` cited in
   [§9](PROTOCOL.md#9-open-questions): keep, schedule or close.
 
