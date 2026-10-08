@@ -17,12 +17,12 @@ eligibility, outcome, client-export and QA stages, and 17 count tables. NLP prer
 
 ## Set up
 
-cumulus-study-builder 0.5.0 is the git tag `v0.5.0`, not on PyPI: installing it needs SSH
+cumulus-study-builder 0.5.3 is the git tag `v0.5.3`, not on PyPI: installing it needs SSH
 read access to `smart-on-fhir/cumulus-study-builder`.
 
 ```sh
 python -m venv .venv && source .venv/bin/activate
-python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.0"
+python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.3"
 python -m pip install -c requirements-tested.txt -e '.[test]'
 cumulus-study skills sync         # agent skills into .agents/skills
 cumulus-study build               # SQL, manifests and LLM schemas. Runs nothing in the warehouse
@@ -50,7 +50,7 @@ Opt-in stages run only when named; local generation never runs NLP, exports or q
 ## Release
 
 The PyPI package `cumulus-library-pcx` is data-only: the rendered SQL and data files of the
-seven default stages without NLP, no Python code and no dependencies. Sites install it next
+eight default stages without NLP, no Python code and no dependencies. Sites install it next
 to Cumulus Library and run `cumulus-library build -t pcx`.
 
 ```sh

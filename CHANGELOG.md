@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-10-08 — elastic_upload is a default stage
+
+- `elastic_upload` runs by default, before `sample`, so every site has `pcx__elastic_union`:
+  empty at a site with no Elasticsearch export (CHOP), the uploaded results at a site with one.
+  A default build at a site with an export now uploads its CSVs.
+- `llm_schema` is opt-in. The default plan is eight stages with no Python.
+- The release script ships `elastic_upload` and renders without an export, so the released
+  union is the empty table.
+
+## 2026-10-08 — builder 0.5.3
+
+- The study requires cumulus-study-builder `>=0.5.3,<0.6` and installs the `v0.5.3` tag.
+  The `elastic_upload` stage now always builds `pcx__elastic_union`: empty, with the same
+  columns, when there are no export CSVs.
+
+## 2026-10-08 — builder 0.5.2
+
+- The study requires cumulus-study-builder `>=0.5.2,<0.6` and installs the `v0.5.2` tag
+  (release script, README, WORKPLAN, `requirements-tested.txt`). 0.5.1 reads the query-topic
+  folder. 0.5.2 fixes `cumulus-study build` stopping once the Elasticsearch export holds CSVs.
+
 ## 2026-10-08 — query topics in the rapid-elastic format
 
 - Query topics are one `<topic>.txt` per topic (file name is the topic, text is the query):

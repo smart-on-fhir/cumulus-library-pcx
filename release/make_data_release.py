@@ -8,7 +8,9 @@ Python that runs it. It also needs SSH read access to the builder repository.
 
 Steps, each stopping at the first problem:
   1. venv      build/release/venv with the builder tag and the tested pins (requirements-tested.txt)
-  2. render    `cumulus-study build` and `cumulus-study validate` in this checkout
+  2. render    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
+               Elasticsearch export: the released pcx__elastic_union is the empty table.
+               Run `cumulus-study build` afterwards to render your own export again.
   3. assemble  build/release/package/: the released stages, the rendered SQL and workflows they
                list, and the spreadsheet files they upload. `../spreadsheet/` paths become
                `spreadsheet/` inside the package.
@@ -19,6 +21,7 @@ Steps, each stopping at the first problem:
 It never uploads and never runs git: it prints the upload command for you to run.
 """
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -36,11 +39,13 @@ ROOT = filetool.path_root()
 STUDY = filetool.path_project()
 PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
-BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.0'
+BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.3'
 
-# The default stages without NLP (PROTOCOL.md decision log, 2026-10-02), in manifest order.
+# The default stages (PROTOCOL.md decision log, 2026-10-02 and 2026-10-08), in manifest order.
 RELEASED_STAGES = ['study_population', 'study_variable', 'study_variable_wide', 'casedef',
-                   'sample', 'counts', 'study_meta']
+                   'elastic_upload', 'sample', 'counts', 'study_meta']
+# Where a site keeps its Elasticsearch export. The release is rendered without one.
+EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
 
 
@@ -48,9 +53,9 @@ class ReleaseError(Exception):
     pass
 
 
-def run(command: list, cwd: Path = ROOT) -> str:
+def run(command: list, cwd: Path = ROOT, env: dict | None = None) -> str:
     print('$', ' '.join(str(part) for part in command), flush=True)
-    result = subprocess.run([str(part) for part in command], cwd=cwd, text=True,
+    result = subprocess.run([str(part) for part in command], cwd=cwd, env=env, text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if result.returncode != 0:
         print(result.stdout)
@@ -78,8 +83,11 @@ def installed_version(venv: Path, dist: str) -> str:
 # --------------------------------------------------------------------------- 2. render
 
 def render(venv: Path) -> None:
-    run([venv / 'bin' / 'cumulus-study', 'build'])
-    run([venv / 'bin' / 'cumulus-study', 'validate'])
+    env = dict(os.environ)
+    for name in EXPORT_VARIABLES:
+        env.pop(name, None)
+    run([venv / 'bin' / 'cumulus-study', 'build'], env=env)
+    run([venv / 'bin' / 'cumulus-study', 'validate'], env=env)
 
 
 # --------------------------------------------------------------------------- 3. assemble

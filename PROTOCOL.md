@@ -9,8 +9,8 @@ depend on: keep the numbers and their order, add subsections freely.
 Inherited source documents are in `docs/source/`; "workplan N.N" below cites the inherited
 `docs/source/workplan.md` (2026-09-11). Migration mechanics are in [MIGRATION.md](MIGRATION.md);
 open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
-(builder 0.5.0). Other sites run the study from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the seven default stages
+(builder 0.5.3). Other sites run the study from a clone of this repository with
+`cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
 without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
 (`release/make_data_release.py`).
 
@@ -33,9 +33,9 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
 - [source eligible] Analysis unit: subject; time zero is the first study-population encounter with
   a tier 1 medulloblastoma code.
 - [decided] Prefix `pcx`. Stages in `cumulus_library_pcx/stage/manifest.py`: study_population,
-  study_variable, study_variable_wide, casedef, sample, llm_schema, counts, study_meta by default;
-  elastic_upload, the four NLP workflows, llm_document_wide, llm_clinical_wide, eligible, outcome,
-  client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
+  study_variable, study_variable_wide, casedef, elastic_upload, sample, counts, study_meta by
+  default; llm_schema, the four NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
+  outcome, client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
   (`core__medicationrequest`, `core__medicationdispense`); there is no `fhir_resource` stage.
 - [decided] Data package version 2.
 
@@ -231,6 +231,15 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
   the installed package is deferred to a later release. Andy.
 - 2026-10-07 [decided] The builder repository moved to `smart-on-fhir/cumulus-study-builder`;
   install and release use that URL. Tag `v0.5.0` is the same commit (7fc9700). Andy.
+- 2026-10-08 [decided] The study moves to builder 0.5.2 (git tag `v0.5.2`): 0.5.1 reads the
+  query-topic folder and 0.5.2 lets the Elasticsearch upload workflow be written beside its
+  export, outside the study. `pyproject.toml` requires `>=0.5.2,<0.6`. Andy.
+- 2026-10-08 [decided] The study moves to builder 0.5.3 (`>=0.5.3,<0.6`): the `elastic_upload`
+  stage always builds `pcx__elastic_union`, empty at a site with no Elasticsearch export, so
+  SQL that reads it runs at every site. Andy.
+- 2026-10-08 [decided] `elastic_upload` is a default stage, placed before `sample`, and ships in
+  the release rendered without an export: CHOP gets the empty `pcx__elastic_union`. At a site
+  with an export, a default build uploads the export CSVs. `llm_schema` is opt-in. Andy.
 - 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
   stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
   Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.

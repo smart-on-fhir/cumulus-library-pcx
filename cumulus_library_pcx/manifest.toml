@@ -25,6 +25,12 @@ files = [
     "casedef.toml",
 ]
 
+[[stages.elastic_upload]]
+type = "submanifest"
+files = [
+    "elastic_upload.toml",
+]
+
 [[stages.sample]]
 type = "submanifest"
 files = [
@@ -32,16 +38,10 @@ files = [
 ]
 
 [[stages.llm_schema]]
-type = "submanifest"
-files = [
-    "llm_schema.toml",
-]
-
-[[stages.elastic_upload]]
 skip_by_default = true
 type = "submanifest"
 files = [
-    "elastic_upload.toml",
+    "llm_schema.toml",
 ]
 
 [[stages.nlp_document_tasks]]
