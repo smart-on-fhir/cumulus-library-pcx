@@ -279,6 +279,9 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] Release 0.4.0 is the first with an LLM workflow, and its scope is
   `nlp_document_tasks.workflow` only (`document_type`, `document_topic`). The clinical
   workflow waits for a later release. Andy.
+- 2026-10-09 [decided] The release ships `nlp_document_tasks` opt-in, as in the study: the
+  default build runs every default stage and skips it, and a site runs it by naming the
+  stage. Andy.
 - 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
   stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
   Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.

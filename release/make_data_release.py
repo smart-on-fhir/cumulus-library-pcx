@@ -8,13 +8,13 @@ Python that runs it. It also needs SSH read access to the builder repository.
 
 Steps, each stopping at the first problem:
   1. venv      build/release/venv with the builder tag and the tested pins (requirements-tested.txt)
-  2. render    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
+  2. build    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
                Elasticsearch export: the released pcx__elastic_union is the empty table.
                Run `cumulus-study build` afterwards to render your own export again.
   3. assemble  build/release/package/: the released stages, the rendered SQL and workflows they
                list, the spreadsheet files they upload, and every LLM response schema in
                llm/schemas/. `../spreadsheet/` paths become `spreadsheet/` inside the package.
-  4. check     only the released stages, none skipped by default, no Python file but
+  4. check     only the released stages, only the opt-in ones skipped by default, no Python file but
                __init__.py, no path leaving the package, no SQL that reads LLM or NLP tables,
                every LLM schema present and every released NLP workflow's schema found
   5. build     wheel and sdist into build/release/dist/, then `twine check`
@@ -57,8 +57,9 @@ RELEASED_STAGES = ['study_population',
 EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
 
-# Released stages the study skips by default but the release runs by default.
-DEFAULT_ON_STAGES = ['nlp_document_tasks']
+# Released stages that stay opt-in, as in the study: the default build runs every other
+# released stage and skips these. A site runs one by naming it with --stage.
+OPT_IN_STAGES = ['nlp_document_tasks']
 
 # LLM response schemas: all are released, including those of the unreleased clinical tasks.
 SCHEMA_DIR = 'llm/schemas'
@@ -149,16 +150,14 @@ def write_manifest(package: Path) -> list[str]:
         if name not in RELEASED_STAGES:
             continue
         for entry in stages[name]:
-            if entry.get('skip_by_default') and name not in DEFAULT_ON_STAGES:
-                raise ReleaseError(f'stage {name}: skipped by default, add it to DEFAULT_ON_STAGES')
+            opt_in = name in OPT_IN_STAGES
+            if bool(entry.get('skip_by_default')) != opt_in:
+                raise ReleaseError(f'stage {name}: skip_by_default must be true only for {OPT_IN_STAGES}')
             workflow = all(file.endswith('.workflow') for file in entry['files'])
             if entry.get('type') != 'submanifest' and not workflow:
                 raise ReleaseError(f'stage {name}: expected a submanifest or workflows, got {entry}')
             stage_files.extend(entry['files'])
-        for block in blocks[name]:
-            if name in DEFAULT_ON_STAGES:
-                block = re.sub(r'(?m)^skip_by_default = true\n', '', block)
-            released_blocks.append(block)
+        released_blocks.extend(blocks[name])
 
     out = rewrite_paths(header.rstrip('\n')) + '\n\n' + '\n'.join(released_blocks)
     (package / 'manifest.toml').write_text(out, encoding='utf-8')
@@ -250,8 +249,9 @@ def check(package: Path) -> None:
     if manifest['data_dictionary'] != 'spreadsheet/data_dictionary.csv':
         raise ReleaseError(f'data_dictionary = {manifest["data_dictionary"]}')
     for name, entries in manifest['stages'].items():
-        if any(entry.get('skip_by_default') for entry in entries):
-            raise ReleaseError(f'released stage {name} is skipped by default')
+        opt_in = name in OPT_IN_STAGES
+        if any(bool(entry.get('skip_by_default')) != opt_in for entry in entries):
+            raise ReleaseError(f'released stage {name}: skip_by_default must be true only for {OPT_IN_STAGES}')
 
     schemas = sorted(path.name for path in (study / SCHEMA_DIR).glob('*.json'))
     if schemas != study_schemas():

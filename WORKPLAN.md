@@ -253,6 +253,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-09 — document tasks opt-in in the release
+
+- The released `nlp_document_tasks` stage stays opt-in, as in the study (it ran by default
+  earlier today). A default build runs the eight default stages, and a site runs the document
+  tasks by naming the stage. The release check now requires `skip_by_default` on exactly
+  the opt-in stages (`OPT_IN_STAGES`).
+
 ### 2026-10-09
 - Data release (`release/make_data_release.py`) now ships `nlp_document_tasks.workflow` and
   runs it by default, plus all 14 LLM response schemas in `llm/schemas/`. The clinical NLP
@@ -268,8 +275,8 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   has `pcx`. `requirements-tested.txt` pins 6.3.5 after a passing run (skills check, starter
   check, build, validate, pytest 72 passed). The old 6.3.4 pin conflicted with the new floor,
   so the set-up commands and the release script could not install.
-- `build/release/` still holds the 0.3.0 build made with 6.3.4 and builder 0.5.4: remove it and
-  rerun `release/make_data_release.py` before uploading.
+- Removed the stale `build/release/` (the 2026-10-08 0.3.0 build made with 6.3.4 and builder
+  0.5.4). The next `release/make_data_release.py` run builds from scratch.
 
 ### 2026-10-08 — README-0.2.md removed
 

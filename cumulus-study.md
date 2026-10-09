@@ -196,9 +196,11 @@ Edit the inputs, never the outputs.
 
 The PyPI package `cumulus-library-pcx` is data-only: the rendered SQL and data files of the
 eight default stages plus `nlp_document_tasks`, the JSON response schemas of every LLM task,
-no Python code and no dependencies. The release runs `nlp_document_tasks` (document type and
-topic) by default; the clinical NLP tasks ship only as schemas. Sites install it next to
-Cumulus Library and run `cumulus-library build -t pcx`.
+no Python code and no dependencies. `nlp_document_tasks` (document type and topic) stays
+opt-in, as in the study: `cumulus-library build -t pcx` runs the eight default stages and
+skips it, and a site runs it afterwards with `--stage nlp_document_tasks` and its NLP
+options. The clinical NLP tasks ship only as schemas. Sites install it next to Cumulus
+Library 6.3.5 or later.
 
 ```sh
 python release/make_data_release.py     # needs SSH read access to the builder repository
