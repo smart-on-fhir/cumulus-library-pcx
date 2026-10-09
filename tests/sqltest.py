@@ -41,7 +41,7 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
 
 def run_custom(con: duckdb.DuckDBPyConnection, names: list[str] = ELIGIBLE_OUTCOME) -> None:
     for name in names:
-        con.execute(filetool.path_sql_generated(f'pcx__{name}.sql').read_text())
+        con.execute(filetool.path_sql_custom(f'{name}.sql').read_text())
 
 
 def list_athena(pattern: str) -> list[Path]:

@@ -8,22 +8,23 @@ Python that runs it. It also needs SSH read access to the builder repository.
 
 Steps, each stopping at the first problem:
   1. venv      build/release/venv with the builder tag and the tested pins (requirements-tested.txt)
-  2. build    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
+  2. study    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
                Elasticsearch export: the released pcx__elastic_union is the empty table.
                Run `cumulus-study build` afterwards to render your own export again.
-  3. assemble  build/release/package/: the released stages, the rendered SQL and workflows they
-               list, the spreadsheet files they upload, and every LLM response schema in
-               llm/schemas/. `../spreadsheet/` paths become `spreadsheet/` inside the package.
-  4. check     only the released stages, only the opt-in ones skipped by default, no Python file but
-               __init__.py, no path leaving the package, no SQL that reads LLM or NLP tables,
-               every LLM schema present and every released NLP workflow's schema found
+  3. assemble  build/release/package/: the study's manifest.toml as is, every stage TOML and
+               workflow it lists with the rendered SQL and spreadsheet files they name, and every
+               LLM response schema in llm/schemas/. `../spreadsheet/` and `../tests/sql/custom/`
+               paths move inside the package. Python builders (stage/llm_schema.py) are not
+               released, so the opt-in llm_schema stage cannot run from the package.
+  4. check     Cumulus Library loads the released manifest, every file a stage lists is in the
+               package (Python builders excepted), no Python file but __init__.py, no path
+               leaving the package, every LLM schema present and every NLP workflow's schema found
   5. build     wheel and sdist into build/release/dist/, then `twine check`
 
 It never uploads and never runs git: it prints the upload command for you to run.
 """
 import argparse
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,7 @@ import tomllib
 import zipfile
 from pathlib import Path
 
+from cumulus_library.study_manifest import StudyManifest
 from cumulus_study_builder.config import set_study_root
 from cumulus_study_builder.tools import filetool, template
 
@@ -40,26 +42,15 @@ ROOT = filetool.path_root()
 STUDY = filetool.path_project()
 PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
-BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5'
+BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.6'
 
-# The default stages
-RELEASED_STAGES = ['study_population',
-                   'study_variable',
-                   'study_variable_wide',
-                   'casedef',
-                   'elastic_upload',
-                   'sample',
-                   'nlp_document_tasks',
-                   'counts',
-                   'study_meta']
+# Folders outside the study package that stages read from: `../<folder>/` in the study
+# becomes `<folder>/` inside the released package.
+OUTSIDE_FOLDERS = ['spreadsheet', 'tests/sql/custom']
 
 # Where a site keeps its Elasticsearch export. The release is rendered without one.
 EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
-
-# Released stages that stay opt-in, as in the study: the default build runs every other
-# released stage and skips these. A site runs one by naming it with --stage.
-OPT_IN_STAGES = ['nlp_document_tasks']
 
 # LLM response schemas: all are released, including those of the unreleased clinical tasks.
 SCHEMA_DIR = 'llm/schemas'
@@ -100,15 +91,18 @@ def build_study(venv: Path) -> None:
 # ---------------------------------------------------------------------------
 def packaged_path(relative: str) -> str:
     """Path of a study-relative file inside the release package."""
-    if relative.startswith('../spreadsheet/'):
-        return relative.removeprefix('../')
+    for folder in OUTSIDE_FOLDERS:
+        if relative.startswith(f'../{folder}/'):
+            return relative.removeprefix('../')
     if relative.startswith('../') or relative.startswith('/'):
-        raise ReleaseError(f'{relative}: only ../spreadsheet/ may point outside the study package')
+        raise ReleaseError(f'{relative}: only {OUTSIDE_FOLDERS} may be outside the study package')
     return relative
 
 
 def rewrite_paths(text: str) -> str:
-    return text.replace('"../spreadsheet/', '"spreadsheet/')
+    for folder in OUTSIDE_FOLDERS:
+        text = text.replace(f'"../{folder}/', f'"{folder}/')
+    return text
 
 def copy_file(source: Path, target: Path, text_rewrite: bool = False) -> None:
     if source.is_symlink():
@@ -124,44 +118,14 @@ def copy_file(source: Path, target: Path, text_rewrite: bool = False) -> None:
         shutil.copyfile(source, target)
 
 
-def manifest_blocks(text: str) -> tuple[str, dict[str, list[str]]]:
-    """The header and the [[stages.<name>]] blocks of a rendered manifest.toml, by stage name."""
-    parts = re.split(r'(?m)^(?=\[\[stages\.)', text)
-    blocks = dict()
-    for part in parts[1:]:
-        name = re.match(r'\[\[stages\.([A-Za-z0-9_]+)\]\]', part).group(1)
-        blocks.setdefault(name, list()).append(part.rstrip('\n') + '\n')
-    return parts[0], blocks
-
-
-def write_manifest(package: Path) -> list[str]:
-    """Released manifest.toml. Returns the stage TOMLs and workflows it lists."""
-    text = (STUDY / 'manifest.toml').read_text(encoding='utf-8')
-    stages = tomllib.loads(text)['stages']
-    header, blocks = manifest_blocks(text)
-
-    missing = [name for name in RELEASED_STAGES if name not in stages]
-    if missing:
-        raise ReleaseError(f'manifest.toml lacks released stages: {missing}')
-
-    released_blocks = list()
-    stage_files = list()
-    for name in stages:
-        if name not in RELEASED_STAGES:
-            continue
-        for entry in stages[name]:
-            opt_in = name in OPT_IN_STAGES
-            if bool(entry.get('skip_by_default')) != opt_in:
-                raise ReleaseError(f'stage {name}: skip_by_default must be true only for {OPT_IN_STAGES}')
-            workflow = all(file.endswith('.workflow') for file in entry['files'])
-            if entry.get('type') != 'submanifest' and not workflow:
-                raise ReleaseError(f'stage {name}: expected a submanifest or workflows, got {entry}')
-            stage_files.extend(entry['files'])
-        released_blocks.extend(blocks[name])
-
-    out = rewrite_paths(header.rstrip('\n')) + '\n\n' + '\n'.join(released_blocks)
-    (package / 'manifest.toml').write_text(out, encoding='utf-8')
-    return stage_files
+def manifest_files() -> list[str]:
+    """The stage TOMLs and workflows the study manifest lists, in stage order."""
+    stages = tomllib.loads((STUDY / 'manifest.toml').read_text(encoding='utf-8'))['stages']
+    files = list()
+    for entries in stages.values():
+        for entry in entries:
+            files.extend(entry['files'])
+    return files
 
 
 def copy_upload(source_toml: Path, target_toml: Path) -> None:
@@ -179,10 +143,10 @@ def copy_upload(source_toml: Path, target_toml: Path) -> None:
 def assemble(package: Path) -> None:
     study = package / PACKAGE_NAME
     study.mkdir(parents=True)
-    stage_files = write_manifest(study)
+    copy_file(STUDY / 'manifest.toml', study / 'manifest.toml', text_rewrite=True)
     copy_file(filetool.path_spreadsheet('data_dictionary.csv'), study / 'spreadsheet' / 'data_dictionary.csv')
 
-    for stage_file in stage_files:
+    for stage_file in manifest_files():
         copy_file(STUDY / stage_file, study / packaged_path(stage_file), text_rewrite=True)
         if stage_file.endswith('.workflow'):
             continue    # an NLP workflow: its schemas are copied with all the others below
@@ -191,7 +155,7 @@ def assemble(package: Path) -> None:
             references = action.get('files', []) + action.get('tables', [])
             for reference in references:
                 if not reference.endswith(FILE_SUFFIXES):
-                    continue    # a table name, such as pcx__meta_date
+                    continue    # a table name (pcx__meta_date) or a Python builder (stage/llm_schema.py)
                 source = STUDY / reference
                 target = study / packaged_path(reference)
                 if reference.endswith('.toml'):
@@ -243,21 +207,25 @@ def check(package: Path) -> None:
     if python_files != ['__init__.py']:
         raise ReleaseError(f'Python files in the package: {python_files}')
 
-    manifest = tomllib.loads((study / 'manifest.toml').read_text(encoding='utf-8'))
-    if list(manifest['stages']) != RELEASED_STAGES:
-        raise ReleaseError(f'released manifest stages: {list(manifest["stages"])}')
-    if manifest['data_dictionary'] != 'spreadsheet/data_dictionary.csv':
-        raise ReleaseError(f'data_dictionary = {manifest["data_dictionary"]}')
-    for name, entries in manifest['stages'].items():
-        opt_in = name in OPT_IN_STAGES
-        if any(bool(entry.get('skip_by_default')) != opt_in for entry in entries):
-            raise ReleaseError(f'released stage {name}: skip_by_default must be true only for {OPT_IN_STAGES}')
+    # Loading opens every stage TOML, every TOML or workflow an action lists and the data
+    # dictionary, as a site's `cumulus-library build` does before it runs anything.
+    try:
+        manifest = StudyManifest(study)
+    except Exception as error:
+        raise ReleaseError(f'Cumulus Library cannot load the released manifest: {error}')
+    missing = set()
+    for name in manifest.get_stages():
+        for action in manifest.get_stage(name):
+            for file in action.get('files', []):
+                if not file.endswith('.py') and not (study / file).is_file():
+                    missing.add(file)
+    if missing:
+        raise ReleaseError(f'listed in the released manifest but not in the package: {sorted(missing)}')
 
     schemas = sorted(path.name for path in (study / SCHEMA_DIR).glob('*.json'))
     if schemas != study_schemas():
         raise ReleaseError(f'released LLM schemas {schemas}, study has {study_schemas()}')
 
-    prefix = manifest['study_prefix'] + '__'
     problems = list()
     for workflow in sorted(study.rglob('*.workflow')):
         config = tomllib.loads(workflow.read_text(encoding='utf-8'))
@@ -272,8 +240,6 @@ def check(package: Path) -> None:
         text = path.read_text(encoding='utf-8-sig')
         if path.suffix == '.toml' and '"../' in text:
             problems.append(f'{path.relative_to(study)}: path leaves the package')
-        if path.suffix in ('.sql', '.workflow') and re.search(rf'\b{prefix}(llm|nlp)_', text):
-            problems.append(f'{path.relative_to(study)}: reads an LLM or NLP table')
     if problems:
         raise ReleaseError('\n'.join(problems))
 
@@ -350,7 +316,8 @@ def main() -> None:
     built = build(venv, package, out / 'dist')
 
     count = sum(1 for path in (package / PACKAGE_NAME).rglob('*') if path.is_file())
-    print(f'\n{DIST_NAME} {version}: {count} files, stages {", ".join(RELEASED_STAGES)}')
+    stages = tomllib.loads((STUDY / 'manifest.toml').read_text(encoding='utf-8'))['stages']
+    print(f'\n{DIST_NAME} {version}: {count} files, stages {", ".join(stages)}')
     print(f'cumulus-library {library}, cumulus-study-builder {builder}, commit {source_commit()}')
     for path in built:
         print(f'  {path}')

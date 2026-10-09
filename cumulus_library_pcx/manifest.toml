@@ -99,6 +99,7 @@ files = [
 ]
 
 [[stages.counts]]
+skip_by_default = true
 type = "submanifest"
 files = [
     "counts.toml",

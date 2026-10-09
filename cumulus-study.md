@@ -8,12 +8,12 @@ replaces the old `make-pcx` manual (git tag `0.2-pre-study-builder`).
 
 ## Set up
 
-cumulus-study-builder 0.5.5 is the git tag `v0.5.5`, not on PyPI: installing it needs SSH
+cumulus-study-builder 0.5.6 is the git tag `v0.5.6`, not on PyPI: installing it needs SSH
 read access to `smart-on-fhir/cumulus-study-builder`.
 
 ```sh
 python -m venv .venv && source .venv/bin/activate
-python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5"
+python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.6"
 python -m pip install -c requirements-tested.txt -e '.[test]'
 ```
 
@@ -194,13 +194,15 @@ Edit the inputs, never the outputs.
 
 ## Release
 
-The PyPI package `cumulus-library-pcx` is data-only: the rendered SQL and data files of the
-eight default stages plus `nlp_document_tasks`, the JSON response schemas of every LLM task,
-no Python code and no dependencies. `nlp_document_tasks` (document type and topic) stays
-opt-in, as in the study: `cumulus-library build -t pcx` runs the eight default stages and
-skips it, and a site runs it afterwards with `--stage nlp_document_tasks` and its NLP
-options. The clinical NLP tasks ship only as schemas. Sites install it next to Cumulus
-Library 6.3.5 or later.
+The PyPI package `cumulus-library-pcx` is data-only: the study's `manifest.toml` as is (only the
+`../spreadsheet/` data dictionary path moves inside the package), every stage it lists with the
+same `skip_by_default` flags, the JSON response schemas of every LLM task, no Python code and no
+dependencies. `cumulus-library build -t pcx` runs the same default stages as the study
+(`study_population` through `sample`, then `study_meta`), and a site runs an opt-in stage by
+naming it with `--stage`. The opt-in `llm_schema` stage is listed, but its Python builder is not
+shipped, so it cannot run from the package; the schemas it writes ship as files. The QA SQL from
+`tests/sql/custom/` ships at the same path inside the package. Sites install it next to
+Cumulus Library 6.3.5 or later.
 
 ```sh
 python release/make_data_release.py     # needs SSH read access to the builder repository

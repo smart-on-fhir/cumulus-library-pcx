@@ -279,6 +279,13 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - 2026-10-08 [decided] Release 0.4.0 is the first with an LLM workflow, and its scope is
   `nlp_document_tasks.workflow` only (`document_type`, `document_topic`). The clinical
   workflow waits for a later release. Andy.
+- 2026-10-09 [decided] The study moves to builder 0.5.6 (`>=0.5.6,<0.6`, git tag `v0.5.6`):
+  plain study SQL runs from `sql/custom/` instead of a copy in `sql/generated/`. The next
+  release is 0.4.0. Andy.
+- 2026-10-09 [decided] The release ships the study manifest as is: every stage with its
+  `skip_by_default`, including the opt-in `llm_schema`, NLP, `eligible`, `outcome`,
+  `client_views`, `qa_athena` (its SQL under `tests/sql/custom/`) and `counts` stages. This
+  replaces the 2026-10-02 plan to hold them for later releases. Andy.
 - 2026-10-09 [decided] The release ships `nlp_document_tasks` opt-in, as in the study: the
   default build runs every default stage and skips it, and a site runs it by naming the
   stage. Andy.

@@ -253,6 +253,39 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-09 — builder 0.5.6, version 0.4.0
+
+- Requires cumulus-study-builder 0.5.6 (`>=0.5.6,<0.6`, git tag `v0.5.6`), in which plain study
+  SQL runs from `sql/custom/`. `requirements-tested.txt`, the release script's `BUILDER` and
+  `cumulus-study.md` point at 0.5.6. The 18 old `sql/generated/pcx__{eligible,outcome,client}*.sql`
+  copies go after the next `cumulus-study build`. `pyproject.toml` version is 0.4.0.
+
+### 2026-10-09 — release copies the study manifest
+
+- The release's `manifest.toml` is the study's, copied as is: only the `../spreadsheet/` data
+  dictionary path moves inside the package. Every stage ships with its `skip_by_default`, now
+  including the opt-in `llm_schema` (`stage/llm_schema.py` is not released, so it cannot run
+  from the package). `manifest_blocks()`, `write_manifest()`, `released_stages()` and
+  `UNRELEASED_STAGES` are gone.
+- The release check now loads the released manifest with Cumulus Library, as a site's build
+  does, and requires every file a stage lists (Python builders excepted) to be in the package.
+
+### 2026-10-09 — study SQL runs from sql/custom (needs the next builder)
+
+- With the unreleased cumulus-study-builder change, the `eligible`, `outcome` and
+  `client_views` TOMLs list `sql/custom/<file>.sql` directly instead of a copy in
+  `sql/generated/`. `tests/sqltest.py` now reads `sql/custom/`. After rebuilding with that
+  builder, delete the 18 old `sql/generated/pcx__{eligible,outcome,client}*.sql` copies.
+
+### 2026-10-09 — release ships every stage
+
+- `release/make_data_release.py` releases every stage of the study manifest except
+  `llm_schema` (it runs Python; its schemas already ship), with `skip_by_default` exactly as in
+  `stage/manifest.py`. `UNRELEASED_STAGES` replaces `RELEASED_STAGES` and `OPT_IN_STAGES`.
+- `../tests/sql/custom/` (the `qa_athena` SQL) is packaged at `tests/sql/custom/`, beside
+  `spreadsheet/`. The check that rejected SQL reading LLM or NLP tables is gone, since those
+  stages now ship.
+
 ### 2026-10-09 — flat sql/custom/
 
 - The 18 study SQL files moved from `sql/custom/eligible/`, `outcome/` and `client_views/`

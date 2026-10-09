@@ -40,6 +40,7 @@ STAGES = [
           skip_by_default=True),
     Stage(qa_athena,
           skip_by_default=True),
-    Stage(counts),  # counts.workflow at the package root
+    Stage(counts,  # counts.workflow at the package root
+          skip_by_default=True),
     Stage(study_meta),
 ]
