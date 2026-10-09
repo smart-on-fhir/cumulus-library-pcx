@@ -101,7 +101,7 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 
 ## 6. Eligibility
 
-From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/eligible/`, opt-in stage `eligible`.
+From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `eligible`.
 `pcx__eligible` is the discovery cohort: every criterion is a yes/no flag, never an exclusion.
 `pcx__eligible_trial` applies the strict ACNS0334 intersection on top of it.
 
@@ -139,7 +139,7 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/eligible
 
 ## 7. Outcomes
 
-SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
+SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 
 - [source] Primary outcome: overall survival, censored at last known alive. Secondary outcome:
   event-free survival, where an event is progression, recurrence, a second malignancy or
@@ -183,7 +183,7 @@ SQL in `cumulus_library_pcx/sql/custom/outcome/`, opt-in stage `outcome`.
 ### 8.2 Exports and statistical plan
 
 - [decided] Scope: exports only. The opt-in `client_views` stage produces the flat client tables
-  (`cumulus_library_pcx/sql/custom/client_views/`, dictionary `spreadsheet/client_dictionary.csv`);
+  (`cumulus_library_pcx/sql/custom/`, dictionary `spreadsheet/client_dictionary.csv`);
   no new estimand was introduced by the migration.
 - [decided] No biostats stage: the 0.4 starter's demonstration scaffold was removed in the 0.5.0
   move. `spreadsheet/data_dictionary.csv` is Cumulus Library's column dictionary

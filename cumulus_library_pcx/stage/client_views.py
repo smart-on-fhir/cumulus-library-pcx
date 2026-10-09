@@ -2,7 +2,7 @@
 from cumulus_study_builder.tools import sql_stage, toml_tool, filetool
 from cumulus_study_builder.tools.actions import FileAction, UploadWorkflow
 
-FILES = ['client_views/client_subject.sql', 'client_views/client_diagnosis.sql', 'client_views/client_encounter.sql', 'client_views/client_exposure.sql', 'client_views/client_timeline.sql', 'client_views/client_timeline_latest.sql', 'client_views/client_outcome.sql', 'client_views/client_dictionary_coverage.sql']
+FILES = ['client_subject.sql', 'client_diagnosis.sql', 'client_encounter.sql', 'client_exposure.sql', 'client_timeline.sql', 'client_timeline_latest.sql', 'client_outcome.sql', 'client_dictionary_coverage.sql']
 
 
 def make():

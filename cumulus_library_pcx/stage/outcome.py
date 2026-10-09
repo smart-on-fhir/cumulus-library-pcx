@@ -2,7 +2,7 @@
 from cumulus_study_builder.tools import sql_stage, toml_tool, filetool
 from cumulus_study_builder.tools.actions import FileAction, UploadWorkflow
 
-FILES = ['outcome/outcome_vital_status.sql', 'outcome/outcome_first_event.sql', 'outcome/outcome_exposure.sql', 'outcome/outcome.sql']
+FILES = ['outcome_vital_status.sql', 'outcome_first_event.sql', 'outcome_exposure.sql', 'outcome.sql']
 
 
 def make():

@@ -223,7 +223,7 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
   `client_timeline_events`; keep only `client_diagnosis`, `client_exposure`, `client_outcome`
-  and overrides in `cumulus_library_pcx/sql/custom/client_views/` (builder rank 17). *Done when* the client
+  and overrides in `cumulus_library_pcx/sql/custom/` (builder rank 17). *Done when* the client
   tables and `spreadsheet/client_dictionary.csv` columns are unchanged.
 
 ## Build, tests and docs
@@ -242,8 +242,8 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - [ ] P2 · tests · **Default plan test.** Assert `StudyManifest.get_stage('all')` contains none
   of the opt-in actions (`llm_schema`, NLP, wide tables, `eligible`, `outcome`, `client_views`,
   `qa_athena`).
-- [ ] P3 · docs · **Stale SQL headers** (was 5.7). Six files in `sql/custom/outcome/` and
-  `sql/custom/client_views/` cite "README section N" of the old README.
+- [ ] P3 · docs · **Stale SQL headers** (was 5.7). Six outcome and client_views files in
+  `sql/custom/` cite "README section N" of the old README.
 - [ ] P3 · tests · **Not re-checked since the builder move** (were 1.6, 1.10, 4.3, 5.5):
   `tier` typed INTEGER in the study-variable upload (the SQL casts it itself);
   `extra="forbid"` on the annotation models (none sets it); `client_timeline.sql` column
@@ -252,6 +252,12 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-09 — flat sql/custom/
+
+- The 18 study SQL files moved from `sql/custom/eligible/`, `outcome/` and `client_views/`
+  into `sql/custom/` itself. The empty `sql/custom/counts/` was removed. The `FILES` lists in
+  `stage/eligible.py`, `outcome.py` and `client_views.py` name the files without a subfolder.
 
 ### 2026-10-09 — document tasks opt-in in the release
 
