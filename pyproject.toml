@@ -2,7 +2,7 @@
 name = "cumulus-library-pcx"
 version = "0.4.0"
 requires-python = ">=3.11"
-dependencies = ["cumulus-study-builder>=0.5.5,<0.6", "cumulus-library>=6.3.5,<6.4"]
+dependencies = ["cumulus-study-builder>=0.5.6,<0.6", "cumulus-library>=6.3.5,<6.4"]
 description = "PCX methotrexate target clinical trial emuluation using Cumulus library."
 
 [project.optional-dependencies]
