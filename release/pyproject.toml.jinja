@@ -1,0 +1,16 @@
+[build-system]
+requires = ["flit_core>=3.9,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "{{ dist_name }}"
+version = "{{ version }}"
+description = "PCX methotrexate study: rendered Cumulus SQL and data files, no Python code."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+Source = "https://github.com/smart-on-fhir/cumulus-library-pcx"
+
+[tool.flit.module]
+name = "{{ package_name }}"

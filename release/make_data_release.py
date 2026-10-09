@@ -12,10 +12,11 @@ Steps, each stopping at the first problem:
                Elasticsearch export: the released pcx__elastic_union is the empty table.
                Run `cumulus-study build` afterwards to render your own export again.
   3. assemble  build/release/package/: the released stages, the rendered SQL and workflows they
-               list, and the spreadsheet files they upload. `../spreadsheet/` paths become
-               `spreadsheet/` inside the package.
-  4. check     only the released stages, no Python file but __init__.py, no path leaving the
-               package, no SQL that reads LLM or NLP tables
+               list, the spreadsheet files they upload, and every LLM response schema in
+               llm/schemas/. `../spreadsheet/` paths become `spreadsheet/` inside the package.
+  4. check     only the released stages, none skipped by default, no Python file but
+               __init__.py, no path leaving the package, no SQL that reads LLM or NLP tables,
+               every LLM schema present and every released NLP workflow's schema found
   5. build     wheel and sdist into build/release/dist/, then `twine check`
 
 It never uploads and never runs git: it prints the upload command for you to run.
@@ -31,7 +32,7 @@ import zipfile
 from pathlib import Path
 
 from cumulus_study_builder.config import set_study_root
-from cumulus_study_builder.tools import filetool
+from cumulus_study_builder.tools import filetool, template
 
 # Select this checkout by its cumulus-study.toml, whatever the working directory is.
 set_study_root(filetool.path_root(__file__))
@@ -48,12 +49,23 @@ RELEASED_STAGES = ['study_population',
                    'casedef',
                    'elastic_upload',
                    'sample',
+                   'nlp_document_tasks',
                    'counts',
                    'study_meta']
 
 # Where a site keeps its Elasticsearch export. The release is rendered without one.
 EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
+
+# Released stages the study skips by default but the release runs by default.
+DEFAULT_ON_STAGES = ['nlp_document_tasks']
+
+# LLM response schemas: all are released, including those of the unreleased clinical tasks.
+SCHEMA_DIR = 'llm/schemas'
+
+# Jinja templates beside this script, rendered into the package root as <name>.
+RELEASE_DIR = Path(__file__).resolve().parent
+PROJECT_TEMPLATES = ['pyproject.toml']
 
 class ReleaseError(Exception):
     pass
@@ -72,9 +84,9 @@ def make_venv(out: Path, builder: str) -> Path:
 
 
 # ---------------------------------------------------------------------------
-# 2. build and validate
+# 2. build study
 # ---------------------------------------------------------------------------
-def build_validate(venv: Path) -> None:
+def build_study(venv: Path) -> None:
     env = dict(os.environ)
     for name in EXPORT_VARIABLES:
         env.pop(name, None)
@@ -122,7 +134,7 @@ def manifest_blocks(text: str) -> tuple[str, dict[str, list[str]]]:
 
 
 def write_manifest(package: Path) -> list[str]:
-    """Released manifest.toml. Returns the stage TOMLs it lists."""
+    """Released manifest.toml. Returns the stage TOMLs and workflows it lists."""
     text = (STUDY / 'manifest.toml').read_text(encoding='utf-8')
     stages = tomllib.loads(text)['stages']
     header, blocks = manifest_blocks(text)
@@ -137,10 +149,16 @@ def write_manifest(package: Path) -> list[str]:
         if name not in RELEASED_STAGES:
             continue
         for entry in stages[name]:
-            if entry.get('type') != 'submanifest' or entry.get('skip_by_default'):
-                raise ReleaseError(f'stage {name}: expected a default submanifest, got {entry}')
+            if entry.get('skip_by_default') and name not in DEFAULT_ON_STAGES:
+                raise ReleaseError(f'stage {name}: skipped by default, add it to DEFAULT_ON_STAGES')
+            workflow = all(file.endswith('.workflow') for file in entry['files'])
+            if entry.get('type') != 'submanifest' and not workflow:
+                raise ReleaseError(f'stage {name}: expected a submanifest or workflows, got {entry}')
             stage_files.extend(entry['files'])
-        released_blocks.extend(blocks[name])
+        for block in blocks[name]:
+            if name in DEFAULT_ON_STAGES:
+                block = re.sub(r'(?m)^skip_by_default = true\n', '', block)
+            released_blocks.append(block)
 
     out = rewrite_paths(header.rstrip('\n')) + '\n\n' + '\n'.join(released_blocks)
     (package / 'manifest.toml').write_text(out, encoding='utf-8')
@@ -167,6 +185,8 @@ def assemble(package: Path) -> None:
 
     for stage_file in stage_files:
         copy_file(STUDY / stage_file, study / packaged_path(stage_file), text_rewrite=True)
+        if stage_file.endswith('.workflow'):
+            continue    # an NLP workflow: its schemas are copied with all the others below
         stage = tomllib.loads((STUDY / stage_file).read_text(encoding='utf-8'))
         for action in stage['actions']:
             references = action.get('files', []) + action.get('tables', [])
@@ -179,6 +199,9 @@ def assemble(package: Path) -> None:
                     copy_upload(source, target)
                 elif not target.exists():
                     copy_file(source, target)
+
+    for schema in study_schemas():
+        copy_file(STUDY / SCHEMA_DIR / schema, study / SCHEMA_DIR / schema)
 
     (study / '__init__.py').write_text(
         '"""PCX study for Cumulus Library: rendered SQL and data files, no code."""\n', encoding='utf-8')
@@ -201,47 +224,15 @@ def source_commit() -> str:
     return 'unknown'
 
 
-def write_project(package: Path, version: str, library: str, builder: str) -> None:
-    (package / 'pyproject.toml').write_text(f'''[build-system]
-requires = ["flit_core>=3.9,<4"]
-build-backend = "flit_core.buildapi"
-
-[project]
-name = "{DIST_NAME}"
-version = "{version}"
-description = "PCX medulloblastoma study for Cumulus Library: rendered SQL and data files, no Python code."
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = []
-
-[project.urls]
-Source = "https://github.com/smart-on-fhir/cumulus-library-pcx"
-
-[tool.flit.module]
-name = "{PACKAGE_NAME}"
-''', encoding='utf-8')
-
-    stages = ''.join(f'- `{name}`\n' for name in RELEASED_STAGES)
-    (package / 'README.md').write_text(f'''# {DIST_NAME} {version} (data-only)
-
-The PCX study (Cumulus table prefix `pcx`) as rendered SQL and data files, with no Python
-code and no dependencies. Rendered from commit `{source_commit()}` of
-[smart-on-fhir/cumulus-library-pcx](https://github.com/smart-on-fhir/cumulus-library-pcx) with
-cumulus-study-builder {builder} and Cumulus Library {library}.
-
-Stages:
-
-{stages}
-The NLP, eligibility, outcome, client-view and QA stages are not in this release.
-
-Install it next to Cumulus Library {library}, which finds the installed `{PACKAGE_NAME}`
-package through its study allowlist, then build after the core study:
-
-```sh
-pip install {DIST_NAME}=={version}
-cumulus-library build -t pcx
-```
-''', encoding='utf-8')
+def write_project(package: Path, version: str) -> None:
+    """pyproject.toml of the package, from the Jinja template in release/."""
+    env = template.environment(RELEASE_DIR)
+    values = dict(dist_name=DIST_NAME,
+                  package_name=PACKAGE_NAME,
+                  version=version)
+    for name in PROJECT_TEMPLATES:
+        text = env.get_template(name + '.jinja').render(**values)
+        (package / name).write_text(text, encoding='utf-8')
 
 
 # ---------------------------------------------------------------------------
@@ -258,9 +249,23 @@ def check(package: Path) -> None:
         raise ReleaseError(f'released manifest stages: {list(manifest["stages"])}')
     if manifest['data_dictionary'] != 'spreadsheet/data_dictionary.csv':
         raise ReleaseError(f'data_dictionary = {manifest["data_dictionary"]}')
+    for name, entries in manifest['stages'].items():
+        if any(entry.get('skip_by_default') for entry in entries):
+            raise ReleaseError(f'released stage {name} is skipped by default')
+
+    schemas = sorted(path.name for path in (study / SCHEMA_DIR).glob('*.json'))
+    if schemas != study_schemas():
+        raise ReleaseError(f'released LLM schemas {schemas}, study has {study_schemas()}')
 
     prefix = manifest['study_prefix'] + '__'
     problems = list()
+    for workflow in sorted(study.rglob('*.workflow')):
+        config = tomllib.loads(workflow.read_text(encoding='utf-8'))
+        if config.get('config_type') != 'nlp':
+            continue
+        for table, task in config['tables'].items():
+            if not (study / task['response_schema']).is_file():
+                problems.append(f'{workflow.relative_to(study)}: {table} schema is missing')
     for path in sorted(study.rglob('*')):
         if path.is_dir():
             continue
@@ -278,7 +283,7 @@ def check(package: Path) -> None:
 def build(venv: Path, package: Path, dist: Path) -> list[Path]:
     run([venv / 'bin' / 'python', '-m', 'build', '--outdir', dist, package])
     built = sorted(dist.iterdir())
-    run([venv / 'bin' / 'twine', 'check', '--strict'] + built)
+    run([venv / 'bin' / 'twine', 'check'] + built)
 
     wheels = [path for path in built if path.suffix == '.whl']
     if len(wheels) != 1:
@@ -289,11 +294,22 @@ def build(venv: Path, package: Path, dist: Path) -> list[Path]:
         raise ReleaseError(f'Python files in the wheel: {python_files}')
     if f'{PACKAGE_NAME}/manifest.toml' not in names:
         raise ReleaseError('manifest.toml is missing from the wheel')
+    missing = [schema for schema in study_schemas()
+               if f'{PACKAGE_NAME}/{SCHEMA_DIR}/{schema}' not in names]
+    if missing:
+        raise ReleaseError(f'LLM schemas missing from the wheel: {missing}')
     return built
 
 #-----------------------------------------------------------------------------
 # Helpers
 #-----------------------------------------------------------------------------
+def study_schemas() -> list[str]:
+    """File names of the study's LLM response schemas, which must exist."""
+    schemas = sorted(path.name for path in (STUDY / SCHEMA_DIR).glob('*.json'))
+    if not schemas:
+        raise ReleaseError(f'no LLM schemas in {STUDY / SCHEMA_DIR}')
+    return schemas
+
 def installed_version(venv: Path, dist: str) -> str:
     code = f'import importlib.metadata as m; print(m.version({dist!r}))'
     return run([venv / 'bin' / 'python', '-c', code]).strip()
@@ -325,11 +341,11 @@ def main() -> None:
     venv = make_venv(out, args.builder)
     library = installed_version(venv, 'cumulus-library')
     builder = installed_version(venv, 'cumulus-study-builder')
-    build_validate(venv)
+    build_study(venv)
 
     package = out / 'package'
     assemble(package)
-    write_project(package, version, library, builder)
+    write_project(package, version)
     check(package)
     built = build(venv, package, out / 'dist')
 

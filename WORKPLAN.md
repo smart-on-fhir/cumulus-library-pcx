@@ -79,12 +79,11 @@ In order:
 - [ ] **Allowlist name.** Cumulus Library 6.3.5 maps `pcx` to the module
   `cumulus_library_pcx`. Discovery (`cli.get_study_dict`) imports allowlisted modules and
   keys them by the manifest prefix, so the installed release should build as `-t pcx` without
-  `--study-dir`. Read in the 6.3.4 code, not yet run on 6.3.5: the 0.4.0 smoke test confirms
-  it.
-- [ ] **Move the study to Cumulus Library 6.3.5.** `pyproject.toml` and
-  `requirements-tested.txt` still say 6.3.4, and so does the builder's own pin
-  (`>=6.3.4,<6.4`, which allows 6.3.5). Install 6.3.5, rerun build, validate and the tests,
-  then record it.
+  `--study-dir`. Checked 2026-10-09 on 6.3.5 with an editable install: `get_study_dict` finds
+  `pcx`. The 0.4.0 smoke test confirms it from the wheel.
+- [x] **Move the study to Cumulus Library 6.3.5.** Done 2026-10-09: `pyproject.toml` requires
+  `>=6.3.5,<6.4` (the builder checkout too, not yet released), `requirements-tested.txt` pins 6.3.5, and skills check,
+  starter check, build, validate and pytest (72 passed) pass on it.
 - [ ] **Stock Cumulus Library runs the NLP stages.** Cumulus Library 6.3.4 has an NLP runner
   with a Bedrock provider (`--nlp-provider bedrock`, `--nlp-model`) and PCX's NLP stages are
   `config_type = "nlp"` workflows plus JSON schemas. Read in the installed package, not yet
@@ -253,6 +252,24 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-09
+- Data release (`release/make_data_release.py`) now ships `nlp_document_tasks.workflow` and
+  runs it by default, plus all 14 LLM response schemas in `llm/schemas/`. The clinical NLP
+  tasks ship as schemas only. New checks: no released stage skipped by default, every schema
+  present in the package and wheel, every released NLP workflow's schema found.
+- The release package's `pyproject.toml` now comes from `release/pyproject.toml.jinja`,
+  rendered with the builder's `template.environment()`. The release no longer writes a
+  README, and `twine check` runs without `--strict`.
+
+### 2026-10-09 — Cumulus Library 6.3.5
+
+- `pyproject.toml` requires Cumulus Library `>=6.3.5,<6.4`, the first release whose allowlist
+  has `pcx`. `requirements-tested.txt` pins 6.3.5 after a passing run (skills check, starter
+  check, build, validate, pytest 72 passed). The old 6.3.4 pin conflicted with the new floor,
+  so the set-up commands and the release script could not install.
+- `build/release/` still holds the 0.3.0 build made with 6.3.4 and builder 0.5.4: remove it and
+  rerun `release/make_data_release.py` before uploading.
 
 ### 2026-10-08 — README-0.2.md removed
 
