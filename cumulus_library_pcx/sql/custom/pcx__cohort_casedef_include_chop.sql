@@ -19,14 +19,14 @@ WITH site_chop AS
             'SITE_CHOP'             as system,
             'SITE_CHOP'             as code,
             diagnosis_type_cohort   as display,
+            -- tier is always "1" highest quality match
+            1   as tier,
             -- subtype
             CASE diagnosis_type_cohort
                 WHEN 'Medulloblastoma'                  THEN 'medulloblastoma'
                 WHEN 'Atypical teratoid/rhabdoid tumor' THEN 'atrt'
                 ELSE CONCAT('UNKNOWN:',diagnosis_type_cohort)
                 END AS subtype,
-            -- tier is always "1" highest quality match
-            1   as tier,
             -- FHIR linkage
             patient_id          as subject_ref,
             enc.encounter_ref   as encounter_ref_link,
@@ -42,8 +42,8 @@ union_all AS
             system,
             code,
             display,
-            subtype,
             tier,
+            subtype,
             subject_ref,
             encounter_ref_link,
             resource_ref
