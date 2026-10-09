@@ -1,0 +1,18 @@
+config_type = "file_upload"
+
+[tables.client_dictionary]
+files = [
+    "client_dictionary.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]

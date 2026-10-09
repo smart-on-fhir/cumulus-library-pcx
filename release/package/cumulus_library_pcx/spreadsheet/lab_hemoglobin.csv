@@ -1,0 +1,34 @@
+system,code,display
+http://loinc.org,718-7,Hemoglobin [Mass/volume] in Blood
+http://loinc.org,20509-6,Hemoglobin [Mass/volume] in Blood by calculation
+http://loinc.org,30313-1,Hemoglobin [Mass/volume] in Arterial blood
+http://loinc.org,30350-3,Hemoglobin [Mass/volume] in Venous blood
+http://loinc.org,30351-1,Hemoglobin [Mass/volume] in Mixed venous blood
+http://loinc.org,30352-9,Hemoglobin [Mass/volume] in Capillary blood
+http://loinc.org,48725-6,Hemoglobin [Mass/volume] in Blood --pre therapeutic phlebotomy
+http://loinc.org,55782-7,Hemoglobin [Mass/volume] in Blood by Oximetry
+http://loinc.org,59260-0,Hemoglobin [Moles/volume] in Blood
+http://loinc.org,75928-2,Hemoglobin [Moles/volume] in Arterial blood
+http://loinc.org,76768-1,Hemoglobin [Mass/volume] in Mixed venous blood by Oximetry
+http://loinc.org,76769-9,Hemoglobin [Mass/volume] in Venous blood by Oximetry
+http://loinc.org,93846-4,Hemoglobin [Moles/volume] in Venous blood
+http://loinc.org,97556-5,Hemoglobin [Mass/volume] in Capillary blood by Oximetry
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1534435,Hemoglobin
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230000002,External Hemoglobin
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,4056,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230010046,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230010117,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230010133,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230013152,Hemoglobin Total POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230013167,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230013180,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014364,Hemoglobin POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230011960,Total Hemoglobin Capillary
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230011966,Total Hemoglobin Venous
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012806,Total Hemoglobin Venous POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012854,Total Hemoglobin Capillary POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,4063,Hemoglobin POCT CPB
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012486,Hemoglobin OR
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012061,Total Hemoglobin Arterial
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230012882,Estimated Hemoglobin Venous POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,923,Reticulocyte Hemoglobin

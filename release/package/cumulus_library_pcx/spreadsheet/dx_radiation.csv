@@ -1,0 +1,6 @@
+system,code,display,tier
+http://hl7.org/fhir/sid/icd-10-cm,Z51.0,Encounter for antineoplastic radiation therapy [CANDIDATE - verify],1
+http://hl7.org/fhir/sid/icd-9-cm,V58.0,Encounter for radiotherapy [CANDIDATE - verify],1
+http://hl7.org/fhir/sid/icd-10-cm,Z92.3,Personal history of irradiation [CANDIDATE - verify],2
+http://hl7.org/fhir/sid/icd-9-cm,V15.3,Personal history of irradiation [CANDIDATE - verify],2
+http://snomed.info/sct,108290001,Radiation oncology AND/OR radiotherapy (procedure) [CANDIDATE - verify],1

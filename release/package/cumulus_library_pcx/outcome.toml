@@ -1,0 +1,10 @@
+[[actions]]
+label = "outcome"
+type = "build:serial"
+files = [
+    "sql/custom/outcome_vital_status.sql",
+    "sql/custom/outcome_first_event.sql",
+    "sql/custom/outcome_exposure.sql",
+    "sql/custom/outcome.sql",
+]
+skip_by_default = true

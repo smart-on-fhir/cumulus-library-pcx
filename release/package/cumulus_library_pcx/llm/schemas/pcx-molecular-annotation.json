@@ -1,0 +1,209 @@
+{
+  "$defs": {
+    "AlterationStatus": {
+      "enum": [
+        "PRESENT",
+        "ABSENT",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "AlterationStatus",
+      "type": "string"
+    },
+    "DatePrecision": {
+      "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
+      "enum": [
+        "DAY",
+        "MONTH",
+        "YEAR"
+      ],
+      "title": "DatePrecision",
+      "type": "string"
+    },
+    "MedulloblastomaMolecularGroup": {
+      "description": "Medulloblastoma molecular group as reported.\nWNT: WNT.\nSHH: SHH.\nGROUP_3: Group 3.\nGROUP_4: Group 4.\nNON_WNT_NON_SHH: non-WNT/non-SHH.\nNOT_SUBGROUPED: not subgrouped.\nINDETERMINATE: indeterminate.\nNONE_OF_THE_ABOVE: no group documented.",
+      "enum": [
+        "WNT",
+        "SHH",
+        "GROUP_3",
+        "GROUP_4",
+        "NON_WNT_NON_SHH",
+        "NOT_SUBGROUPED",
+        "INDETERMINATE",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MedulloblastomaMolecularGroup",
+      "type": "string"
+    },
+    "MolecularAlterationMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "target": {
+          "description": "Exact gene/chromosome, e.g. MYC, MYCN, TP53, isochromosome 17q, chromosome 8, 10 or 11. Keep MYC and MYCN separate.",
+          "title": "Target",
+          "type": "string"
+        },
+        "alteration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Amplification, gain, loss, mutation or isochromosome as stated. Amplification and gain are distinct; preserve the reported term.",
+          "title": "Alteration"
+        },
+        "status": {
+          "$ref": "#/$defs/AlterationStatus",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Status of this alteration. PRESENT: explicitly reported as present. ABSENT: requires explicitly negative testing. NONE_OF_THE_ABOVE: tested but indeterminate, or status not documented."
+        },
+        "report_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of the source result, ISO date at supported precision.",
+          "title": "Report Date"
+        },
+        "report_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for report_date; null if absent."
+        },
+        "testing_method": {
+          "$ref": "#/$defs/MolecularMethod",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Method supporting this alteration, if stated. NONE_OF_THE_ABOVE: another named method, or no method given."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans",
+        "target"
+      ],
+      "title": "MolecularAlterationMention",
+      "type": "object"
+    },
+    "MolecularMethod": {
+      "enum": [
+        "DNA_METHYLATION",
+        "SEQUENCING",
+        "IMMUNOHISTOCHEMISTRY",
+        "FISH",
+        "COPY_NUMBER_ANALYSIS",
+        "CLINICAL_SUMMARY",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "MolecularMethod",
+      "type": "string"
+    },
+    "MolecularReportMention": {
+      "properties": {
+        "has_mention": {
+          "description": "Indicates whether the concept was mentioned in the text.",
+          "title": "Has Mention",
+          "type": "boolean"
+        },
+        "spans": {
+          "description": "The verbatim text where this concept was mentioned.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Spans",
+          "type": "array"
+        },
+        "molecular_group": {
+          "$ref": "#/$defs/MedulloblastomaMolecularGroup",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Explicit medulloblastoma molecular group as this report states it. Preserve conflicting calls across reports. Never infer a group from a single alteration, from histology, or from treatment. WNT: WNT-activated. SHH: SHH-activated, any TP53 status. GROUP_3: Group 3 by methylation or expression profiling. GROUP_4: Group 4 by methylation or expression profiling. NON_WNT_NON_SHH: non-WNT/non-SHH without a Group 3 versus Group 4 call, as from immunohistochemistry. NOT_SUBGROUPED: testing explicitly not performed or not available. INDETERMINATE: testing attempted but no classification reached, such as failed assay or insufficient tissue. NONE_OF_THE_ABOVE: no molecular group documented in this report."
+        },
+        "methods": {
+          "description": "Methods this report documents for molecular classification. Select every method the report documents; several may apply to one report. NONE_OF_THE_ABOVE is only valid on its own, never alongside a named method. DNA_METHYLATION: methylation array or methylation-based classifier. SEQUENCING: DNA or RNA sequencing, including expression-based subgrouping such as NanoString. IMMUNOHISTOCHEMISTRY: surrogate markers such as beta-catenin, GAB1, YAP1 or filamin A. FISH: fluorescence in situ hybridization. COPY_NUMBER_ANALYSIS: array or sequencing-derived copy number. CLINICAL_SUMMARY: the note quotes a group without the original report or method. NONE_OF_THE_ABOVE: another named method, or a result is stated but no method is given.",
+          "items": {
+            "$ref": "#/$defs/MolecularMethod"
+          },
+          "title": "Methods",
+          "type": "array"
+        },
+        "report_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of this molecular report, ISO date at supported precision; distinct from original diagnosis.",
+          "title": "Report Date"
+        },
+        "report_date_precision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatePrecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precision for report_date; null if absent."
+        }
+      },
+      "required": [
+        "has_mention",
+        "spans"
+      ],
+      "title": "MolecularReportMention",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "reports": {
+      "description": "One entry per report/classification; retain conflicting reports separately.",
+      "items": {
+        "$ref": "#/$defs/MolecularReportMention"
+      },
+      "title": "Reports",
+      "type": "array"
+    },
+    "alterations": {
+      "description": "Documented alterations or explicit negative results; empty is not a negative panel.",
+      "items": {
+        "$ref": "#/$defs/MolecularAlterationMention"
+      },
+      "title": "Alterations",
+      "type": "array"
+    }
+  },
+  "title": "MolecularAnnotation",
+  "type": "object"
+}

@@ -1,0 +1,10 @@
+system,code,display
+http://loinc.org,1742-6,Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma
+http://loinc.org,1743-4,Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma by With P-5'-P
+http://loinc.org,1744-2,Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma by No addition of P-5'-P
+http://loinc.org,76625-3,Alanine aminotransferase [Enzymatic activity/volume] in Blood
+http://loinc.org,77144-4,"Alanine aminotransferase [Enzymatic activity/volume] in Serum, Plasma or Blood"
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014477,ALT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230025081,"ALANINE AMINOTRANSFERASE (ALT), S"
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1525870,ALT (SGPT)
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,210000009,External ALT (SGPT)

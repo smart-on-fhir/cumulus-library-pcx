@@ -1,0 +1,7 @@
+CREATE TABLE pcx__cohort_proc_radiation AS 
+SELECT DISTINCT * FROM 
+ pcx__cohort_study_population_proc , 
+pcx__valueset_proc_radiation
+WHERE
+pcx__cohort_study_population_proc.proc_code = pcx__valueset_proc_radiation.code and 
+pcx__cohort_study_population_proc.proc_system = pcx__valueset_proc_radiation.system
