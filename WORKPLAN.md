@@ -19,10 +19,10 @@ Validated 2026-10-09 on builder 0.5.6 and Cumulus Library 6.3.5: `skills check`,
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
 dependency is Cumulus Library (`>=6.3.5,<6.4`), so neither the site nor the package needs
-cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
-**0.4.1**.
+cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). This release is
+**0.4.0**; **0.4.1** is planned for patch fixes after it.
 
-## Release 0.4.1
+## Release 0.4.0
 
 CHOP must run the LLM on its own notes (no PHI leaves the site; CHOP has the Cumulus core
 tables and AWS Bedrock, and runs `gpt-oss-120b`, the same model as BCH).
@@ -53,9 +53,9 @@ In order:
 - [ ] P2 · docs · **Site run instructions.** In `cumulus-study.md` and the package README:
   the stage to name, and the options a site passes (`--note-dir`, `--etl-phi-dir`,
   `--nlp-provider bedrock`, `--nlp-model gpt-oss-120b`).
-- [ ] P1 · release · **Publish 0.4.1.** Set the version in `pyproject.toml` (it says 0.4.0
-  today), build with the script, upload with the printed `twine upload` (Andy or @msa2984,
-  straight to PyPI), tag `v0.4.1`. *Done when* 0.4.1 is on PyPI and tagged.
+- [ ] P1 · release · **Publish 0.4.0.** `pyproject.toml` says 0.4.0. Commit, build with the
+  script, upload with the printed `twine upload` (Andy or @msa2984, straight to PyPI), tag
+  `v0.4.0`. *Done when* 0.4.0 is on PyPI and tagged. Patch fixes after it go in 0.4.1.
 
 ## Open questions
 
@@ -63,14 +63,14 @@ In order:
   `cumulus_library_pcx`. Discovery (`cli.get_study_dict`) imports allowlisted modules and
   keys them by the manifest prefix, so the installed release should build as `-t pcx` without
   `--study-dir`. Checked 2026-10-09 on 6.3.5 with an editable install: `get_study_dict` finds
-  `pcx`. The 0.4.1 smoke test confirms it from the wheel.
+  `pcx`. The 0.4.0 smoke test confirms it from the wheel.
 - [x] **Move the study to Cumulus Library 6.3.5.** Done 2026-10-09: `pyproject.toml` requires
   `>=6.3.5,<6.4` (the builder checkout too, not yet released), `requirements-tested.txt` pins 6.3.5, and skills check,
   starter check, build, validate and pytest (72 passed) pass on it.
 - [ ] **Stock Cumulus Library runs the NLP stages.** Cumulus Library 6.3.5 has an NLP runner
   with a Bedrock provider (`--nlp-provider bedrock`, `--nlp-model`) and PCX's NLP stages are
   `config_type = "nlp"` workflows plus JSON schemas. Read in the installed package, not yet
-  run: the 0.4.1 smoke test confirms it. If it fails, the stopgap is a source
+  run: the 0.4.0 smoke test confirms it. If it fails, the stopgap is a source
   install of PCX and the builder at CHOP. A builder dependency in the package needs the
   builder on PyPI first.
 - [ ] **Clinical-task selectors.** Decided 2026-10-08: each clinical task gets the notes the
@@ -229,6 +229,11 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-09 — this release is 0.4.0
+
+- The release in progress is 0.4.0 (as in `pyproject.toml`); 0.4.1 is the planned patch
+  release after it. Corrects "the next release is 0.4.1" below.
 
 ### 2026-10-09 — release outputs beside the script
 
