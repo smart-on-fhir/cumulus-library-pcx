@@ -6,12 +6,15 @@ Python that runs it. It also needs SSH read access to the builder repository.
 
     python release/make_data_release.py
 
+Everything it writes goes beside this script: release/venv/, release/package/ and
+release/dist/. Each run deletes those three first, so nothing stale is released.
+
 Steps, each stopping at the first problem:
-  1. venv      build/release/venv with the builder tag and the tested pins (requirements-tested.txt)
+  1. venv      release/venv/ with the builder tag and the tested pins (requirements-tested.txt)
   2. study    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
                Elasticsearch export: the released pcx__elastic_union is the empty table.
                Run `cumulus-study build` afterwards to render your own export again.
-  3. assemble  build/release/package/: the study's manifest.toml as is, every stage TOML and
+  3. assemble  release/package/: the study's manifest.toml as is, every stage TOML and
                workflow it lists with the rendered SQL and spreadsheet files they name, and every
                LLM response schema in llm/schemas/, plus UNLISTED_FILES, which no stage lists.
                `../spreadsheet/` and `../tests/sql/custom/` paths move inside the package.
@@ -20,7 +23,7 @@ Steps, each stopping at the first problem:
   4. check     Cumulus Library loads the released manifest, every file a stage lists is in the
                package (Python builders excepted), no Python file but __init__.py, no path
                leaving the package, every LLM schema present and every NLP workflow's schema found
-  5. build     wheel and sdist into build/release/dist/, then `twine check`
+  5. build     wheel and sdist into release/dist/, then `twine check`
 
 It never uploads and never runs git: it prints the upload command for you to run.
 """
@@ -64,6 +67,9 @@ UNLISTED_FILES = ['sql/custom/pcx__cohort_casedef_include.sql']
 # Jinja templates beside this script, rendered into the package root as <name>.
 RELEASE_DIR = Path(__file__).resolve().parent
 PROJECT_TEMPLATES = ['pyproject.toml']
+
+# What a run writes inside its work directory (release/ by default), all generated.
+OUTPUT_DIRS = ['venv', 'package', 'dist']
 
 class ReleaseError(Exception):
     pass
@@ -324,13 +330,15 @@ def run(command: list, cwd: Path = ROOT, env: dict | None = None) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--builder', default=BUILDER, help='pip requirement for cumulus-study-builder')
-    parser.add_argument('--out', type=Path, default=ROOT / 'build' / 'release',
-                        help='work directory, must not exist yet (default build/release)')
+    parser.add_argument('--out', type=Path, default=RELEASE_DIR,
+                        help='work directory for venv/, package/ and dist/, cleared on every run (default release/)')
     args = parser.parse_args()
 
     out = args.out.resolve()
-    if out.exists():
-        raise ReleaseError(f'{out} exists: remove it first, so nothing stale is released')
+    for name in OUTPUT_DIRS:
+        if (out / name).exists():
+            print(f'removing {out / name}', flush=True)
+            shutil.rmtree(out / name)
     version = tomllib.loads((ROOT / 'pyproject.toml').read_text())['project']['version']
 
     venv = make_venv(out, args.builder)

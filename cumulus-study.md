@@ -213,7 +213,8 @@ python release/make_data_release.py     # needs SSH read access to the builder r
 Run it with the development venv from [Set up](#set-up) active: the script finds the repository
 through the builder's `filetool`, so the builder must be installed in the Python that runs it.
 
-The script works in `build/release/` (remove it before the next run): a venv with the
-builder tag, `cumulus-study build` and `validate`, the assembled package, checks, then the
-wheel and sdist in `build/release/dist/`. The version comes from `pyproject.toml`. It never
-uploads or runs git: it prints the `twine upload` command for the person publishing.
+The script writes beside itself in `release/`: a venv with the builder tag in `release/venv/`,
+the assembled package in `release/package/`, and the wheel and sdist in `release/dist/`, after
+`cumulus-study build`, `validate` and the checks. Each run deletes those three folders first,
+so nothing stale is released. The version comes from `pyproject.toml`. It never uploads or
+runs git: it prints the `twine upload` command for the person publishing.

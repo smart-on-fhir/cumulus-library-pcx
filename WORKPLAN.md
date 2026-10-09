@@ -230,6 +230,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-09 — release outputs beside the script
+
+- `release/make_data_release.py` writes `release/venv/`, `release/package/` and
+  `release/dist/` beside itself instead of `build/release/`, and deletes those three at the
+  start of every run, so there is no folder to remove by hand. The old `build/` folder is no
+  longer used.
+
 ### 2026-10-09 — release ships the CHOP casedef include
 
 - The release copies `sql/custom/pcx__cohort_casedef_include.sql` (the CHOP site version of the
