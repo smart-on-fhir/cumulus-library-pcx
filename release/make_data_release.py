@@ -41,7 +41,7 @@ PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
 BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.5'
 
-# The default stages (PROTOCOL.md decision log, 2026-10-02 and 2026-10-08), in manifest order.
+# The default stages
 RELEASED_STAGES = ['study_population',
                    'study_variable',
                    'study_variable_wide',
@@ -50,27 +50,17 @@ RELEASED_STAGES = ['study_population',
                    'sample',
                    'counts',
                    'study_meta']
+
 # Where a site keeps its Elasticsearch export. The release is rendered without one.
 EXPORT_VARIABLES = ['ELASTIC_OUTPUT_DIR', 'CUMULUS_LIBRARY_DATA_PATH']
 FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
 
-
 class ReleaseError(Exception):
     pass
 
-
-def run(command: list, cwd: Path = ROOT, env: dict | None = None) -> str:
-    print('$', ' '.join(str(part) for part in command), flush=True)
-    result = subprocess.run([str(part) for part in command], cwd=cwd, env=env, text=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    if result.returncode != 0:
-        print(result.stdout)
-        raise ReleaseError(f'command failed ({result.returncode}): {command[0]}')
-    return result.stdout
-
-
-# --------------------------------------------------------------------------- 1. venv
-
+#-----------------------------------------------------------------------------
+# 1. virtualenv
+#-----------------------------------------------------------------------------
 def make_venv(out: Path, builder: str) -> Path:
     venv = out / 'venv'
     run([sys.executable, '-m', 'venv', venv])
@@ -81,14 +71,10 @@ def make_venv(out: Path, builder: str) -> Path:
     return venv
 
 
-def installed_version(venv: Path, dist: str) -> str:
-    code = f'import importlib.metadata as m; print(m.version({dist!r}))'
-    return run([venv / 'bin' / 'python', '-c', code]).strip()
-
-
-# --------------------------------------------------------------------------- 2. render
-
-def render(venv: Path) -> None:
+# ---------------------------------------------------------------------------
+# 2. build and validate
+# ---------------------------------------------------------------------------
+def build_validate(venv: Path) -> None:
     env = dict(os.environ)
     for name in EXPORT_VARIABLES:
         env.pop(name, None)
@@ -96,8 +82,9 @@ def render(venv: Path) -> None:
     run([venv / 'bin' / 'cumulus-study', 'validate'], env=env)
 
 
-# --------------------------------------------------------------------------- 3. assemble
-
+# ---------------------------------------------------------------------------
+# 3. Package
+# ---------------------------------------------------------------------------
 def packaged_path(relative: str) -> str:
     """Path of a study-relative file inside the release package."""
     if relative.startswith('../spreadsheet/'):
@@ -109,7 +96,6 @@ def packaged_path(relative: str) -> str:
 
 def rewrite_paths(text: str) -> str:
     return text.replace('"../spreadsheet/', '"spreadsheet/')
-
 
 def copy_file(source: Path, target: Path, text_rewrite: bool = False) -> None:
     if source.is_symlink():
@@ -258,8 +244,9 @@ cumulus-library build -t pcx
 ''', encoding='utf-8')
 
 
-# --------------------------------------------------------------------------- 4. check
-
+# ---------------------------------------------------------------------------
+# 4. check
+# ---------------------------------------------------------------------------
 def check(package: Path) -> None:
     study = package / PACKAGE_NAME
     python_files = sorted(str(p.relative_to(study)) for p in study.rglob('*.py'))
@@ -285,9 +272,9 @@ def check(package: Path) -> None:
     if problems:
         raise ReleaseError('\n'.join(problems))
 
-
-# --------------------------------------------------------------------------- 5. build
-
+# ---------------------------------------------------------------------------
+# 5. build
+# ---------------------------------------------------------------------------
 def build(venv: Path, package: Path, dist: Path) -> list[Path]:
     run([venv / 'bin' / 'python', '-m', 'build', '--outdir', dist, package])
     built = sorted(dist.iterdir())
@@ -304,7 +291,25 @@ def build(venv: Path, package: Path, dist: Path) -> list[Path]:
         raise ReleaseError('manifest.toml is missing from the wheel')
     return built
 
+#-----------------------------------------------------------------------------
+# Helpers
+#-----------------------------------------------------------------------------
+def installed_version(venv: Path, dist: str) -> str:
+    code = f'import importlib.metadata as m; print(m.version({dist!r}))'
+    return run([venv / 'bin' / 'python', '-c', code]).strip()
 
+def run(command: list, cwd: Path = ROOT, env: dict | None = None) -> str:
+    print('$', ' '.join(str(part) for part in command), flush=True)
+    result = subprocess.run([str(part) for part in command], cwd=cwd, env=env, text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode != 0:
+        print(result.stdout)
+        raise ReleaseError(f'command failed ({result.returncode}): {command[0]}')
+    return result.stdout
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--builder', default=BUILDER, help='pip requirement for cumulus-study-builder')
@@ -320,7 +325,7 @@ def main() -> None:
     venv = make_venv(out, args.builder)
     library = installed_version(venv, 'cumulus-library')
     builder = installed_version(venv, 'cumulus-study-builder')
-    render(venv)
+    build_validate(venv)
 
     package = out / 'package'
     assemble(package)
@@ -337,6 +342,10 @@ def main() -> None:
     print(f'  {venv / "bin" / "twine"} upload {out / "dist"}/*')
 
 
+
+#-----------------------------------------------------------------------------
+# Main
+#-----------------------------------------------------------------------------
 if __name__ == '__main__':
     try:
         main()
