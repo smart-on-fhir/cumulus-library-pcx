@@ -11,27 +11,31 @@
 --    encounter_ref_link  	FHIR Encounter/$id
 
 CREATE  TABLE   pcx__cohort_casedef_include AS
-with site_chop as
+WITH site_chop AS
 (
     SELECT  DISTINCT
             -- site is chop (philadelphia)
-            'SITE_CHOP' as valueset,
-            'SITE_CHOP' as system,
-            'SITE_CHOP' as code,
+            'SITE_CHOP'             as valueset,
+            'SITE_CHOP'             as system,
+            'SITE_CHOP'             as code,
+            diagnosis_type_cohort   as display,
             -- subtype
-            diagnosis_type_cohort           as display,
-            lower(diagnosis_type_cohort)    as subtype,
+            CASE diagnosis_type_cohort
+                WHEN 'Medulloblastoma'                  THEN 'medulloblastoma'
+                WHEN 'Atypical teratoid/rhabdoid tumor' THEN 'atrt'
+                ELSE CONCAT('UNKNOWN:',diagnosis_type_cohort)
+                END AS subtype,
             -- tier is always "1" highest quality match
-            1                               as tier,
+            1   as tier,
             -- FHIR linkage
-            patient_id                      as subject_ref,
-            enc.encounter_ref               as encounter_ref_link,
-            NULL                            as resource_ref
-    FROM    radiant_data_dev.pcx_patient_list as pcx_patient_list
-    JOIN    pcx__cohort_study_population as enc
-    ON      pcx_patient_list.subject_ref = enc.subject_ref
+            patient_id          as subject_ref,
+            enc.encounter_ref   as encounter_ref_link,
+            NULL                as resource_ref
+    FROM    radiant_data_dev.pcx_patient_list   as pcx_patient_list
+    JOIN    pcx__cohort_study_population        as enc
+    ON      pcx_patient_list.patient_id = enc.subject_ref
 ),
-union_all as
+union_all AS
 (
     SELECT  DISTINCT
             valueset,
