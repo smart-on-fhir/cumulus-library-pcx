@@ -6,14 +6,12 @@ writes decisions back. Tags on every line: `[source <doc>]` from a starting docu
 unanswered. The numbered headings are the contract the skills and `cumulus-study validate`
 depend on: keep the numbers and their order, add subsections freely.
 
-Inherited source documents are in `docs/source/`. The inherited workplan (2026-09-11) was
-removed 2026-10-08: its open items are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git tag
-`0.2-pre-study-builder`;
-open work is in [WORKPLAN.md](WORKPLAN.md). The study package is `cumulus_library_pcx/`
-(builder 0.5.5). Other sites run the study from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`. From 0.3.0, the eight default stages
-without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
-(`release/make_data_release.py`).
+Open work and the changelog are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git
+tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built with
+cumulus-study-builder 0.5.6 and run by Cumulus Library 6.3.5. Other sites run the study from
+the data-only PyPI package `cumulus-library-pcx` (`release/make_data_release.py`), which
+ships the whole manifest and every stage, or from a clone of this repository with
+`cumulus-library build --study-dir cumulus_library_pcx`. The next release is 0.4.1.
 
 ## 0. Source
 
@@ -22,7 +20,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   chemotherapy backbone for young children with medulloblastoma and other embryonal brain tumors.
 - [decided] Migrated 2026-09-19 from `cumulus-library-pcx` (read-only); the source is
   git tag `0.2-pre-study-builder`. Design notes at the repository root: [eligible.md](eligible.md),
-  [laboratory.md](laboratory.md), [LIMITATIONS.md](limitations.md). The model reference is [LLM.md](llm.md).
+  [laboratory.md](laboratory.md), [limitations.md](limitations.md). The model reference is [llm.md](llm.md).
 
 ## 1. Objective
 
@@ -35,7 +33,7 @@ without NLP also ship as the data-only PyPI package `cumulus-library-pcx`
   a tier 1 medulloblastoma code.
 - [decided] Prefix `pcx`. Stages in `cumulus_library_pcx/stage/manifest.py`: study_population,
   study_variable, study_variable_wide, casedef, elastic_upload, sample, counts, study_meta by
-  default; llm_schema, the four NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
+  default; llm_schema, the NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
   outcome, client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
   (`core__medicationrequest`, `core__medicationdispense`); there is no `fhir_resource` stage.
 - [decided] Data package version 2.
@@ -64,14 +62,14 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [source laboratory] Toxicity laboratories: `lab_{absolute_neutrophil_count,alt,ast,creatinine,
   hemoglobin,platelets,total_bilirubin}`; no eligible or outcome SQL reads a lab table yet.
 - [open] Creatinine has one LOINC; hemoglobin still includes local reticulocyte code 923;
-  methotrexate serum levels and leucovorin have no valueset ([LIMITATIONS.md](limitations.md)).
+  methotrexate serum levels and leucovorin have no valueset ([limitations.md](limitations.md)).
 
 ## 4. Case definition
 
 - [source] `spreadsheet/casedef.csv`: 55 rows, subtypes medulloblastoma, atrt, cns_embryonal,
   etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero; tier 2 codes are evidence.
 - [source eligible] Index event: first study-population encounter carrying a tier 1
-  medulloblastoma code (`pcx__eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
+  medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
   (first casedef encounter of any subtype or tier) for note sampling ([WORKPLAN](WORKPLAN.md#case-definition)).
 - [open] SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in
   dx_brain_cancer.csv. ICD-O-3 morphology codes are absent from casedef.csv. etmr,
@@ -80,10 +78,10 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 
 ## 5. Clinical notes
 
-- [source llm] 14 extraction models in `cumulus_library_pcx/llm/models/`: diagnosis, document_topic,
+- [source llm] Extraction models in `cumulus_library_pcx/llm/models/`: diagnosis, document_topic,
   document_type, event, laboratory, metastasis, molecular, radiation, registry_eligibility,
   response, surgery, survival_timeline, systemic_therapy, transition_of_care (`treatment.py`
-  is shared context, not a task). Workflows: `nlp_document_tasks` and `nlp_clinical_tasks`; 23 wide and
+  is shared context, not a task). Workflows: `nlp_document_tasks` and `nlp_clinical_tasks`; wide and
   projection templates in `cumulus_library_pcx/sql/template/`. Deployment `gpt_oss_120b` (`cumulus-study.toml`).
 - [decided] Sample windows from the shared sampler: pre, peri, post around the casedef anchor;
   10 patients and 50 notes per window (`cumulus-study.toml`).
@@ -92,9 +90,9 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   stage builds at every site.
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created. Supply reviewed selectors, each with a `note_ref` column,
-  before running it. The 12 tables are declared as site-supplied under `[builder] external_tables`.
-  Nothing stops the stage when a selector is empty (no selector guard since builder 0.5.5), and
-  cumulus-library 6.3.4 then sends every note to the LLM: check each selector has rows first.
+  before running it. The tables are declared as site-supplied under `[builder] external_tables`.
+  Nothing stops the stage when a selector is empty (the builder has no selector guard), and
+  Cumulus Library 6.3.5 then sends every note to the LLM: check each selector has rows first.
 - [open] The diagnosis task is version 2 and the projections consume version 2. The removed
   `_50k` workflow ran it as version 3. Confirm the version before production.
   `HOME_INSTITUTION` is site-specific.
@@ -143,8 +141,7 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 
 - [source] Primary outcome: overall survival, censored at last known alive. Secondary outcome:
   event-free survival, where an event is progression, recurrence, a second malignancy or
-  death. EFS is provisional until event-free follow-up is adjudicated (limitations.md).
-
+  death. EFS is provisional until event-free follow-up is adjudicated ([limitations.md](limitations.md)).
 - [source limitations] Vital status (`outcome_vital_status.sql`): raw `patient.deceasedBoolean` /
   `deceasedDateTime`, the last study-population encounter, and LLM vital-status mentions; the
   earliest death and latest alive dates win without cross-checking. The raw FHIR Patient
@@ -195,8 +192,7 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 
 - [open] The diagnosis task version (section 5).
 - [open] The original `reviews/` were not migrated. The query topics are back, as one
-  `<topic>.txt` per topic in `spreadsheet/query_topics_ppv/` and `query_topics_recall/`
-  (2026-10-08).
+  `<topic>.txt` per topic in `spreadsheet/query_topics/` (2026-10-08).
 - [open] Inherited items of the 2026-09-11 workplan, now listed in WORKPLAN.md under their
   sections: keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md:
@@ -242,6 +238,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   the installed package is deferred to a later release. Andy.
 - 2026-10-07 [decided] The builder repository moved to `smart-on-fhir/cumulus-study-builder`;
   install and release use that URL. Tag `v0.5.0` is the same commit (7fc9700). Andy.
+- 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
+  stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
+  Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.
 - 2026-10-08 [decided] The study moves to builder 0.5.2 (git tag `v0.5.2`): 0.5.1 reads the
   query-topic folder and 0.5.2 lets the Elasticsearch upload workflow be written beside its
   export, outside the study. `pyproject.toml` requires `>=0.5.2,<0.6`. Andy.
@@ -289,9 +288,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - 2026-10-09 [decided] The release ships `nlp_document_tasks` opt-in, as in the study: the
   default build runs every default stage and skips it, and a site runs it by naming the
   stage. Andy.
-- 2026-10-07 [decided] CHOP runs the LLM on its own notes, so the release must carry the NLP
-  stages. It stays data-only (SQL, TOML and JSON, no Python, no builder dependency) and
-  Cumulus Library runs the workflows. Not yet verified by a run; see WORKPLAN. Andy.
+- 2026-10-09 [decided] The next release is 0.4.1. Docs name one builder version (0.5.6) and
+  one Cumulus Library version (6.3.5), and do not count workflows or tasks. The study
+  population has no age restriction; the trial's age limit is an eligibility flag. Andy.
 
 ## Agent rules
 

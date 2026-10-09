@@ -70,11 +70,11 @@ The build order is the `STAGES` list in
 | `casedef` | default | builder | case-definition cohort from [casedef.csv](spreadsheet/casedef.csv) |
 | `elastic_upload` | default | builder | load Elasticsearch results into `pcx__elastic_union`; an empty table when there is no export |
 | `sample` | default | builder | note samples for the casedef cohort, and `pcx__sample_task` |
-| `llm_schema` | opt-in | PCX | JSON schemas and summaries from the models in `llm/models/` ([LLM.md](llm.md)) |
+| `llm_schema` | opt-in | PCX | JSON schemas and summaries from the models in `llm/models/` ([llm.md](llm.md)) |
 | `nlp_document_tasks` | opt-in | PCX workflow | notes → LLM document type and topic |
 | `llm_document_wide` | opt-in | builder | document type and topic results → wide SQL |
-| `nlp_clinical_tasks` | opt-in | PCX workflow | notes → the 12 LLM clinical tasks |
-| `llm_clinical_wide` | opt-in | builder | clinical results → 21 wide projections |
+| `nlp_clinical_tasks` | opt-in | PCX workflow | notes → the LLM clinical tasks |
+| `llm_clinical_wide` | opt-in | builder | clinical results → wide SQL |
 | `eligible` | opt-in | PCX | trial inclusion and exclusion flags ([eligible.md](eligible.md)) |
 | `outcome` | opt-in | PCX | vital status, first event, OS and provisional EFS |
 | `client_views` | opt-in | PCX | `pcx__client_*` tables for timeline and survival analysis |
@@ -97,7 +97,7 @@ before `sample`, because `pcx__sample_task` reads `pcx__elastic_union`.
 | `sample_patient_limit`, `sample_note_limit` | note-sampling limits per window (10 patients, 50 notes) |
 | `data_package_version` | the data package version (2) |
 | `nlp_deployments` | the models whose result tables the wide SQL reads (`gpt_oss_120b`) |
-| `external_tables` | tables a site supplies, so `validate` does not expect a stage to build them: the 12 clinical note-selection tables |
+| `external_tables` | tables a site supplies, so `validate` does not expect a stage to build them: the clinical note-selection tables |
 
 The study prefix `pcx` is set only in `manifest.toml`.
 
@@ -196,13 +196,15 @@ Edit the inputs, never the outputs.
 
 The PyPI package `cumulus-library-pcx` is data-only: the study's `manifest.toml` as is (only the
 `../spreadsheet/` data dictionary path moves inside the package), every stage it lists with the
-same `skip_by_default` flags, the JSON response schemas of every LLM task, no Python code and no
-dependencies. `cumulus-library build -t pcx` runs the same default stages as the study
-(`study_population` through `sample`, then `study_meta`), and a site runs an opt-in stage by
-naming it with `--stage`. The opt-in `llm_schema` stage is listed, but its Python builder is not
-shipped, so it cannot run from the package; the schemas it writes ship as files. The QA SQL from
-`tests/sql/custom/` ships at the same path inside the package. Sites install it next to
-Cumulus Library 6.3.5 or later.
+same `skip_by_default` flags, the JSON response schemas of every LLM task, and no Python code. Its
+one dependency is Cumulus Library, in the range this repository's `pyproject.toml` requires
+(`>=6.3.5,<6.4`), so `pip install` brings a site to that range. `cumulus-library build -t pcx`
+runs the same default stages as the study (`study_population` through `sample`, then
+`study_meta`), and a site runs an opt-in stage by naming it with `--stage`. The opt-in
+`llm_schema` stage is listed, but its Python builder is not shipped, so it cannot run from the
+package; the schemas it writes ship as files. The QA SQL from `tests/sql/custom/` ships at the
+same path inside the package, and so does `sql/custom/pcx__cohort_casedef_include.sql` (the CHOP
+site version of the casedef include table), which no stage lists.
 
 ```sh
 python release/make_data_release.py     # needs SSH read access to the builder repository

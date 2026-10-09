@@ -13,9 +13,10 @@ Steps, each stopping at the first problem:
                Run `cumulus-study build` afterwards to render your own export again.
   3. assemble  build/release/package/: the study's manifest.toml as is, every stage TOML and
                workflow it lists with the rendered SQL and spreadsheet files they name, and every
-               LLM response schema in llm/schemas/. `../spreadsheet/` and `../tests/sql/custom/`
-               paths move inside the package. Python builders (stage/llm_schema.py) are not
-               released, so the opt-in llm_schema stage cannot run from the package.
+               LLM response schema in llm/schemas/, plus UNLISTED_FILES, which no stage lists.
+               `../spreadsheet/` and `../tests/sql/custom/` paths move inside the package.
+               Python builders (stage/llm_schema.py) are not released, so the opt-in
+               llm_schema stage cannot run from the package.
   4. check     Cumulus Library loads the released manifest, every file a stage lists is in the
                package (Python builders excepted), no Python file but __init__.py, no path
                leaving the package, every LLM schema present and every NLP workflow's schema found
@@ -25,6 +26,7 @@ It never uploads and never runs git: it prints the upload command for you to run
 """
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -54,6 +56,10 @@ FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
 
 # LLM response schemas: all are released, including those of the unreleased clinical tasks.
 SCHEMA_DIR = 'llm/schemas'
+
+# Study files released at the same path inside the package although no stage lists them.
+# pcx__cohort_casedef_include.sql is the CHOP site version of the casedef include table.
+UNLISTED_FILES = ['sql/custom/pcx__cohort_casedef_include.sql']
 
 # Jinja templates beside this script, rendered into the package root as <name>.
 RELEASE_DIR = Path(__file__).resolve().parent
@@ -166,6 +172,9 @@ def assemble(package: Path) -> None:
     for schema in study_schemas():
         copy_file(STUDY / SCHEMA_DIR / schema, study / SCHEMA_DIR / schema)
 
+    for name in UNLISTED_FILES:
+        copy_file(STUDY / name, study / name)
+
     (study / '__init__.py').write_text(
         '"""PCX study for Cumulus Library: rendered SQL and data files, no code."""\n', encoding='utf-8')
 
@@ -192,7 +201,8 @@ def write_project(package: Path, version: str) -> None:
     env = template.environment(RELEASE_DIR)
     values = dict(dist_name=DIST_NAME,
                   package_name=PACKAGE_NAME,
-                  version=version)
+                  version=version,
+                  library_requirement=library_requirement())
     for name in PROJECT_TEMPLATES:
         text = env.get_template(name + '.jinja').render(**values)
         (package / name).write_text(text, encoding='utf-8')
@@ -264,6 +274,13 @@ def build(venv: Path, package: Path, dist: Path) -> list[Path]:
                if f'{PACKAGE_NAME}/{SCHEMA_DIR}/{schema}' not in names]
     if missing:
         raise ReleaseError(f'LLM schemas missing from the wheel: {missing}')
+    missing = [name for name in UNLISTED_FILES if f'{PACKAGE_NAME}/{name}' not in names]
+    if missing:
+        raise ReleaseError(f'unlisted files missing from the wheel: {missing}')
+    metadata = [name for name in names if name.endswith('.dist-info/METADATA')]
+    requires = zipfile.ZipFile(wheels[0]).read(metadata[0]).decode('utf-8')
+    if f'Requires-Dist: {library_requirement()}\n' not in requires:
+        raise ReleaseError(f'the wheel does not require {library_requirement()}')
     return built
 
 #-----------------------------------------------------------------------------
@@ -275,6 +292,18 @@ def study_schemas() -> list[str]:
     if not schemas:
         raise ReleaseError(f'no LLM schemas in {STUDY / SCHEMA_DIR}')
     return schemas
+
+def library_requirement() -> str:
+    """The cumulus-library requirement in this checkout's pyproject.toml, such as
+    'cumulus-library>=6.3.5,<6.4'. The released package requires the same range."""
+    project = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))['project']
+    found = list()
+    for dependency in project['dependencies']:
+        if re.match(r'cumulus-library\s*[<>=~!]', dependency):
+            found.append(dependency)
+    if len(found) != 1:
+        raise ReleaseError(f'expected one cumulus-library requirement in pyproject.toml, got {found}')
+    return found[0]
 
 def installed_version(venv: Path, dist: str) -> str:
     code = f'import importlib.metadata as m; print(m.version({dist!r}))'

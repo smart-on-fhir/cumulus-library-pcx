@@ -21,7 +21,6 @@ flags encounters with any of the seven organ-function labs.
 | [Total bilirubin](spreadsheet/lab_total_bilirubin.csv)                              |       1 | 1975-2 only; 42719-5 and 14631-6 are missing (see WORKPLAN.md)                     |
 
 Folate valuesets were removed from the study on 2026-09-14. The seven organ-function
-valuesets above remain. Two generated files with no CSV and no toml entry,
-`athena/pcx__cohort_lab_albumin.sql` and `athena/pcx__cohort_lab_platelet_count.sql`, are stale leftovers (see WORKPLAN.md).
+valuesets above remain.
 Methotrexate serum levels (LOINC 3618-4, 14836-1) and leucovorin, the strongest structured markers of high-dose
 methotrexate, have no valueset yet (see WORKPLAN.md).

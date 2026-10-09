@@ -1,10 +1,11 @@
 # pcx
 
-Embryonal brain tumors (all ages, encounters from 2008 with history), Cumulus table
-prefix `pcx`, emulating the ACNS0334 trial population. A coded case definition (medulloblastoma,
+Embryonal brain tumors (no age restriction, encounters from 2008 with history), Cumulus table
+prefix `pcx`, emulating the ACNS0334 trial. The trial enrolled young children; this
+study population has no age limit, and age is an eligibility flag. A coded case definition (medulloblastoma,
 ATRT, CNS embryonal, ETMR, pineoblastoma), chemotherapy, laboratory toxicity, craniotomy and
-radiation variables, note samples, 14 LLM chart-review schemas with 23 projections, opt-in
-eligibility, outcome, client-export and QA stages, and 17 count tables.
+radiation variables, note samples, LLM chart-review tasks with their wide tables, opt-in
+eligibility, outcome, client-export and QA stages, and count tables.
 
 This is a retrospective, proof-of-concept emulation of
 [ACNS0334](https://clinicaltrials.gov/study/NCT00336024)
@@ -16,7 +17,7 @@ eligibility criterion is met in this phase ([limitations.md](limitations.md)).
 - [PROTOCOL.md](PROTOCOL.md): frame, population, variables, decisions and open questions.
 - [eligible.md](eligible.md): eligibility criteria and how each is computed.
 - [laboratory.md](laboratory.md): the toxicity laboratory valuesets.
-- [LLM.md](llm.md): the LLM extraction models, note selection, schemas and wide tables.
+- [llm.md](llm.md): the LLM extraction models, note selection, schemas and wide tables.
 - [limitations.md](limitations.md): scientific gaps between ACNS0334 and the EHR emulation.
 
 ## Build and release

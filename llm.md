@@ -17,18 +17,18 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 
 `treatment.py` holds shared enums (`TreatmentPhase`, `DeliveryStatus`), not a task.
 
-Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (12 clinical tasks) and [nlp_document_tasks.workflow](cumulus_library_pcx/nlp_document_tasks.workflow) (routing and classification). Bump a task's version whenever its model changes, and regenerate the schema and the wide-table SQL together.
+Task versions live in the `.workflow` files: [nlp_clinical_tasks.workflow](cumulus_library_pcx/nlp_clinical_tasks.workflow) (the clinical tasks) and [nlp_document_tasks.workflow](cumulus_library_pcx/nlp_document_tasks.workflow) (routing and classification). Bump a task's version whenever its model changes, and regenerate the schema and the wide-table SQL together.
 
-The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([LIMITATIONS.md](limitations.md) §3–§4).
+The paper's primary response endpoint uses baseline-evaluable patients and assesses complete response after consolidation. Early progression/death must remain in that denominator. Missing response is not complete response. EFS candidates include progression/relapse, secondary malignancy and death; remission is a response state. The [registered EFS definition](https://clinicaltrials.gov/study/NCT00336024) starts at enrollment. The outcome stage currently uses t0 (first tier 1 medulloblastoma encounter) as the EFS origin and censors at last known alive, marked provisional ([limitations.md](limitations.md) §3–§4).
 
 Routine lab names are informed by the associated trial's [eligibility listing](https://www.mayo.edu/research/clinical-trials/cls-20126460) and registry. The article does not specify the full routine lab schedule. Numeric thresholds, age calculations, staging, dose classification and cohort selection are validated in the SQL stages, not in the models.
 
 ## Note selection
 
 - The document tasks (`document_topic`, `document_type`) select every note in `pcx__sample_task`, which the `sample` stage builds at every site: casedef notes plus Elasticsearch notes.
-- Each clinical task selects from `pcx__llm_document_task_<task>`. No stage builds these 12 tables yet. They are declared as site-supplied in `cumulus-study.toml`, and the plan is to build them from the `document_topic` results (WORKPLAN.md, "Clinical-task selectors").
-- `document_topic` has 11 routing fields for the 12 clinical tasks: `transition_of_care` has no router field.
-- Nothing stops a workflow whose selection table is empty. Cumulus Library 6.3.4 then sends every note to the LLM, so check each selection has rows first.
+- Each clinical task selects from `pcx__llm_document_task_<task>`. No stage builds these tables yet. They are declared as site-supplied in `cumulus-study.toml`, and the plan is to build them from the `document_topic` results (WORKPLAN.md, "Clinical-task selectors").
+- `document_topic` has a routing field for every clinical task except `transition_of_care`.
+- Nothing stops a workflow whose selection table is empty. Cumulus Library 6.3.5 then sends every note to the LLM, so check each selection has rows first.
 
 ## Extraction conventions
 
@@ -60,7 +60,7 @@ wording changes nothing until the schemas are regenerated. Annotation models acc
 ignore unknown keys (Pydantic's default), so the schemas do not declare
 `additionalProperties: false`.
 
-The wide templates (`cumulus_library_pcx/sql/template/llm_*.sql.jinja`, 23 files) project
+The wide templates (`cumulus_library_pcx/sql/template/llm_*.sql.jinja`) project
 values without repairing dates or adjudicating evidence:
 
 - Scalar mentions produce one row per note; lists use `UNNEST ... WITH ORDINALITY`
@@ -71,7 +71,7 @@ values without repairing dates or adjudicating evidence:
   BIGINT, DOUBLE, BOOLEAN or VARCHAR; diagnosis dates remain VARCHAR with precision.
 - Diagnosis wide output omits mention flags and evidence spans. Retrieve those from
   the source NLP result; a projected value alone is not the full evidence record.
-- Two opt-in stages own the templates: `llm_clinical_wide` renders the 21 clinical
+- Two opt-in stages own the templates: `llm_clinical_wide` renders the clinical
   projections of `nlp_clinical_tasks.workflow`, and `llm_document_wide` renders document type
   and topic from `nlp_document_tasks.workflow`. A template belongs to the workflow whose task
   name it starts with (`diagnosis_wide` → `diagnosis`).
