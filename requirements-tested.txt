@@ -1,0 +1,12 @@
+# Versions used for the 2026-10-09 run against cumulus-study-builder 0.5.6 (git tag v0.5.6,
+# not on PyPI; this run used the local checkout before tagging) and Cumulus Library 6.3.5
+# (Linux, Python 3.11.16): skills check, starter check, build, validate and pytest (72 passed).
+cumulus-study-builder==0.5.6
+cumulus-library==6.3.5
+pydantic==2.13.5
+Jinja2==3.1.6
+tomli-w==1.2.0
+pytest==9.1.1
+duckdb==1.4.5
+sqlglot==30.21.0
+PyYAML==6.0.3

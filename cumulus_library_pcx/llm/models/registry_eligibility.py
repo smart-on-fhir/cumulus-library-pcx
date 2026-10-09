@@ -7,7 +7,7 @@ Source: PMC12833527, Patients and Eligibility and Study Design and Treatment.
 """
 from enum import StrEnum
 from pydantic import BaseModel, Field, model_validator
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 class CriterionStatus(StrEnum):
     """Status of a trial criterion.

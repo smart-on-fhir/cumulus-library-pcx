@@ -1,7 +1,7 @@
 from enum import StrEnum
 from pydantic import BaseModel, Field
-from cumulus_library_pcx.tools import settings
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from . import _settings as settings
+from .base import SpanAugmentedMention, DatePrecision
 
 ###############################################################################
 # How to read this file:

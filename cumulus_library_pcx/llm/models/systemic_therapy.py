@@ -7,7 +7,7 @@ name alone or equate a planned protocol dose with administration.
 from pydantic import BaseModel, Field, model_validator
 from .treatment import TreatmentPhase, DeliveryStatus
 
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 
 class TherapyAdministrationMention(SpanAugmentedMention):

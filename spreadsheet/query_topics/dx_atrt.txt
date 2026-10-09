@@ -1,0 +1,1 @@
+note:("atypical teratoid rhabdoid" OR "atypical teratoid" OR ATRT OR "AT/RT" OR "AT RT" OR "9508/3" OR (rhabdoid AND (brain OR cerebellar OR intracranial OR CNS OR "central nervous system" OR "posterior fossa" OR INI1 OR SMARCB1 OR SMARCA4 OR BRG1)))

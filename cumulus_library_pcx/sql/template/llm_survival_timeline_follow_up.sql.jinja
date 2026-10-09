@@ -1,5 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
-CREATE TABLE pcx__llm_survival_timeline_follow_up AS
+CREATE TABLE {{ prefix }}__llm_survival_timeline_follow_up AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
         nlp.note_ref,

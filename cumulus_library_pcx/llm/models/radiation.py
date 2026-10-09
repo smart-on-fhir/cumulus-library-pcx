@@ -6,7 +6,7 @@ from enum import StrEnum
 from pydantic import BaseModel, Field
 from .treatment import TreatmentPhase, DeliveryStatus
 
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 
 class RadiationMethod(StrEnum):

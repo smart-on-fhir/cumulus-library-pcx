@@ -1,80 +1,14 @@
-"""
-Client views stage: pcx__client_* tables, the flat contract exported as CSV.
+"""Study-owned SQL; clinical definitions are preserved from the source study."""
+from cumulus_study_builder.tools import sql_stage, toml_tool, filetool
+from cumulus_study_builder.tools.actions import FileAction, UploadWorkflow
 
-    client_subject              one row per subject: time zero, age, ACNS0334 criteria, exposures, OS/EFS summary
-    client_diagnosis            one row per subject: LLM diagnosis phenotype, baseline vs ever
-    client_encounter            one row per subject x encounter: spine relative to t0 with coded-evidence flags
-    client_exposure             one row per subject x exposure: METHOTREXATE / CHEMOTHERAPY / RADIATION timing
-    client_timeline             one row per event: coded, LLM and derived evidence, 20-column contract shared with IBD
-    client_timeline_latest      view: latest usable event per subject x variable x rx_class
-    client_outcome              one row per subject x variable x date: OS, provisional EFS, death, first event
-    client_dictionary_coverage  one row per timeline variable observed at this site
+FILES = ['client_subject.sql', 'client_diagnosis.sql', 'client_encounter.sql', 'client_exposure.sql', 'client_timeline.sql', 'client_timeline_latest.sql', 'client_outcome.sql', 'client_dictionary_coverage.sql']
 
-Same structure as cumulus-library-ibd-cds client_views.py with PCX variables: diagnosis replaces
-paris, exposure replaces therapy_line. The SQL is study-specific and lives in custom/.
-Depends on the eligible and outcome stages and on every LLM wide table in sql/generated.
-"""
-from pathlib import Path
-from cumulus_library_pcx.tools import filetool, tablespace
-from cumulus_library_pcx.tools.actions import Action, SqlAction, FileAction, ExportAction
-from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
-# -----------------------------------------------------------------------------
-# Client tables data dictionary
-# -----------------------------------------------------------------------------
-UPLOAD_TOML = 'file_upload_client_views.toml'
-
-# -----------------------------------------------------------------------------
-# Views
-# -----------------------------------------------------------------------------
-VIEW_LIST = (
-    "subject",
-    "diagnosis",
-    "encounter",
-    "exposure",
-    "timeline",
-    "outcome",
-    "dictionary_coverage",
-)
-
-def list_tables() -> list[str]:
-    """Return every flat view exported as CSV."""
-    return [tablespace.name_join("client", suffix) for suffix in VIEW_LIST]
-
-# -----------------------------------------------------------------------------
-# Client namespace and path
-# -----------------------------------------------------------------------------
-def path_client(table_suffix: str | None) -> Path:
-    client_table = tablespace.name_client(table_suffix)
-    return filetool.path_sql_custom(f"{client_table}.sql")
-
-# -----------------------------------------------------------------------------
-# actions
-# -----------------------------------------------------------------------------
-def make_actions() -> list[Action]:
-    return [FileAction([f'../spreadsheet/{UPLOAD_TOML}'],
-                       'upload client_dictionary.csv'),
-            SqlAction([path_client('subject')],
-                      'client subject'),
-            SqlAction([path_client('diagnosis')],
-                      'client diagnosis'),
-            SqlAction([path_client('encounter')],
-                      'client encounter'),
-            SqlAction([path_client('exposure')],
-                      'client exposure'),
-            SqlAction([path_client('timeline'), path_client('timeline_latest')],
-                      'client timeline'),
-            SqlAction([path_client('outcome')],
-                      'client outcome'),
-            SqlAction([path_client('dictionary_coverage')],
-                      'client dictionary coverage'),
-            ExportAction(list_tables(),
-                         "client SQL views -> CSV files",
-                         export_type="export:flat")
-    ]
-# -----------------------------------------------------------------------------
-# make
-# -----------------------------------------------------------------------------
-def make() -> Path:
-    return save_actions_toml(make_actions(), 'client_views.toml')
-
+def make():
+    toml_tool.save_upload_toml(UploadWorkflow([filetool.path_spreadsheet(p) for p in ['client_dictionary.csv']], prefix=''), filetool.path_spreadsheet('file_upload_client_views.toml'))
+    path = sql_stage.make('client_views', FILES, exports=['client_subject', 'client_diagnosis', 'client_encounter', 'client_exposure', 'client_timeline', 'client_outcome', 'client_dictionary_coverage'])
+    content = toml_tool.load_toml(path)
+    content["actions"][:0] = toml_tool.as_actions_toml(FileAction(['../spreadsheet/file_upload_client_views.toml'], "Study inputs"))["actions"]
+    toml_tool.save_actions_toml(content['actions'], path)
+    return path

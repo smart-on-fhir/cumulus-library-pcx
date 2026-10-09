@@ -2,7 +2,7 @@
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 
 class DiseaseSubtype(StrEnum):
@@ -94,9 +94,12 @@ class ChangMStageMention(SpanAugmentedMention):
     chang_m_stage: ChangMStage = Field(
         default=ChangMStage.NONE_OF_THE_ABOVE,
         description=(
-            "M0: no metastasis (localized). M1: positive CSF cytology only. "
-            "M2: intracranial metastasis beyond primary. M3: spinal/leptomeningeal metastasis. "
-            "M4: metastasis outside the CNS. NONE_OF_THE_ABOVE: M-stage not documented."
+            "M0: no metastasis (localized). "
+            "M1: positive CSF cytology only. "
+            "M2: intracranial metastasis beyond primary. "
+            "M3: spinal/leptomeningeal metastasis. "
+            "M4: metastasis outside the CNS. "
+            "NONE_OF_THE_ABOVE: M-stage not documented."
         ),
     )
 

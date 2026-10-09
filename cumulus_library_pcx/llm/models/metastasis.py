@@ -6,7 +6,7 @@ An explicitly documented Chang M-stage is captured in diagnosis.py; do not deriv
 from enum import StrEnum
 from pydantic import BaseModel, Field
 
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention, DatePrecision
+from .base import SpanAugmentedMention, DatePrecision
 
 
 class MetastasisEvidence(StrEnum):
@@ -94,7 +94,10 @@ class MetastaticStagingInputsMention(SpanAugmentedMention):
         ),
     )
 
-
+# TODO: multiple choice
+# Christine "I would tier it" CNS Yes/No; "Rest of body" Yes/No
+# Hannah: Chang M-stage is already doing this (?)
+# Christine: MULTIPLE_SITES: more than one site of metastasis
 class MetastasisSiteMention(SpanAugmentedMention):
     """A single documented metastatic site (applies when there is metastasis, i.e. Chang
     M2/M3/M4). Emit one per distinct site."""

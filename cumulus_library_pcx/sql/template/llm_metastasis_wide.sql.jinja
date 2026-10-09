@@ -1,5 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
-CREATE TABLE pcx__llm_metastasis_wide AS
+CREATE TABLE {{ prefix }}__llm_metastasis_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
         nlp.note_ref,

@@ -1,6 +1,6 @@
 from enum import StrEnum
 from pydantic import Field
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
+from .base import SpanAugmentedMention
 
 # ---------------------------------------------------------------------------
 # Shared enums

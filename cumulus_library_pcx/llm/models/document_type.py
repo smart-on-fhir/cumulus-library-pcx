@@ -14,7 +14,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
+from .base import SpanAugmentedMention
 
 
 class DocumentType(StrEnum):

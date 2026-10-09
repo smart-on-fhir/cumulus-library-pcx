@@ -1,6 +1,0 @@
-[[actions]]
-label="Elastic search query (this might take a while)"
-type="build:serial"
-files= [
-	"tools/elastic_query.py"
-]

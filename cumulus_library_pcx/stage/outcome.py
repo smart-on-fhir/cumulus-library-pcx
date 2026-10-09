@@ -1,39 +1,10 @@
-"""
-Outcome stage: pcx__outcome_* tables, one row per subject in pcx__eligible.
+"""Study-owned SQL; clinical definitions are preserved from the source study."""
+from cumulus_study_builder.tools import sql_stage, toml_tool, filetool
+from cumulus_study_builder.tools.actions import FileAction, UploadWorkflow
 
-    outcome_vital_status    deceased flag, death day, last-known-alive day (FHIR patient, encounters, LLM patient task)
-    outcome_first_event     first EFS-type event: progression, recurrence, secondary malignancy, death
-    outcome_exposure        methotrexate and radiation prior to first event, initial-therapy sequence, protocol names
-    outcome                 overall survival (README section 3) and provisional event-free survival (section 5)
+FILES = ['outcome_vital_status.sql', 'outcome_first_event.sql', 'outcome_exposure.sql', 'outcome.sql']
 
-Depends on the eligible stage and on the LLM wide tables for patient, event, and
-systemic-therapy regimens and anchors (built empty when NLP has not run).
-"""
-from pathlib import Path
-from cumulus_library_pcx.tools import tablespace, filetool
-from cumulus_library_pcx.tools.actions import Action, SqlAction
-from cumulus_library_pcx.tools.toml_tool import save_actions_toml
 
-# -----------------------------------------------------------------------------
-# helper path to custom "outcome" SQL files
-# -----------------------------------------------------------------------------
-def path_outcome(table_suffix: str | None) -> Path:
-    outcome_table = tablespace.name_outcome(table_suffix)
-    return filetool.path_sql_custom(f"{outcome_table}.sql")
-
-# -----------------------------------------------------------------------------
-# actions
-# -----------------------------------------------------------------------------
-def make_actions() -> list[Action]:
-    outcome_list = ['vital_status', 'first_event', 'exposure']
-    return [SqlAction([path_outcome(t) for t in outcome_list],
-                      'outcome vital status, then first event, then exposure prior to first event'),
-            SqlAction([path_outcome(None)],
-                      'outcome per subject: overall survival and provisional event-free survival')]
-
-#-----------------------------------------------------------------------------
-# Make
-#-----------------------------------------------------------------------------
-def make() -> Path:
-    return save_actions_toml(make_actions(), 'outcome.toml')
-
+def make():
+    path = sql_stage.make('outcome', FILES, exports=[])
+    return path

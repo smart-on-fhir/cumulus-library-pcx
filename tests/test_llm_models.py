@@ -4,14 +4,13 @@ import inspect
 import pytest
 from pydantic import BaseModel, ValidationError
 from cumulus_library_pcx.llm.models.base import SpanAugmentedMention
-from cumulus_library_pcx.tools import filetool
+from cumulus_study_builder.tools import filetool
 from cumulus_library_pcx.llm.models.molecular import MolecularReportMention, MolecularAlterationMention
 from cumulus_library_pcx.llm.models.registry_eligibility import TrialEligibilityAnnotation
 from cumulus_library_pcx.llm.models.systemic_therapy import TherapyAdministrationMention, TherapyAgentMention
 from cumulus_library_pcx.llm.models.survival_timeline import EventFreeFollowUpMention, TimelineAnchorMention, VitalStatusMention
 from cumulus_library_pcx.llm.models.response import ResponseAssessmentMention
 from cumulus_library_pcx.llm.models.metastasis import MetastaticStagingInputsMention
-from cumulus_library_pcx.stage.llm_schema import make_schemas, list_tasks
 
 EMPTY = dict(has_mention=False, spans=[])
 EVIDENCE = dict(has_mention=True, spans=['Documented finding'])
@@ -98,9 +97,3 @@ def test_vital_timeline_contradictions_rejected():
         VitalStatusMention(**EVIDENCE, vital_status='ALIVE', death_date='2020-01-01', death_date_precision='DAY')
     with pytest.raises(ValidationError):
         VitalStatusMention(**EVIDENCE, vital_status='DECEASED', death_date='2020-01-01', death_date_precision='DAY', last_known_alive_date='2020-01-02', last_known_alive_date_precision='DAY')
-
-
-def test_schema_generation_writes_one_schema_per_task(tmp_path):
-    paths = make_schemas(tmp_path / 'schemas')
-    assert len(paths) == len(list_tasks())
-    assert all(path.exists() for path in paths)
