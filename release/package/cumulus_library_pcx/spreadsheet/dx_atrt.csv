@@ -1,0 +1,5 @@
+system,code,display,tier
+urn:oid:2.16.840.1.113883.6.43.1,9508/3,Atypical teratoid/rhabdoid tumor (ICD-O-3),1
+http://snomed.info/sct,715659006,Atypical teratoid/rhabdoid tumor [CANDIDATE - verify],1
+http://hl7.org/fhir/sid/icd-10-cm,C71.9,"Malignant neoplasm of brain, unspecified",3
+http://hl7.org/fhir/sid/icd-9-cm,191.9,Malignant neoplasm of brain NOS,3

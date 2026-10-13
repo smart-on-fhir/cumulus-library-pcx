@@ -1,0 +1,7 @@
+CREATE TABLE pcx__cohort_lab_total_bilirubin AS 
+SELECT DISTINCT * FROM 
+ pcx__cohort_study_population_lab , 
+pcx__valueset_lab_total_bilirubin
+WHERE
+pcx__cohort_study_population_lab.lab_observation_code = pcx__valueset_lab_total_bilirubin.code and 
+pcx__cohort_study_population_lab.lab_observation_system = pcx__valueset_lab_total_bilirubin.system

@@ -1,0 +1,36 @@
+[[actions]]
+label = "Study inputs"
+type = "build:parallel"
+files = [
+    "spreadsheet/file_upload_client_views.toml",
+]
+skip_by_default = true
+
+[[actions]]
+label = "client_views"
+type = "build:serial"
+files = [
+    "sql/custom/client_subject.sql",
+    "sql/custom/client_diagnosis.sql",
+    "sql/custom/client_encounter.sql",
+    "sql/custom/client_exposure.sql",
+    "sql/custom/client_timeline.sql",
+    "sql/custom/client_timeline_latest.sql",
+    "sql/custom/client_outcome.sql",
+    "sql/custom/client_dictionary_coverage.sql",
+]
+skip_by_default = true
+
+[[actions]]
+label = "Analysis-ready tables"
+type = "export:flat"
+tables = [
+    "pcx__client_subject",
+    "pcx__client_diagnosis",
+    "pcx__client_encounter",
+    "pcx__client_exposure",
+    "pcx__client_timeline",
+    "pcx__client_outcome",
+    "pcx__client_dictionary_coverage",
+]
+skip_by_default = true

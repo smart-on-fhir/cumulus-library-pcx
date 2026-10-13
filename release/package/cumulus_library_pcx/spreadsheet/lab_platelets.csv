@@ -1,0 +1,10 @@
+system,code,display
+http://loinc.org,777-3,Platelets [#/volume] in Blood by Automated count
+http://loinc.org,26515-7,Platelets [#/volume] in Blood (method unspecified)
+http://loinc.org,778-1,Platelets [#/volume] in Blood by Manual count
+http://loinc.org,97995-5,Platelets [#/volume] in Blood by Automated count.optical
+http://loinc.org,49497-1,Platelets [#/volume] in Blood by Estimate
+http://loinc.org,107193-5,Platelets [#/volume] in Blood by Automated count --in presence of EDTA to detect possible clumping
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014369,Platelets POCT
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1577116,Platelets
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1810585,Platelets

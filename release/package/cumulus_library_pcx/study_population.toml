@@ -1,0 +1,43 @@
+[[actions]]
+label = "inclusion criteria for study population"
+type = "build:parallel"
+files = [
+    "spreadsheet/file_upload_population.toml",
+]
+
+[[actions]]
+label = "study_period"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__cohort_study_period.sql",
+]
+
+[[actions]]
+label = "study_population"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__cohort_study_population.sql",
+]
+
+[[actions]]
+label = "obs_base, lab_base"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__cohort_study_population_obs_base.sql",
+    "sql/generated/pcx__cohort_study_population_lab_base.sql",
+]
+
+[[actions]]
+label = "study_population aspects ('enc', 'dx', 'rx', 'lab', 'obs', 'proc', 'doc', 'diag', 'allergy')"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__cohort_study_population_enc.sql",
+    "sql/generated/pcx__cohort_study_population_dx.sql",
+    "sql/generated/pcx__cohort_study_population_rx.sql",
+    "sql/generated/pcx__cohort_study_population_lab.sql",
+    "sql/generated/pcx__cohort_study_population_obs.sql",
+    "sql/generated/pcx__cohort_study_population_proc.sql",
+    "sql/generated/pcx__cohort_study_population_doc.sql",
+    "sql/generated/pcx__cohort_study_population_diag.sql",
+    "sql/generated/pcx__cohort_study_population_allergy.sql",
+]

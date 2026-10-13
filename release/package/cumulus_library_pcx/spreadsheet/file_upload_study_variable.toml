@@ -1,0 +1,225 @@
+config_type = "file_upload"
+
+[tables.valueset_dx_atrt]
+files = [
+    "dx_atrt.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_dx_brain_cancer]
+files = [
+    "dx_brain_cancer.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_dx_medulloblastoma]
+files = [
+    "dx_medulloblastoma.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_dx_methotrexate_toxic]
+files = [
+    "dx_methotrexate_toxic.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_dx_radiation]
+files = [
+    "dx_radiation.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_absolute_neutrophil_count]
+files = [
+    "lab_absolute_neutrophil_count.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_alt]
+files = [
+    "lab_alt.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_ast]
+files = [
+    "lab_ast.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_creatinine]
+files = [
+    "lab_creatinine.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_hemoglobin]
+files = [
+    "lab_hemoglobin.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_platelets]
+files = [
+    "lab_platelets.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_lab_total_bilirubin]
+files = [
+    "lab_total_bilirubin.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_proc_craniotomy]
+files = [
+    "proc_craniotomy.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_proc_radiation]
+files = [
+    "proc_radiation.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_carboplatin]
+files = [
+    "rx_chemo_carboplatin.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_cisplatin]
+files = [
+    "rx_chemo_cisplatin.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_cyclophosphamide]
+files = [
+    "rx_chemo_cyclophosphamide.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_etoposide]
+files = [
+    "rx_chemo_etoposide.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_thiotepa]
+files = [
+    "rx_chemo_thiotepa.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_chemo_vincristine]
+files = [
+    "rx_chemo_vincristine.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.valueset_rx_contrast_methotrexate]
+files = [
+    "rx_contrast_methotrexate.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+]

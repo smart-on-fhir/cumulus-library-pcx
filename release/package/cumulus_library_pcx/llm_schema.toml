@@ -1,0 +1,7 @@
+[[actions]]
+label = "LLM schemas and summaries"
+type = "build:serial"
+files = [
+    "stage/llm_schema.py",
+]
+skip_by_default = true

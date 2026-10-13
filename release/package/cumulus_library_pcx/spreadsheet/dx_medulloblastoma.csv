@@ -1,0 +1,8 @@
+system,code,display,tier
+urn:oid:2.16.840.1.113883.6.43.1,9470/3,Medulloblastoma NOS (ICD-O-3),1
+urn:oid:2.16.840.1.113883.6.43.1,9471/3,Desmoplastic nodular medulloblastoma (ICD-O-3),1
+urn:oid:2.16.840.1.113883.6.43.1,9474/3,Large cell medulloblastoma (ICD-O-3),1
+urn:oid:2.16.840.1.113883.6.43.1,9472/3,Medullomyoblastoma (ICD-O-3),1
+http://snomed.info/sct,443333004,Medulloblastoma (disorder) [CANDIDATE - verify],1
+http://hl7.org/fhir/sid/icd-10-cm,C71.6,Malignant neoplasm of cerebellum,2
+http://hl7.org/fhir/sid/icd-9-cm,191.6,Malignant neoplasm of cerebellum NOS,2

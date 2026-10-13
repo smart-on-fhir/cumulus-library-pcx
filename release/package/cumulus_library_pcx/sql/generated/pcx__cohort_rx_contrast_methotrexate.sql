@@ -1,0 +1,7 @@
+CREATE TABLE pcx__cohort_rx_contrast_methotrexate AS 
+SELECT DISTINCT * FROM 
+ pcx__cohort_study_population_rx , 
+pcx__valueset_rx_contrast_methotrexate
+WHERE
+pcx__cohort_study_population_rx.rx_code = pcx__valueset_rx_contrast_methotrexate.code and 
+pcx__cohort_study_population_rx.rx_system = pcx__valueset_rx_contrast_methotrexate.system

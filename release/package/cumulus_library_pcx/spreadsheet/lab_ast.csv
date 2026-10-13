@@ -1,0 +1,7 @@
+system,code,display
+http://loinc.org,1920-8,Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma
+http://loinc.org,30239-8,Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma by With P-5'-P
+http://loinc.org,88112-8,Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma by No addition of P-5'-P
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1230014478,AST
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,1526000,AST
+urn:oid:1.2.840.114350.1.13.713.3.7.2.768282,210000008,External AST (SGOT)

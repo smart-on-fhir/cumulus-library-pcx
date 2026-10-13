@@ -1,0 +1,6 @@
+[[actions]]
+label = "elastic_output union tasks"
+type = "build:serial"
+files = [
+    "sql/generated/pcx__elastic_union.sql",
+]

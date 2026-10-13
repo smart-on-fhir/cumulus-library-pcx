@@ -1,0 +1,28 @@
+CREATE TABLE pcx__llm_laboratory_result AS
+SELECT  DISTINCT
+        nlp.note_ref,
+        nlp.encounter_ref,
+        nlp.subject_ref,
+        'pcx__nlp_laboratory_gpt_oss_120b' AS origin,
+        CAST(nlp.generated_on AS VARCHAR) AS generated_on,
+        CAST(nlp.task_version AS BIGINT) AS task_version,
+        nlp.system_fingerprint,
+        -- 1-based position of each unnested list item (see FROM)
+        result_index,
+        lab_result.test                                                  AS test,
+        lab_result.value_numeric                                         AS value_numeric,
+        lab_result.value_type                                            AS value_type,
+        lab_result.value_unit                                            AS value_unit,
+        lab_result.trend                                                 AS trend,
+        lab_result.interp_instrument                                     AS interp_instrument,
+        lab_result.interp_clinician                                      AS interp_clinician,
+        lab_result.interp_llm                                            AS interp_llm,
+        lab_result.reference_range                                       AS reference_range,
+        lab_result.collection_date                                       AS collection_date,
+        lab_result.collection_date_precision                             AS collection_date_precision
+FROM
+        pcx__nlp_laboratory_gpt_oss_120b AS nlp
+CROSS JOIN UNNEST(nlp.result.results) WITH ORDINALITY AS result_t (lab_result, result_index)
+WHERE
+        nlp.result IS NOT NULL
+AND     nlp.task_version = 2

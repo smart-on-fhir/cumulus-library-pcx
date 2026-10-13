@@ -1,0 +1,12 @@
+[[actions]]
+label = "eligible"
+type = "build:serial"
+files = [
+    "sql/custom/eligible_dx.sql",
+    "sql/custom/eligible_surgery.sql",
+    "sql/custom/eligible_rx.sql",
+    "sql/custom/eligible_radiation.sql",
+    "sql/custom/eligible.sql",
+    "sql/custom/eligible_trial.sql",
+]
+skip_by_default = true

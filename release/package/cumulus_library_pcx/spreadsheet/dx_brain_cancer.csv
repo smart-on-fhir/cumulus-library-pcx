@@ -1,0 +1,25 @@
+system,code,display,tier
+http://hl7.org/fhir/sid/icd-10-cm,C71,Malignant neoplasm of brain,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.0,"Malignant neoplasm of cerebrum, except lobes and ventricles",3
+http://hl7.org/fhir/sid/icd-10-cm,C71.1,Malignant neoplasm of frontal lobe,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.2,Malignant neoplasm of temporal lobe,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.3,Malignant neoplasm of parietal lobe,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.4,Malignant neoplasm of occipital lobe,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.5,Malignant neoplasm of cerebral ventricle,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.6,Malignant neoplasm of cerebellum,2
+http://hl7.org/fhir/sid/icd-10-cm,C71.7,Malignant neoplasm of brain stem,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.8,Malignant neoplasm of overlapping sites of brain,3
+http://hl7.org/fhir/sid/icd-10-cm,C71.9,"Malignant neoplasm of brain, unspecified",3
+http://hl7.org/fhir/sid/icd-9-cm,191,Malignant neoplasm of brain,3
+http://hl7.org/fhir/sid/icd-9-cm,191.0,"Malignant neoplasm of cerebrum, except lobes and ventricles",3
+http://hl7.org/fhir/sid/icd-9-cm,191.1,Malignant neoplasm of frontal lobe,3
+http://hl7.org/fhir/sid/icd-9-cm,191.2,Malignant neoplasm of temporal lobe,3
+http://hl7.org/fhir/sid/icd-9-cm,191.3,Malignant neoplasm of parietal lobe,3
+http://hl7.org/fhir/sid/icd-9-cm,191.4,Malignant neoplasm of occipital lobe,3
+http://hl7.org/fhir/sid/icd-9-cm,191.5,Malignant neoplasm of ventricles,3
+http://hl7.org/fhir/sid/icd-9-cm,191.6,Malignant neoplasm of cerebellum NOS,2
+http://hl7.org/fhir/sid/icd-9-cm,191.7,Malignant neoplasm of brain stem,3
+http://hl7.org/fhir/sid/icd-9-cm,191.8,Malignant neoplasm of other parts of brain,3
+http://hl7.org/fhir/sid/icd-9-cm,191.9,Malignant neoplasm of brain NOS,3
+http://snomed.info/sct,428061005,Malignant tumor of brain (disorder) [CANDIDATE - verify],3
+http://snomed.info/sct,93727008,Primary malignant neoplasm of brain (disorder) [CANDIDATE - verify],3

@@ -1,0 +1,7 @@
+CREATE TABLE pcx__cohort_rx_chemo_thiotepa AS 
+SELECT DISTINCT * FROM 
+ pcx__cohort_study_population_rx , 
+pcx__valueset_rx_chemo_thiotepa
+WHERE
+pcx__cohort_study_population_rx.rx_code = pcx__valueset_rx_chemo_thiotepa.code and 
+pcx__cohort_study_population_rx.rx_system = pcx__valueset_rx_chemo_thiotepa.system

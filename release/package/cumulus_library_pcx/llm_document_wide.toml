@@ -1,0 +1,8 @@
+[[actions]]
+label = "document LLM results"
+type = "build:parallel"
+files = [
+    "sql/generated/pcx__llm_document_topic_wide.sql",
+    "sql/generated/pcx__llm_document_type_wide.sql",
+]
+skip_by_default = true

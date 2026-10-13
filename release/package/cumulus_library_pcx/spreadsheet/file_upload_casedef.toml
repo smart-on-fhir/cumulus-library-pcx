@@ -1,0 +1,13 @@
+config_type = "file_upload"
+
+[tables.valueset_casedef]
+files = [
+    "casedef.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "BIGINT",
+]

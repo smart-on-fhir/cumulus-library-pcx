@@ -1,0 +1,7 @@
+CREATE TABLE pcx__cohort_rx_chemo_vincristine AS 
+SELECT DISTINCT * FROM 
+ pcx__cohort_study_population_rx , 
+pcx__valueset_rx_chemo_vincristine
+WHERE
+pcx__cohort_study_population_rx.rx_code = pcx__valueset_rx_chemo_vincristine.code and 
+pcx__cohort_study_population_rx.rx_system = pcx__valueset_rx_chemo_vincristine.system

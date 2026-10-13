@@ -1,0 +1,61 @@
+config_type = "file_upload"
+
+[tables.include_age_at_visit]
+files = [
+    "include_age_at_visit.csv",
+]
+col_types = [
+    "BIGINT",
+    "BIGINT",
+]
+
+[tables.include_gender]
+files = [
+    "include_gender.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.include_obs_category]
+files = [
+    "include_obs_category.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+    "STRING",
+]
+
+[tables.include_study_period]
+files = [
+    "include_study_period.csv",
+]
+col_types = [
+    "DATE",
+    "DATE",
+    "BOOLEAN",
+]
+
+[tables.include_utilization]
+files = [
+    "include_utilization.csv",
+]
+col_types = [
+    "BIGINT",
+    "BIGINT",
+    "BIGINT",
+    "BIGINT",
+]
+
+[tables.valueset_age_group]
+files = [
+    "age_group.csv",
+]
+col_types = [
+    "BIGINT",
+    "STRING",
+    "STRING",
+]
