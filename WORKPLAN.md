@@ -211,6 +211,30 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Build, tests and docs
 
+- [ ] P3 · builder · **Parallel table actions** (cumulus-study-builder 0.5.7, then PCX 0.4.1).
+  Builder side done 2026-10-09, unreleased (its CHANGELOG "Unreleased"): the actions below
+  are `SqlParallelAction`, and `validate` now rejects a parallel action whose files read each
+  other's tables. PCX picks it up when it moves to that builder release; the 0.4.0 release
+  builds from the `v0.5.6` tag and stays serial.
+  Generated actions built their tables one at a time only because the builder's `SqlAction`
+  defaults to `build:serial`. Checked 2026-10-09 on the rendered SQL: in these actions no
+  table reads another in the same action, so each can be `SqlParallelAction`, as the
+  `sample` aspects already are:
+  - `study_population` aspects (enc, dx, rx, lab, obs, proc, doc, diag, allergy),
+    `stage/study_population.py`
+  - `study_variable` "variable cohorts" (every valueset cohort), `stage/study_variable.py`
+  - `study_variable_wide` "variable union" and "variable wide" (dx, lab, proc, rx each),
+    `stage/study_variable_wide.py`
+  - `casedef` aspects (dx, lab, proc, rx), `stage/casedef.py`
+  - also safe, same check, left serial for now: `study_meta` (meta_date, meta_version)
+
+  These must stay serial, because a table reads another in the same action: `obs_base,
+  lab_base` (`lab_base` reads `obs_base`), `casedef` "filter include/exclude" (`include`
+  reads `candidate` and `exclude`), and the study-owned `eligible`, `outcome` and
+  `client_views` chains. Build speed only: same SQL, same results. *Done when* PCX is on the
+  builder release with this change, its rendered stage TOMLs show these actions as
+  `build:parallel`, and build, validate and the tests pass.
+
 - [ ] P2 · release · **Clinical workflow cannot run yet.** `nlp_clinical_tasks` and
   `llm_clinical_wide` ship opt-in, but need the clinical note-selection tables first
   (open question above).
