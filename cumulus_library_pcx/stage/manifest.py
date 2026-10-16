@@ -7,12 +7,11 @@ from cumulus_study_builder.stage import (
     casedef,
     sample,
     study_meta,
-    llm_document_wide,
     llm_clinical_wide,
     elastic_upload,
     counts
 )
-from . import llm_schema, eligible, outcome, client_views, qa_athena
+from . import llm_schema, llm_document_wide, eligible, outcome, client_views, qa_athena
 
 STAGES = [
     Stage(study_population),
