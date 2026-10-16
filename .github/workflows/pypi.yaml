@@ -16,7 +16,7 @@ jobs:
 
 
     # As of this writing, we are assuming that the distributable wheel has been built via the
-    # bespoke package/make_data_release.py script. When time allows, we need to update the
+    # bespoke package/make_chop_release.py script. When time allows, we need to update the
     # study builder/this repo to be runnable on more than one machine, and then should convert
     # this study to use a standard flit or other pyproject.toml-based build configuration step
     # when that happens, we'll need to add back the python setup infrastructure to this action
