@@ -254,6 +254,16 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-16 — version 0.4.1
+
+- `pyproject.toml` version 0.4.1 for the CHOP build, so its wheel is not confused with the
+  0.4.0 wheel CHOP already has.
+
+### 2026-10-16 — builder is a dev extra
+
+- `pyproject.toml`: cumulus-study-builder moved to the `dev` extra, pinned to tag v0.5.7 over
+  SSH (the repository is private). Install with `pip install -e ".[dev]"`.
+
 ### 2026-10-16 — CHOP release script
 
 - New `release/make_chop_release.py`, a copy of `release/make_data_release.py` (unchanged) for CHOP. PRE: the study build

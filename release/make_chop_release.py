@@ -52,7 +52,7 @@ ROOT = filetool.path_root()
 STUDY = filetool.path_project()
 PACKAGE_NAME = 'cumulus_library_pcx'
 DIST_NAME = 'cumulus-library-pcx'
-BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.6'
+BUILDER = 'git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.7'
 
 # Folders outside the study package that stages read from: `../<folder>/` in the study
 # becomes `<folder>/` inside the released package.
