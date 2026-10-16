@@ -7,7 +7,7 @@ files = [
 
 [[actions]]
 label = "variable cohorts"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "sql/generated/pcx__cohort_dx_atrt.sql",
     "sql/generated/pcx__cohort_dx_brain_cancer.sql",

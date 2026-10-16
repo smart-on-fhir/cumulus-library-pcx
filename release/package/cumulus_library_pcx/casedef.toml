@@ -11,7 +11,7 @@ type = "build:serial"
 files = [
     "sql/generated/pcx__cohort_casedef_candidate.sql",
     "sql/generated/pcx__cohort_casedef_exclude.sql",
-    "sql/generated/pcx__cohort_casedef_include.sql",
+    "sql/custom/pcx__cohort_casedef_include.sql",
 ]
 
 [[actions]]
@@ -23,7 +23,7 @@ files = [
 
 [[actions]]
 label = "cohort for case definition aspects (dx, rx, lab, proc)"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "sql/generated/pcx__cohort_casedef_dx.sql",
     "sql/generated/pcx__cohort_casedef_lab.sql",
