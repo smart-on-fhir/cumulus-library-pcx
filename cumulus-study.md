@@ -218,3 +218,10 @@ the assembled package in `release/package/`, and the wheel and sdist in `release
 `cumulus-study build`, `validate` and the checks. Each run deletes those three folders first,
 so nothing stale is released. The version comes from `pyproject.toml`. It never uploads or
 runs git: it prints the `twine upload` command for the person publishing.
+
+`release/make_chop_release.py` makes CHOP's build the same way, with two differences. Before `cumulus-study build` it sets `HOME_INSTITUTION` to
+Children's Hospital of Philadelphia, so the `transition_of_care` schemas name CHOP, and the check
+fails if any released schema still names Boston Children's Hospital. After assembling, it points
+the released `casedef.toml` at `sql/custom/pcx__cohort_casedef_include.sql` (the CHOP include
+table) in place of `sql/generated/pcx__cohort_casedef_include.sql`. The build leaves CHOP schemas
+in this checkout: run `cumulus-study build` afterwards to render your own again.

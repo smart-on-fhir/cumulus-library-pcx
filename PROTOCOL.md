@@ -11,8 +11,8 @@ tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built 
 cumulus-study-builder 0.5.6 and run by Cumulus Library 6.3.5. Other sites run the study from
 the data-only PyPI package `cumulus-library-pcx` (`release/make_data_release.py`), which
 ships the whole manifest and every stage, or from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`. This release is 0.4.0; 0.4.1 is
-planned for patch fixes after it.
+`cumulus-library build --study-dir cumulus_library_pcx`. This release is 0.4.1, the CHOP
+build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
 
 ## 0. Source
 
@@ -294,6 +294,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - 2026-10-09 [decided] The next release is 0.4.1. Docs name one builder version (0.5.6) and
   one Cumulus Library version (6.3.5), and do not count workflows or tasks. The study
   population has no age restriction; the trial's age limit is an eligibility flag. Andy.
+- 2026-10-16 [decided] This release is 0.4.1, the CHOP build from `release/make_chop_release.py`
+  (CHOP schemas and casedef include), so it is not confused with the 0.4.0 wheel CHOP already
+  has. Andy.
 
 ## Agent rules
 

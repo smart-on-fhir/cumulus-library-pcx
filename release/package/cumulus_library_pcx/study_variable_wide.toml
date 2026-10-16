@@ -7,7 +7,7 @@ files = [
 
 [[actions]]
 label = "variable union ('dx', 'lab', 'proc', 'rx')"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "sql/generated/pcx__cohort_variable_union_dx.sql",
     "sql/generated/pcx__cohort_variable_union_lab.sql",
@@ -24,7 +24,7 @@ files = [
 
 [[actions]]
 label = "variable wide ('dx', 'lab', 'proc', 'rx')"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "sql/generated/pcx__cohort_variable_wide_dx.sql",
     "sql/generated/pcx__cohort_variable_wide_lab.sql",

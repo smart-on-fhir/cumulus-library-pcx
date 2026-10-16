@@ -1,12 +1,15 @@
 [project]
 name = "cumulus-library-pcx"
-version = "0.4.0"
+version = "0.4.1"
 requires-python = ">=3.11"
-dependencies = ["cumulus-study-builder>=0.5.6,<0.6", "cumulus-library>=6.3.5,<6.4"]
+dependencies = ["cumulus-library>=6.3.5,<6.4"]
 description = "PCX methotrexate target clinical trial emuluation using Cumulus library."
 
 [project.optional-dependencies]
 test = ["pytest", "duckdb", "sqlglot", "PyYAML"]
+dev = [
+    "cumulus-study-builder @ git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.7",
+]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

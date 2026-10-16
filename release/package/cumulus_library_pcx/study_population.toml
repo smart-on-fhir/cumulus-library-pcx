@@ -29,7 +29,7 @@ files = [
 
 [[actions]]
 label = "study_population aspects ('enc', 'dx', 'rx', 'lab', 'obs', 'proc', 'doc', 'diag', 'allergy')"
-type = "build:serial"
+type = "build:parallel"
 files = [
     "sql/generated/pcx__cohort_study_population_enc.sql",
     "sql/generated/pcx__cohort_study_population_dx.sql",
