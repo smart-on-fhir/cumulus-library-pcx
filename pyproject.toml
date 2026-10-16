@@ -8,7 +8,7 @@ description = "PCX methotrexate target clinical trial emuluation using Cumulus l
 [project.optional-dependencies]
 test = ["pytest", "duckdb", "sqlglot", "PyYAML"]
 dev = [
-    "cumulus-study-builder @ git+https://github.com/smart-on-fhir/cumulus-study-builder@v0.5.7",
+    "cumulus-study-builder @ git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.7",
 ]
 
 [build-system]
