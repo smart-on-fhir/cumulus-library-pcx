@@ -254,6 +254,14 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-16 — CHOP release script
+
+- New `release/make_chop_release.py`, a copy of `release/make_data_release.py` (unchanged) for CHOP. PRE: the study build
+  runs with `HOME_INSTITUTION` set to Children's Hospital of Philadelphia, so the
+  `transition_of_care` schemas name CHOP; the check fails if a released schema names Boston
+  Children's Hospital. POST: the released `casedef.toml` runs
+  `sql/custom/pcx__cohort_casedef_include.sql` (CHOP) instead of the generated include.
+
 ### 2026-10-09 — this release is 0.4.0
 
 - The release in progress is 0.4.0 (as in `pyproject.toml`); 0.4.1 is the planned patch

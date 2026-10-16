@@ -1,10 +1,10 @@
-"""Build the data-only PyPI release of PCX: rendered SQL and data files, no Python code.
+"""Build the CHOP (Philadelphia) data-only release of PCX: rendered SQL and data files, no Python code.
 
 Run from any directory, with the study's development venv active: the script finds the
 repository through the builder's filetool, so cumulus-study-builder must be installed in the
 Python that runs it. It also needs SSH read access to the builder repository.
 
-    python release/make_data_release.py
+    python release/make_chop_release.py
 
 Everything it writes goes beside this script: release/venv/, release/package/ and
 release/dist/. Each run deletes those three first, so nothing stale is released.
@@ -13,16 +13,21 @@ Steps, each stopping at the first problem:
   1. venv      release/venv/ with the builder tag and the tested pins (requirements-tested.txt)
   2. study    `cumulus-study build` and `cumulus-study validate` in this checkout, without an
                Elasticsearch export: the released pcx__elastic_union is the empty table.
-               Run `cumulus-study build` afterwards to render your own export again.
+               PRE: HOME_INSTITUTION is CHOP, so the LLM schemas (transition_of_care prompts)
+               name CHOP as the home institution.
+               Run `cumulus-study build` afterwards to render your own export and schemas again.
   3. assemble  release/package/: the study's manifest.toml as is, every stage TOML and
                workflow it lists with the rendered SQL and spreadsheet files they name, and every
                LLM response schema in llm/schemas/, plus UNLISTED_FILES, which no stage lists.
                `../spreadsheet/` and `../tests/sql/custom/` paths move inside the package.
                Python builders (stage/llm_schema.py) are not released, so the opt-in
                llm_schema stage cannot run from the package.
+               POST: the released casedef.toml runs the CHOP sql/custom/pcx__cohort_casedef_include.sql
+               in place of the generated one.
   4. check     Cumulus Library loads the released manifest, every file a stage lists is in the
                package (Python builders excepted), no Python file but __init__.py, no path
-               leaving the package, every LLM schema present and every NLP workflow's schema found
+               leaving the package, every LLM schema present and every NLP workflow's schema found,
+               no LLM schema naming the default home institution (BCH)
   5. build     wheel and sdist into release/dist/, then `twine check`
 
 It never uploads and never runs git: it prints the upload command for you to run.
@@ -60,9 +65,18 @@ FILE_SUFFIXES = ('.sql', '.toml', '.workflow')
 # LLM response schemas: all are released, including those of the unreleased clinical tasks.
 SCHEMA_DIR = 'llm/schemas'
 
-# Study files released at the same path inside the package although no stage lists them.
+# Study files released at the same path inside the package although the study's stages do not list them.
 # pcx__cohort_casedef_include.sql is the CHOP site version of the casedef include table.
 UNLISTED_FILES = ['sql/custom/pcx__cohort_casedef_include.sql']
+
+# CHOP site build.
+# PRE: the home institution named in the LLM prompts (llm/models/_settings.py).
+HOME_INSTITUTION_CHOP = "Children's Hospital of Philadelphia"
+HOME_INSTITUTION_BCH = "Boston Children's Hospital"
+# POST: in the released casedef.toml, the CHOP include table replaces the generated one.
+CASEDEF_TOML = 'casedef.toml'
+CASEDEF_INCLUDE_GENERATED = 'sql/generated/pcx__cohort_casedef_include.sql'
+CASEDEF_INCLUDE_CHOP = 'sql/custom/pcx__cohort_casedef_include.sql'
 
 # Jinja templates beside this script, rendered into the package root as <name>.
 RELEASE_DIR = Path(__file__).resolve().parent
@@ -94,6 +108,7 @@ def build_study(venv: Path) -> None:
     env = dict(os.environ)
     for name in EXPORT_VARIABLES:
         env.pop(name, None)
+    env['HOME_INSTITUTION'] = HOME_INSTITUTION_CHOP
     run([venv / 'bin' / 'cumulus-study', 'build'], env=env)
     run([venv / 'bin' / 'cumulus-study', 'validate'], env=env)
 
@@ -185,6 +200,17 @@ def assemble(package: Path) -> None:
         '"""PCX study for Cumulus Library: rendered SQL and data files, no code."""\n', encoding='utf-8')
 
 
+def use_chop_casedef_include(package: Path) -> None:
+    """POST: the released casedef.toml runs the CHOP include table instead of the generated one."""
+    casedef = package / PACKAGE_NAME / CASEDEF_TOML
+    text = casedef.read_text(encoding='utf-8')
+    count = text.count(f'"{CASEDEF_INCLUDE_GENERATED}"')
+    if count != 1:
+        raise ReleaseError(f'{casedef}: expected "{CASEDEF_INCLUDE_GENERATED}" once, found {count}')
+    text = text.replace(f'"{CASEDEF_INCLUDE_GENERATED}"', f'"{CASEDEF_INCLUDE_CHOP}"')
+    casedef.write_text(text, encoding='utf-8')
+
+
 def source_commit() -> str:
     """The checkout's commit, read from .git without running git."""
     git = ROOT / '.git'
@@ -256,6 +282,9 @@ def check(package: Path) -> None:
         text = path.read_text(encoding='utf-8-sig')
         if path.suffix == '.toml' and '"../' in text:
             problems.append(f'{path.relative_to(study)}: path leaves the package')
+    for schema in sorted((study / SCHEMA_DIR).glob('*.json')):
+        if HOME_INSTITUTION_BCH in schema.read_text(encoding='utf-8'):
+            problems.append(f'{schema.relative_to(study)}: names {HOME_INSTITUTION_BCH}, not {HOME_INSTITUTION_CHOP}')
     if problems:
         raise ReleaseError('\n'.join(problems))
 
@@ -348,6 +377,7 @@ def main() -> None:
 
     package = out / 'package'
     assemble(package)
+    use_chop_casedef_include(package)
     write_project(package, version)
     check(package)
     built = build(venv, package, out / 'dist')
