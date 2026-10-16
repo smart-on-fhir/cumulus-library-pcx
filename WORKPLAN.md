@@ -254,6 +254,15 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-16 — document_topic wide table reads versions 1 and 3
+
+- `llm_document_topic_wide.sql.jinja`: UNION ALL of `task_version = 1` (no `survival_timeline`
+  topic, columns NULL) and `task_version = 3` (`survival_timeline` read through JSON, NULL
+  until a version 3 run adds the field to the table). Versions are hardcoded, not taken
+  from the workflow. Existing BCH results are version 1 (42,060 rows).
+- `nlp_document_tasks.workflow`: `document_topic` version 3, so new runs land in the
+  version 3 branch. `llm.md` lists the new version.
+
 ### 2026-10-16 — version 0.4.1
 
 - `pyproject.toml` version 0.4.1 for the CHOP build, so its wheel is not confused with the

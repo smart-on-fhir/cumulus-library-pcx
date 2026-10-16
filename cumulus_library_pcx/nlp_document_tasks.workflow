@@ -36,9 +36,10 @@ Clinical document:
 [tables.document_topic]
 # Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
 # Version 2 (2026-09-10): PCX task-selector types replace the CCDA-era list.
+# Version 3 (2026-10-16): predisposition topic removed, patient topic renamed survival_timeline.
 response_schema = "llm/schemas/pcx-document-topic-annotation.json"
 select_by_table = "pcx__sample_task"
-version = 2
+version = 3
 
 [tables.document_type]
 # Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
