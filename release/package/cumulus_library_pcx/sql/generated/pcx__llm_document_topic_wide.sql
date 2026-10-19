@@ -43,7 +43,7 @@ FROM
         pcx__nlp_document_topic_gpt_oss_120b AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version in (1,2)
 UNION ALL
 SELECT  DISTINCT
         nlp.note_ref,
