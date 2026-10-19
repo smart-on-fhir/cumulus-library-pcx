@@ -6,3 +6,11 @@ files = [
     "sql/generated/pcx__llm_document_type_wide.sql",
 ]
 skip_by_default = true
+
+[[actions]]
+label = "document LLM task views"
+type = "build:serial"
+files = [
+    "sql/custom/pcx__llm_document_task.sql",
+]
+skip_by_default = true
