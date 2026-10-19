@@ -1,7 +1,11 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
-CREATE TABLE {{ prefix }}__llm_document_topic_wide AS
-{%- for table_name in table_names %}
-SELECT  DISTINCT
+{#- Two task versions with different result structs.
+    Version 1 has no survival_timeline topic (it was named patient).
+    Version 3 adds survival_timeline. Athena resolves struct fields from the table
+    definition, not from the rows, so result.survival_timeline cannot be named until a
+    version 3 run has added it to the table. Until then it is read through JSON,
+    which is NULL when the field is absent. -#}
+{%- macro shared_columns(table_name) %}
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
@@ -35,16 +39,37 @@ SELECT  DISTINCT
 
         nlp.result.laboratory.relevance                              AS laboratory_relevance,
         nlp.result.laboratory.confidence                             AS laboratory_confidence,
-
-        nlp.result.survival_timeline.relevance                       AS survival_timeline_relevance,
-        nlp.result.survival_timeline.confidence                      AS survival_timeline_confidence,
-
+{%- endmacro %}
+{%- macro registry_columns() %}
         nlp.result.registry_eligibility.relevance                    AS registry_eligibility_relevance,
         nlp.result.registry_eligibility.confidence                   AS registry_eligibility_confidence
+{%- endmacro %}
+CREATE TABLE {{ prefix }}__llm_document_topic_wide AS
+{%- for table_name in table_names %}
+SELECT  DISTINCT
+{{- shared_columns(table_name) }}
+
+        CAST(NULL AS VARCHAR)                                        AS survival_timeline_relevance,
+        CAST(NULL AS DOUBLE)                                         AS survival_timeline_confidence,
+{{ registry_columns() }}
 FROM
         {{ table_name }} AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = {{ task_version }}
+AND     nlp.task_version in (1,2)
+UNION ALL
+SELECT  DISTINCT
+{{- shared_columns(table_name) }}
+
+        json_extract_scalar(CAST(nlp.result AS JSON), '$.survival_timeline.relevance')
+                                                                     AS survival_timeline_relevance,
+        CAST(json_extract_scalar(CAST(nlp.result AS JSON), '$.survival_timeline.confidence') AS DOUBLE)
+                                                                     AS survival_timeline_confidence,
+{{ registry_columns() }}
+FROM
+        {{ table_name }} AS nlp
+WHERE
+        nlp.result IS NOT NULL
+AND     nlp.task_version = 3
 {{ syntax.union_all_delineate(loop) }}
 {%- endfor %}

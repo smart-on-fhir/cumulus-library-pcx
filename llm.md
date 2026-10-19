@@ -13,7 +13,7 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 | `event`, `survival_timeline` | 1, 2 | Dated disease events, distinct time anchors, death, last-known-alive and event-free follow-up |
 | `laboratory` | 2 | Optional organ-function results and documented toxicity; prefer structured labs |
 | `transition_of_care` | 1 | Transfer-in timing/reason, diagnosis and surgery setting, and therapy before entry |
-| `document_topic`, `document_type` | 2, 2 | Routing to extraction topics and document classification |
+| `document_topic`, `document_type` | 3, 2 | Routing to extraction topics and document classification |
 
 `treatment.py` holds shared enums (`TreatmentPhase`, `DeliveryStatus`), not a task.
 
