@@ -56,7 +56,7 @@ FROM
         {{ table_name }} AS nlp
 WHERE
         nlp.result IS NOT NULL
-AND     nlp.task_version = 1
+AND     nlp.task_version in (1,2)
 UNION ALL
 SELECT  DISTINCT
 {{- shared_columns(table_name) }}
