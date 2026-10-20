@@ -33,7 +33,7 @@ WITH site_chop AS
             NULL                as resource_ref
     FROM    radiant_data_dev.pcx_patient_list   as pcx_patient_list
     JOIN    pcx__cohort_study_population        as enc
-    ON      CONCAT('Patient/', pcx_patient_list.patient_id) = enc.subject_ref
+    ON      CONCAT('Patient/', pcx_patient_list.anon_id) = enc.subject_ref
 ),
 union_all AS
 (
