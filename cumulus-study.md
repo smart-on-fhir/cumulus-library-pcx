@@ -80,6 +80,7 @@ The build order is the `STAGES` list in
 | `client_views` | opt-in | PCX | `pcx__client_*` tables for timeline and survival analysis |
 | `qa_athena` | opt-in | PCX | `pcx__qa_*` and `pcx__warn_*` data-quality tables |
 | `counts` | default | builder | the count tables in [counts.workflow](cumulus_library_pcx/counts.workflow) |
+| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes in the PCX-30 layout, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), exported with the approved floor of 1 |
 | `study_meta` | default | builder | study metadata tables |
 
 "PCX" stages are modules in `cumulus_library_pcx/stage/`. "Builder" stages come from the
@@ -182,7 +183,7 @@ Edit the inputs, never the outputs.
 | `cumulus_library_pcx/sql/custom/` | study SQL for `eligible`, `outcome`, `client_views` |
 | `cumulus_library_pcx/sql/template/` | Jinja templates, including the LLM wide projections |
 | `cumulus_library_pcx/llm/models/` | the LLM extraction models |
-| `cumulus_library_pcx/nlp_*.workflow`, `counts.workflow` | workflows, written by hand |
+| `cumulus_library_pcx/nlp_*.workflow`, `counts.workflow`, `counts_kaplan*.workflow` | workflows, written by hand |
 
 | Output | By |
 |---|---|

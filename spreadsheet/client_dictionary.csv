@@ -111,7 +111,7 @@ pcx__client_timeline,variable,,PCX source-variable name,covariate_selector,varch
 pcx__client_timeline,event_date,,Best clinical date used to place the event on the patient timeline,covariate_time,date,,,,
 pcx__client_timeline,evidence_date,,Date on which the supporting evidence was documented,provenance,date,,,,
 pcx__client_timeline,date_type,,Semantic label describing the date selected as event_date,provenance,varchar,,,,
-pcx__client_timeline,date_precision,,"Precision of an extracted date when supplied (DAY, MONTH, YEAR)",provenance,varchar,,,,
+pcx__client_timeline,date_precision,,"Precision of an extracted LLM date (DAY, MONTH, YEAR), the coarser of the date's shape and the model's stated precision. A MONTH or YEAR event_date is the first day of that month or year",provenance,varchar,,,,
 pcx__client_timeline,value_text,,Categorical or free-text payload,payload,varchar,,,,
 pcx__client_timeline,value_number,,Numeric payload,payload,double,,,,
 pcx__client_timeline,value_boolean,,Boolean payload,payload,boolean,,,,

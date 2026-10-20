@@ -176,7 +176,9 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - [ ] P3 · decision · **ATRT from one note** (was 2.9). A single LLM note with subtype ATRT
   excludes. The old plan: require two notes or a pathology-typed note.
 - [ ] P3 · `eligible`, `outcome` · **LLM date precision** (was 3.8). MONTH and YEAR precision
-  dates are cast to exact days.
+  dates are compared as exact days (the first day of the period). `<name>_day_precision` is
+  carried in the wide tables and `client_timeline.date_precision`, but not yet into the
+  `eligible` and `outcome` first-day columns.
 
 - [ ] P3 · `eligible` · `t0_source` is `'casedef_tier1_medulloblastoma'` even when `t0_day`
   is NULL (`eligible_dx.sql:59`); the header says tiers 2 and 3 (`eligible_dx.sql:6`),
@@ -253,6 +255,52 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-20 — Kaplan-Meier cubes exported with the approved floor of 1
+
+- `min_subject = 1` is approved for PCX. `counts_kaplan.workflow` sets it on both cubes and is
+  the only Kaplan-Meier workflow; `counts_kaplan_site.workflow` and its `_site` cubes are gone.
+- `stage/counts_kaplan.py` checks the workflow with the builder's site-only rules (any explicit
+  positive floor with a description), because its shared rules require at least 10.
+
+### 2026-10-20 — Kaplan-Meier source is plain SQL, no site column
+
+- `sql/custom/kaplan_subject.sql.jinja` is now `sql/custom/pcx__kaplan_subject.sql`, run as is
+  from `sql/custom` like the other study SQL.
+- The `site` column is gone from `pcx__kaplan_subject` and all four cubes. The aggregator adds
+  site when it combines each site's export. `HOME_INSTITUTION_CODE` is removed from
+  `_settings.py`, the CHOP release script and cumulus-study.md.
+
+### 2026-10-20 — LLM dates parsed once, unreadable dates flagged
+
+- The eligible stage failed on Athena: `CAST(therapy_start_date AS DATE)` met `2020-09`.
+  Real BCH values also include `2012-04`, `202?-05-23` and `10-30`.
+- `sql/template/date_macros.sql.jinja`: every LLM wide table now adds `<name>_day` (DATE) and
+  `<name>_day_precision` next to each date. Only `YYYY-MM-DD`, `YYYY-MM` and `YYYY` are
+  understood, as the first day of the period, with the coarser of the shape and the stated
+  precision. Other text gets NULL, and so does a day not on the calendar such as `2024-02-30`
+  (seen in the BCH event results). The calendar check is string tests only, so it cannot error.
+- `eligible_*`, `outcome_*`, `client_timeline` and the warn tables read `<name>_day` instead
+  of casting the text. `client_timeline.date_precision` is the parsed precision, and a date
+  that cannot be understood falls back to the note date (`date_type = documented`).
+- New `pcx__warn_llm_date_invalid` lists every unreadable LLM date, all 44 date columns.
+  `pcx__warn_llm_date_coarse` uses the parsed precision.
+- Tests: `tests/test_llm_dates.py`, fixture columns and seeded bad dates (p1, p8).
+  `tests/sqltest.py` gives DuckDB a `from_iso8601_timestamp` macro for `outcome_vital_status.sql`.
+
+### 2026-10-19 — Kaplan-Meier count cubes
+
+- New opt-in `counts_kaplan` stage: `pcx__kaplan_subject`, then OS and EFS cubes with
+  the exact PCX-30 `_cube.csv` columns. `counts_kaplan.workflow` is shared (floor 10, exported),
+  `counts_kaplan_site.workflow` is site-only (floor 1, never exported).
+- `HOME_INSTITUTION_CODE` (default BCH) fills the `site` column. The CHOP release sets it to CHOP.
+- Tests: `tests/test_counts_kaplan.py`. Dictionary rows added, PROTOCOL 8.1 updated.
+
+### 2026-10-19 — outcome_vital_status parses FHIR deceasedDateTime
+
+- `outcome_vital_status.sql`: `DATE(FROM_ISO8601_TIMESTAMP(deceasedDateTime))` instead of
+  `DATE(deceasedDateTime)`, which failed the outcome stage on full timestamps like
+  `2024-08-25T23:21:00Z`. Still a hard parse: malformed values error.
 
 ### 2026-10-16 — document_topic wide table reads versions 1 and 3
 

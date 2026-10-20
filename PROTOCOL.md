@@ -177,6 +177,21 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   keeps `age_group`. With ages 0-120, single years would add many small suppressed cells.
 - [open] Output column order changed for `cube_patient_variable_union` (`age_group` is now
   last); the values and names are the same. Counts have not been run in the warehouse.
+- [decided] 2026-10-19, Andy: Kaplan-Meier cubes in the PCX-30 OS and EFS `_cube.csv` layout,
+  in their own `counts_kaplan` stage (`stage/counts_kaplan.py`). Source
+  `pcx__kaplan_subject`, one labeled row per `pcx__outcome` subject. `cube_kaplan_os` and
+  `cube_kaplan_efs` (`counts_kaplan.workflow`, exported). Counted unit: distinct patients.
+- [decided] Exact PCX-30 columns, order and labels, except `site`. Survival years are
+  FLOOR(days / 365.25) from t0, capped at >=10. `diagnosis` is always Medulloblastoma (ATRT
+  is not eligible), `subtype` is the latest documented molecular group or NOS/NEC. No exposure
+  evidence is Not Reported, never No. EFS keeps the provisional censoring.
+- [decided] 2026-10-20, Andy: no `site` column. Each site's export reaches the aggregator
+  under that site, which adds it when cubes are combined. The source is plain SQL,
+  `sql/custom/pcx__kaplan_subject.sql`, with no build-time values.
+- [decided] 2026-10-20, Andy: `min_subject = 1` is approved for PCX. The Kaplan-Meier cubes are
+  exported with a floor of 1, like the unsuppressed PCX-30 files, and the site-only copies
+  (`counts_kaplan_site.workflow`) are removed. `stage/counts_kaplan.py` checks the workflow with
+  the builder's site-only rules, since its shared rules require a floor of at least 10.
 
 ### 8.2 Exports and statistical plan
 
