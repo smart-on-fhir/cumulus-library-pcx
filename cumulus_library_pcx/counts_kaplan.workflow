@@ -12,7 +12,7 @@ config_type = "counts"
 [tables.cube_kaplan_os]
 min_subject = 1
 description = "Eligible medulloblastoma patients by whole years of overall survival from t0, vital status, age under 36 months, methotrexate ever, radiation ever, and molecular subtype, in the PCX-30 OS cube layout without its site column. cnt is patients."
-source_table = "{{ prefix }}__kaplan_subject"
+source_table = "pcx__kaplan_subject"
 table_cols =["diagnosis",
             "overall_survival_years",
             "vital_status",
@@ -25,7 +25,7 @@ table_cols =["diagnosis",
 [tables.cube_kaplan_efs]
 min_subject = 1
 description = "Eligible medulloblastoma patients by whole years of provisional event-free survival from t0, event status, age under 36 months, methotrexate ever, radiation ever, molecular subtype and initial treatment order, in the PCX-30 EFS cube layout without its site column. cnt is patients."
-source_table = "{{ prefix }}__kaplan_subject"
+source_table = "pcx__kaplan_subject"
 table_cols =["diagnosis",
             "event_free_survival_years",
             "efs_status",

@@ -15,5 +15,6 @@ def make():
     return toml_tool.save_actions_toml([
         SqlAction([sql], 'Kaplan-Meier count source'),
         FileAction([path], 'Kaplan-Meier counts', build_type='build:serial'),
-        ExportAction([path], 'Kaplan-Meier counts'),
+        ExportAction(['pcx__cube_kaplan_os', 'pcx__cube_kaplan_efs'], 'Kaplan-Meier counts'),
+        ExportAction(['pcx__meta_date', 'pcx__meta_version'], 'Study metadata', export_type='export:meta'),
     ], 'counts_kaplan.toml')
