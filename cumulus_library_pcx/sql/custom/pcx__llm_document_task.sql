@@ -4,20 +4,34 @@
 -- Task views below select from this table.
 -- Document types per task follow DOCUMENT_TASKS in
 -- llm/models/document_type.py
+--
+-- pcx__cohort_casedef has one row per subject x encounter x
+-- casedef code, so it is collapsed to its subject attributes
+-- first. Joining it on subject_ref alone multiplied every
+-- note by every encounter of that subject before DISTINCT.
 -----------------------------------------------------------
 CREATE  TABLE   pcx__llm_document_task AS
+WITH
+casedef_subject AS (
+    SELECT  DISTINCT
+            subject_ref,
+            subtype,
+            enc_period_start_day_min,
+            age_at_casedef_min
+    FROM    pcx__cohort_casedef
+)
 SELECT  DISTINCT
         T.document_type,
         R.*,
-        casedef.subtype,
-        casedef.enc_period_start_day_min,
-        casedef.age_at_casedef_min
-FROM    pcx__llm_document_type_wide     AS T,
-        pcx__llm_document_topic_wide    AS R,
-        pcx__cohort_casedef             AS casedef
-WHERE   T.note_ref = R.note_ref
-AND     T.subject_ref = casedef.subject_ref
-AND     R.subject_ref = casedef.subject_ref
+        casedef_subject.subtype,
+        casedef_subject.enc_period_start_day_min,
+        casedef_subject.age_at_casedef_min
+FROM    pcx__llm_document_type_wide     AS T
+JOIN    pcx__llm_document_topic_wide    AS R
+ON      T.note_ref = R.note_ref
+AND     T.subject_ref = R.subject_ref
+JOIN    casedef_subject
+ON      R.subject_ref = casedef_subject.subject_ref
 ;
 
 -----------------------------------------------------------
