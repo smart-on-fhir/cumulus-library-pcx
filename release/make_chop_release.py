@@ -109,6 +109,7 @@ def build_study(venv: Path) -> None:
     for name in EXPORT_VARIABLES:
         env.pop(name, None)
     env['HOME_INSTITUTION'] = HOME_INSTITUTION_CHOP
+    env['HOME_INSTITUTION_CODE'] = 'CHOP'
     run([venv / 'bin' / 'cumulus-study', 'build'], env=env)
     run([venv / 'bin' / 'cumulus-study', 'validate'], env=env)
 
