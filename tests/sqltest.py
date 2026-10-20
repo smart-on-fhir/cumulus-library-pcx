@@ -31,6 +31,7 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
         data_dir = filetool.path_tests_data_warn()
     con = duckdb.connect()
     con.execute("CREATE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
+    con.execute("CREATE MACRO from_iso8601_timestamp(s) AS CAST(s AS TIMESTAMPTZ)")
     con.execute(SCHEMA.read_text())
     for (table,) in con.execute('SHOW TABLES').fetchall():
         csv_file = data_dir / f'{table}.csv'
