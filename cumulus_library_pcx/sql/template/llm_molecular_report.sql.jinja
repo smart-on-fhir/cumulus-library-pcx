@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_molecular_report AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -14,7 +15,8 @@ SELECT  DISTINCT
         report.molecular_group                                       AS molecular_group,
         array_join(report.methods, ',')                              AS methods,
         report.report_date                                           AS report_date,
-        report.report_date_precision                                 AS report_date_precision
+        report.report_date_precision                                 AS report_date_precision,
+        {{ dates.llm_day_columns('report.report_date', 'report.report_date_precision', 'report_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.reports) WITH ORDINALITY AS report_t (report, report_index)

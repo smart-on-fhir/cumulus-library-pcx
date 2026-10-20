@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_radiation_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -16,13 +17,16 @@ SELECT  DISTINCT
         radiation_round.indication                                   AS indication,
         radiation_round.assessed_through_date                        AS assessed_through_date,
         radiation_round.assessed_through_date_precision              AS assessed_through_date_precision,
+        {{ dates.llm_day_columns('radiation_round.assessed_through_date', 'radiation_round.assessed_through_date_precision', 'assessed_through_day') }},
         radiation_round.dose_verbatim                                AS dose_verbatim,
         radiation_round.radiation_method                             AS radiation_method,
         radiation_round.radiation_field                              AS radiation_field,
         radiation_round.radiation_start_date                         AS radiation_start_date,
         radiation_round.radiation_start_date_precision               AS radiation_start_date_precision,
+        {{ dates.llm_day_columns('radiation_round.radiation_start_date', 'radiation_round.radiation_start_date_precision', 'radiation_start_day') }},
         radiation_round.radiation_end_date                           AS radiation_end_date,
         radiation_round.radiation_end_date_precision                 AS radiation_end_date_precision,
+        {{ dates.llm_day_columns('radiation_round.radiation_end_date', 'radiation_round.radiation_end_date_precision', 'radiation_end_day') }},
         radiation_round.focal_dose_to_primary_site                   AS focal_dose_to_primary_site,
         radiation_round.total_dose_to_primary_site                   AS total_dose_to_primary_site,
         radiation_round.focal_dose_to_metastatic_site                AS focal_dose_to_metastatic_site,

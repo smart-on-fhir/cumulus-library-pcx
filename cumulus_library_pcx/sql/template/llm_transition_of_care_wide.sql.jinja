@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_transition_of_care_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -12,6 +13,7 @@ SELECT  DISTINCT
         nlp.result.transfer_in.transfer_in_timing                                   AS transfer_in_timing,
         nlp.result.transfer_in.transfer_in_date                                     AS transfer_in_date,
         nlp.result.transfer_in.transfer_in_date_precision                           AS transfer_in_date_precision,
+        {{ dates.llm_day_columns('nlp.result.transfer_in.transfer_in_date', 'nlp.result.transfer_in.transfer_in_date_precision', 'transfer_in_day') }},
         nlp.result.transfer_in.transfer_in_reason                                   AS transfer_in_reason,
         nlp.result.diagnosis_setting.diagnosis_setting                              AS diagnosis_setting,
         nlp.result.diagnosis_setting.imaging_detected_externally                    AS imaging_detected_externally,

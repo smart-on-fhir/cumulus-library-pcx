@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_systemic_therapy_stem_cell_infusion AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -15,6 +16,7 @@ SELECT  DISTINCT
         stem_cell_infusion.phase                                     AS phase,
         stem_cell_infusion.infusion_date                             AS infusion_date,
         stem_cell_infusion.infusion_date_precision                   AS infusion_date_precision,
+        {{ dates.llm_day_columns('stem_cell_infusion.infusion_date', 'stem_cell_infusion.infusion_date_precision', 'infusion_day') }},
         stem_cell_infusion.cycle_name                                AS cycle_name,
         stem_cell_infusion.cell_source                               AS cell_source,
         stem_cell_infusion.cd34_cells_per_kg                         AS cd34_cells_per_kg

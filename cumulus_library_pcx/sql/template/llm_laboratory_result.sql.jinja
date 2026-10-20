@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_laboratory_result AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -21,7 +22,8 @@ SELECT  DISTINCT
         lab_result.interp_llm                                            AS interp_llm,
         lab_result.reference_range                                       AS reference_range,
         lab_result.collection_date                                       AS collection_date,
-        lab_result.collection_date_precision                             AS collection_date_precision
+        lab_result.collection_date_precision                             AS collection_date_precision,
+        {{ dates.llm_day_columns('lab_result.collection_date', 'lab_result.collection_date_precision', 'collection_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.results) WITH ORDINALITY AS result_t (lab_result, result_index)
