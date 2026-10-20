@@ -14,7 +14,7 @@ WITH
 fhir_patient AS (
     SELECT  CONCAT('Patient/', id)          AS subject_ref,
             deceasedBoolean                 AS fhir_deceased_bool,
-            DATE(deceasedDateTime)          AS fhir_death_day
+            DATE(FROM_ISO8601_TIMESTAMP(deceasedDateTime)) AS fhir_death_day
     FROM    patient
 ),
 last_encounter AS (
@@ -26,8 +26,8 @@ last_encounter AS (
 llm AS (
     SELECT  subject_ref,
             BOOL_OR(vital_status = 'DECEASED')                              AS llm_deceased_bool,
-            MIN(CAST(death_date AS DATE))                                   AS llm_death_day,
-            MAX(CAST(last_known_alive_date AS DATE))                        AS llm_last_known_alive_day
+            MIN(death_day)                                                  AS llm_death_day,
+            MAX(last_known_alive_day)                                       AS llm_last_known_alive_day
     FROM    pcx__llm_survival_timeline_wide
     GROUP BY subject_ref
 ),

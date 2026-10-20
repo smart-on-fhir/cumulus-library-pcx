@@ -14,7 +14,7 @@ WITH
 llm_event AS (
     SELECT  subject_ref,
             event_type,
-            CAST(event_date AS DATE)    AS event_day
+            event_day
     FROM    pcx__llm_event_wide
     WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY', 'DECEASED')
 ),
