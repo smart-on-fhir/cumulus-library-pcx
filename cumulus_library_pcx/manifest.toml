@@ -105,6 +105,13 @@ files = [
     "counts.toml",
 ]
 
+[[stages.counts_kaplan]]
+skip_by_default = true
+type = "submanifest"
+files = [
+    "counts_kaplan.toml",
+]
+
 [[stages.study_meta]]
 type = "submanifest"
 files = [

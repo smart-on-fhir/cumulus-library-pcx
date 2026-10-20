@@ -11,7 +11,15 @@ from cumulus_study_builder.stage import (
     elastic_upload,
     counts
 )
-from . import llm_schema, llm_document_wide, eligible, outcome, client_views, qa_athena
+from . import (
+    llm_schema,
+    llm_document_wide,
+    eligible,
+    outcome,
+    client_views,
+    qa_athena,
+    counts_kaplan
+)
 
 STAGES = [
     Stage(study_population),
@@ -40,6 +48,8 @@ STAGES = [
     Stage(qa_athena,
           skip_by_default=True),
     Stage(counts,  # counts.workflow at the package root
+          skip_by_default=True),
+    Stage(counts_kaplan,  # counts_kaplan.workflow
           skip_by_default=True),
     Stage(study_meta),
 ]
