@@ -30,7 +30,7 @@ candidate AS (
     UNION ALL
     SELECT  subject_ref,
             'llm_administered'          AS source,
-            CAST(radiation_start_date AS DATE) AS exposure_day
+            radiation_start_day AS exposure_day
     FROM    pcx__llm_radiation_wide
     WHERE   delivery_status = 'ADMINISTERED'
 ),

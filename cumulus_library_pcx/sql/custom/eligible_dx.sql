@@ -44,8 +44,8 @@ llm_diagnosis AS (
     SELECT  subject_ref,
             BOOL_OR(disease_subtype = 'MEDULLOBLASTOMA')            AS llm_medulloblastoma_bool,
             BOOL_OR(disease_subtype = 'ATRT')                       AS llm_atrt_bool,
-            MIN(CAST(diagnosis_date AS DATE))                       AS llm_diagnosis_day_min,
-            MIN(CAST(diagnosis_date_gold AS DATE))                  AS llm_diagnosis_gold_day_min,
+            MIN(diagnosis_day)                                      AS llm_diagnosis_day_min,
+            MIN(diagnosis_gold_day)                                 AS llm_diagnosis_gold_day_min,
             MIN(age_at_diagnosis_months)                            AS llm_age_at_diagnosis_months_min,
             BOOL_OR(chang_m_stage IN ('M1', 'M2', 'M3', 'M4'))      AS llm_metastatic_bool,
             BOOL_OR(medulloblastoma_histology = 'LARGE_CELL_ANAPLASTIC') AS llm_anaplastic_bool

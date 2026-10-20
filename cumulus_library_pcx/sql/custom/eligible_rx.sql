@@ -69,7 +69,7 @@ candidate AS (
     SELECT  subject_ref,
             'methotrexate'              AS exposure,
             'llm_administered'          AS source,
-            CAST(therapy_start_date AS DATE) AS exposure_day
+            therapy_start_day AS exposure_day
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
     AND     (LOWER(agent_name) LIKE '%methotrexate%' OR LOWER(agent_name) LIKE '%mtx%')
@@ -77,7 +77,7 @@ candidate AS (
     SELECT  subject_ref,
             'chemo'                     AS exposure,
             'llm_administered'          AS source,
-            CAST(therapy_start_date AS DATE) AS exposure_day
+            therapy_start_day AS exposure_day
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
 ),
