@@ -52,7 +52,7 @@ def _walk(*, default_only=False):
                 query=tree.expression.copy()
                 # SQLGlot reads Trino's bare CURRENT_SCHEMA as a column.
                 query=query.transform(lambda n: exp.CurrentSchema() if isinstance(n,exp.Column) and not n.table and n.name.lower()=='current_schema' else n)
-                result=qualify(query,schema=schema,dialect='trino',infer_schema=False)
+                result=qualify(query,schema=schema,dialect='trino')
                 assert len(result.named_selects)==len(set(result.named_selects)),(source_file,'duplicate output columns')
                 schema[target]=dict.fromkeys(result.named_selects,'UNKNOWN');known.add(target)
 

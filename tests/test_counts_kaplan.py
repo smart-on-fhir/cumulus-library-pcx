@@ -1,4 +1,4 @@
-"""Kaplan-Meier count cubes: the source SQL and counts workflows, executed in DuckDB."""
+"""Kaplan-Meier count cubes: the source SQL and counts workflow, executed in DuckDB."""
 import datetime
 
 import duckdb
@@ -6,7 +6,6 @@ from cumulus_library import CountsBuilder, StudyManifest
 
 from tests.conftest import ROOT
 
-GENERATED = ROOT / 'cumulus_library_pcx/sql/generated'
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
 
 # Headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
@@ -44,7 +43,7 @@ def load(con, outcome_rows: list, molecular_rows: list):
 
 def count_sql(workflow: str, table: str) -> str:
     manifest = StudyManifest(ROOT / 'cumulus_library_pcx')
-    builder = CountsBuilder(manifest, toml_config_path=GENERATED / workflow)
+    builder = CountsBuilder(manifest, toml_config_path=ROOT / 'cumulus_library_pcx' / workflow)
     builder.prepare_queries(config=None, manifest=manifest)
     for sql in builder.queries:
         if sql.startswith(f'CREATE TABLE {table} '):
@@ -96,8 +95,8 @@ def test_columns_match_pcx30_and_floor_of_one():
     rows = [outcome(i, os_days=100) for i in range(12)] + [outcome(100 + i, os_event=True, os_days=400) for i in range(3)]
     load(con, rows, [])
 
-    os_cube = cube(con, 'pcx__counts_kaplan.workflow', 'pcx__cube_kaplan_os')
-    efs_cube = cube(con, 'pcx__counts_kaplan.workflow', 'pcx__cube_kaplan_efs')
+    os_cube = cube(con, 'counts_kaplan.workflow', 'pcx__cube_kaplan_os')
+    efs_cube = cube(con, 'counts_kaplan.workflow', 'pcx__cube_kaplan_efs')
     assert list(os_cube.columns) == OS_COLS
     assert list(efs_cube.columns) == EFS_COLS
 
