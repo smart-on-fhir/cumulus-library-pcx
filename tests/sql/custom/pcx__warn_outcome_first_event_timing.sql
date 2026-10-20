@@ -17,10 +17,10 @@ CREATE TABLE pcx__warn_outcome_first_event_timing AS
 WITH dated_event AS (
     SELECT  subject_ref,
             event_type,
-            CAST(event_date AS DATE)    AS event_day
+            event_day
     FROM    pcx__llm_event_wide
     WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY')
-    AND     event_date IS NOT NULL
+    AND     event_day IS NOT NULL
 )
 
 SELECT  'event_before_t0'                                                       AS warn_check,

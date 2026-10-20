@@ -14,7 +14,7 @@ CREATE TABLE pcx__warn_eligible_rx_llm_agent_unrecognized AS
 WITH administered AS (
     SELECT  subject_ref,
             LOWER(agent_name)                       AS agent_lower,
-            MIN(CAST(therapy_start_date AS DATE))   AS first_day,
+            MIN(therapy_start_day)                  AS first_day,
             COUNT(DISTINCT note_ref)                AS note_cnt
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'

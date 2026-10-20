@@ -47,6 +47,9 @@ SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_after_note' AS test
 SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_coarse' AS test 
  FROM pcx__warn_llm_date_coarse
  UNION ALL 
+SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_invalid' AS test 
+ FROM pcx__warn_llm_date_invalid
+ UNION ALL 
 SELECT COUNT(*) AS cnt, 'pcx__warn_outcome_exposure_after_first_event' AS test 
  FROM pcx__warn_outcome_exposure_after_first_event
  UNION ALL 
