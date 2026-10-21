@@ -149,6 +149,22 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   deceased fields are a site prerequisite: the site's ETL must expose them.
 - [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS; a death
   recorded only by the event task reaches EFS but not OS. Coarse LLM dates are consumed as exact days.
+- [decided] 2026-10-21, Andy: a documented EFS event without a usable date is an event with an
+  uncomputable interval, not a censored observation. `efs_event_bool` is `event_documented_bool`
+  (dated event, undated event, or a death without a date).
+  - An undated progression, recurrence or second malignancy (`event_timing_uncertain_bool`) makes
+    the EFS interval NULL even next to a dated event, pending reconciliation: it may be earlier
+    or a repeat. The earliest dated event stays in `first_event_day` as evidence.
+    `efs_censor_source = event_timing_uncertain`.
+  - A deceased flag without a death date is an event with a NULL interval, as for OS
+    (`efs_censor_source = event_undated`). A conflicting LLM `ALIVE` statement is kept for review
+    (`llm_deceased_bool`, `llm_last_known_alive_day` in `pcx__outcome_vital_status`, listed by
+    the `deceased_without_death_day` warning), since it may describe an earlier time.
+  - The patient was alive for every dated event and exposure, so an undated death never
+    makes the timing uncertain: a dated event before it is still the first event, and every
+    dated exposure precedes it.
+  - Prior-to-first-event exposure flags are NULL (unknown) when the timing is uncertain and the
+    exposure is not on or after the dated event. On or after it is still FALSE.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
   source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
   ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
@@ -183,8 +199,8 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   `pcx__kaplan_subject`, one labeled row per `pcx__outcome` subject. `cube_kaplan_os` and
   `cube_kaplan_efs` (`counts_kaplan.workflow`, exported). Counted unit: distinct patients.
 - [decided] Exact PCX-30 columns, order and labels, except `site`. Survival years are
-  FLOOR(days / 365.25) from t0, capped at >=10. `diagnosis` is always Medulloblastoma (ATRT
-  is not eligible), `subtype` is the latest documented molecular group or NOS/NEC. No exposure
+  FLOOR(days / 365.25) from t0, capped at >=10. `diagnosis` was always Medulloblastoma
+  until 2026-10-21 (below), `subtype` is the latest documented molecular group or NOS/NEC. No exposure
   evidence is Not Reported, never No. EFS keeps the provisional censoring.
 - [decided] 2026-10-20, Andy: no `site` column. Each site's export reaches the aggregator
   under that site, which adds it when cubes are combined. The source is plain SQL,
@@ -193,6 +209,14 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   exported with a floor of 1, like the unsuppressed PCX-30 files, and the site-only copies
   (`counts_kaplan_site.workflow`) are removed. `stage/counts_kaplan.py` checks the workflow with
   the builder's site-only rules, since its shared rules require a floor of at least 10.
+- [decided] 2026-10-21, Andy: `diagnosis` is the latest documented CNS embryonal subtype
+  (`pcx__client_diagnosis.disease_subtype_ever`, codes such as MEDULLOBLASTOMA or ATRT), Not
+  Reported when none is documented. `pcx__kaplan_subject` applies no diagnosis, age or
+  prior-treatment exclusion.
+- [decided] 2026-10-21, Andy: a documented EFS event without a usable date is `efs_status`
+  event with `event_free_survival_years` Not Reported. Curve calculations downstream must count
+  the event but use no duration for it. `initial_treatment_order` is Not Reported when the
+  event timing is uncertain.
 
 ### 8.2 Exports and statistical plan
 

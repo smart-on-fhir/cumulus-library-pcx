@@ -23,20 +23,22 @@ def day(n: int) -> datetime.date:
 
 
 def outcome(i, t0=T0, os_event=False, os_days=400, efs_event=False, efs_days=400, under_36=False,
-            methotrexate=None, chemo=None, radiation=None, sequence=None):
+            methotrexate=None, chemo=None, radiation=None, sequence=None, censor=None):
     return (f'Patient/{i}', t0, os_event, os_days, efs_event, efs_days, under_36,
-            methotrexate, chemo, radiation, sequence)
+            methotrexate, chemo, radiation, sequence, censor)
 
 
 def load(con, outcome_rows: list, molecular_rows: list):
     con.execute('CREATE OR REPLACE TABLE pcx__outcome (subject_ref VARCHAR, t0_day DATE, os_event_bool BOOLEAN, '
                 'os_days BIGINT, efs_event_bool BOOLEAN, efs_days BIGINT, '
                 'age_under_36_months_at_definitive_surgery BOOLEAN, methotrexate_first_day DATE, '
-                'chemo_first_day DATE, radiation_first_day DATE, initial_therapy_sequence VARCHAR)')
-    con.execute('CREATE OR REPLACE TABLE pcx__client_diagnosis (subject_ref VARCHAR, molecular_group_ever VARCHAR)')
-    con.executemany('INSERT INTO pcx__outcome VALUES (' + ', '.join(['?'] * 11) + ')', outcome_rows)
+                'chemo_first_day DATE, radiation_first_day DATE, initial_therapy_sequence VARCHAR, '
+                'efs_censor_source VARCHAR)')
+    con.execute('CREATE OR REPLACE TABLE pcx__client_diagnosis (subject_ref VARCHAR, molecular_group_ever VARCHAR, '
+                'disease_subtype_ever VARCHAR)')
+    con.executemany('INSERT INTO pcx__outcome VALUES (' + ', '.join(['?'] * 12) + ')', outcome_rows)
     if molecular_rows:
-        con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?)', molecular_rows)
+        con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?, ?)', molecular_rows)
     con.execute('DROP TABLE IF EXISTS pcx__kaplan_subject')
     con.execute(SOURCE.read_text())
 
@@ -66,9 +68,11 @@ def test_labels():
             outcome(8, efs_event=True, under_36=True, methotrexate=day(10), chemo=day(10), radiation=day(40),
                     sequence='CHEMOTHERAPY_BEFORE_RADIATION'),
             outcome(9, chemo=day(900)),
-            outcome(10)]
-    molecular = [('Patient/0', 'WNT'), ('Patient/1', 'GROUP_3'), ('Patient/2', 'NON_WNT_NON_SHH'),
-                 ('Patient/3', 'NOT_SUBGROUPED'), ('Patient/4', 'INDETERMINATE')]
+            outcome(10),
+            outcome(11, efs_event=True, efs_days=None, chemo=day(10), censor='event_timing_uncertain')]
+    molecular = [('Patient/0', 'WNT', 'MEDULLOBLASTOMA'), ('Patient/1', 'GROUP_3', 'MEDULLOBLASTOMA'),
+                 ('Patient/2', 'NON_WNT_NON_SHH', 'MEDULLOBLASTOMA'), ('Patient/3', 'NOT_SUBGROUPED', 'ATRT'),
+                 ('Patient/4', 'INDETERMINATE', None)]
     load(con, rows, molecular)
     df = con.execute('SELECT * FROM pcx__kaplan_subject ORDER BY CAST(SUBSTR(subject_ref, 9) AS INTEGER)').fetchdf()
     s = df.to_dict('records')
@@ -85,7 +89,11 @@ def test_labels():
     assert (s[0]['ever_methotrexate'], s[0]['radiation']) == ('Not Reported', 'Not Reported')
     assert [s[i]['initial_treatment_order'] for i in (8, 9, 10, 5)] == \
         ['chemo_before_radiation', 'no_initial_radiation_or_chemo', 'Not Reported', 'Not Applicable']
-    assert set(df.diagnosis) == {'Medulloblastoma'}
+    # an event without a usable date counts as an event with no duration, and its exposures are unordered
+    assert (s[11]['efs_status'], s[11]['event_free_survival_years'], s[11]['initial_treatment_order']) == \
+        ('event', 'Not Reported', 'Not Reported')
+    # diagnosis is the latest documented subtype, not an exclusion: ATRT stays, none documented is Not Reported
+    assert [s[i]['diagnosis'] for i in (0, 3, 4, 6)] == ['MEDULLOBLASTOMA', 'ATRT', 'Not Reported', 'Not Reported']
     assert df.drop(columns='subject_ref').isna().sum().sum() == 0
 
 

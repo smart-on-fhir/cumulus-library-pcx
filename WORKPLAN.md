@@ -202,6 +202,12 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - [ ] P2 · `outcome` · **Events before time zero** (was 3.2). First-event candidates are not
   limited to `event_day >= t0_day`, so `efs_days` can be negative. Not re-checked since
   2026-09-11 beyond a search of the SQL.
+- [ ] P2 · `outcome` · **Reconcile undated events** (2026-10-21). An undated progression,
+  recurrence or second malignancy makes the EFS interval NULL (`efs_censor_source =
+  event_timing_uncertain`), even next to a dated event, and leaves exposures before the dated
+  event unordered. Measure the rate on BCH data (`pcx__warn_outcome_first_event_timing`,
+  `undated_event`), then decide how an undated mention is matched to a dated one or bounded
+  (note date, for example).
 - [ ] P3 · `outcome` · **Vital-status reconciliation** (was 3.9). The earliest death and
   latest alive dates win without cross-checking, and `efs_end_day` can exceed `os_end_day`.
 
@@ -261,6 +267,26 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — Why eligible_dx ages come from birthdate
+
+- `eligible_dx.sql`: header comment now says why age stays in months from
+  `core__patient.birthdate` rather than `core__encounter.age_at_visit` (whole years). No SQL change.
+
+### 2026-10-21 — Undated EFS events are events, not censoring
+
+- `outcome_first_event.sql`: `dated_event_bool` (was `any_event_bool`), plus
+  `event_timing_uncertain_bool` (undated progression, recurrence or second malignancy),
+  `death_undated_bool` and `event_documented_bool`. `undated_event_cnt` excludes deaths.
+- `outcome.sql`: `efs_event_bool = event_documented_bool`. Undated events have NULL
+  `efs_end_day` / `efs_days`, `efs_censor_source` `event_timing_uncertain` or `event_undated`.
+- `outcome_exposure.sql`: prior-to-first-event flags are NULL when the timing is uncertain and
+  the exposure is not on or after the dated event. An undated death never makes them unknown.
+- `pcx__kaplan_subject.sql`: `initial_treatment_order` Not Reported when the timing is
+  uncertain. `client_outcome.sql`, the `undated_event` warn check, dictionaries, PROTOCOL 7 and
+  8.1, limitations 4 and tests updated. Open item: **Reconcile undated events** (Outcomes).
+- `pcx__kaplan_subject.sql`: `diagnosis` is now `disease_subtype_ever` or Not Reported (was always
+  Medulloblastoma). `test_counts_kaplan.py`, the data dictionary and PROTOCOL 8.1 match it.
 
 ### 2026-10-21 — Systemic therapy v2: coded values instead of free text
 

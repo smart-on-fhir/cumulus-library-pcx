@@ -2,6 +2,11 @@
 -- Diagnosis uses the latest documented disease subtype from client_diagnosis.
 -- No diagnosis, age, or prior-treatment exclusions are applied here.
 -- NULL dimensions are avoided so cube NULLs represent subtotals.
+-- A documented EFS event without a usable date is efs_status event with
+-- event_free_survival_years Not Reported: curves count the event but use no
+-- duration for it. Its initial_treatment_order is Not Reported when
+-- efs_censor_source is event_timing_uncertain, since an undated event may
+-- precede every exposure.
 
 CREATE TABLE pcx__kaplan_subject AS
 SELECT  outcome.subject_ref,
@@ -88,6 +93,8 @@ SELECT  outcome.subject_ref,
             WHEN outcome.initial_therapy_sequence = 'RADIATION_ONLY'
             THEN 'radiation_only_no_initial_chemo'
             WHEN outcome.chemo_first_day IS NULL AND outcome.radiation_first_day IS NULL
+            THEN 'Not Reported'
+            WHEN outcome.efs_censor_source = 'event_timing_uncertain'
             THEN 'Not Reported'
             ELSE 'no_initial_radiation_or_chemo'
         END AS initial_treatment_order

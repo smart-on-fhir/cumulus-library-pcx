@@ -24,7 +24,7 @@ table_cols =["diagnosis",
 
 [tables.cube_kaplan_efs]
 min_subject = 1
-description = "Eligible medulloblastoma patients by whole years of provisional event-free survival from t0, event status, age under 36 months, methotrexate ever, radiation ever, molecular subtype and initial treatment order, in the PCX-30 EFS cube layout without its site column. cnt is patients."
+description = "Eligible medulloblastoma patients by whole years of provisional event-free survival from t0, event status, age under 36 months, methotrexate ever, radiation ever, molecular subtype and initial treatment order, in the PCX-30 EFS cube layout without its site column. A documented event without a usable date is event with Not Reported years: count the event, but use no duration for it. cnt is patients."
 source_table = "pcx__kaplan_subject"
 table_cols =["diagnosis",
             "event_free_survival_years",

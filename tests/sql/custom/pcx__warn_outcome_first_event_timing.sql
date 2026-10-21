@@ -7,9 +7,10 @@
 --                               event belongs to an earlier tumor)
 --   event_after_death           a dated progression / recurrence / second
 --                               malignancy later than death_day
---   undated_events_only         events exist but none has a date, so
---                               any_event_bool is FALSE and the subject is
---                               censored as event-free
+--   undated_event               a progression, recurrence or second malignancy
+--                               without a date (event_timing_uncertain_bool). EFS
+--                               counts the event with a NULL interval until the
+--                               mention is reconciled with the dated events, if any
 --   first_event_multiple_types  two event types share the first event day
 -- ============================================================================
 CREATE TABLE pcx__warn_outcome_first_event_timing AS
@@ -52,14 +53,14 @@ AND     event.event_day > first_event.death_day
 
 UNION ALL
 
-SELECT  'undated_events_only'                                                   AS warn_check,
+SELECT  'undated_event'                                                         AS warn_check,
         CAST(subject_ref AS VARCHAR)                                            AS subject_ref,
         CONCAT_WS('|',
             CONCAT('undated=',  CAST(undated_event_cnt AS VARCHAR)),
+            CONCAT('dated=',    CAST(first_event_day AS VARCHAR)),
             CONCAT('t0=',       CAST(t0_day AS VARCHAR)))                       AS detail
 FROM    pcx__outcome_first_event
-WHERE   NOT any_event_bool
-AND     undated_event_cnt > 0
+WHERE   event_timing_uncertain_bool
 
 UNION ALL
 

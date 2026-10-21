@@ -115,7 +115,8 @@ def test_first_event_and_exposure_order(con):
     assert rows['Patient/p1'] == ('PROGRESSION', True, True, 'CHEMOTHERAPY_BEFORE_RADIATION', 'ACNS0334')
     assert rows['Patient/p2'] == ('DECEASED', None, True, 'CHEMOTHERAPY_BEFORE_RADIATION', 'Head Start')
     assert rows['Patient/p3'] == (None, None, None, None, None)      # no t0: nothing is ordered
-    assert rows['Patient/p6'][3] == 'RADIATION_ONLY'
+    # p6: an undated recurrence may precede its exposures, so none is ordered against it
+    assert rows['Patient/p6'][1:4] == (None, None, None)
 
 
 def test_survival_censoring(con):
@@ -125,4 +126,31 @@ def test_survival_censoring(con):
     assert rows['Patient/p1'] == (False, False, True, 'first_event')                 # alive, progressed
     assert rows['Patient/p2'] == (True, False, True, 'first_event')                  # died
     assert rows['Patient/p3'] == (False, True, False, 'last_known_alive_provisional') # no t0: no survival interval
-    assert rows['Patient/p6'] == (True, True, False, 'last_known_alive_provisional')  # deceased without a death day
+    # p6: an undated recurrence and a death without a day are documented events, not censoring
+    assert rows['Patient/p6'] == (True, True, True, 'event_timing_uncertain')
+
+
+def test_undated_events_are_events_without_an_interval():
+    con = sqltest.connect()
+    # p6 keeps only its deceased flag without a death day
+    con.execute("DELETE FROM pcx__llm_event_wide WHERE subject_ref = 'Patient/p6'")
+    # p1 (progression 2021-03-01) also gets a deceased flag without a death day
+    con.execute("UPDATE patient SET deceasedBoolean = TRUE WHERE id = 'p1'")
+    # p8 (events 2021-01-01, methotrexate and radiation after them) gets an undated recurrence
+    con.execute("INSERT INTO pcx__llm_event_wide (subject_ref, note_ref, event_type) "
+                "VALUES ('Patient/p8', 'note-p8-ev-undated', 'RECURRENCE')")
+    sqltest.run_custom(con)
+    rows = {r[0]: r[1:] for r in con.execute("SELECT subject_ref, efs_event_bool, efs_days IS NULL, "
+                                             "efs_censor_source, first_event_day, "
+                                             "methotrexate_prior_to_first_event_bool, "
+                                             "radiation_prior_to_first_event_bool, initial_therapy_sequence "
+                                             "FROM pcx__outcome").fetchall()}
+    # a death without a day is an event with no interval, after every dated exposure
+    assert rows['Patient/p6'][:4] == (True, True, 'event_undated', None)
+    assert rows['Patient/p6'][5:] == (True, 'RADIATION_ONLY')
+    # the patient was alive at the dated progression, so it is still the first event
+    assert rows['Patient/p1'] == (True, False, 'first_event', date(2021, 3, 1), True, True,
+                                  'CHEMOTHERAPY_BEFORE_RADIATION')
+    # dated plus undated: the dated event stays as evidence, the interval waits for reconciliation,
+    # and exposures on or after the dated event are still salvage
+    assert rows['Patient/p8'] == (True, True, 'event_timing_uncertain', date(2021, 1, 1), False, False, None)

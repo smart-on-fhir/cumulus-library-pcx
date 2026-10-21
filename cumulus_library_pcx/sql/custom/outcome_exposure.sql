@@ -2,11 +2,19 @@
 --  Outcome: treatment exposure relative to the first event (README section 2)
 --
 --  methotrexate_prior_to_first_event_bool / radiation_prior_to_first_event_bool
---    TRUE   first exposure day is before the first event day, or there is no event
---    FALSE  first exposure day is on or after the first event day (salvage, not initial therapy)
---    NULL   no dated exposure evidence at all (unknown, not confirmed absence)
+--    TRUE   first exposure day is before first_event_day, or there is no dated
+--           event and no undated progression, recurrence or second malignancy.
+--           A death without a date follows every dated exposure, since the
+--           patient was alive for it.
+--    FALSE  first exposure day is on or after first_event_day (salvage, not initial
+--           therapy). Still FALSE when event_timing_uncertain_bool is TRUE, since the
+--           true first event is no later than first_event_day.
+--    NULL   no dated exposure evidence at all (unknown, not confirmed absence), or
+--           event_timing_uncertain_bool is TRUE and the exposure is not on or after
+--           a dated event, so its order against the first event is unknown
 --  initial_therapy_sequence compares first chemo day with first radiation day,
---  both restricted to before the first event (Sarah's stratifier).
+--  both restricted to before the first event (Sarah's stratifier). It is NULL
+--  when event_timing_uncertain_bool leaves the exposures unordered.
 --  protocol_names is every distinct protocol named in regimen or anchor evidence.
 --  =====================================================================
 CREATE  TABLE   pcx__outcome_exposure AS
@@ -31,23 +39,27 @@ timing AS (
             elig.t0_day,
             event.first_event_day,
             event.first_event_type,
+            event.event_timing_uncertain_bool,
             elig.methotrexate_first_day,
             elig.chemo_first_day,
             elig.radiation_first_day,
             CASE
-                WHEN elig.methotrexate_first_day IS NULL    THEN NULL
-                WHEN event.first_event_day IS NULL          THEN TRUE
-                ELSE elig.methotrexate_first_day < event.first_event_day
+                WHEN elig.methotrexate_first_day IS NULL                  THEN NULL
+                WHEN elig.methotrexate_first_day >= event.first_event_day THEN FALSE
+                WHEN event.event_timing_uncertain_bool                    THEN NULL
+                ELSE                                                      TRUE
             END                                                                 AS methotrexate_prior_to_first_event_bool,
             CASE
-                WHEN elig.chemo_first_day IS NULL           THEN NULL
-                WHEN event.first_event_day IS NULL          THEN TRUE
-                ELSE elig.chemo_first_day < event.first_event_day
+                WHEN elig.chemo_first_day IS NULL                         THEN NULL
+                WHEN elig.chemo_first_day >= event.first_event_day        THEN FALSE
+                WHEN event.event_timing_uncertain_bool                    THEN NULL
+                ELSE                                                      TRUE
             END                                                                 AS chemo_prior_to_first_event_bool,
             CASE
-                WHEN elig.radiation_first_day IS NULL       THEN NULL
-                WHEN event.first_event_day IS NULL          THEN TRUE
-                ELSE elig.radiation_first_day < event.first_event_day
+                WHEN elig.radiation_first_day IS NULL                     THEN NULL
+                WHEN elig.radiation_first_day >= event.first_event_day    THEN FALSE
+                WHEN event.event_timing_uncertain_bool                    THEN NULL
+                ELSE                                                      TRUE
             END                                                                 AS radiation_prior_to_first_event_bool
     FROM    pcx__eligible              AS elig
     LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref = elig.subject_ref

@@ -84,6 +84,8 @@ UNION ALL
 -- ------------------------------------------------------------------------
 -- pcx__outcome_first_event (first EFS-type event)
 --   value_text = event type(s) on that day, value_number = days from t0
+--   dated events only. A documented event without a usable date shows in
+--   the event_free_survival row (efs_event_bool TRUE, efs_days NULL)
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
         'first_event'                       AS variable,
@@ -92,7 +94,7 @@ SELECT  subject_ref,
         first_event_type                    AS value_text,
         CAST(days_t0_to_first_event AS DOUBLE)
                                             AS value_number,
-        any_event_bool                      AS value_boolean,
+        dated_event_bool                    AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
         'pcx__outcome_first_event'          AS source_table
 FROM    pcx__outcome_first_event

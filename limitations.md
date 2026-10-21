@@ -74,8 +74,9 @@ date for another or assume the registered EFS origin establishes every OS conven
 last_known_alive_provisional`) because event-free follow-up is not adjudicated. Baseline
 response evaluability and treatment-phase response assessments are extracted by the
 `response` task and projected to `pcx__llm_response_wide`, which only the client timeline
-reads: no eligibility or outcome SQL uses it. Undated events are
-invisible to EFS; events before time zero are not excluded.
+reads: no eligibility or outcome SQL uses it. Undated events count as EFS events with a NULL
+interval (`efs_censor_source` event_timing_uncertain or event_undated) until they are
+reconciled with the dated events; events before time zero are not excluded.
 
 **Resolution:** Promote EFS to the core reproduction specification and add baseline
 measurable/evaluable disease, dated response assessments, consolidation completion,

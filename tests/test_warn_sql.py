@@ -36,7 +36,7 @@ EXPECTED = {
     "pcx__warn_outcome_vital_status_conflict": {("death_day_disagree", "Patient/p2"), ("alive_after_death", "Patient/p2"),
                                                 ("deceased_without_death_day", "Patient/p6"),
                                                 ("death_before_t0", "Patient/p7"), ("alive_after_death", "Patient/p7")},
-    "pcx__warn_outcome_first_event_timing": {("event_after_death", "Patient/p2"), ("undated_events_only", "Patient/p6"),
+    "pcx__warn_outcome_first_event_timing": {("event_after_death", "Patient/p2"), ("undated_event", "Patient/p6"),
                                              ("event_before_t0", "Patient/p7"), ("first_event_multiple_types", "Patient/p8")},
     "pcx__warn_outcome_exposure_order_only": {("chemo_order_only", "Patient/p2"), ("radiation_code_only", "Patient/p2"),
                                               ("methotrexate_order_only", "Patient/p6"),
