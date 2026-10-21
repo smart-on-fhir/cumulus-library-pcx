@@ -51,11 +51,17 @@ EXPECTED = {
     "pcx__warn_llm_date_after_note": {("llm_date_after_note", "Patient/p7")},
     "pcx__warn_llm_date_invalid": {("llm_date_invalid", "Patient/p1"), ("llm_date_invalid", "Patient/p8"),
                                    ("llm_date_precision_missing", "Patient/p8")},
+    "pcx__warn_llm_molecular_duplicate_output": {("molecular_note_multiple_outputs", "Patient/p1")},
     "pcx__warn_llm_model_rule": {("administration_date_not_administered", "Patient/p2"),
                                  ("dose_unit_without_amount", "Patient/p2"), ("dose_amount_negative", "Patient/p2"),
                                  ("cycle_num_below_1", "Patient/p2"), ("cycle_num_below_1", "Patient/p8"),
                                  ("cd34_negative", "Patient/p8"),
                                  ("death_date_not_deceased", "Patient/p2"), ("alive_after_death_in_note", "Patient/p2")},
+    "pcx__warn_molecular_result_no_diagnosis": {("molecular_no_diagnosis_evidence", "Patient/p9"),
+                                                ("molecular_outside_discovery", "Patient/p9"),
+                                                ("molecular_diagnosis_not_medulloblastoma", "Patient/p10"),
+                                                ("molecular_outside_discovery", "Patient/p10"),
+                                                ("molecular_outside_discovery", "Patient/p4")},
     "pcx__warn_study_period_null_end": {("null_end_in_window", "Patient/p1"), ("null_end_history", "Patient/p6")},
 }
 

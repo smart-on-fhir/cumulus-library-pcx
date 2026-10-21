@@ -340,7 +340,9 @@ CREATE TABLE pcx__llm_molecular_report (
     report_day_precision VARCHAR,
     report_index BIGINT,
     molecular_group VARCHAR,
-    methods VARCHAR
+    methods VARCHAR,
+    generated_on VARCHAR,
+    system_fingerprint VARCHAR
 );
 
 CREATE TABLE pcx__llm_registry_eligibility_wide (

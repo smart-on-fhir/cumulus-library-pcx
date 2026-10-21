@@ -264,6 +264,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Molecular: one report row per subject across re-runs, molecular warn tables
+
+- `pcx__client_diagnosis` now selects the molecular report as a single ROW (group, methods) with `MAX_BY`, never joined back by `note_ref#report_index`. Re-running the molecular task on a note produced two outputs with the same key, and the client table returned several rows per subject with mixed groups. All outputs are pooled. Order: real group, latest note, last report in the note, latest output (`generated_on`, `system_fingerprint`), then group and methods so the pick is deterministic.
+- New warn `pcx__warn_llm_molecular_duplicate_output`: notes with more than one molecular extraction output, each output's groups in the detail.
+- Reworked `pcx__warn_molecular_result_no_diagnosis` (real groups only): `molecular_no_diagnosis_evidence` (no named LLM diagnosis, no tier 1 casedef code), `molecular_diagnosis_not_medulloblastoma` (evidence exists, none of it medulloblastoma), `molecular_outside_discovery` (not in `pcx__eligible`). The first two are exclusive. Registered in `qa_athena.toml` and `pcx__warn_union`.
+- Tests: molecular fixture `tests/data/warn/pcx__llm_molecular_report.csv`, `generated_on` and `system_fingerprint` appended to its schema, an ATRT-only diagnosis row for Patient/p10, expectations for both warn tables, and two re-run cases in `tests/test_client_diagnosis_sql.py` (fails on the old SQL with 9 rows for 7 subjects).
+
 ### 2026-10-21 — Molecular group: a real group is never replaced, method from the same report
 
 - `pcx__client_diagnosis` picks ONE molecular report per subject and takes `molecular_group_ever` and `molecular_group_method` from that same report. Order: a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats NOT_SUBGROUPED / INDETERMINATE, then the latest note (`pcx__llm_note_date`, undated notes last), then the last report in the note (`report_index`).

@@ -80,26 +80,34 @@ diagnosis AS (
 ),
 
 -- Molecular group from the molecular task, one row per documented report.
--- One report is selected per subject, and its group and methods are reported
--- together, so the method always describes the selected group. A CLINICAL_SUMMARY
--- method is not methylation confirmation. Report order:
+-- One report is selected per subject as a single ROW (group, methods), so the
+-- method always describes the selected group, and no report is joined back by
+-- key. A CLINICAL_SUMMARY method is not methylation confirmation.
+-- Every extraction output counts, re-runs of the same note included
+-- (pcx__warn_llm_molecular_duplicate_output lists them). Report order:
 --   1. a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats
 --      NOT_SUBGROUPED and INDETERMINATE, which are absence of a result. Those
 --      are reported only when the subject has no real group.
 --   2. the latest note, undated notes first
 --   3. the last report in the note
+--   4. the latest extraction output (generated_on, then system_fingerprint)
+--   5. the group, then the methods, so even identical outputs pick one row
 molecular_note AS (
     SELECT  DISTINCT
             src.subject_ref,
-            CONCAT(src.note_ref, '#', CAST(src.report_index AS VARCHAR))   AS report_key,
+            CAST(ROW(src.molecular_group, src.methods)
+                 AS ROW(molecular_group VARCHAR, methods VARCHAR))     AS report,
             ROW(src.molecular_group NOT IN ('NOT_SUBGROUPED', 'INDETERMINATE'),
                 COALESCE(note_day.note_date, DATE '0001-01-01'),
                 src.note_ref,
-                src.report_index)                               AS report_order,
+                src.report_index,
+                COALESCE(src.generated_on, ''),
+                COALESCE(src.system_fingerprint, ''),
+                src.molecular_group,
+                COALESCE(src.methods, ''))                      AS report_order,
             (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_date)) <= 90)
                                                                 AS in_baseline,
-            src.molecular_group,
-            src.methods
+            src.molecular_group
     FROM    pcx__llm_molecular_report       AS src
     LEFT JOIN pcx__llm_note_date        AS note_day
       ON    src.subject_ref = note_day.subject_ref
@@ -111,8 +119,8 @@ molecular_note AS (
 
 molecular_pick AS (
     SELECT  subject_ref,
-            MAX_BY(report_key, report_order)                            AS ever_key,
-            MAX_BY(report_key, report_order) FILTER (WHERE in_baseline) AS baseline_key,
+            MAX_BY(report, report_order)                                AS ever_report,
+            MAX_BY(report, report_order) FILTER (WHERE in_baseline)     AS baseline_report,
             -- NOT_SUBGROUPED and INDETERMINATE are absence of a result, not groups
             COUNT(DISTINCT molecular_group)
                 FILTER (WHERE molecular_group IN ('WNT', 'SHH', 'GROUP_3', 'GROUP_4', 'NON_WNT_NON_SHH'))
@@ -123,19 +131,13 @@ molecular_pick AS (
 ),
 
 molecular AS (
-    SELECT  pick.subject_ref,
-            ever.molecular_group                                        AS molecular_group_ever,
-            baseline.molecular_group                                    AS molecular_group_baseline,
-            NULLIF(ever.methods, '')                                    AS molecular_group_method,
-            pick.molecular_group_distinct_count,
-            pick.group_3_ever_bool
-    FROM    molecular_pick          AS pick
-    JOIN    molecular_note          AS ever
-      ON    ever.subject_ref = pick.subject_ref
-     AND    ever.report_key  = pick.ever_key
-    LEFT JOIN molecular_note        AS baseline
-      ON    baseline.subject_ref = pick.subject_ref
-     AND    baseline.report_key  = pick.baseline_key
+    SELECT  subject_ref,
+            ever_report.molecular_group                                 AS molecular_group_ever,
+            baseline_report.molecular_group                             AS molecular_group_baseline,
+            NULLIF(ever_report.methods, '')                             AS molecular_group_method,
+            molecular_group_distinct_count,
+            group_3_ever_bool
+    FROM    molecular_pick
 ),
 
 -- Structured case-definition subtypes at tier 1, for comparison with the notes.
