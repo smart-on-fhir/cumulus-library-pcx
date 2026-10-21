@@ -11,7 +11,8 @@ from tests import sqltest
 
 EXPECTED = {
     "pcx__warn_eligible_t0_missing": {("t0_missing_llm_medulloblastoma", "Patient/p3")},
-    "pcx__warn_eligible_t0_anchor_disagree": {("t0_anchor_casedef_earlier", "Patient/p1")},
+    "pcx__warn_eligible_t0_anchor_disagree": {("t0_anchor_casedef_earlier", "Patient/p1"),
+                                              ("t0_anchor_casedef_later", "Patient/p2")},
     "pcx__warn_eligible_t0_after_condition_date": {("t0_after_condition_date", "Patient/p1")},
     "pcx__warn_eligible_dx_date_disagree_fhir_before_llm": {("dx_date_fhir_before_llm", "Patient/p8")},
     "pcx__warn_eligible_dx_date_disagree_llm_before_fhir": {("dx_date_llm_before_fhir", "Patient/p6")},
@@ -45,7 +46,8 @@ EXPECTED = {
                                                      ("radiation_after_first_event", "Patient/p8")},
     "pcx__warn_outcome_survival_days": {("os_days_null_deceased", "Patient/p6"), ("os_days_negative", "Patient/p7"),
                                         ("os_days_zero", "Patient/p8")},
-    "pcx__warn_llm_date_coarse": {("llm_date_coarse_month", "Patient/p1"), ("llm_date_coarse_year", "Patient/p6")},
+    "pcx__warn_llm_date_coarse": {("llm_date_coarse_month", "Patient/p1"), ("llm_date_coarse_year", "Patient/p6"),
+                                  ("llm_date_coarse_month", "Patient/p6"), ("llm_date_coarse_month", "Patient/p8")},
     "pcx__warn_llm_date_after_note": {("llm_date_after_note", "Patient/p7")},
     "pcx__warn_llm_date_invalid": {("llm_date_invalid", "Patient/p1"), ("llm_date_invalid", "Patient/p8")},
     "pcx__warn_study_period_null_end": {("null_end_in_window", "Patient/p1"), ("null_end_history", "Patient/p6")},

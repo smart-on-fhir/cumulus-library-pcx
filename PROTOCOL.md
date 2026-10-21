@@ -30,8 +30,8 @@ build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
   molecular Group 3. An observational treatment-effect analysis is not yet specified.
 - [source eligible] Design: a discovery cohort (`pcx__eligible`, every criterion as a nullable
   boolean) and a trial-like cohort (`pcx__eligible_trial`, strict intersection).
-- [source eligible] Analysis unit: subject; time zero is the first study-population encounter with
-  a tier 1 medulloblastoma code.
+- [source eligible] Analysis unit: subject; time zero is the LLM gold (tissue) diagnosis day,
+  else the first study-population encounter with a tier 1 medulloblastoma code.
 - [decided] Prefix `pcx`. Stages in `cumulus_library_pcx/stage/manifest.py`: study_population,
   study_variable, study_variable_wide, casedef, elastic_upload, sample, counts, study_meta by
   default; llm_schema, the NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
@@ -68,13 +68,14 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 ## 4. Case definition
 
 - [source] `spreadsheet/casedef.csv`: 55 rows, subtypes medulloblastoma, atrt, cns_embryonal,
-  etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero; tier 2 codes are evidence.
-- [source eligible] Index event: first study-population encounter carrying a tier 1
-  medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
+  etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero when no LLM gold diagnosis
+  day exists; tier 2 codes (and the CHOP roster) are evidence.
+- [source eligible] Index event: the earliest day-precision LLM gold diagnosis day, else the first
+  study-population encounter carrying a tier 1 medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
   (first casedef encounter of any subtype or tier) for note sampling ([WORKPLAN](WORKPLAN.md#case-definition)).
 - [open] SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in
   dx_brain_cancer.csv. ICD-O-3 morphology codes are absent from casedef.csv. etmr,
-  pineoblastoma and cns_embryonal never produce a time zero. All three are in
+  pineoblastoma and cns_embryonal get a time zero only from an LLM gold date. All three are in
   [WORKPLAN](WORKPLAN.md#case-definition).
 
 ## 5. Clinical notes
@@ -104,7 +105,11 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
 `pcx__eligible` is the discovery cohort: every criterion is a yes/no flag, never an exclusion.
 `pcx__eligible_trial` applies the strict ACNS0334 intersection on top of it.
 
-- [source] Time zero `t0_day`: first tier 1 medulloblastoma casedef encounter (section 4).
+- [source] Time zero `t0_day`: the LLM gold diagnosis day, else the first tier 1 medulloblastoma
+  casedef encounter (section 4). `t0_source` names which; `casedef_t0_day` keeps the coded day.
+- [decided] 2026-10-21, Andy: the LLM gold diagnosis day (`diagnosis_date_gold`) is the gold
+  standard and sets t0 ahead of a casedef code. Day precision only. Any subtype the diagnosis task
+  names counts, ATRT included; ATRT is excluded separately.
 - [source] I1 Diagnosis: tier 1 medulloblastoma casedef code OR an LLM diagnosis of
   MEDULLOBLASTOMA (`pcx__llm_diagnosis_wide`).
 - [source] I2 Definitive surgery under 36 months of age: earliest LLM resection (gross total,

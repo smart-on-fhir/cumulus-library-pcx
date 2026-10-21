@@ -21,10 +21,18 @@ on how complete the site's medication and procedure data are. Open defects are i
 
 ## Time zero (t=0)
 
-`t0_day` is the start day of the first study-population encounter that carries a **tier 1 medulloblastoma** code from
-[casedef.csv](spreadsheet/casedef.csv) (`eligible_dx.sql`). Tier 2 codes (history of brain neoplasm, unspecified brain neoplasm)
-are evidence only: a subject with no tier 1 medulloblastoma code has a NULL `t0_day` and stays a candidate. The `etmr`,
-`pineoblastoma` and `cns_embryonal` subtypes in casedef.csv currently do **not** produce a t0 (see WORKPLAN.md).
+`t0_day` (`eligible_dx.sql`) comes from the first of these that exists, and `t0_source` names it:
+
+1. `llm_diagnosis_gold`: the earliest **day-precision** confirmatory tissue-diagnosis date (`diagnosis_date_gold`,
+   [diagnosis.py](cumulus_library_pcx/llm/models/diagnosis.py)) from a note naming any embryonal subtype, ATRT included
+   (ATRT is excluded separately). This is the gold standard and wins over a coded entry. Month or year precision does not
+   set t0.
+2. `casedef_tier1_medulloblastoma`: the start day of the first study-population encounter that carries a **tier 1
+   medulloblastoma** code from [casedef.csv](spreadsheet/casedef.csv). It is kept as `casedef_t0_day` either way.
+
+Tier 2 codes (history of brain neoplasm, unspecified brain neoplasm, the CHOP roster) are evidence only: a subject with
+neither source has a NULL `t0_day` and `t0_source` and stays a candidate. An `etmr`, `pineoblastoma` or `cns_embryonal`
+subject gets a t0 only from a gold date (see WORKPLAN.md).
 
 Age is `DATE_DIFF('month', birthdate, day)` from `core__patient.birthdate`; on Athena this is completed months
 (WORKPLAN.md makes it engine-independent). `pcx__cohort_casedef` keeps its own anchor (first casedef encounter of any
@@ -58,7 +66,7 @@ Required. The structured and LLM evidence are reported side by side and OR-ed in
 
 | file                                                         | criteria                                                                                                    |
 |--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| [casedef.csv](spreadsheet/casedef.csv)                       | `medulloblastoma_tier1_bool`: any tier 1 medulloblastoma code (this also sets t0)                          |
+| [casedef.csv](spreadsheet/casedef.csv)                       | `medulloblastoma_tier1_bool`: any tier 1 medulloblastoma code (sets t0 when no day-precision gold date)    |
 | [diagnosis.py](cumulus_library_pcx/llm/models/diagnosis.py)  | `llm_medulloblastoma_bool`: any note in `pcx__llm_diagnosis_wide` with `disease_subtype = MEDULLOBLASTOMA` |
 | [dx_medulloblastoma.csv](spreadsheet/dx_medulloblastoma.csv) | builds `pcx__cohort_dx_medulloblastoma` for discovery; **not read by the eligible SQL**, and its ICD-O-3 codes are absent from casedef.csv (see WORKPLAN.md) |
 

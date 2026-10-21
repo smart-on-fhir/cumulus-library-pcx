@@ -42,6 +42,17 @@ def test_atrt_evidence_is_an_exclusion_not_a_case(con):
     assert 'Patient/p6' not in trial(con)
 
 
+def test_t0_prefers_the_llm_gold_diagnosis_day(con):
+    rows = {r[0]: r[1:] for r in con.execute(
+        "SELECT subject_ref, t0_day, t0_source, casedef_t0_day FROM pcx__eligible_dx").fetchall()}
+    # p1: day-precision gold date (2020-01-28) wins over the tier 1 code encounter (2020-02-01)
+    assert rows['Patient/p1'] == (date(2020, 1, 28), 'llm_diagnosis_gold', date(2020, 2, 1))
+    # p6: a month-precision gold date never sets t0, so the tier 1 code does
+    assert rows['Patient/p6'] == (date(2020, 5, 1), 'casedef_tier1_medulloblastoma', date(2020, 5, 1))
+    # p3: no day-precision gold date and no tier 1 code: no t0 and no source
+    assert rows['Patient/p3'] == (None, None, None)
+
+
 def test_prior_therapy_flags(con):
     rows = eligible(con)
     prior = ['methotrexate_prior_to_t0_bool', 'chemo_prior_to_t0_bool', 'radiation_prior_to_t0_bool']
@@ -58,7 +69,7 @@ def test_prior_therapy_flags(con):
 
 def test_relaxed_criteria_are_flags_not_exclusions(con):
     rows = eligible(con)
-    # p2 was 55 months old at t0 and had chemotherapy before t0: still in the discovery cohort
+    # p2 was 54 months old at t0 (its gold diagnosis day) and had chemotherapy before t0: still in the discovery cohort
     assert rows['Patient/p2']['age_under_36_months_at_t0'] is False
     assert rows['Patient/p2']['age_under_36_months_at_definitive_surgery'] is False
     assert rows['Patient/p2']['chemo_prior_to_t0_bool'] is True

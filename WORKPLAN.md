@@ -117,12 +117,12 @@ No changes planned.
 - [ ] P2 · `casedef` · **ICD-O-3 morphology codes** (was 2.4). `dx_medulloblastoma.csv` has
   9470/3-9474/3. `casedef.csv` has none, so they never set time zero. The old plan: add them
   to casedef at tier 1 and derive `dx_medulloblastoma.csv` from casedef.
-- [ ] P2 · decision · **sPNET arm** (was 2.5). ETMR, pineoblastoma and CNS embryonal never
-  get a time zero. Either anchor `t0_day` on any non-ATRT tier 1 subtype, or record that this
-  phase is medulloblastoma-only.
+- [ ] P2 · decision · **sPNET arm** (was 2.5). ETMR, pineoblastoma and CNS embryonal get a time
+  zero only from a day-precision LLM gold diagnosis date, never from a code. Either also anchor
+  `t0_day` on any non-ATRT tier 1 subtype, or record that this phase is medulloblastoma-only.
 - [ ] P2 · decision · **Two time zeros** (was 2.6, 2.8). `pcx__cohort_casedef` anchors note
   sampling on the first casedef encounter of any subtype or tier. `eligible_dx.sql` anchors
-  `t0_day` on the first tier 1 medulloblastoma encounter. Make the sampling anchor tier-aware
+  `t0_day` on the LLM gold diagnosis day, else the first tier 1 medulloblastoma encounter. Make the sampling anchor tier-aware
   or record that it is deliberately broader. Also undecided: whether time zero should come
   from the Condition onset or recorded date (`t0_condition_day` does not exist yet).
 
@@ -185,10 +185,6 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   dates are compared as exact days (the first day of the period). `<name>_day_precision` is
   carried in the wide tables and `client_timeline.date_precision`, but not yet into the
   `eligible` and `outcome` first-day columns.
-
-- [ ] P3 · `eligible` · `t0_source` is `'casedef_tier1_medulloblastoma'` even when `t0_day`
-  is NULL (`eligible_dx.sql:59`); the header says tiers 2 and 3 (`eligible_dx.sql:6`),
-  casedef has tiers 1-2.
 
 ## Outcomes
 
@@ -267,6 +263,28 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — t0 from the LLM gold diagnosis day first
+
+- `eligible_dx.sql`: `t0_day` is the earliest day-precision `diagnosis_gold_day` from a diagnosis
+  note of any subtype (ATRT included), else the first tier 1 medulloblastoma encounter. New
+  `t0_source` values `llm_diagnosis_gold` / `casedef_tier1_medulloblastoma`, NULL without a t0
+  (was always the casedef label). New columns `casedef_t0_day` and `llm_t0_gold_day`.
+- LLM-only and CHOP-roster subjects with a gold date now get a t0 and can reach the trial view.
+- The two `dx_date_disagree` warn checks compare the LLM date with `casedef_t0_day` (comparing it
+  with `t0_day` would compare the gold date with itself). `t0_anchor_casedef_later` can now fire.
+- Fixtures: p6 and p8 gold dates are month precision, so they keep their seeded scenarios and test
+  that a coarse gold date does not set t0. New test `test_t0_prefers_the_llm_gold_diagnosis_day`.
+  eligible.md, PROTOCOL 2, 4 and 6, and the data dictionary updated.
+
+### 2026-10-21 — CHOP roster rows are tier 2
+
+- `sql/custom/pcx__cohort_casedef_include.sql` (CHOP): `subject_ref` is now `enc.subject_ref`
+  (was the roster `patient_id`, which never matched the population), joined on `anon_id`.
+- Roster rows are tier 2, not 1. They sit on every encounter of a listed patient, so as tier 1
+  `eligible_dx` took the first encounter of any kind as t0. A roster-only patient is still a
+  case-definition subject, with a NULL t0 unless a tier 1 medulloblastoma code sets it.
+  `release/package` not updated: rebuild the release.
 
 ### 2026-10-21 — Why eligible_dx ages come from birthdate
 

@@ -1,18 +1,19 @@
 -- ============================================================================
--- Warning: LLM diagnosis is more than 90 days BEFORE the structured time zero.
+-- Warning: LLM diagnosis is more than 90 days BEFORE the tier 1 code encounter
+-- (casedef_t0_day).
 --
 -- llm_day is the earliest LLM tissue-diagnosis date (diagnosis_date_gold),
 -- falling back to the earliest LLM diagnosis_date. A note-stated diagnosis
--- well before t0_day usually means an outside diagnosis (transfer-in) or a
--- casedef valueset gap, so age_months_at_t0 and every prior-to-t0 flag are
--- measured from the wrong day.
+-- well before casedef_t0_day usually means an outside diagnosis (transfer-in)
+-- or a casedef valueset gap. t0_day already uses a day-precision gold date, so
+-- this matters most when the LLM date is coarse or only diagnosis_date.
 -- Companion: pcx__warn_eligible_dx_date_disagree_fhir_before_llm.
 -- ============================================================================
 CREATE TABLE pcx__warn_eligible_dx_date_disagree_llm_before_fhir AS
 
 WITH disagreement AS (
     SELECT  subject_ref,
-            t0_day                                                      AS fhir_day,
+            casedef_t0_day                                              AS fhir_day,
             COALESCE(llm_diagnosis_gold_day_min, llm_diagnosis_day_min) AS llm_day
     FROM    pcx__eligible_dx
 )
