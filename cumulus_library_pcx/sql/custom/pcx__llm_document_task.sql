@@ -250,3 +250,53 @@ WHERE   task.document_type IN (
             'NEUROSURGERY_NOTE',
             'ONCOLOGY_NOTE')
 ;
+
+-----------------------------------------------------------
+-- Survival timeline
+-- relevance: explicit/implicit
+-- or document type in DOCUMENT_TASKS["survival_timeline"]
+--
+-- Only notes from each subject's last clinical visit, the
+-- latest encounter day among the qualifying notes.
+-- Vital status and last known alive are documented at the
+-- last visit, there are no visits after death.
+-----------------------------------------------------------
+CREATE OR REPLACE VIEW pcx__llm_document_task_survival_timeline AS
+WITH
+encounter_day AS (
+    SELECT  DISTINCT
+            encounter_ref,
+            enc_period_start_day
+    FROM    pcx__cohort_study_population
+),
+survival_note AS (
+    SELECT  task.survival_timeline_relevance,
+            task.survival_timeline_confidence,
+            task.document_type,
+            task.note_ref,
+            task.encounter_ref,
+            task.subject_ref,
+            encounter_day.enc_period_start_day
+    FROM    pcx__llm_document_task AS task
+    JOIN    encounter_day
+    ON      task.encounter_ref = encounter_day.encounter_ref
+    WHERE   task.survival_timeline_relevance IN ('EXPLICIT', 'IMPLICIT')
+    OR      task.document_type IN (
+                'RESEARCH_PROTOCOL_DOCUMENT',
+                'DISCHARGE_SUMMARY',
+                'END_OF_LIFE_DOCUMENT',
+                'ONCOLOGY_NOTE',
+                'NONE_OF_THE_ABOVE')
+),
+last_visit AS (
+    SELECT  subject_ref,
+            MAX(enc_period_start_day) AS enc_period_start_day
+    FROM    survival_note
+    GROUP BY subject_ref
+)
+SELECT  survival_note.*
+FROM    survival_note
+JOIN    last_visit
+ON      survival_note.subject_ref = last_visit.subject_ref
+AND     survival_note.enc_period_start_day = last_visit.enc_period_start_day
+;
