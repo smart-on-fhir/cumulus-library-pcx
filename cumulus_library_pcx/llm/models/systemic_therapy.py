@@ -3,6 +3,14 @@ The reference uses three induction cycles (cyclophosphamide, etoposide, vincrist
 cisplatin with/without MTX), then three carboplatin/thiotepa consolidation cycles with
 stem-cell infusion. Extract actual evidence; never populate drugs/cycles from protocol
 name alone or equate a planned protocol dose with administration.
+
+Produces these SQL tables:
+SystemicTherapyAnnotation (per note_ref)
+├── regimens[]              → pcx__llm_systemic_therapy_regimen
+│   └── agents[]            → pcx__llm_systemic_therapy_agent
+│       └── administrations[] → pcx__llm_systemic_therapy_administration
+├── cycles[]                → pcx__llm_systemic_therapy_cycle
+└── stem_cell_infusions[]   → pcx__llm_systemic_therapy_stem_cell_infusion
 """
 from pydantic import BaseModel, Field, model_validator
 from .treatment import TreatmentPhase, DeliveryStatus
