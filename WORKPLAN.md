@@ -264,6 +264,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Molecular group: a real group is never replaced, method from the same report
+
+- `pcx__client_diagnosis` picks ONE molecular report per subject and takes `molecular_group_ever` and `molecular_group_method` from that same report. Order: a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats NOT_SUBGROUPED / INDETERMINATE, then the latest note (`pcx__llm_note_date`, undated notes last), then the last report in the note (`report_index`).
+- An uncertain result is shown only when the subject has no real group. Previously a later NOT_SUBGROUPED / INDETERMINATE overwrote an earlier real group, and the method could come from a different report.
+- `molecular_group_baseline` uses the same order among reports within 90 days of t0_day.
+- Test `tests/test_client_diagnosis_sql.py` (fails on the old SQL). Fixture columns appended to `tests/data/schema.sql` and `tests/data/warn/pcx__llm_diagnosis_wide.csv`. Descriptions updated in `spreadsheet/client_dictionary.csv`.
+
 ### 2026-10-21 — Model rules checked in SQL, since the validators are test-only
 
 - Cumulus Library validates each LLM response against the JSON schema, not the Python models,

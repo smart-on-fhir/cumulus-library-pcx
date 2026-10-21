@@ -80,13 +80,24 @@ diagnosis AS (
 ),
 
 -- Molecular group from the molecular task, one row per documented report.
--- A CLINICAL_SUMMARY method is not methylation confirmation, so the methods ride along.
+-- One report is selected per subject, and its group and methods are reported
+-- together, so the method always describes the selected group. A CLINICAL_SUMMARY
+-- method is not methylation confirmation. Report order:
+--   1. a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats
+--      NOT_SUBGROUPED and INDETERMINATE, which are absence of a result. Those
+--      are reported only when the subject has no real group.
+--   2. the latest note, undated notes first
+--   3. the last report in the note
 molecular_note AS (
-    SELECT  src.subject_ref,
-            src.note_ref,
-            COALESCE(note_day.note_date, DATE '0001-01-01')    AS note_order_day,
+    SELECT  DISTINCT
+            src.subject_ref,
+            CONCAT(src.note_ref, '#', CAST(src.report_index AS VARCHAR))   AS report_key,
+            ROW(src.molecular_group NOT IN ('NOT_SUBGROUPED', 'INDETERMINATE'),
+                COALESCE(note_day.note_date, DATE '0001-01-01'),
+                src.note_ref,
+                src.report_index)                               AS report_order,
             (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_date)) <= 90)
-                                                        AS in_baseline,
+                                                                AS in_baseline,
             src.molecular_group,
             src.methods
     FROM    pcx__llm_molecular_report       AS src
@@ -98,13 +109,10 @@ molecular_note AS (
     WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
 ),
 
-molecular AS (
+molecular_pick AS (
     SELECT  subject_ref,
-            MAX_BY(molecular_group, ROW(note_order_day, note_ref))    AS molecular_group_ever,
-            MAX_BY(molecular_group, ROW(note_order_day, note_ref))
-                FILTER (WHERE in_baseline)                              AS molecular_group_baseline,
-            MAX_BY(methods, ROW(note_order_day, note_ref))
-                FILTER (WHERE methods <> '')                            AS molecular_group_method,
+            MAX_BY(report_key, report_order)                            AS ever_key,
+            MAX_BY(report_key, report_order) FILTER (WHERE in_baseline) AS baseline_key,
             -- NOT_SUBGROUPED and INDETERMINATE are absence of a result, not groups
             COUNT(DISTINCT molecular_group)
                 FILTER (WHERE molecular_group IN ('WNT', 'SHH', 'GROUP_3', 'GROUP_4', 'NON_WNT_NON_SHH'))
@@ -112,6 +120,22 @@ molecular AS (
             BOOL_OR(molecular_group = 'GROUP_3')                        AS group_3_ever_bool
     FROM    molecular_note
     GROUP BY subject_ref
+),
+
+molecular AS (
+    SELECT  pick.subject_ref,
+            ever.molecular_group                                        AS molecular_group_ever,
+            baseline.molecular_group                                    AS molecular_group_baseline,
+            NULLIF(ever.methods, '')                                    AS molecular_group_method,
+            pick.molecular_group_distinct_count,
+            pick.group_3_ever_bool
+    FROM    molecular_pick          AS pick
+    JOIN    molecular_note          AS ever
+      ON    ever.subject_ref = pick.subject_ref
+     AND    ever.report_key  = pick.ever_key
+    LEFT JOIN molecular_note        AS baseline
+      ON    baseline.subject_ref = pick.subject_ref
+     AND    baseline.report_key  = pick.baseline_key
 ),
 
 -- Structured case-definition subtypes at tier 1, for comparison with the notes.

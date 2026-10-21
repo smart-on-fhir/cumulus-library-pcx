@@ -77,7 +77,8 @@ CREATE TABLE pcx__llm_diagnosis_wide (
     diagnosis_date_gold_precision VARCHAR,
     diagnosis_gold_day DATE,
     diagnosis_gold_day_precision VARCHAR,
-    age_at_diagnosis_months BIGINT
+    age_at_diagnosis_months BIGINT,
+    historical_diagnosis_term VARCHAR
 );
 
 CREATE TABLE pcx__cohort_proc_craniotomy (
@@ -336,7 +337,10 @@ CREATE TABLE pcx__llm_molecular_report (
     report_date VARCHAR,
     report_date_precision VARCHAR,
     report_day DATE,
-    report_day_precision VARCHAR
+    report_day_precision VARCHAR,
+    report_index BIGINT,
+    molecular_group VARCHAR,
+    methods VARCHAR
 );
 
 CREATE TABLE pcx__llm_registry_eligibility_wide (
