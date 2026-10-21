@@ -261,6 +261,15 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Survival timeline notes: last visit, death documents and unlinked notes
+
+- `pcx__llm_document_task_survival_timeline` keeps the last-visit notes (2026-10-20) and adds
+  END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any visit, so a documented death
+  is never dropped, and notes with no encounter or an encounter outside the study population
+  (LEFT JOIN, was an inner join that dropped them). The LLM extracts those notes' dates.
+- New `tests/test_document_task_sql.py` runs the selector SQL on eight hand-made notes; it fails
+  on the old SQL. PROTOCOL 5 decision added.
+
 ### 2026-10-21 — Event-task death reaches OS and EFS alike
 
 - `outcome_vital_status.sql` is the one place deaths are reconciled: it now adds event-task

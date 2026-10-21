@@ -256,10 +256,16 @@ WHERE   task.document_type IN (
 -- relevance: explicit/implicit
 -- or document type in DOCUMENT_TASKS["survival_timeline"]
 --
--- Only notes from each subject's last clinical visit, the
--- latest encounter day among the qualifying notes.
--- Vital status and last known alive are documented at the
--- last visit, there are no visits after death.
+-- Of the qualifying notes, keep:
+--   notes from each subject's last clinical visit, the latest
+--   encounter day among the qualifying notes. Vital status and
+--   last known alive are documented at the last visit, there
+--   are no visits after death.
+--   END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes
+--   from any visit, so a documented death is never dropped.
+--   notes not on a study-population visit (no encounter_ref,
+--   or an encounter outside the population). They cannot be
+--   ordered, so they are kept and the LLM extracts their dates.
 -----------------------------------------------------------
 CREATE OR REPLACE VIEW pcx__llm_document_task_survival_timeline AS
 WITH
@@ -278,7 +284,7 @@ survival_note AS (
             task.subject_ref,
             encounter_day.enc_period_start_day
     FROM    pcx__llm_document_task AS task
-    JOIN    encounter_day
+    LEFT JOIN encounter_day
     ON      task.encounter_ref = encounter_day.encounter_ref
     WHERE   task.survival_timeline_relevance IN ('EXPLICIT', 'IMPLICIT')
     OR      task.document_type IN (
@@ -298,5 +304,8 @@ SELECT  survival_note.*
 FROM    survival_note
 JOIN    last_visit
 ON      survival_note.subject_ref = last_visit.subject_ref
-AND     survival_note.enc_period_start_day = last_visit.enc_period_start_day
+WHERE   survival_note.enc_period_start_day = last_visit.enc_period_start_day
+OR      survival_note.enc_period_start_day IS NULL
+OR      survival_note.document_type = 'END_OF_LIFE_DOCUMENT'
+OR      survival_note.survival_timeline_relevance = 'EXPLICIT'
 ;

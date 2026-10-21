@@ -90,6 +90,10 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [decided] 2026-10-08, Andy: the document tasks (`document_topic`, `document_type`) select every
   note in `pcx__sample_task`, the casedef notes plus the Elasticsearch notes, which the `sample`
   stage builds at every site.
+- [decided] 2026-10-21, Andy: the survival_timeline task reads the qualifying notes from each
+  subject's last visit, plus END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any
+  visit, plus notes not on a study-population visit (no encounter, or one outside the
+  population), whose dates the LLM extracts (`pcx__llm_document_task_survival_timeline`).
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created. Supply reviewed selectors, each with a `note_ref` column,
   before running it. The tables are declared as site-supplied under `[builder] external_tables`.
