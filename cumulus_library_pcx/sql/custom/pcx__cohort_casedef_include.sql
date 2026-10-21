@@ -5,7 +5,7 @@
 --    system              	{'http://hl7.org/fhir/sid/icd-10-cm','http://snomed.info/sct', ...}
 --    code                	vocabulary concept ID
 --    display             	vocabulary concept display
---    tier                	1: best code match; 2: lower but still a match
+--    tier                	1: best code match, 2: lower but still a match
 --    resource_ref        	FHIR Condition/$id
 --    subject_ref         	FHIR Patient/$id
 --    encounter_ref_link  	FHIR Encounter/$id
