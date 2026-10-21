@@ -5,8 +5,11 @@
 --  study-population encounter carrying a TIER 1 medulloblastoma casedef code.
 --  Tier 2 and 3 codes (unspecified brain neoplasm) are kept as evidence only,
 --  so a subject with no tier 1 code has a NULL t0_day and stays a candidate.
---  Age is in completed months from core__patient.birthdate, because the
---  ACNS0334 criterion is under 36 months and integer years cannot express it.
+--  Age is in completed months from core__patient.birthdate, not from
+--  core__encounter.age_at_visit (whole years). Under 36 months alone would
+--  equal age_at_visit < 3, but age_months_at_t0, the under-8-months
+--  high-risk qualifier (pcx__eligible) and the LLM diagnosis-gold age
+--  (not an encounter day) all need months.
 --  LLM diagnosis evidence comes from pcx__llm_diagnosis_wide and is
 --  reported beside the structured evidence, never merged into it.
 --  ATRT is an ACNS0334 exclusion, not a case. Its casedef rows exist only so
