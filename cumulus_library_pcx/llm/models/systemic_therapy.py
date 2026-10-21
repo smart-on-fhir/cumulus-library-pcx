@@ -129,6 +129,16 @@ class TreatmentProtocol(StrEnum):
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
+class TrialArm(StrEnum):
+    """Randomized arm the note explicitly assigns the patient to, read together with protocol_name.
+    REGIMEN_A: Regimen A or Arm A, such as ACNS0334 Regimen A (without high-dose methotrexate).
+    REGIMEN_B: Regimen B or Arm B, such as ACNS0334 Regimen B (with high-dose methotrexate).
+    NONE_OF_THE_ABOVE: another arm, a non-randomized or off-study treatment, or no arm documented."""
+    REGIMEN_A = "REGIMEN_A"
+    REGIMEN_B = "REGIMEN_B"
+    NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
+
+
 class CycleCompletionStatus(StrEnum):
     """Explicitly documented status of a treatment cycle; do not infer completion from dates alone.
     PLANNED: planned or scheduled, not yet started.
@@ -327,7 +337,14 @@ class MedicalTherapyRegimenMention(SpanAugmentedMention):
     in accordance with, its start/stop, and the agents it comprises. Emit one per distinct
     regimen documented in this note."""
     phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE)
-    documented_trial_arm: str | None = Field(default=None, description="Explicit randomized arm assignment, if any. Do not infer randomization from observed treatment.")
+    documented_trial_arm: TrialArm = Field(
+        default=TrialArm.NONE_OF_THE_ABOVE,
+        description="Explicitly documented randomized arm assignment. Do not infer the arm from observed treatment, such as high-dose methotrexate being given.",
+    )
+    documented_trial_arm_verbatim: str | None = Field(
+        default=None,
+        description="Arm exactly as written (for QA), such as 'Regimen B' or 'randomized to Arm B'. Null if no arm is documented.",
+    )
     protocol_name: TreatmentProtocol = Field(default=TreatmentProtocol.NONE_OF_THE_ABOVE)
     protocol_name_verbatim: str | None = Field(
         default=None,

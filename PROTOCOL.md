@@ -119,7 +119,8 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   surgery flag is a trial criterion.
 - [source] E1 ATRT: tier 1 atrt casedef code or any single LLM note with subtype ATRT.
 - [source] E2 Prior chemotherapy before t0: earliest chemotherapy order, pharmacy dispense or
-  LLM-administered agent.
+  LLM-administered agent or dose. Prior methotrexate: earliest high-dose dose or ACNS0334
+  Regimen B evidence.
 - [source] E3 Prior radiation before t0: earliest tier 1 radiation procedure, tier 1 radiation
   encounter code, or LLM-administered radiation.
 - [decided] 2026-09-30, Andy: prior therapy is three flags, `methotrexate_prior_to_t0_bool`,
@@ -129,6 +130,14 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   `*_any_bool` is exposure at any time, FALSE when there is no evidence.
 - [decided] 2026-09-30, Andy: ACNS0334 excludes any prior chemotherapy, so prior methotrexate
   excludes from `pcx__eligible_trial` like the six backbone agents.
+- [decided] 2026-10-21, Andy: the methotrexate exposure is high-dose methotrexate. It counts from
+  an ADMINISTERED dose explicitly called high-dose (`llm_high_dose`) or an ACNS0334 regimen with
+  `documented_trial_arm = REGIMEN_B` (`llm_acns0334_regimen_b`: the assignment alone counts, and
+  methotrexate administered in it adds its dates). `methotrexate_source` names which. Structured
+  methotrexate orders and dispenses are evidence only. LLM receipt is the agent-level or the
+  dose-level `ADMINISTERED`, earliest date wins. Other methotrexate (intrathecal, not high-dose)
+  is chemotherapy only. Systemic therapy v2 amended in place: `documented_trial_arm` is the
+  `TrialArm` enum (REGIMEN_A, REGIMEN_B, NONE_OF_THE_ABOVE) with `documented_trial_arm_verbatim`.
 - [decided] 2026-09-30, Andy: MedicationDispense hand-overs (`core__medicationdispense`
   `whenhandedover_day`, cancelled and declined dropped) are structured evidence beside
   MedicationRequest orders. A dispense is closer to receipt than an order but is not proof of
@@ -171,9 +180,10 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   - Prior-to-first-event exposure flags are NULL (unknown) when the timing is uncertain and the
     exposure is not on or after the dated event. On or after it is still FALSE.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
-  source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
-  ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
-  chemotherapy except the supportive markers leucovorin, mesna and dexrazoxane
+  source. Methotrexate is high-dose or ACNS0334 Regimen B LLM evidence only. Structured
+  chemotherapy is orders and pharmacy dispenses, not administration; LLM ADMINISTERED agents and
+  doses are the only receipt evidence, and every administered agent counts as chemotherapy
+  except the supportive markers leucovorin, mesna and dexrazoxane
   ([WORKPLAN](WORKPLAN.md#eligibility)).
 
 ## 8. Analysis

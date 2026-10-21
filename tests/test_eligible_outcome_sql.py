@@ -80,23 +80,49 @@ def test_relaxed_criteria_are_flags_not_exclusions(con):
 
 
 def test_prior_methotrexate_is_a_flag_here_and_an_exclusion_in_the_trial():
-    # p7 plus one methotrexate order a month before its t0 (2020-01-01)
+    # p7 plus one methotrexate order a month before its t0 (2020-01-01): structured
+    # methotrexate is evidence only, so p7 is not exposed and stays in the trial view
+    order = ("INSERT INTO pcx__cohort_variable_union_rx VALUES "
+             "('Patient/p7', 'rx_contrast_methotrexate', DATE '2019-12-01')")
     con = sqltest.connect()
-    con.execute("INSERT INTO pcx__cohort_variable_union_rx VALUES "
-                "('Patient/p7', 'rx_contrast_methotrexate', DATE '2019-12-01')")
+    con.execute(order)
     sqltest.run_custom(con)
     row = eligible(con)['Patient/p7']
-    assert (row['methotrexate_prior_to_t0_bool'], row['chemo_prior_to_t0_bool'], row['methotrexate_any_bool']) == (True, False, True)
+    assert (row['methotrexate_prior_to_t0_bool'], row['chemo_prior_to_t0_bool'], row['methotrexate_any_bool']) == (False, False, False)
+    assert 'Patient/p7' in trial(con)
+    # plus an explicitly high-dose methotrexate dose given that day: prior methotrexate,
+    # which is also prior chemotherapy, so p7 leaves the trial view
+    con = sqltest.connect()
+    con.execute(order)
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, agent_name, "
+                "regimen_index, agent_index) VALUES ('Patient/p7', 'note-p7-rx', 'NONE_OF_THE_ABOVE', 'METHOTREXATE', 1, 1)")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, administration_day, "
+                "regimen_index, agent_index, delivery_status, high_dose_methotrexate_explicit_bool) VALUES "
+                "('Patient/p7', 'note-p7-rx', DATE '2019-12-01', 1, 1, 'ADMINISTERED', TRUE)")
+    sqltest.run_custom(con)
+    row = eligible(con)['Patient/p7']
+    assert (row['methotrexate_prior_to_t0_bool'], row['chemo_prior_to_t0_bool'], row['methotrexate_any_bool']) == (True, True, True)
     assert 'Patient/p7' not in trial(con)
+
+
+def test_methotrexate_is_high_dose_or_acns0334_regimen_b(con):
+    rows = {r[0]: r[1:] for r in con.execute(
+        "SELECT subject_ref, methotrexate_source, methotrexate_first_day, methotrexate_high_dose_first_day, "
+        "methotrexate_regimen_b_first_day, chemo_administered_first_day FROM pcx__eligible_rx").fetchall()}
+    # p1: on ACNS0334 Regimen B with no regimen start date, dated by its administered methotrexate.
+    # Its cisplatin agent is only PLANNED, but a cisplatin dose is ADMINISTERED: dose-level receipt is chemo.
+    assert rows['Patient/p1'] == ('llm_acns0334_regimen_b', date(2020, 2, 12), None, date(2020, 2, 12), date(2020, 2, 5))
+    # p8: the explicitly high-dose dose counts. The earlier intrathecal, not high-dose dose is chemo only.
+    assert rows['Patient/p8'] == ('llm_high_dose', date(2021, 2, 1), date(2021, 2, 1), None, date(2021, 1, 15))
 
 
 def test_dispense_is_structured_evidence_not_receipt(con):
     rows = {r[0]: r[1:] for r in con.execute(
         "SELECT subject_ref, chemo_first_day, chemo_order_first_day, chemo_dispense_first_day, "
-        "methotrexate_dispense_first_day, methotrexate_administered_bool, chemo_any_bool FROM pcx__eligible_rx").fetchall()}
+        "methotrexate_dispense_first_day, methotrexate_any_bool, chemo_any_bool FROM pcx__eligible_rx").fetchall()}
     # p2: cisplatin handed over before its first order is the earliest chemo day
     assert rows['Patient/p2'][:3] == (date(2014, 10, 28), date(2014, 11, 1), date(2014, 10, 28))
-    # p6: a methotrexate dispense is neither receipt nor chemotherapy
+    # p6: a methotrexate dispense is evidence only: neither methotrexate exposure nor chemotherapy
     assert rows['Patient/p6'][3:] == (date(2020, 6, 3), False, False)
     # p5: cancelled and never-handed-over dispenses are ignored, p1: a code outside the rx valuesets is ignored
     assert rows['Patient/p5'][2] is None

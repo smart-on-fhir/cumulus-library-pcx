@@ -8,7 +8,9 @@
 -- every prior-to-first-event flag and initial_therapy_sequence, can therefore
 -- rest on an order, a dispense or an encounter code alone.
 --
---   methotrexate_order_only   methotrexate ordered or dispensed, never LLM-administered
+--   methotrexate_order_only   methotrexate ordered or dispensed, but no high-dose or
+--                             ACNS0334 Regimen B evidence, so not counted as exposure
+--                             (structured methotrexate is evidence only)
 --   radiation_code_only       radiation coded, never LLM-administered
 --   chemo_order_only          backbone chemo ordered or dispensed, never LLM-administered
 -- ============================================================================
@@ -24,8 +26,8 @@ SELECT  'methotrexate_order_only'                                               
                                                                                 AS detail
 FROM    pcx__eligible_rx        AS rx
 JOIN    pcx__outcome_exposure   AS exposure ON exposure.subject_ref = rx.subject_ref
-WHERE   rx.methotrexate_any_bool
-AND     NOT COALESCE(rx.methotrexate_administered_bool, FALSE)
+WHERE   (rx.methotrexate_order_first_day IS NOT NULL OR rx.methotrexate_dispense_first_day IS NOT NULL)
+AND     NOT rx.methotrexate_any_bool
 
 UNION ALL
 

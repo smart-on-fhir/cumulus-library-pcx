@@ -84,15 +84,26 @@ Optional in `pcx__eligible`, **required** in `pcx__eligible_trial` (a NULL age a
 
 ### Medication
 
-Methotrexate is the "causal contrast"; the six backbone agents are chemotherapy. `eligible_rx.sql` unions every
-dated candidate with its source and takes the earliest day per exposure:
+Methotrexate is the "causal contrast": **high-dose** methotrexate, as in ACNS0334 Regimen B. The six backbone agents
+are chemotherapy. `eligible_rx.sql` unions every candidate with its source and takes the earliest day per exposure.
+
+Methotrexate exposure comes only from the LLM, and `methotrexate_source` lists which of these gave evidence:
+
+* `llm_high_dose`: an ADMINISTERED methotrexate dose with `high_dose_methotrexate_explicit_bool` TRUE
+  (`pcx__llm_systemic_therapy_administration`);
+* `llm_acns0334_regimen_b`: a regimen with `protocol_name = ACNS0334` and `documented_trial_arm = REGIMEN_B`.
+  The assignment alone counts, dated by the regimen start; methotrexate ADMINISTERED within that regimen adds its dates.
+
+Methotrexate that is neither (intrathecal, intraventricular, or not called high-dose) is chemotherapy only.
+Structured methotrexate orders and dispenses have no dose or route, so they are evidence only
+(`methotrexate_order_first_day`, `methotrexate_dispense_first_day`) and never set `methotrexate_first_day`.
 
 | file                                                                       | criteria                                                                                              |
 |----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`); prior methotrexate excludes from the trial-like cohort like the backbone agents |
+| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** and dispenses: evidence only, not exposure |
 | [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** |
 | `core__medicationdispense`                                                 | pharmacy **dispenses** (`whenHandedOver`, cancelled and declined dropped) for the same valuesets: closer to receipt than an order, not proof of administration |
-| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate is `agent_name = METHOTREXATE`; **every** other administered agent counts as chemotherapy, including unlisted anticancer agents (`NONE_OF_THE_ABOVE`), except the supportive markers `LEUCOVORIN`, `MESNA` and `DEXRAZOXANE` (WORKPLAN.md) |
+| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM receipt, `delivery_status = ADMINISTERED` on the agent **or** on any of its doses (earliest date wins): high-dose methotrexate and ACNS0334 Regimen B as above; **every** administered agent counts as chemotherapy, methotrexate of any dose and unlisted anticancer agents (`NONE_OF_THE_ABOVE`) included, except the supportive markers `LEUCOVORIN`, `MESNA` and `DEXRAZOXANE` (WORKPLAN.md) |
 
 Views by strictness, as implemented:
 
@@ -117,7 +128,8 @@ Views by strictness, as implemented:
 ### Prior chemotherapy
 
 `chemo_prior_to_t0_bool` and `methotrexate_prior_to_t0_bool` are TRUE when the first dated
-exposure (order, dispense or LLM-administered agent) is before `t0_day`. They are FALSE when
+exposure is before `t0_day`: for chemo an order, dispense or LLM-administered agent or dose, for
+methotrexate a high-dose dose or ACNS0334 Regimen B evidence. They are FALSE when
 `t0_day` is known and nothing is dated before it, including no evidence or only undated
 evidence, and NULL only when `t0_day` is NULL. The trial-like cohort excludes TRUE and NULL.
 `chemo_any_bool` and `methotrexate_any_bool` report exposure at any time.

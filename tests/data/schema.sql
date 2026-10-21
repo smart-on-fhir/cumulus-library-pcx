@@ -173,7 +173,9 @@ CREATE TABLE pcx__llm_systemic_therapy_agent (
     assessed_through_date VARCHAR,
     assessed_through_date_precision VARCHAR,
     assessed_through_day DATE,
-    assessed_through_day_precision VARCHAR
+    assessed_through_day_precision VARCHAR,
+    regimen_index BIGINT,
+    agent_index BIGINT
 );
 
 CREATE TABLE pcx__cohort_proc_radiation (
@@ -252,7 +254,10 @@ CREATE TABLE pcx__llm_systemic_therapy_regimen (
     regimen_stop_date VARCHAR,
     regimen_stop_date_precision VARCHAR,
     regimen_stop_day DATE,
-    regimen_stop_day_precision VARCHAR
+    regimen_stop_day_precision VARCHAR,
+    regimen_index BIGINT,
+    protocol_name VARCHAR,
+    documented_trial_arm VARCHAR
 );
 
 CREATE TABLE pcx__llm_survival_timeline_anchor (
@@ -407,7 +412,12 @@ CREATE TABLE pcx__llm_systemic_therapy_administration (
     administration_date VARCHAR,
     administration_date_precision VARCHAR,
     administration_day DATE,
-    administration_day_precision VARCHAR
+    administration_day_precision VARCHAR,
+    regimen_index BIGINT,
+    agent_index BIGINT,
+    delivery_status VARCHAR,
+    route VARCHAR,
+    high_dose_methotrexate_explicit_bool BOOLEAN
 );
 
 CREATE TABLE pcx__llm_systemic_therapy_cycle (

@@ -264,6 +264,24 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Methotrexate exposure is high-dose, from dose-level receipt too
+
+- `eligible_rx.sql`: methotrexate counts only from the LLM: an ADMINISTERED dose with
+  `high_dose_methotrexate_explicit_bool` TRUE (`llm_high_dose`), or an ACNS0334 regimen with
+  `documented_trial_arm = REGIMEN_B` (`llm_acns0334_regimen_b`, dated by the regimen start and by
+  methotrexate administered in it). New `methotrexate_source`, `_high_dose_first_day`,
+  `_regimen_b_first_day`, `_high_dose_bool`, `_regimen_b_bool`. `methotrexate_administered_*` removed.
+- Structured methotrexate orders and dispenses are evidence only (`_order_first_day`,
+  `_dispense_first_day`). Other methotrexate (intrathecal, not high-dose) is chemotherapy only.
+- LLM receipt is the agent-level or the dose-level ADMINISTERED, earliest wins, for chemo too:
+  a dose given under a PLANNED agent now counts.
+- `systemic_therapy.py` v2 amended in place (no results yet): `documented_trial_arm` is the
+  `TrialArm` enum (REGIMEN_A, REGIMEN_B, NONE_OF_THE_ABOVE) plus `documented_trial_arm_verbatim`.
+  Schema, summaries and the regimen wide SQL regenerated.
+- `client_exposure`, the `therapy_precedes_t0` and `exposure_order_only` warn checks, fixtures
+  (new administration CSV), tests, eligible.md, PROTOCOL 6 and 7, limitations 2 and both
+  dictionaries updated.
+
 ### 2026-10-21 — t0 from the LLM gold diagnosis day first
 
 - `eligible_dx.sql`: `t0_day` is the earliest day-precision `diagnosis_gold_day` from a diagnosis

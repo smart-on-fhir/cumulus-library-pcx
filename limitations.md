@@ -40,11 +40,14 @@ evidence as further nullable criteria. Do not convert undocumented criteria into
 
 ## 2. Any-dose methotrexate is insufficient treatment specificity
 
-**Gap:** The exposure is any methotrexate order, pharmacy dispense or LLM-administered methotrexate. That
-does not identify the study treatment strategy (high-dose, 5 g/m², with leucovorin rescue
-and serum levels) described in the reference paper.
+**Gap:** Since 2026-10-21 the exposure is high-dose methotrexate from the LLM only: a dose the note
+explicitly calls high-dose, or ACNS0334 Regimen B. Structured orders and dispenses carry no dose or
+route and are evidence only. A note that gives "5 g/m2" without calling it high-dose does not count
+(numeric dose classification is not implemented), and a Regimen B assignment counts as exposure
+without proof of delivery, so it mixes intended with delivered treatment. Neither captures the full
+strategy (5 g/m², with leucovorin rescue and serum levels) described in the reference paper.
 
-**Resolution:** Retain any-dose exposure for discovery, then capture dose and units,
+**Resolution:** Classify high dose from `dose_amount` and `dose_unit` too, then capture dose and units,
 route, administration dates, induction/consolidation phase, companion agents,
 stem-cell rescue, interruptions and discontinuation. Add methotrexate-level and leucovorin
 valuesets as structured markers. Separate protocol documentation, intended treatment and

@@ -1,2 +1,2 @@
-subject_ref,note_ref,protocol_name_verbatim,regimen_start_date,regimen_start_date_precision,regimen_start_day,regimen_start_day_precision,regimen_stop_date,regimen_stop_date_precision,regimen_stop_day,regimen_stop_day_precision
-Patient/p1,,ACNS0334,,,,,,,,
+subject_ref,note_ref,protocol_name_verbatim,regimen_start_date,regimen_start_date_precision,regimen_start_day,regimen_start_day_precision,regimen_stop_date,regimen_stop_date_precision,regimen_stop_day,regimen_stop_day_precision,regimen_index,protocol_name,documented_trial_arm
+Patient/p1,note-p1-rx,ACNS0334,,,,,,,,,1,ACNS0334,REGIMEN_B

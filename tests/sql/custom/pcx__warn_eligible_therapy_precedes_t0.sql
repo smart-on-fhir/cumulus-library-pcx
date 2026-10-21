@@ -31,9 +31,8 @@ WITH exposure AS (
             'methotrexate'                      AS exposure,
             rx.methotrexate_first_day           AS exposure_day,
             CASE
-                WHEN rx.methotrexate_administered_first_day = rx.methotrexate_first_day THEN 'llm_administered'
-                WHEN rx.methotrexate_dispense_first_day = rx.methotrexate_first_day     THEN 'rx_dispense'
-                ELSE                                                                         'rx_order'
+                WHEN rx.methotrexate_high_dose_first_day = rx.methotrexate_first_day THEN 'llm_high_dose'
+                ELSE                                                                      'llm_acns0334_regimen_b'
             END                                 AS source
     FROM    pcx__eligible_rx AS rx
     WHERE   rx.methotrexate_first_day < rx.t0_day

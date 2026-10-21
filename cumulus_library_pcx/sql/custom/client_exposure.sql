@@ -5,6 +5,9 @@
 -- from pcx__eligible_rx / pcx__eligible_radiation and every first-event flag
 -- from pcx__outcome_exposure, so this view adds no new rules. Subject-level
 -- sequence and protocol names live on pcx__client_subject.
+-- METHOTREXATE is high-dose methotrexate (pcx__eligible_rx): its administered
+-- columns are the explicitly high-dose doses, and the order and dispense
+-- columns are structured evidence that does not count as exposure.
 -- ==========================================================================
 CREATE TABLE pcx__client_exposure AS
 WITH
@@ -14,9 +17,9 @@ exposure AS (
             rx.methotrexate_first_day               AS first_day,
             rx.methotrexate_order_first_day         AS order_first_day,
             rx.methotrexate_dispense_first_day      AS dispense_first_day,
-            rx.methotrexate_administered_first_day  AS administered_first_day,
+            rx.methotrexate_high_dose_first_day     AS administered_first_day,
             rx.methotrexate_any_bool                AS any_bool,
-            rx.methotrexate_administered_bool       AS administered_bool,
+            rx.methotrexate_high_dose_bool          AS administered_bool,
             rx.methotrexate_prior_to_t0_bool        AS prior_to_t0_bool,
             outcome.methotrexate_prior_to_first_event_bool AS prior_to_first_event_bool
     FROM    pcx__eligible_rx            AS rx
