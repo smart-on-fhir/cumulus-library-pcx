@@ -417,7 +417,10 @@ CREATE TABLE pcx__llm_systemic_therapy_administration (
     agent_index BIGINT,
     delivery_status VARCHAR,
     route VARCHAR,
-    high_dose_methotrexate_explicit_bool BOOLEAN
+    high_dose_methotrexate_explicit_bool BOOLEAN,
+    dose_amount DOUBLE,
+    dose_unit VARCHAR,
+    cycle_num BIGINT
 );
 
 CREATE TABLE pcx__llm_systemic_therapy_cycle (
@@ -430,7 +433,8 @@ CREATE TABLE pcx__llm_systemic_therapy_cycle (
     cycle_stop_date VARCHAR,
     cycle_stop_date_precision VARCHAR,
     cycle_stop_day DATE,
-    cycle_stop_day_precision VARCHAR
+    cycle_stop_day_precision VARCHAR,
+    cycle_num BIGINT
 );
 
 CREATE TABLE pcx__llm_systemic_therapy_stem_cell_infusion (
@@ -439,7 +443,9 @@ CREATE TABLE pcx__llm_systemic_therapy_stem_cell_infusion (
     infusion_date VARCHAR,
     infusion_date_precision VARCHAR,
     infusion_day DATE,
-    infusion_day_precision VARCHAR
+    infusion_day_precision VARCHAR,
+    cycle_num BIGINT,
+    cd34_cells_per_kg DOUBLE
 );
 
 CREATE TABLE pcx__llm_transition_of_care_wide (

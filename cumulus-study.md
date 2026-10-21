@@ -109,7 +109,7 @@ The study prefix `pcx` is set only in `manifest.toml`.
 | `ELASTIC_OUTPUT_DIR` | `$CUMULUS_LIBRARY_DATA_PATH/elastic/output` | where `elastic_upload` looks for Elasticsearch result CSVs. With neither variable set, or no CSVs, the stage builds an empty `pcx__elastic_union` |
 | `CUMULUS_LIBRARY_DATA_PATH` | none | fallback for the folder above; `cumulus-library build` has its own uses for it |
 | `HOME_INSTITUTION` | `Boston Children's Hospital (BCH)` | named in the `transition_of_care` prompts; set it to your site before `llm_schema` |
-| `CUMULUS_PCX_STRICT_MENTIONS` | off | `1` makes the LLM model validators raise on missing evidence spans or bad dates. The default only warns; the test suite forces strict |
+| `CUMULUS_PCX_STRICT_MENTIONS` | off | Tests only: `1` makes the model validators raise on missing evidence spans or bad dates, and the test suite sets it. No effect at inference, where Cumulus Library validates against the JSON schema without the validators ([llm.md](llm.md)) |
 | `CUMULUS_ENCOUNTER_REF` | `encounter_ref_link` | which encounter link the templates use: `encounter_ref_link` (also attaches evidence by date) or `encounter_ref` (the FHIR Encounter reference only) |
 
 ## Site requirements

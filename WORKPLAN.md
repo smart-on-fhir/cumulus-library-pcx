@@ -138,9 +138,14 @@ No changes planned.
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
   regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
   the earliest resection and has no free-text match.
-- [ ] P3 · `llm` · **One validation switch** (was 4.6). `systemic_therapy.py`,
-  `survival_timeline.py` and `registry_eligibility.py` still `raise ValueError` directly, outside the
-  `CUMULUS_PCX_STRICT_MENTIONS` switch in `base.py`.
+- [ ] P3 · `llm` · **Validators are test-only** (was "One validation switch", 4.6). Cumulus
+  Library validates responses against the JSON schema, so the `@model_validator` checks and
+  `CUMULUS_PCX_STRICT_MENTIONS` run only in pytest. The checks that matter are SQL warn tables
+  (`pcx__warn_llm_model_rule`, `pcx__warn_llm_date_invalid`). Open: the evidence rule (a finding
+  needs verbatim spans) is unchecked, because the wide tables do not carry `has_mention` or
+  `spans`. Also open: numeric limits remain in other schemas and discard the whole note when
+  broken; the transition_of_care date `pattern` is the risky one. Remove them at each task's
+  next version bump.
 
 Deferred model fields. None is scheduled: each is restored only if an analysis needs it.
 Restoring one means a flat field on `DiagnosisAnnotation` (no mention wrapper), a task
@@ -258,6 +263,19 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — Model rules checked in SQL, since the validators are test-only
+
+- Cumulus Library validates each LLM response against the JSON schema, not the Python models,
+  so the `@model_validator` checks never run at inference. New warn table
+  `pcx__warn_llm_model_rule` applies them to the stored answers: administration date on a dose not
+  ADMINISTERED, dose unit without an amount, negative dose, cycle number below 1, negative CD34,
+  death date on a status not DECEASED, last known alive after death in the same note.
+- `pcx__warn_llm_date_invalid` also lists `llm_date_precision_missing` (a date without its
+  precision, or the reverse).
+- Fixtures seed each check (administration rows for p2, new cycle and stem-cell CSVs for p8, an
+  ALIVE survival note for p2 that does not move its outcome). llm.md, cumulus-study.md
+  (`CUMULUS_PCX_STRICT_MENTIONS` is tests only) and the WORKPLAN validation item corrected.
 
 ### 2026-10-21 — Systemic therapy v2: no numeric limits in the schema
 

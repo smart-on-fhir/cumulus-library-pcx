@@ -32,7 +32,11 @@ Routine lab names are informed by the associated trial's [eligibility listing](h
 
 ## Extraction conventions
 
-- Diagnosis uses evidence-backed mentions; integrated diagnosis, tumor location, laterality and germline predisposition are deferred (WORKPLAN.md, Clinical notes), while the historical diagnosis term remains. The shared evidence contract calls for nonempty verbatim spans for a present mention. Enforcement is warn-only by default: `base._mention_validation_issue` warns unless `CUMULUS_PCX_STRICT_MENTIONS=1`, which the test suite sets. Validators in `systemic_therapy.py`, `survival_timeline.py` and `registry_eligibility.py` still raise unconditionally, so production behaviour depends on which field is wrong (WORKPLAN.md). Explicit negative tests and non-receipt are useful evidence. Silence is unknown.
+- Diagnosis uses evidence-backed mentions; integrated diagnosis, tumor location, laterality and germline predisposition are deferred (WORKPLAN.md, Clinical notes), while the historical diagnosis term remains. The shared evidence contract calls for nonempty verbatim spans for a present mention.
+
+  **The model validators run only in the tests, never at inference.** Cumulus Library does not import these Python models: it reads the JSON schema in `llm/schemas/`, rebuilds a model from it (`jambo.SchemaConverter.build` in `nlp_builder._flatten_config`) and validates each response against that. A JSON schema carries field types, enum values and numeric limits, not `@model_validator` methods. So `base._mention_validation_issue` (spans vs `has_mention`, date vs precision), the raises in `systemic_therapy.py`, `survival_timeline.py` and `registry_eligibility.py`, and the `CUMULUS_PCX_STRICT_MENTIONS` switch affect pytest only. What does apply at inference is the schema, and a schema violation discards the whole note's response, so the models keep numeric limits out of it (systemic therapy has none since 2026-10-21).
+
+  The rules that matter are checked on the stored answers by SQL warn tables: `pcx__warn_llm_model_rule` (an administration date on a dose not ADMINISTERED, a dose unit without an amount, a negative dose or CD34 count, a cycle number below 1, a death date on a status that is not DECEASED, last known alive after death in the same note) and `pcx__warn_llm_date_invalid` (unreadable dates, and a date without its precision or the reverse). The evidence rules (a finding needs verbatim spans) are not checked, because the wide tables do not carry `has_mention` or `spans`. Explicit negative tests and non-receipt are useful evidence. Silence is unknown.
 - Dates with precision use ISO `YYYY-MM-DD`. Partial dates use first-of-period plus `MONTH`/`YEAR`; never treat those placeholders as exact survival dates. The wide tables keep the date text as written and add `<name>_day` (DATE) and `<name>_day_precision` (`sql/template/date_macros.sql.jinja`). Only `YYYY-MM-DD`, `YYYY-MM` and `YYYY` are understood, and only when the month and day exist on the calendar (`2024-02-30` is not understood). The day is the first day of the period, and the precision is the coarser of the shape and the stated precision, so a `YEAR` date sorts on or before every `DAY` date of the same year. Anything else gets a NULL day and is listed in `pcx__warn_llm_date_invalid`. The eligible, outcome and client_views SQL read only `<name>_day`. They still compare coarse days as exact days (warn table `pcx__warn_llm_date_coarse`, WORKPLAN.md).
 - Preserve distinct reports/events and disagreements for patient-level adjudication. A documented molecular group is not automatically methylation-confirmed.
 - Planned doses are not actual administration. Protocol names do not establish receipt, full regimen completion or randomization.
@@ -88,6 +92,7 @@ incompatible table schema.
 ### Tests
 
 `tests/test_nlp_shapes.py`, `tests/test_llm_models.py` and `tests/test_llm_strict_mode.py`
-cover the models, schemas, templates and strict-mention switch. DuckDB checks do not validate
+cover the models, schemas, templates and strict-mention switch. The model validators run only
+here; `tests/test_warn_sql.py` checks the SQL warn tables that apply the same rules to real answers. DuckDB checks do not validate
 Athena's nested `UNNEST` execution; the transition-of-care projection uses `array_join`,
 which DuckDB lacks.

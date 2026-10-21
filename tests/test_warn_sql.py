@@ -49,7 +49,13 @@ EXPECTED = {
     "pcx__warn_llm_date_coarse": {("llm_date_coarse_month", "Patient/p1"), ("llm_date_coarse_year", "Patient/p6"),
                                   ("llm_date_coarse_month", "Patient/p6"), ("llm_date_coarse_month", "Patient/p8")},
     "pcx__warn_llm_date_after_note": {("llm_date_after_note", "Patient/p7")},
-    "pcx__warn_llm_date_invalid": {("llm_date_invalid", "Patient/p1"), ("llm_date_invalid", "Patient/p8")},
+    "pcx__warn_llm_date_invalid": {("llm_date_invalid", "Patient/p1"), ("llm_date_invalid", "Patient/p8"),
+                                   ("llm_date_precision_missing", "Patient/p8")},
+    "pcx__warn_llm_model_rule": {("administration_date_not_administered", "Patient/p2"),
+                                 ("dose_unit_without_amount", "Patient/p2"), ("dose_amount_negative", "Patient/p2"),
+                                 ("cycle_num_below_1", "Patient/p2"), ("cycle_num_below_1", "Patient/p8"),
+                                 ("cd34_negative", "Patient/p8"),
+                                 ("death_date_not_deceased", "Patient/p2"), ("alive_after_death_in_note", "Patient/p2")},
     "pcx__warn_study_period_null_end": {("null_end_in_window", "Patient/p1"), ("null_end_history", "Patient/p6")},
 }
 

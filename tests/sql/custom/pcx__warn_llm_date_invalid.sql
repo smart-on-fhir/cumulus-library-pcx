@@ -1,5 +1,10 @@
 -- ============================================================================
--- Warning: an LLM date that cannot be understood.
+-- Warning: an LLM date that cannot be understood, or whose precision is missing.
+--
+--   llm_date_invalid             the date text is not understood (below)
+--   llm_date_precision_missing   a date with no precision, or a precision with no
+--                                date. The model validator that forbids this runs
+--                                only in the tests, not at inference.
 --
 -- The LLM wide tables accept only YYYY-MM-DD, YYYY-MM and YYYY
 -- (sql/template/date_macros.sql.jinja), on real calendar days. Any other text,
@@ -190,7 +195,10 @@ WITH candidate AS (
 )
 
 SELECT  DISTINCT
-        'llm_date_invalid'                                                      AS warn_check,
+        CASE
+            WHEN date_value IS NOT NULL AND date_day IS NULL                    THEN 'llm_date_invalid'
+            ELSE                                                                     'llm_date_precision_missing'
+        END                                                                     AS warn_check,
         CAST(subject_ref AS VARCHAR)                                            AS subject_ref,
         CONCAT_WS('|',
             CONCAT('table=',     source_table),
@@ -199,6 +207,6 @@ SELECT  DISTINCT
             CONCAT('precision=', precision),
             CONCAT('note=',      note_ref))                                     AS detail
 FROM    candidate
-WHERE   date_value IS NOT NULL
-AND     date_day IS NULL
+WHERE   (date_value IS NOT NULL AND date_day IS NULL)
+OR      ((date_value IS NULL) <> (precision IS NULL))
 ;
