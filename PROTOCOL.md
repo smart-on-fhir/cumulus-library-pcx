@@ -90,6 +90,12 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [decided] 2026-10-08, Andy: the document tasks (`document_topic`, `document_type`) select every
   note in `pcx__sample_task`, the casedef notes plus the Elasticsearch notes, which the `sample`
   stage builds at every site.
+- [decided] 2026-10-21, Andy: note dates for the client views and date warnings come from
+  `pcx__llm_note_date`, one row per note in `pcx__sample_task`, so Elasticsearch-only notes are
+  dated too: DocumentReference author day else `date`, DiagnosticReport effectiveDateTime day else
+  effectivePeriod start. In `client_diagnosis`, a note without a usable date still counts in the
+  `_ever`, count and conflict columns, is never baseline, and is the latest only when no dated note
+  has a value.
 - [decided] 2026-10-21, Andy: the survival_timeline task reads the qualifying notes from each
   subject's last visit, plus END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any
   visit, plus notes not on a study-population visit (no encounter, or one outside the
@@ -258,8 +264,7 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - [open] Inherited items of the 2026-09-11 workplan, now listed in WORKPLAN.md under their
   sections: keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md:
-  encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL
-  `note_author_date` and drop out of `client_diagnosis.sql`. The builder `cohort_casedef`
+  encounter-only joins in `client_timeline.sql`. The builder `cohort_casedef`
   duplicate `subject_ref` defect was not re-checked against 0.5.0.
 
 ## 10. Decision log

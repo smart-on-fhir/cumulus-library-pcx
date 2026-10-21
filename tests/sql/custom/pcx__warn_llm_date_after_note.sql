@@ -2,12 +2,13 @@
 -- Warning: an LLM date later than the note that states it.
 --
 -- A diagnosis, death, last-alive, event, administered therapy or radiation
--- start date cannot fall after the author date of the note it was read from.
+-- start date cannot fall after the date of the note it was read from.
 -- Such a date is a misread (year typo, a scheduled date taken as delivered)
 -- and the eligible / outcome stages consume it as fact. Surgery dates are
 -- included because eligible_surgery does not check delivery status, so a
 -- scheduled operation can become the definitive surgery day.
--- Note dates come from pcx__sample_casedef_author (the shared note spine).
+-- Note dates come from pcx__llm_note_date, the note date spine for every note
+-- the LLM tasks read (casedef and Elasticsearch notes).
 -- ============================================================================
 CREATE TABLE pcx__warn_llm_date_after_note AS
 
@@ -63,13 +64,13 @@ SELECT  DISTINCT
             CONCAT('table=',    candidate.source_table),
             CONCAT('column=',   candidate.date_column),
             CONCAT('llm=',      CAST(candidate.llm_day AS VARCHAR)),
-            CONCAT('note_date=',CAST(author.note_author_date AS VARCHAR)),
-            CONCAT('days=',     CAST(DATE_DIFF('day', author.note_author_date, candidate.llm_day) AS VARCHAR)),
+            CONCAT('note_date=',CAST(author.note_date AS VARCHAR)),
+            CONCAT('days=',     CAST(DATE_DIFF('day', author.note_date, candidate.llm_day) AS VARCHAR)),
             CONCAT('note=',     candidate.note_ref))                            AS detail
 FROM    candidate
-JOIN    pcx__sample_casedef_author  AS author
+JOIN    pcx__llm_note_date  AS author
 ON      author.note_ref     = candidate.note_ref
 AND     author.subject_ref  = candidate.subject_ref
-WHERE   author.note_author_date IS NOT NULL
-AND     candidate.llm_day > author.note_author_date
+WHERE   author.note_date IS NOT NULL
+AND     candidate.llm_day > author.note_date
 ;

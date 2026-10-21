@@ -5,7 +5,11 @@
 --   _baseline  documentation within 90 days either side of t0_day, the
 --              diagnosis-time reading that is safe as a causal covariate
 --   _ever      any note, carries later reclassification and progression
--- Note dates come from the shared author spine, never re-derived here.
+-- Note dates come from pcx__llm_note_date, one per selected note (casedef and
+-- Elasticsearch notes), never re-derived here. A note without a usable date
+-- still counts in the _ever, count and conflict columns. It is never baseline,
+-- and it is the latest only when no dated note has a value: note_order_day
+-- sorts it before every dated note.
 -- Subtype and histology resolve to the LATEST documented real value, because
 -- a later pathology or methylation report supersedes an earlier one.
 -- Chang M-stage resolves to the MOST SEVERE documented value, because staging
@@ -16,8 +20,8 @@ WITH
 diagnosis_note AS (
     SELECT  src.subject_ref,
             src.note_ref,
-            note_day.note_author_date,
-            (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_author_date)) <= 90)
+            COALESCE(note_day.note_date, DATE '0001-01-01')    AS note_order_day,
+            (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_date)) <= 90)
                                                         AS in_baseline,
             src.disease_subtype,
             src.medulloblastoma_histology,
@@ -33,7 +37,7 @@ diagnosis_note AS (
             END                                         AS m_stage_rank,
             src.age_at_diagnosis_months
     FROM    pcx__llm_diagnosis_wide     AS src
-    JOIN    pcx__sample_casedef_author  AS note_day
+    LEFT JOIN pcx__llm_note_date    AS note_day
       ON    src.subject_ref = note_day.subject_ref
      AND    src.note_ref    = note_day.note_ref
     JOIN    pcx__eligible               AS elig
@@ -44,9 +48,9 @@ diagnosis AS (
     SELECT  subject_ref,
             COUNT(DISTINCT note_ref)                                    AS diagnosis_note_count,
             -- latest real subtype
-            MAX_BY(disease_subtype, ROW(note_author_date, note_ref))
+            MAX_BY(disease_subtype, ROW(note_order_day, note_ref))
                 FILTER (WHERE disease_subtype <> 'NONE_OF_THE_ABOVE')   AS disease_subtype_ever,
-            MAX_BY(disease_subtype, ROW(note_author_date, note_ref))
+            MAX_BY(disease_subtype, ROW(note_order_day, note_ref))
                 FILTER (WHERE disease_subtype <> 'NONE_OF_THE_ABOVE' AND in_baseline)
                                                                         AS disease_subtype_baseline,
             COUNT(DISTINCT disease_subtype)
@@ -54,10 +58,10 @@ diagnosis AS (
             BOOL_OR(disease_subtype = 'MEDULLOBLASTOMA')                AS medulloblastoma_ever_bool,
             BOOL_OR(disease_subtype = 'ATRT')                           AS atrt_ever_bool,
             -- latest real histology
-            MAX_BY(medulloblastoma_histology, ROW(note_author_date, note_ref))
+            MAX_BY(medulloblastoma_histology, ROW(note_order_day, note_ref))
                 FILTER (WHERE medulloblastoma_histology <> 'NONE_OF_THE_ABOVE')
                                                                         AS histology_ever,
-            MAX_BY(medulloblastoma_histology, ROW(note_author_date, note_ref))
+            MAX_BY(medulloblastoma_histology, ROW(note_order_day, note_ref))
                 FILTER (WHERE medulloblastoma_histology <> 'NONE_OF_THE_ABOVE' AND in_baseline)
                                                                         AS histology_baseline,
             BOOL_OR(medulloblastoma_histology = 'LARGE_CELL_ANAPLASTIC') AS anaplastic_ever_bool,
@@ -68,7 +72,7 @@ diagnosis AS (
                 FILTER (WHERE m_stage_rank >= 0 AND in_baseline)        AS chang_m_stage_baseline,
             BOOL_OR(m_stage_rank >= 1)                                  AS metastatic_ever_bool,
             -- verbatim wording, latest
-            MAX_BY(historical_diagnosis_term, ROW(note_author_date, note_ref))
+            MAX_BY(historical_diagnosis_term, ROW(note_order_day, note_ref))
                 FILTER (WHERE historical_diagnosis_term IS NOT NULL)    AS historical_diagnosis_term,
             MIN(age_at_diagnosis_months)                                AS age_at_diagnosis_months_stated
     FROM    diagnosis_note
@@ -80,13 +84,13 @@ diagnosis AS (
 molecular_note AS (
     SELECT  src.subject_ref,
             src.note_ref,
-            note_day.note_author_date,
-            (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_author_date)) <= 90)
+            COALESCE(note_day.note_date, DATE '0001-01-01')    AS note_order_day,
+            (ABS(DATE_DIFF('day', elig.t0_day, note_day.note_date)) <= 90)
                                                         AS in_baseline,
             src.molecular_group,
             src.methods
     FROM    pcx__llm_molecular_report       AS src
-    JOIN    pcx__sample_casedef_author      AS note_day
+    LEFT JOIN pcx__llm_note_date        AS note_day
       ON    src.subject_ref = note_day.subject_ref
      AND    src.note_ref    = note_day.note_ref
     JOIN    pcx__eligible                   AS elig
@@ -96,10 +100,10 @@ molecular_note AS (
 
 molecular AS (
     SELECT  subject_ref,
-            MAX_BY(molecular_group, ROW(note_author_date, note_ref))    AS molecular_group_ever,
-            MAX_BY(molecular_group, ROW(note_author_date, note_ref))
+            MAX_BY(molecular_group, ROW(note_order_day, note_ref))    AS molecular_group_ever,
+            MAX_BY(molecular_group, ROW(note_order_day, note_ref))
                 FILTER (WHERE in_baseline)                              AS molecular_group_baseline,
-            MAX_BY(methods, ROW(note_author_date, note_ref))
+            MAX_BY(methods, ROW(note_order_day, note_ref))
                 FILTER (WHERE methods <> '')                            AS molecular_group_method,
             -- NOT_SUBGROUPED and INDETERMINATE are absence of a result, not groups
             COUNT(DISTINCT molecular_group)

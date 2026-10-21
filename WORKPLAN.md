@@ -206,9 +206,7 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Analysis
 
-- [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only;
-  notes with conflicting dates get a NULL `note_author_date` and drop out of
-  `client_diagnosis.sql`.
+- [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only.
 - [ ] P3 · `client_views` · **Use the builder's client views.** The builder's opt-in
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
@@ -260,6 +258,20 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — Note dates for every selected note, Elasticsearch notes included
+
+- New `sql/custom/pcx__llm_note_date.sql` (first table of the `client_views` stage): one row per
+  note in `pcx__sample_task`. DocumentReference author day else `date`, DiagnosticReport
+  effectiveDateTime day else effectivePeriod start. Conflicting dates give NULL and
+  `note_date_conflict_bool`. Replaces `pcx__sample_casedef_author`, which covered casedef notes only.
+- `client_diagnosis.sql` left-joins it: diagnosis and molecular rows from Elasticsearch-only or
+  undated notes are kept for the `_ever`, count and conflict columns, never baseline, and are the
+  latest only when no dated note has a value (`note_order_day`). Was an inner join that dropped them.
+- `client_timeline.sql` and `pcx__warn_llm_date_after_note` read the same spine (`note_date`, was
+  `note_author_date`), so search-only notes get dates there too.
+- Tests: `test_every_selected_note_gets_a_date`; the warn fixture is now `pcx__llm_note_date.csv`.
+  client dictionary, cumulus-study.md and PROTOCOL updated.
 
 ### 2026-10-21 — Survival timeline notes: last visit, death documents and unlinked notes
 

@@ -270,10 +270,10 @@ CREATE TABLE pcx__llm_survival_timeline_anchor (
     anchor_day_precision VARCHAR
 );
 
-CREATE TABLE pcx__sample_casedef_author (
+CREATE TABLE pcx__llm_note_date (
     subject_ref VARCHAR,
     note_ref VARCHAR,
-    note_author_date DATE
+    note_date DATE
 );
 
 -- LLM tables read only by pcx__warn_llm_date_invalid, empty in the fixtures

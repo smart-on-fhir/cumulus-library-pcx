@@ -149,6 +149,7 @@ casedef, sample, eligible and outcome tables, and
 | `pcx__sample_*` | candidate clinical notes; `pcx__sample_task` is the casedef notes plus the Elasticsearch notes |
 | `pcx__nlp_<task>_<deployment>` | raw LLM output per task and model deployment |
 | `pcx__llm_*` | LLM chart abstraction flattened to SQL (wide tables, one table per list-valued mention) |
+| `pcx__llm_note_date` | one date per note in `pcx__sample_task` (casedef and Elasticsearch notes), read by the client views and the date warnings (`client_views`, opt-in) |
 | `pcx__eligible_*` | per-subject eligibility criteria (`pcx__eligible`, all ages) and the trial-like intersection (`pcx__eligible_trial`) |
 | `pcx__outcome_*` | per-subject vital status, first event, exposure timing, OS and EFS |
 | `pcx__client_*` | timeline of eligibility, outcomes and variables, for export |
