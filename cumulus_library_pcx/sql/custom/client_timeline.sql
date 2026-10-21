@@ -1767,7 +1767,10 @@ WHERE   src.last_known_alive_day IS NOT NULL
 -- before the fingerprint, keeps event_id consistent with the row it names, and
 -- lets pcx__client_timeline_latest and pcx__client_dictionary_coverage inherit
 -- the rule instead of restating it. Rows are never dropped, only their dates
--- are cleared.
+-- are cleared. LLM dates and the outcome inputs already get the same window
+-- upstream, so this is a backstop. A DERIVED row's value_number is computed
+-- from its date (age at t0, days from t0 to the first event), so clearing
+-- that date clears the number too. A measured value (a lab result) is kept.
 guarded AS (
     SELECT  events.subject_ref,
             events.encounter_ref,
@@ -1787,7 +1790,12 @@ guarded AS (
             events.date_type,
             events.date_precision,
             events.value_text,
-            events.value_number,
+            CASE
+                WHEN events.source_type = 'DERIVED'
+                 AND events.event_date NOT BETWEEN DATE '1980-01-01' AND CURRENT_DATE
+                THEN NULL
+                ELSE events.value_number
+            END                                                 AS value_number,
             events.value_boolean,
             events.unit,
             events.interpretation,

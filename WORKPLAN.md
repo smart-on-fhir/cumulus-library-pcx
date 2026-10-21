@@ -264,6 +264,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Dates outside 1980 to today are cleared at the source, with their durations
+
+- LLM dates: `sql/template/date_macros.sql.jinja` treats a well-formed date outside 1980-01-01 to the build day as not usable, so its `<name>_day` and precision are NULL in every `pcx__llm_*` table (all 21 regenerated). Downstream it behaves like an undated value: an implausible event date makes the event undated (EFS `event_timing_uncertain`), an implausible death date leaves the subject deceased with `death_day` NULL.
+- FHIR: `pcx__outcome_vital_status` clears an implausible `deceasedDateTime` (still deceased, no FHIR death day) and ignores implausible encounter end days for `last_encounter_day`. A `deceasedDateTime` now sets `fhir_deceased_bool` even when its date is cleared.
+- So `pcx__outcome`, `pcx__kaplan_subject` and the client views compute `os_days`, `efs_days` and `days_t0_to_first_event` only from plausible dates. The client guards stay as a backstop and now also clear `value_number` when they clear its date (client_outcome rows, client_timeline DERIVED rows).
+- Warn checks: `llm_date_implausible` in `pcx__warn_llm_date_invalid`, `fhir_death_day_implausible` in `pcx__warn_outcome_vital_status_conflict`. Fixtures: Patient/p6 FHIR death 2031, Patient/p10 LLM diagnosis date 2031. `test_llm_dates.py` covers the window edges and today/tomorrow.
+
 ### 2026-10-21 — Molecular: one report row per subject across re-runs, molecular warn tables
 
 - `pcx__client_diagnosis` now selects the molecular report as a single ROW (group, methods) with `MAX_BY`, never joined back by `note_ref#report_index`. Re-running the molecular task on a note produced two outputs with the same key, and the client table returned several rows per subject with mixed groups. All outputs are pooled. Order: real group, latest note, last report in the note, latest output (`generated_on`, `system_fingerprint`), then group and methods so the pick is deterministic.

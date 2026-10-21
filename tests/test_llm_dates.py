@@ -40,6 +40,12 @@ CASES = [
     ('2020-09-00', 'DAY',   None, None),
     ('2020-13',    'MONTH', None, None),
     ('2020-00',    'MONTH', None, None),
+    # plausible only from 1980-01-01 to the build day
+    ('1980-01-01', 'DAY',   date(1980, 1, 1),  'DAY'),
+    ('1979-12-31', 'DAY',   None, None),
+    ('1979',       'YEAR',  None, None),
+    ('2999-01-01', 'DAY',   None, None),
+    ('2999',       'YEAR',  None, None),
     ('',           None,    None, None),
     (None,         'YEAR',  None, None),
     (None,         None,    None, None),
@@ -81,3 +87,10 @@ def test_every_day_of_two_years_is_understood():
     month_ends = [d for d in days if (d + timedelta(1)).day == 1]
     over = [f'{d.year}-{d.month:02d}-{d.day + 1:02d}' for d in month_ends if d.day < 31]
     assert parse([(v, 'DAY') for v in over]) == [(None, None)] * len(over)
+
+
+def test_today_is_plausible_and_tomorrow_is_not():
+    from datetime import timedelta
+    today = date.today()
+    tomorrow = today + timedelta(1)
+    assert parse([(today.isoformat(), 'DAY'), (tomorrow.isoformat(), 'DAY')]) == [(today, 'DAY'), (None, None)]

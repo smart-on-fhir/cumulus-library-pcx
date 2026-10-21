@@ -11,19 +11,39 @@
 --  death from here, so OS and EFS always see the same death.
 --  A deceased flag without a date gives deceased_bool TRUE and death_day NULL,
 --  which the OS table treats as not computable (README section 3).
+--  Every date is plausible, from 1980-01-01 to the build day. LLM days are
+--  already NULL outside it (sql/template/date_macros.sql.jinja). Here the
+--  FHIR deceasedDateTime and the last encounter day get the same window, so
+--  an implausible death date leaves the subject deceased with death_day NULL,
+--  and no duration is computed from it. A deceasedDateTime counts as the FHIR
+--  deceased flag even when its date is cleared (FHIR sends deceasedBoolean or
+--  deceasedDateTime, not both). pcx__warn_outcome_vital_status_conflict lists
+--  each cleared FHIR death date as fhir_death_day_implausible.
 --  =====================================================================
 CREATE  TABLE   pcx__outcome_vital_status AS
 WITH
-fhir_patient AS (
+fhir_patient_raw AS (
     SELECT  CONCAT('Patient/', id)          AS subject_ref,
-            deceasedBoolean                 AS fhir_deceased_bool,
-            DATE(FROM_ISO8601_TIMESTAMP(deceasedDateTime)) AS fhir_death_day
+            CASE
+                WHEN deceasedDateTime IS NOT NULL THEN TRUE
+                ELSE deceasedBoolean
+            END                             AS fhir_deceased_bool,
+            DATE(FROM_ISO8601_TIMESTAMP(deceasedDateTime)) AS fhir_death_day_raw
     FROM    patient
+),
+fhir_patient AS (
+    SELECT  subject_ref,
+            fhir_deceased_bool,
+            CASE
+                WHEN fhir_death_day_raw BETWEEN DATE '1980-01-01' AND CURRENT_DATE THEN fhir_death_day_raw
+            END                             AS fhir_death_day
+    FROM    fhir_patient_raw
 ),
 last_encounter AS (
     SELECT  subject_ref,
             MAX(enc_period_end_day_filled)  AS last_encounter_day
     FROM    pcx__cohort_study_population
+    WHERE   enc_period_end_day_filled BETWEEN DATE '1980-01-01' AND CURRENT_DATE
     GROUP BY subject_ref
 ),
 llm AS (

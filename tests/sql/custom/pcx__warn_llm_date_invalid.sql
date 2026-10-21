@@ -2,6 +2,10 @@
 -- Warning: an LLM date that cannot be understood, or whose precision is missing.
 --
 --   llm_date_invalid             the date text is not understood (below)
+--   llm_date_implausible         a well-formed date outside 1980-01-01 to the
+--                                build day (a placeholder, a typo, a planned
+--                                future visit). Its <name>_day is NULL too, so no
+--                                duration is computed from it
 --   llm_date_precision_missing   a date with no precision, or a precision with no
 --                                date. The model validator that forbids this runs
 --                                only in the tests, not at inference.
@@ -196,6 +200,10 @@ WITH candidate AS (
 
 SELECT  DISTINCT
         CASE
+            WHEN date_value IS NOT NULL AND date_day IS NULL
+             AND TRANSLATE(date_value, '0123456789', '9999999999') IN ('9999', '9999-99', '9999-99-99')
+             AND SUBSTR(CONCAT(date_value, '-01-01'), 1, 10)
+                 NOT BETWEEN '1980-01-01' AND CAST(CURRENT_DATE AS VARCHAR)     THEN 'llm_date_implausible'
             WHEN date_value IS NOT NULL AND date_day IS NULL                    THEN 'llm_date_invalid'
             ELSE                                                                     'llm_date_precision_missing'
         END                                                                     AS warn_check,

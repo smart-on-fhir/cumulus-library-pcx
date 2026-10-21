@@ -6,6 +6,13 @@
     '?', words, 2024-02-30, 2023-02-29, 2020-13) gives a NULL day and a NULL
     precision, and pcx__warn_llm_date_invalid lists it.
 
+    A date must also be plausible: from 1980-01-01 to the build day. A date
+    outside that window (a placeholder, a typo, a planned future visit) is
+    not an observation, so it too gives a NULL day and precision, and every
+    duration computed downstream is NULL with it. The check compares the date
+    padded to YYYY-MM-DD, so 2031 or a day later this month is out.
+    pcx__warn_llm_date_invalid lists these as llm_date_implausible.
+
     The calendar check uses only string tests, so it cannot error whatever order
     the engine evaluates it in. The CAST to DATE runs only on a date that passed.
 
@@ -39,10 +46,15 @@ SUBSTR(CONCAT({{ value }}, '-01-01'), 1, 10)
                 END)
 {%- endmacro -%}
 
+{%- macro plausible(value) -%}
+({{ padded(value) }} BETWEEN '1980-01-01' AND CAST(CURRENT_DATE AS VARCHAR))
+{%- endmacro -%}
+
 {%- macro llm_day(value, precision) -%}
 CASE
             WHEN {{ value }} IS NULL                                    THEN NULL
             WHEN NOT {{ understood(value) }}                            THEN NULL
+            WHEN NOT {{ plausible(value) }}                             THEN NULL
             WHEN LENGTH({{ value }}) = 4 OR {{ precision }} = 'YEAR'     THEN CAST(CONCAT(SUBSTR({{ value }}, 1, 4), '-01-01') AS DATE)
             WHEN LENGTH({{ value }}) = 7 OR {{ precision }} = 'MONTH'    THEN CAST(CONCAT(SUBSTR({{ value }}, 1, 7), '-01') AS DATE)
             ELSE                                                             CAST({{ value }} AS DATE)
@@ -53,6 +65,7 @@ CASE
 CASE
             WHEN {{ value }} IS NULL                                    THEN NULL
             WHEN NOT {{ understood(value) }}                            THEN NULL
+            WHEN NOT {{ plausible(value) }}                             THEN NULL
             WHEN LENGTH({{ value }}) = 4 OR {{ precision }} = 'YEAR'     THEN 'YEAR'
             WHEN LENGTH({{ value }}) = 7 OR {{ precision }} = 'MONTH'    THEN 'MONTH'
             ELSE                                                             'DAY'
