@@ -56,8 +56,10 @@ def test_systemic_therapy_values_are_coded():
         TherapyAgentMention(**EVIDENCE, agent_name='Cytoxan')
     with pytest.raises(ValidationError):
         TherapyAdministrationMention(**EVIDENCE, delivery_status='PLANNED', dose_unit='MG_PER_M2')
-    with pytest.raises(ValidationError):
-        TherapyAdministrationMention(**EVIDENCE, cycle_num=0)
+    # no numeric limits: a cycle 0 or a negative dose is kept for the SQL warn tables, not
+    # rejected, since a schema limit would discard the whole note's response at inference
+    assert TherapyAdministrationMention(**EVIDENCE, cycle_num=0).cycle_num == 0
+    assert TherapyAdministrationMention(**EVIDENCE, dose_amount=-1).dose_amount == -1
     # consolidation days count from the stem-cell infusion (day 0), so may be negative
     assert TherapyAdministrationMention(**EVIDENCE, cycle_num=1, cycle_day=-3, cycle_name_verbatim='Consolidation 1 Day -3').cycle_day == -3
 

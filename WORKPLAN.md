@@ -259,6 +259,14 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-21 — Systemic therapy v2: no numeric limits in the schema
+
+- `systemic_therapy.py` (v2 amended in place, not yet run): removed `ge=1` from the three
+  `cycle_num` fields and `ge=0` from `dose_amount` and `cd34_cells_per_kg`. Cumulus Library
+  validates each response against the JSON schema, so one out-of-range number discarded the whole
+  note. Out-of-range values are now kept, to be flagged by SQL warn tables. Schema and summary
+  regenerated, `test_llm_models` updated.
+
 ### 2026-10-21 — Note dates for every selected note, Elasticsearch notes included
 
 - New `sql/custom/pcx__llm_note_date.sql` (first table of the `client_views` stage): one row per

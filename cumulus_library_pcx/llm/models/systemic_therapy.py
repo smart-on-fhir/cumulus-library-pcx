@@ -197,6 +197,9 @@ class DoseUnit(StrEnum):
     NONE_OF_THE_ABOVE = "NONE_OF_THE_ABOVE"
 
 
+# No numeric limits (ge=...) on systemic therapy fields: Cumulus Library validates each response
+# against the JSON schema, and one out-of-range number would discard the whole note. Out-of-range
+# values are kept and flagged by SQL warn tables instead.
 CYCLE_NUM_DESCRIPTION = (
     "Cycle number exactly as the note numbers it, an integer: 'Cycle 3' is 3, 'Induction cycle 2' "
     "is 2, 'C1D8' is 1, 'maintenance cycle 1' is 1. Do not renumber across phases (phase is "
@@ -221,7 +224,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
 
     delivery_status: DeliveryStatus = Field(default=DeliveryStatus.NONE_OF_THE_ABOVE, description="Delivery status of this dose. ADMINISTERED: actual receipt. PLANNED / HELD / CANCELLED: planned protocol doses, held doses and cancelled orders remain separate from receipt.")
     phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE, description="Documented phase of this dose; never infer from drug name alone.")
-    cycle_num: int | None = Field(default=None, ge=1, description="Cycle this administration belongs to. " + CYCLE_NUM_DESCRIPTION)
+    cycle_num: int | None = Field(default=None, description="Cycle this administration belongs to. " + CYCLE_NUM_DESCRIPTION)
     cycle_day: int | None = Field(
         default=None,
         description=(
@@ -241,7 +244,6 @@ class TherapyAdministrationMention(SpanAugmentedMention):
     )
     dose_amount: float | None = Field(
         default=None,
-        ge=0,
         description=(
             "Numeric dose amount as documented. Use the per-body-surface-area amount "
             "when the note gives g/m2 or mg/m2; otherwise use the administered amount. "
@@ -316,7 +318,7 @@ class MedicalTherapyCycleMention(SpanAugmentedMention):
     protocol_name_verbatim: str | None = Field(default=None, description="Protocol name exactly as written (for QA). Null if none.")
     completion_status: CycleCompletionStatus = Field(default=CycleCompletionStatus.NONE_OF_THE_ABOVE)
     interruption_reason: str | None = Field(default=None, description="Reason for interruption/discontinuation only if stated; do not infer toxicity or progression.")
-    cycle_num: int | None = Field(default=None, ge=1, description=CYCLE_NUM_DESCRIPTION)
+    cycle_num: int | None = Field(default=None, description=CYCLE_NUM_DESCRIPTION)
     cycle_name_verbatim: str | None = Field(default=None, description=CYCLE_NAME_VERBATIM_DESCRIPTION)
     cycle_start_date: str | None = Field(
         default=None, description="Cycle start date, ISO YYYY-MM-DD. Null if not stated.",
@@ -377,10 +379,10 @@ class StemCellInfusionMention(SpanAugmentedMention):
     phase: TreatmentPhase = Field(default=TreatmentPhase.NONE_OF_THE_ABOVE)
     infusion_date: str | None = Field(default=None, description="Actual stem-cell infusion date, not collection date.")
     infusion_date_precision: DatePrecision | None = Field(default=None, description="Precision for infusion_date; null if absent.")
-    cycle_num: int | None = Field(default=None, ge=1, description="Consolidation cycle this infusion rescues, only when documented. " + CYCLE_NUM_DESCRIPTION)
+    cycle_num: int | None = Field(default=None, description="Consolidation cycle this infusion rescues, only when documented. " + CYCLE_NUM_DESCRIPTION)
     cycle_name_verbatim: str | None = Field(default=None, description=CYCLE_NAME_VERBATIM_DESCRIPTION)
     cell_source: str | None = Field(default=None, description="Autologous peripheral blood, bone marrow or other documented source.")
-    cd34_cells_per_kg: float | None = Field(default=None, ge=0, description="Explicit absolute CD34+ cells/kg; convert a stated multiplier such as 2 x 10^6 to 2000000. Never substitute collected dose for infused dose.")
+    cd34_cells_per_kg: float | None = Field(default=None, description="Explicit absolute CD34+ cells/kg; convert a stated multiplier such as 2 x 10^6 to 2000000. Never substitute collected dose for infused dose.")
 
 
 class SystemicTherapyAnnotation(BaseModel):
