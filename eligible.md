@@ -84,7 +84,7 @@ dated candidate with its source and takes the earliest day per exposure:
 | [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`); prior methotrexate excludes from the trial-like cohort like the backbone agents |
 | [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** |
 | `core__medicationdispense`                                                 | pharmacy **dispenses** (`whenHandedOver`, cancelled and declined dropped) for the same valuesets: closer to receipt than an order, not proof of administration |
-| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate by agent name; **every** administered agent counts as chemotherapy, whatever the agent (WORKPLAN.md) |
+| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate is `agent_name = METHOTREXATE`; **every** other administered agent counts as chemotherapy, including unlisted anticancer agents (`NONE_OF_THE_ABOVE`), except the supportive markers `LEUCOVORIN`, `MESNA` and `DEXRAZOXANE` (WORKPLAN.md) |
 
 Views by strictness, as implemented:
 

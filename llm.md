@@ -7,11 +7,11 @@ These models support an EHR reproduction of [ACNS0334 (PMC12833527)](https://pmc
 | `diagnosis`, `surgery`, `metastasis` | 2, 2, 2 | Original and revised diagnoses, age, definitive surgery, residual disease, MRI and CSF staging. `diagnosis` replaced the former compact `medulloblastoma` model |
 | `registry_eligibility` | 1 | `TrialEligibilityAnnotation`: evidence for a separate trial-like cohort |
 | `molecular` | 2 | Report-level classification and assay provenance; separate MYC/MYCN and gain/amplification; preserve conflicting calls |
-| `systemic_therapy` | 1 | Regimens, induction/consolidation, delivered versus planned doses, cycles and stem-cell infusion |
-| `radiation` | 2 | Receipt, timing, field, dose and indication, including post-chemotherapy and salvage treatment |
+| `systemic_therapy` | 2 | Regimens, induction/consolidation, delivered versus planned doses, cycles and stem-cell infusion. Agent, protocol, cycle number, route, dose unit and cycle status are coded (StrEnum or int), each name with a `*_verbatim` companion for QA |
+| `radiation` | 3 | Receipt, timing, field, dose and indication, including post-chemotherapy and salvage treatment. The wide table also reads version 2 (same schema shape, older `TreatmentPhase` wording) |
 | `response` | 1 | Baseline imaging/cytology evaluability and end-induction/end-consolidation response |
 | `event`, `survival_timeline` | 1, 2 | Dated disease events, distinct time anchors, death, last-known-alive and event-free follow-up |
-| `laboratory` | 2 | Optional organ-function results and documented toxicity; prefer structured labs |
+| `laboratory` | 3 | Optional organ-function results and documented toxicity; prefer structured labs |
 | `transition_of_care` | 1 | Transfer-in timing/reason, diagnosis and surgery setting, and therapy before entry |
 | `document_topic`, `document_type` | 3, 2 | Routing to extraction topics and document classification |
 
@@ -38,7 +38,7 @@ Routine lab names are informed by the associated trial's [eligibility listing](h
 - Planned doses are not actual administration. Protocol names do not establish receipt, full regimen completion or randomization.
 - Actual ATRT diagnoses remain available for exclusion and retrospective reclassification. ATRT is not the required PCX diagnosis.
 - Every `StrEnum` is KEY=VALUE. 32 of the 36 enums have a `NONE_OF_THE_ABOVE` sentinel.
-- Surgery has no free-text role: the eligible SQL takes the earliest resection. Radiation `indication` is still free text, and protocol naming differs across models (`protocol_name_verbatim` in systemic therapy, `protocol_name` in the survival timeline). See WORKPLAN.md.
+- Surgery has no free-text role: the eligible SQL takes the earliest resection. Radiation `indication` is still free text, and protocol naming differs across models: systemic therapy codes `protocol_name` (`TreatmentProtocol` enum) next to `protocol_name_verbatim`, while the survival timeline's `protocol_name` is still free text. See WORKPLAN.md.
 - Prior therapy before arrival at a site (`transition_of_care`) is distinct from prior therapy before trial-like initial treatment.
 
 ## Schema generation and wide outputs

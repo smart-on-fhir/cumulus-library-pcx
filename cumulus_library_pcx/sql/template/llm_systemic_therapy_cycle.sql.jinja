@@ -13,10 +13,12 @@ SELECT  DISTINCT
         -- 1-based position of each unnested list item (see FROM)
         cycle_index,
         cycle.phase                                                  AS phase,
+        cycle.protocol_name                                          AS protocol_name,
         cycle.protocol_name_verbatim                                 AS protocol_name_verbatim,
         cycle.completion_status                                      AS completion_status,
         cycle.interruption_reason                                    AS interruption_reason,
-        cycle.cycle_name                                             AS cycle_name,
+        cycle.cycle_num                                              AS cycle_num,
+        cycle.cycle_name_verbatim                                    AS cycle_name_verbatim,
         cycle.cycle_start_date                                       AS cycle_start_date,
         cycle.cycle_start_date_precision                             AS cycle_start_date_precision,
         {{ dates.llm_day_columns('cycle.cycle_start_date', 'cycle.cycle_start_date_precision', 'cycle_start_day') }},

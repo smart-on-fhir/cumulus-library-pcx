@@ -161,6 +161,7 @@ CREATE TABLE pcx__llm_systemic_therapy_agent (
     note_ref VARCHAR,
     delivery_status VARCHAR,
     agent_name VARCHAR,
+    agent_name_verbatim VARCHAR,
     therapy_start_date VARCHAR,
     therapy_start_date_precision VARCHAR,
     therapy_start_day DATE,

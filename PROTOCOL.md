@@ -152,7 +152,8 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
   source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
   ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
-  chemotherapy ([WORKPLAN](WORKPLAN.md#eligibility)).
+  chemotherapy except the supportive markers leucovorin, mesna and dexrazoxane
+  ([WORKPLAN](WORKPLAN.md#eligibility)).
 
 ## 8. Analysis
 

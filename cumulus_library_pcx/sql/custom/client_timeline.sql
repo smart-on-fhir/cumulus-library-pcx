@@ -6,7 +6,8 @@
 -- LLM chart-review task that has a wide table, and the derived anchors and
 -- outcomes. Same 20-column contract as the IBD client timeline so downstream
 -- tooling is shared. therapy_line_number is always NULL in PCX, rx_class
--- carries METHOTREXATE / CHEMOTHERAPY for medication rows.
+-- carries METHOTREXATE / CHEMOTHERAPY for medication rows (NULL for the LLM
+-- supportive markers LEUCOVORIN, MESNA and DEXRAZOXANE).
 --
 -- Dates: coded rows use the resource date, else the encounter start. LLM rows
 -- use the extracted date when the model gave one that can be understood
@@ -677,7 +678,10 @@ SELECT  DISTINCT
         'evidence'                                                   AS assertion_level,
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CASE WHEN LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%' THEN 'METHOTREXATE' WHEN src.agent_name IS NOT NULL THEN 'CHEMOTHERAPY' END AS rx_class
+        CASE
+            WHEN src.agent_name = 'METHOTREXATE'                                        THEN 'METHOTREXATE'
+            WHEN src.agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')           THEN 'CHEMOTHERAPY'
+        END                                                          AS rx_class
 FROM    pcx__llm_systemic_therapy_agent      AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
@@ -696,7 +700,7 @@ SELECT  DISTINCT
         note_day.note_author_date                                    AS evidence_date,
         CASE WHEN src.regimen_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
         src.regimen_start_day_precision                              AS date_precision,
-        src.protocol_name_verbatim                                   AS value_text,
+        src.protocol_name                                            AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
@@ -758,8 +762,8 @@ SELECT  DISTINCT
         note_day.note_author_date                                    AS evidence_date,
         CASE WHEN src.cycle_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
         src.cycle_start_day_precision                                AS date_precision,
-        src.cycle_name                                               AS value_text,
-        CAST(NULL AS DOUBLE)                                         AS value_number,
+        src.protocol_name                                            AS value_text,
+        CAST(src.cycle_num AS DOUBLE)                                AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
         src.phase                                                    AS interpretation,
@@ -1061,7 +1065,7 @@ FROM    pcx__llm_systemic_therapy_agent      AS src
 LEFT JOIN pcx__sample_casedef_author AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   (LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%')
+WHERE   src.agent_name = 'METHOTREXATE'
 AND     src.delivery_status IN ('ADMINISTERED', 'EXPLICITLY_NOT_RECEIVED')
 
 UNION ALL

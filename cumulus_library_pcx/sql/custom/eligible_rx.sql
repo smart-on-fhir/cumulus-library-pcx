@@ -9,7 +9,10 @@
 --                 it over. Closer to receipt, still not administration. Epic
 --                 dispensing is where infusion-center and inpatient doses appear.
 --  LLM evidence is pcx__llm_systemic_therapy_agent with
---  delivery_status = ADMINISTERED, which is receipt.
+--  delivery_status = ADMINISTERED, which is receipt. agent_name is the
+--  RxAgentName enum: METHOTREXATE is the contrast, every other administered
+--  agent is chemo except the supportive markers LEUCOVORIN, MESNA and
+--  DEXRAZOXANE (NONE_OF_THE_ABOVE is an unlisted anticancer agent, so chemo).
 --  Every dated candidate is unioned with its source, then the earliest date per
 --  exposure is taken, so adding a source is one more UNION branch.
 --  Orders are linked to study_population encounters, dispenses are matched for
@@ -72,7 +75,7 @@ candidate AS (
             therapy_start_day AS exposure_day
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
-    AND     (LOWER(agent_name) LIKE '%methotrexate%' OR LOWER(agent_name) LIKE '%mtx%')
+    AND     agent_name = 'METHOTREXATE'
     UNION ALL
     SELECT  subject_ref,
             'chemo'                     AS exposure,
@@ -80,6 +83,7 @@ candidate AS (
             therapy_start_day AS exposure_day
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   delivery_status = 'ADMINISTERED'
+    AND     agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')
 ),
 first_day AS (
     SELECT  subject_ref,

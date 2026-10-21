@@ -15,6 +15,7 @@ SELECT  DISTINCT
         agent_index,
         agent.delivery_status                                        AS delivery_status,
         agent.agent_name                                             AS agent_name,
+        agent.agent_name_verbatim                                    AS agent_name_verbatim,
         agent.therapy_start_date                                     AS therapy_start_date,
         agent.therapy_start_date_precision                           AS therapy_start_date_precision,
         {{ dates.llm_day_columns('agent.therapy_start_date', 'agent.therapy_start_date_precision', 'therapy_start_day') }},

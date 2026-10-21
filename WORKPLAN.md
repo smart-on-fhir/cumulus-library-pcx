@@ -128,6 +128,12 @@ No changes planned.
 
 ## Clinical notes
 
+- [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). `systemic_therapy` is now
+  version 2 and its wide tables keep only that version, so they are empty until BCH reruns it.
+  `radiation` and `laboratory` are version 3 (shared `TreatmentPhase` wording only). Radiation
+  is deliberately not rerun: `pcx__llm_radiation_wide` reads versions 2 and 3, whose schemas
+  differ only in that wording, so BCH rows keep the old phase definitions. Laboratory has never
+  been run. CHOP has not run notes yet and gets the new schemas.
 - [ ] P3 · `llm` · **Radiation indication enum** (was 3.6). `radiation.py` `indication` is
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
   regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
@@ -255,6 +261,39 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — Systemic therapy v2: coded values instead of free text
+
+- `systemic_therapy.py`: `agent_name` is now `RxAgentName` (anticancer agents seen in BCH
+  output, plus leucovorin, mesna and dexrazoxane as markers). Other supportive care
+  (antiemetics, growth factors, antimicrobials, steroids) is no longer extracted. The note's
+  own wording moved to `agent_name_verbatim`.
+- `cycle_name` became `cycle_num` (int, as the note numbers it, not renumbered across phases)
+  and `cycle_name_verbatim`. Administrations also get `cycle_day` (consolidation days count
+  from the stem-cell infusion, day 0, so may be negative).
+- New enums: `TreatmentProtocol` (`protocol_name`, next to `protocol_name_verbatim`, on
+  regimens and cycles), `CycleCompletionStatus`, `AdministrationRoute`, `DoseUnit`.
+- `treatment.py`: `TreatmentPhase` wording only adds what the standard terms lack (maintenance
+  is POST_CONSOLIDATION, salvage is therapy for relapse or progression whenever given,
+  pre-induction therapy is NONE_OF_THE_ABOVE). Shared with radiation and laboratory, so those
+  bump too.
+- Workflow: `systemic_therapy` 1 → 2, `radiation` 2 → 3, `laboratory` 2 → 3. Radiation is not
+  rerun: `llm_radiation_wide.sql.jinja` reads `task_version IN (2, 3)`.
+- SQL: `eligible_rx.sql` and `client_timeline.sql` match `agent_name = 'METHOTREXATE'`
+  instead of `LIKE '%methotrexate%' OR '%mtx%'`. LLM chemo no longer counts the three
+  supportive markers. `client_timeline` shows the coded agent and protocol, and cycle rows
+  carry `cycle_num` in `value_number`. `pcx__warn_eligible_rx_llm_agent_unrecognized` lists
+  agent and verbatim spelling.
+- Tests: fixture `pcx__llm_systemic_therapy_agent.csv` uses coded agents (p1 gets a
+  temozolomide row for the warn check), new `test_systemic_therapy_values_are_coded`.
+
+### 2026-10-20 — Survival timeline notes come from the last clinical visit
+
+- `release/package/.../sql/custom/pcx__llm_document_task.sql` adds the view
+  `pcx__llm_document_task_survival_timeline` that `nlp_clinical_tasks.workflow` already selects by.
+  Same relevance or `DOCUMENT_TASKS["survival_timeline"]` document types as the other task views,
+  then only each subject's last clinical visit (latest encounter day among those notes), since
+  there are no visits after death.
 
 ### 2026-10-20 — Kaplan-Meier cubes exported with the approved floor of 1
 

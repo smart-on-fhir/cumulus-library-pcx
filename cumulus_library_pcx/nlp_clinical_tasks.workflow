@@ -52,12 +52,18 @@ version = 2
 response_schema = "llm/schemas/pcx-radiation-annotation.json"
 select_by_table = "pcx__llm_document_task_radiation"
 # Version 2 (2026-09-16): radiation_field NONE_OF_THE_ABOVE covers documented unlisted fields; stale OTHER clause removed.
-version = 2
+# Version 3 (2026-10-21): shared TreatmentPhase definitions rewritten (maintenance, salvage, pre-induction).
+# Not rerun at BCH: llm_radiation_wide.sql.jinja reads versions 2 and 3, same schema shape.
+version = 3
 
 [tables.systemic_therapy]
 response_schema = "llm/schemas/pcx-systemic-therapy-annotation.json"
 select_by_table = "pcx__llm_document_task_systemic_therapy"
-version = 1
+# Version 2 (2026-10-21): coded StrEnums instead of free text. agent_name is RxAgentName (anticancer agents plus
+# leucovorin, mesna, dexrazoxane, other supportive care not extracted) with agent_name_verbatim. cycle_name became
+# cycle_num (int) and cycle_name_verbatim, plus cycle_day on administrations. protocol_name (TreatmentProtocol),
+# completion_status, route and dose_unit are enums. TreatmentPhase definitions rewritten.
+version = 2
 
 [tables.metastasis]
 response_schema = "llm/schemas/pcx-metastasis-annotation.json"
@@ -89,7 +95,8 @@ version = 2
 [tables.laboratory]
 response_schema = "llm/schemas/pcx-laboratory-annotation.json"
 select_by_table = "pcx__llm_document_task_laboratory"
-version = 2
+# Version 3 (2026-10-21): shared TreatmentPhase definitions rewritten (maintenance, salvage, pre-induction).
+version = 3
 
 [tables.registry_eligibility]
 response_schema = "llm/schemas/pcx-registry-eligibility-annotation.json"
