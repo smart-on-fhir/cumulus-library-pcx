@@ -192,9 +192,6 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `outcome_vital_status.sql` uses `DATE(deceasedDateTime)`, which fails on Athena for a
   timestamp string. The old plan: `CAST(from_iso8601_timestamp(deceasedDateTime) AS DATE)`
   with a DuckDB macro in the tests. Before the first warehouse run of `outcome`.
-- [ ] P2 · `outcome` · **Event-task death does not reach OS** (was 3.1).
-  `outcome_first_event.sql` takes DECEASED from the event task. `outcome_vital_status.sql`
-  does not, so such a death counts for EFS but not OS.
 - [ ] P2 · `outcome` · **Events before time zero** (was 3.2). First-event candidates are not
   limited to `event_day >= t0_day`, so `efs_days` can be negative. Not re-checked since
   2026-09-11 beyond a search of the SQL.
@@ -263,6 +260,17 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — Event-task death reaches OS and EFS alike
+
+- `outcome_vital_status.sql` is the one place deaths are reconciled: it now adds event-task
+  DECEASED mentions (new `llm_event_deceased_bool`, `llm_event_death_day`) to the FHIR and
+  survival-timeline deaths, for `deceased_bool` and the earliest `death_day`.
+- `outcome_first_event.sql` no longer reads DECEASED from the event task. Death comes only from
+  vital status, so OS and EFS see the same death. EFS output is unchanged.
+- `death_day_disagree` warn now compares all three death dates. New test
+  `test_event_task_death_reaches_os_and_efs_alike`. Closes the P2 item "Event-task death does
+  not reach OS". PROTOCOL 7 and the data dictionary updated.
 
 ### 2026-10-21 — Methotrexate exposure is high-dose, from dose-level receipt too
 

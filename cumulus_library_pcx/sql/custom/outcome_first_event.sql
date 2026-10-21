@@ -5,8 +5,9 @@
 --  EFS calculation, that is progression, recurrence, secondary malignancy or
 --  death. REMISSION, INITIAL_DIAGNOSIS and SECOND_PRIMARY are not counted
 --  (SECOND_PRIMARY is pending the EFS event-list decision in section 5).
---  Death comes from outcome_vital_status so a structured death date counts
---  even when no note names it.
+--  Death comes only from outcome_vital_status, which reconciles FHIR, the
+--  survival_timeline task and event-task DECEASED mentions. A structured death
+--  date counts even when no note names it, and OS and EFS see the same death.
 --
 --  A documented event is not the same as a dated event:
 --    dated_event_bool             a dated event exists, first_event_day is the earliest
@@ -28,7 +29,7 @@ llm_event AS (
             event_type,
             event_day
     FROM    pcx__llm_event_wide
-    WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY', 'DECEASED')
+    WHERE   event_type IN ('PROGRESSION', 'RECURRENCE', 'SECOND_MALIGNANCY')
 ),
 candidate AS (
     SELECT  subject_ref, event_type, event_day
@@ -69,14 +70,7 @@ undated AS (
             COUNT(*)                        AS undated_event_cnt
     FROM    llm_event
     WHERE   event_day IS NULL
-    AND     event_type <> 'DECEASED'
     GROUP BY subject_ref
-),
-undated_death AS (
-    SELECT  DISTINCT subject_ref
-    FROM    llm_event
-    WHERE   event_day IS NULL
-    AND     event_type = 'DECEASED'
 ),
 subject AS (
     SELECT  elig.subject_ref,
@@ -85,8 +79,7 @@ subject AS (
             first_type.first_event_type,
             (first_day.first_event_day IS NOT NULL)                                 AS dated_event_bool,
             (undated.undated_event_cnt IS NOT NULL)                                 AS event_timing_uncertain_bool,
-            (first_day.death_first_day IS NULL
-             AND (vital.deceased_bool OR undated_death.subject_ref IS NOT NULL))    AS death_undated_bool,
+            (first_day.death_first_day IS NULL AND vital.deceased_bool)            AS death_undated_bool,
             first_day.progression_first_day,
             first_day.recurrence_first_day,
             first_day.second_malignancy_first_day,
@@ -98,7 +91,6 @@ subject AS (
     LEFT JOIN first_day                                   ON first_day.subject_ref  = elig.subject_ref
     LEFT JOIN first_type                                  ON first_type.subject_ref = elig.subject_ref
     LEFT JOIN undated                                     ON undated.subject_ref    = elig.subject_ref
-    LEFT JOIN undated_death                               ON undated_death.subject_ref = elig.subject_ref
 )
 SELECT  subject.*,
         (dated_event_bool OR event_timing_uncertain_bool OR death_undated_bool)     AS event_documented_bool

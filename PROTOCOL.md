@@ -158,11 +158,13 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   event-free survival, where an event is progression, recurrence, a second malignancy or
   death. EFS is provisional until event-free follow-up is adjudicated ([limitations.md](limitations.md)).
 - [source limitations] Vital status (`outcome_vital_status.sql`): raw `patient.deceasedBoolean` /
-  `deceasedDateTime`, the last study-population encounter, and LLM vital-status mentions; the
-  earliest death and latest alive dates win without cross-checking. The raw FHIR Patient
+  `deceasedDateTime`, the last study-population encounter, LLM survival-timeline vital status and
+  LLM event-task DECEASED mentions; the earliest death and latest alive dates win without
+  cross-checking. It is the one place deaths are reconciled: `outcome_first_event.sql` takes
+  death from it, so OS and EFS always see the same death. The raw FHIR Patient
   deceased fields are a site prerequisite: the site's ETL must expose them.
-- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS; a death
-  recorded only by the event task reaches EFS but not OS. Coarse LLM dates are consumed as exact days.
+- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS. Coarse
+  LLM dates are consumed as exact days.
 - [decided] 2026-10-21, Andy: a documented EFS event without a usable date is an event with an
   uncomputable interval, not a censored observation. `efs_event_bool` is `event_documented_bool`
   (dated event, undated event, or a death without a date).

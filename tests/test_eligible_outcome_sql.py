@@ -129,6 +129,23 @@ def test_dispense_is_structured_evidence_not_receipt(con):
     assert rows['Patient/p1'][2] is None
 
 
+def test_event_task_death_reaches_os_and_efs_alike():
+    # p5: alive by every other source, the event task documents death on 2021-06-01.
+    # p1: an undated event-task death, beside its dated progression on 2021-03-01.
+    con = sqltest.connect()
+    con.execute("INSERT INTO pcx__llm_event_wide (subject_ref, note_ref, event_type, event_day) VALUES "
+                "('Patient/p5', 'note-p5-ev', 'DECEASED', DATE '2021-06-01'), "
+                "('Patient/p1', 'note-p1-ev2', 'DECEASED', NULL)")
+    sqltest.run_custom(con)
+    rows = {r[0]: r[1:] for r in con.execute(
+        "SELECT subject_ref, os_event_bool, death_day, os_days, efs_event_bool, first_event_day, efs_censor_source "
+        "FROM pcx__outcome").fetchall()}
+    # the same death ends OS and EFS: 396 days from t0 (2020-05-01)
+    assert rows['Patient/p5'] == (True, date(2021, 6, 1), 396, True, date(2021, 6, 1), 'first_event')
+    # an undated death is an OS event with no interval, and the dated progression stays the first EFS event
+    assert rows['Patient/p1'] == (True, None, None, True, date(2021, 3, 1), 'first_event')
+
+
 def test_trial_cohort_is_the_strict_intersection(con):
     # p7 has t0, medulloblastoma, surgery under 36 months and no treatment evidence at all,
     # which is "no prior therapy" once t0 is known (workplan 2.2)
