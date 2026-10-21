@@ -39,8 +39,10 @@ FROM
 CROSS JOIN UNNEST(nlp.result.radiation_rounds) WITH ORDINALITY AS radiation_round_t (radiation_round, radiation_round_index)
 WHERE
         nlp.result IS NOT NULL
--- Version 2 results are kept: version 3 changed only the TreatmentPhase wording, not the schema shape.
--- The task_version column tells them apart.
+-- The NLP table holds ONE task version, the folder it was last built over. Version 3
+-- changed only the TreatmentPhase wording, not the schema shape, so this reads either.
+-- Nothing keeps version 2 rows beside version 3 rows: rebuilding the radiation task
+-- repoints the table at version 3 and re-extracts every note.
 AND     nlp.task_version IN (2, {{ task_version }})
 {{ syntax.union_all_delineate(loop) }}
 {%- endfor %}

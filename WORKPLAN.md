@@ -128,12 +128,26 @@ No changes planned.
 
 ## Clinical notes
 
-- [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). `systemic_therapy` is now
-  version 2 and its wide tables keep only that version, so they are empty until BCH reruns it.
-  `radiation` and `laboratory` are version 3 (shared `TreatmentPhase` wording only). Radiation
-  is deliberately not rerun: `pcx__llm_radiation_wide` reads versions 2 and 3, whose schemas
-  differ only in that wording, so BCH rows keep the old phase definitions. Laboratory has never
-  been run. CHOP has not run notes yet and gets the new schemas.
+- [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). Each `pcx__nlp_<task>_<model>` table
+  holds ONE task version: Cumulus Library builds it over the folder `..._v<version>` of the
+  current workflow version, and `--clean` deletes the older folders. BCH, checked in Athena
+  2026-10-21:
+  - `systemic_therapy` is version 1 (external Parquet over `nlp_systemic_therapy_gpt_oss_120b_v1`,
+    63,490 notes). The v2 templates name struct fields v1 lacks (`agent_name_verbatim`,
+    `cycle_num`, `cycle_day`), so `llm_clinical_wide` FAILS at analysis until it is rerun, it is
+    not empty. The selector `pcx__llm_document_task_systemic_therapy` has 139,015 rows over the
+    same 63,490 notes (0 new, 0 omitted), so the rerun re-sends exactly those notes.
+  - `radiation` is version 2 (44,968 notes), `document_topic` and `document_type` version 2
+    (180,226 notes). They are kept only by NOT rebuilding them: a rebuild repoints the table at
+    the workflow version and re-extracts every note. The radiation (2 or 3) and topic (1, 2 or 3)
+    templates read whichever version the table holds.
+  - Order: `--stage nlp_clinical_tasks --nlp-subtask systemic_therapy` without `--clean`, then
+    `llm_clinical_wide`, `eligible`, `outcome`, `client_views`. `laboratory` (version 3) has
+    never been run: `pcx__nlp_laboratory_gpt_oss_120b` exists with 0 rows, built over the empty
+    `nlp_laboratory_gpt_oss_120b_v2` folder (checked 2026-10-21). Every struct field the
+    laboratory templates read is in that v2 table, so `llm_clinical_wide` builds and the
+    laboratory tables are empty until a `--nlp-subtask laboratory` run repoints it at `_v3`.
+  CHOP has not run notes yet and gets the current versions.
 - [ ] P3 · `llm` · **Radiation indication enum** (was 3.6). `radiation.py` `indication` is
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
   regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
@@ -263,6 +277,11 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-21 — NLP tables hold one task version: comments and plan corrected
+
+- Comments in `llm_radiation_wide.sql.jinja`, `llm_document_topic_wide.sql.jinja` and both workflows no longer say older rows are "kept". Cumulus Library builds each NLP table over one `_v<version>` folder, so the multi-version filters read whichever version the table holds, never both. BCH keeps radiation v2 and topic v2 only by not rebuilding those tasks.
+- P1 "Rerun systemic therapy" now records the BCH Athena checks (systemic therapy v1 over the `_v1` folder, 63,490 notes, selector matches exactly) and the order: `--nlp-subtask systemic_therapy` without `--clean`, then the downstream stages. `llm_clinical_wide` fails, not empties, until then.
 
 ### 2026-10-21 — Dates outside 1980 to today are cleared at the source, with their durations
 
@@ -415,8 +434,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   is POST_CONSOLIDATION, salvage is therapy for relapse or progression whenever given,
   pre-induction therapy is NONE_OF_THE_ABOVE). Shared with radiation and laboratory, so those
   bump too.
-- Workflow: `systemic_therapy` 1 → 2, `radiation` 2 → 3, `laboratory` 2 → 3. Radiation is not
-  rerun: `llm_radiation_wide.sql.jinja` reads `task_version IN (2, 3)`.
+- Workflow: `systemic_therapy` 1 → 2, `radiation` 2 → 3, `laboratory` 2 → 3. BCH must not
+  rebuild the radiation task: its table holds version 2 only, and `llm_radiation_wide.sql.jinja`
+  reads `task_version IN (2, 3)` so either version works (corrected 2026-10-21, the table never
+  holds both).
 - SQL: `eligible_rx.sql` and `client_timeline.sql` match `agent_name = 'METHOTREXATE'`
   instead of `LIKE '%methotrexate%' OR '%mtx%'`. LLM chemo no longer counts the three
   supportive markers. `client_timeline` shows the coded agent and protocol, and cycle rows
@@ -484,7 +505,8 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - `llm_document_topic_wide.sql.jinja`: UNION ALL of `task_version = 1` (no `survival_timeline`
   topic, columns NULL) and `task_version = 3` (`survival_timeline` read through JSON, NULL
   until a version 3 run adds the field to the table). Versions are hardcoded, not taken
-  from the workflow. Existing BCH results are version 1 (42,060 rows).
+  from the workflow. Existing BCH results are version 1 (42,060 rows). (Corrected 2026-10-21:
+  BCH's table is version 2, 180,226 notes, and the table only ever holds one version.)
 - `nlp_document_tasks.workflow`: `document_topic` version 3, so new runs land in the
   version 3 branch. `llm.md` lists the new version.
 

@@ -53,7 +53,9 @@ response_schema = "llm/schemas/pcx-radiation-annotation.json"
 select_by_table = "pcx__llm_document_task_radiation"
 # Version 2 (2026-09-16): radiation_field NONE_OF_THE_ABOVE covers documented unlisted fields; stale OTHER clause removed.
 # Version 3 (2026-10-21): shared TreatmentPhase definitions rewritten (maintenance, salvage, pre-induction).
-# Not rerun at BCH: llm_radiation_wide.sql.jinja reads versions 2 and 3, same schema shape.
+# The NLP table holds one version, the folder it was last built over. BCH's is version 2
+# and is deliberately not rebuilt (a rebuild re-extracts every note and replaces it).
+# llm_radiation_wide.sql.jinja reads version 2 or 3, same schema shape.
 version = 3
 
 [tables.systemic_therapy]
