@@ -28,7 +28,7 @@ WITH site_chop AS
                 ELSE CONCAT('UNKNOWN:',diagnosis_type_cohort)
                 END AS subtype,
             -- FHIR linkage
-            patient_id          as subject_ref,
+            enc.subject_ref     as subject_ref,
             enc.encounter_ref   as encounter_ref_link,
             NULL                as resource_ref
     FROM    radiant_data_dev.pcx_patient_list   as pcx_patient_list
