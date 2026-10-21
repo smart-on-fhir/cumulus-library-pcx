@@ -19,8 +19,11 @@ WITH site_chop AS
             'SITE_CHOP'             as system,
             'SITE_CHOP'             as code,
             diagnosis_type_cohort   as display,
-            -- tier is always "1" highest quality match
-            1   as tier,
+            -- tier 2: the roster marks a case-definition subject but has no
+            -- diagnosis date. Each roster row sits on every population encounter,
+            -- so tier 1 would make eligible_dx take the patient's first encounter
+            -- of any kind as t0. t0 still comes from tier 1 coded medulloblastoma.
+            2   as tier,
             -- subtype
             CASE diagnosis_type_cohort
                 WHEN 'Medulloblastoma'                  THEN 'medulloblastoma'
