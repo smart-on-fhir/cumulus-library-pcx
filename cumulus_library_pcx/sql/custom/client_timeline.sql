@@ -722,6 +722,8 @@ UNION ALL
 
 -- ----------------------------------------------------------------------
 -- pcx__llm_systemic_therapy_administration
+-- The drug comes from the dose's agent in the same extraction output, as code
+-- with rx_class like the agent rows. Two drugs given alike are two rows.
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
@@ -737,14 +739,22 @@ SELECT  DISTINCT
         src.dose_unit                                                AS unit,
         src.phase                                                    AS interpretation,
         src.delivery_status                                          AS status,
-        CAST(NULL AS VARCHAR)                                        AS code,
-        CAST(NULL AS VARCHAR)                                        AS code_system,
+        agent.agent_name                                             AS code,
+        'pcx_llm_rx_agent'                                           AS code_system,
         'LLM'                                                        AS source_type,
         'evidence'                                                   AS assertion_level,
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CAST(NULL AS VARCHAR)                                        AS rx_class
+        CASE
+            WHEN agent.agent_name = 'METHOTREXATE'                                      THEN 'METHOTREXATE'
+            WHEN agent.agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')         THEN 'CHEMOTHERAPY'
+        END                                                          AS rx_class
 FROM    pcx__llm_systemic_therapy_administration AS src
+LEFT JOIN pcx__llm_systemic_therapy_agent      AS agent
+  ON    agent.note_ref      = src.note_ref
+ AND    agent.generated_on  = src.generated_on
+ AND    agent.regimen_index = src.regimen_index
+ AND    agent.agent_index   = src.agent_index
 LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref

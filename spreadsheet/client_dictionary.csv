@@ -119,7 +119,7 @@ pcx__client_timeline,value_boolean,,Boolean payload,payload,boolean,,,,
 pcx__client_timeline,unit,,Unit for value_number when applicable,provenance,varchar,,,,
 pcx__client_timeline,interpretation,,"Secondary categorical payload (tier, method, phase, reason)",provenance,varchar,,,,
 pcx__client_timeline,status,,"Record status or secondary label (FHIR status, delivery status, role)",provenance,varchar,,,,
-pcx__client_timeline,code,,Source code for coded FHIR evidence,provenance,varchar,,,,
+pcx__client_timeline,code,,"Source code for coded FHIR evidence, and the agent of an LLM administration",provenance,varchar,,,,
 pcx__client_timeline,code_system,,Coding system for code,provenance,varchar,,,,
 pcx__client_timeline,source_type,,"FHIR, LLM or DERIVED",provenance,varchar,,,,
 pcx__client_timeline,assertion_level,,evidence or derived,provenance,varchar,,,,
@@ -183,7 +183,7 @@ pcx__client_timeline,variable,llm_timeline_anchor,"LLM timeline anchor: original
 pcx__client_timeline,variable,llm_event_free_follow_up,LLM dated event-free follow-up assessment (value_boolean = event free),covariate_source,,LLM,,llm_clinical_date,note_date
 pcx__client_timeline,variable,llm_therapy_agent,"LLM systemic agent (value = agent, status = delivery status, rx_class = METHOTREXATE or CHEMOTHERAPY)",covariate_source,,LLM,,llm_clinical_date,note_date
 pcx__client_timeline,variable,llm_therapy_regimen,"LLM regimen (value = protocol name, interpretation = phase, status = trial arm)",covariate_source,,LLM,,llm_clinical_date,note_date
-pcx__client_timeline,variable,llm_therapy_administration,"LLM administration (value_number = dose, unit, value_text = route, interpretation = phase, value_boolean = explicit high-dose MTX)",covariate_source,,LLM,,llm_clinical_date,note_date
+pcx__client_timeline,variable,llm_therapy_administration,"LLM administration (code = agent, code_system = pcx_llm_rx_agent, rx_class = METHOTREXATE or CHEMOTHERAPY, value_number = dose, unit, value_text = route, interpretation = phase, value_boolean = explicit high-dose MTX)",covariate_source,,LLM,,llm_clinical_date,note_date
 pcx__client_timeline,variable,llm_therapy_cycle,"LLM therapy cycle (value = cycle name, interpretation = phase, status = completion)",covariate_source,,LLM,,llm_clinical_date,note_date
 pcx__client_timeline,variable,llm_stem_cell_infusion,"LLM stem-cell infusion (value = cell source, value_number = CD34 cells/kg)",covariate_source,,LLM,,llm_clinical_date,note_date
 pcx__client_timeline,variable,llm_response,"LLM response assessment (value = CR/PR/SD/PD, interpretation = timepoint, value_boolean = radiologically evaluable)",covariate_source,,LLM,,llm_clinical_date,note_date
