@@ -4,11 +4,13 @@
 -- README section 2 asks for ACTUAL administration. pcx__eligible_rx unions
 -- MedicationRequest orders (authoredOn) and MedicationDispense hand-overs
 -- (whenHandedOver) with LLM ADMINISTERED agents and takes the earliest day,
--- and pcx__eligible_radiation does the same with procedure and encounter codes. methotrexate_first_day / radiation_first_day, and so
--- every prior-to-first-event flag and initial_therapy_sequence, can therefore
+-- and pcx__eligible_radiation does the same with procedure and encounter codes. chemo_first_day / radiation_first_day, and so
+-- the had_initial_* flags and initial_therapy_sequence, can therefore
 -- rest on an order, a dispense or an encounter code alone.
 --
---   methotrexate_order_only   methotrexate ordered or dispensed, never LLM-administered
+--   methotrexate_order_only   methotrexate ordered or dispensed, but no LLM administration
+--                             or ACNS0334 Regimen B evidence, so not counted as exposure
+--                             (structured methotrexate is evidence only)
 --   radiation_code_only       radiation coded, never LLM-administered
 --   chemo_order_only          backbone chemo ordered or dispensed, never LLM-administered
 -- ============================================================================
@@ -19,13 +21,13 @@ SELECT  'methotrexate_order_only'                                               
         CONCAT_WS('|',
             CONCAT('order_first=',      CAST(rx.methotrexate_order_first_day AS VARCHAR)),
             CONCAT('dispense_first=',   CAST(rx.methotrexate_dispense_first_day AS VARCHAR)),
-            CONCAT('prior_to_first_event=', CAST(exposure.methotrexate_prior_to_first_event_bool AS VARCHAR)),
+            CONCAT('had_initial=',      CAST(exposure.had_initial_methotrexate_bool AS VARCHAR)),
             CONCAT('first_event=',      CAST(exposure.first_event_day AS VARCHAR)))
                                                                                 AS detail
 FROM    pcx__eligible_rx        AS rx
 JOIN    pcx__outcome_exposure   AS exposure ON exposure.subject_ref = rx.subject_ref
-WHERE   rx.methotrexate_any_bool
-AND     NOT COALESCE(rx.methotrexate_administered_bool, FALSE)
+WHERE   (rx.methotrexate_order_first_day IS NOT NULL OR rx.methotrexate_dispense_first_day IS NOT NULL)
+AND     NOT rx.methotrexate_any_bool
 
 UNION ALL
 
@@ -34,7 +36,7 @@ SELECT  'radiation_code_only'                                                   
         CONCAT_WS('|',
             CONCAT('proc_first=',       CAST(radiation.radiation_proc_first_day AS VARCHAR)),
             CONCAT('dx_first=',         CAST(radiation.radiation_dx_first_day AS VARCHAR)),
-            CONCAT('prior_to_first_event=', CAST(exposure.radiation_prior_to_first_event_bool AS VARCHAR)),
+            CONCAT('had_initial=',      CAST(exposure.had_initial_radiation_bool AS VARCHAR)),
             CONCAT('first_event=',      CAST(exposure.first_event_day AS VARCHAR)))
                                                                                 AS detail
 FROM    pcx__eligible_radiation AS radiation

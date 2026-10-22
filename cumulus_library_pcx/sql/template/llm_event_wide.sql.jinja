@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_event_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -15,10 +16,13 @@ SELECT  DISTINCT
         event.source_of_event_diagnosis                              AS source_of_event_diagnosis,
         event.event_date                                             AS event_date,
         event.event_date_precision                                   AS event_date_precision,
+        {{ dates.llm_day_columns('event.event_date', 'event.event_date_precision', 'event_day') }},
         event.date_of_progression_mri                                AS date_of_progression_mri,
         event.date_of_progression_mri_precision                      AS date_of_progression_mri_precision,
+        {{ dates.llm_day_columns('event.date_of_progression_mri', 'event.date_of_progression_mri_precision', 'progression_mri_day') }},
         event.confirmation_date                                      AS confirmation_date,
-        event.confirmation_date_precision                            AS confirmation_date_precision
+        event.confirmation_date_precision                            AS confirmation_date_precision,
+        {{ dates.llm_day_columns('event.confirmation_date', 'event.confirmation_date_precision', 'confirmation_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.events) WITH ORDINALITY AS event_t (event, event_index)

@@ -36,16 +36,32 @@ def test_unknown_is_not_absent_or_received():
     assert TherapyAdministrationMention(**EMPTY).high_dose_methotrexate_explicit_bool is None
     assert TherapyAgentMention(**EMPTY).delivery_status == 'NONE_OF_THE_ABOVE'
     assert TherapyAgentMention(**EMPTY).assessed_through_date is None
+    assert TherapyAgentMention(**EMPTY).agent_name == 'NONE_OF_THE_ABOVE'
     assert MolecularAlterationMention(**EMPTY, target='MYC').status == 'NONE_OF_THE_ABOVE'
     assert MetastaticStagingInputsMention(**EMPTY).csf_cytology == 'NONE_OF_THE_ABOVE'
 
 
 def test_planned_mtx_does_not_establish_receipt():
-    planned = TherapyAdministrationMention(**EVIDENCE, delivery_status='PLANNED', dose_amount=8, dose_unit='g/m2', high_dose_methotrexate_explicit_bool=True)
+    planned = TherapyAdministrationMention(**EVIDENCE, delivery_status='PLANNED', dose_amount=8, dose_unit='G_PER_M2', high_dose_methotrexate_explicit_bool=True)
     assert planned.delivery_status != 'ADMINISTERED'
     assert planned.administration_date is None
     with pytest.raises(ValidationError):
         TherapyAdministrationMention(**EVIDENCE, delivery_status='EXPLICITLY_NOT_RECEIVED', administration_date='2020-01-01', administration_date_precision='DAY')
+
+
+def test_systemic_therapy_values_are_coded():
+    # agent, unit and cycle are coded values, not free text for SQL to parse
+    assert TherapyAgentMention(**EVIDENCE, agent_name='CYCLOPHOSPHAMIDE', agent_name_verbatim='Cytoxan').agent_name == 'CYCLOPHOSPHAMIDE'
+    with pytest.raises(ValidationError):
+        TherapyAgentMention(**EVIDENCE, agent_name='Cytoxan')
+    with pytest.raises(ValidationError):
+        TherapyAdministrationMention(**EVIDENCE, delivery_status='PLANNED', dose_unit='MG_PER_M2')
+    # no numeric limits: a cycle 0 or a negative dose is kept for the SQL warn tables, not
+    # rejected, since a schema limit would discard the whole note's response at inference
+    assert TherapyAdministrationMention(**EVIDENCE, cycle_num=0).cycle_num == 0
+    assert TherapyAdministrationMention(**EVIDENCE, dose_amount=-1).dose_amount == -1
+    # consolidation days count from the stem-cell infusion (day 0), so may be negative
+    assert TherapyAdministrationMention(**EVIDENCE, cycle_num=1, cycle_day=-3, cycle_name_verbatim='Consolidation 1 Day -3').cycle_day == -3
 
 
 def test_molecular_calls_preserve_conflicts_and_distinct_alterations():

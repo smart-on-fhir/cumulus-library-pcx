@@ -11,16 +11,25 @@ from cumulus_study_builder.stage import (
     elastic_upload,
     counts
 )
-from . import llm_schema, llm_document_wide, eligible, outcome, client_views, qa_athena
+from . import (
+    llm_schema,
+    llm_document_wide,
+    eligible,
+    outcome,
+    client_views,
+    qa_athena,
+    counts_kaplan
+)
 
 STAGES = [
     Stage(study_population),
     Stage(study_variable),
     Stage(study_variable_wide),
     Stage(casedef),
-    Stage(elastic_upload,
-          skip_by_default=False),
+    Stage(elastic_upload),
     Stage(sample),
+    Stage(study_meta),
+    Stage(counts), # counts.workflow (FHIR only, no LLM)
     Stage(llm_schema,
           skip_by_default=True),
     Stage('nlp_document_tasks.workflow',
@@ -39,7 +48,6 @@ STAGES = [
           skip_by_default=True),
     Stage(qa_athena,
           skip_by_default=True),
-    Stage(counts,  # counts.workflow at the package root
+    Stage(counts_kaplan,  # counts_kaplan.workflow (with LLM)
           skip_by_default=True),
-    Stage(study_meta),
 ]

@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_metastasis_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -11,10 +12,13 @@ SELECT  DISTINCT
         nlp.system_fingerprint,
         nlp.result.staging_inputs.csf_collection_date                AS csf_collection_date,
         nlp.result.staging_inputs.csf_collection_date_precision      AS csf_collection_date_precision,
+        {{ dates.llm_day_columns('nlp.result.staging_inputs.csf_collection_date', 'nlp.result.staging_inputs.csf_collection_date_precision', 'csf_collection_day') }},
         nlp.result.staging_inputs.brain_mri_date                     AS brain_mri_date,
         nlp.result.staging_inputs.brain_mri_date_precision           AS brain_mri_date_precision,
+        {{ dates.llm_day_columns('nlp.result.staging_inputs.brain_mri_date', 'nlp.result.staging_inputs.brain_mri_date_precision', 'brain_mri_day') }},
         nlp.result.staging_inputs.spine_mri_date                     AS spine_mri_date,
         nlp.result.staging_inputs.spine_mri_date_precision           AS spine_mri_date_precision,
+        {{ dates.llm_day_columns('nlp.result.staging_inputs.spine_mri_date', 'nlp.result.staging_inputs.spine_mri_date_precision', 'spine_mri_day') }},
         nlp.result.staging_inputs.spine_mri_findings                 AS spine_mri_findings,
         nlp.result.staging_inputs.brain_mri_findings                 AS brain_mri_findings,
         nlp.result.staging_inputs.csf_cytology                       AS csf_cytology,

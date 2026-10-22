@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_response_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -16,7 +17,8 @@ SELECT  DISTINCT
         assessment.radiologically_evaluable                          AS radiologically_evaluable,
         assessment.cytologically_evaluable                           AS cytologically_evaluable,
         assessment.assessment_date                                   AS assessment_date,
-        assessment.assessment_date_precision                         AS assessment_date_precision
+        assessment.assessment_date_precision                         AS assessment_date_precision,
+        {{ dates.llm_day_columns('assessment.assessment_date', 'assessment.assessment_date_precision', 'assessment_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.assessments) WITH ORDINALITY AS assessment_t (assessment, assessment_index)

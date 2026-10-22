@@ -80,6 +80,7 @@ The build order is the `STAGES` list in
 | `client_views` | opt-in | PCX | `pcx__client_*` tables for timeline and survival analysis |
 | `qa_athena` | opt-in | PCX | `pcx__qa_*` and `pcx__warn_*` data-quality tables |
 | `counts` | default | builder | the count tables in [counts.workflow](cumulus_library_pcx/counts.workflow) |
+| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes in the PCX-30 layout, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), exported with the approved floor of 1 |
 | `study_meta` | default | builder | study metadata tables |
 
 "PCX" stages are modules in `cumulus_library_pcx/stage/`. "Builder" stages come from the
@@ -108,7 +109,7 @@ The study prefix `pcx` is set only in `manifest.toml`.
 | `ELASTIC_OUTPUT_DIR` | `$CUMULUS_LIBRARY_DATA_PATH/elastic/output` | where `elastic_upload` looks for Elasticsearch result CSVs. With neither variable set, or no CSVs, the stage builds an empty `pcx__elastic_union` |
 | `CUMULUS_LIBRARY_DATA_PATH` | none | fallback for the folder above; `cumulus-library build` has its own uses for it |
 | `HOME_INSTITUTION` | `Boston Children's Hospital (BCH)` | named in the `transition_of_care` prompts; set it to your site before `llm_schema` |
-| `CUMULUS_PCX_STRICT_MENTIONS` | off | `1` makes the LLM model validators raise on missing evidence spans or bad dates. The default only warns; the test suite forces strict |
+| `CUMULUS_PCX_STRICT_MENTIONS` | off | Tests only: `1` makes the model validators raise on missing evidence spans or bad dates, and the test suite sets it. No effect at inference, where Cumulus Library validates against the JSON schema without the validators ([llm.md](llm.md)) |
 | `CUMULUS_ENCOUNTER_REF` | `encounter_ref_link` | which encounter link the templates use: `encounter_ref_link` (also attaches evidence by date) or `encounter_ref` (the FHIR Encounter reference only) |
 
 ## Site requirements
@@ -148,6 +149,7 @@ casedef, sample, eligible and outcome tables, and
 | `pcx__sample_*` | candidate clinical notes; `pcx__sample_task` is the casedef notes plus the Elasticsearch notes |
 | `pcx__nlp_<task>_<deployment>` | raw LLM output per task and model deployment |
 | `pcx__llm_*` | LLM chart abstraction flattened to SQL (wide tables, one table per list-valued mention) |
+| `pcx__llm_note_date` | one date per note in `pcx__sample_task` (casedef and Elasticsearch notes), read by the client views and the date warnings (`client_views`, opt-in) |
 | `pcx__eligible_*` | per-subject eligibility criteria (`pcx__eligible`, all ages) and the trial-like intersection (`pcx__eligible_trial`) |
 | `pcx__outcome_*` | per-subject vital status, first event, exposure timing, OS and EFS |
 | `pcx__client_*` | timeline of eligibility, outcomes and variables, for export |
@@ -182,7 +184,7 @@ Edit the inputs, never the outputs.
 | `cumulus_library_pcx/sql/custom/` | study SQL for `eligible`, `outcome`, `client_views` |
 | `cumulus_library_pcx/sql/template/` | Jinja templates, including the LLM wide projections |
 | `cumulus_library_pcx/llm/models/` | the LLM extraction models |
-| `cumulus_library_pcx/nlp_*.workflow`, `counts.workflow` | workflows, written by hand |
+| `cumulus_library_pcx/nlp_*.workflow`, `counts.workflow`, `counts_kaplan*.workflow` | workflows, written by hand |
 
 | Output | By |
 |---|---|

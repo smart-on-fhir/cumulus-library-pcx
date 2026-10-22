@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_survival_timeline_anchor AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -14,6 +15,7 @@ SELECT  DISTINCT
         anchor.anchor                                                AS anchor,
         anchor.anchor_date                                           AS anchor_date,
         anchor.anchor_date_precision                                 AS anchor_date_precision,
+        {{ dates.llm_day_columns('anchor.anchor_date', 'anchor.anchor_date_precision', 'anchor_day') }},
         anchor.protocol_name                                         AS protocol_name
 FROM
         {{ table_name }} AS nlp

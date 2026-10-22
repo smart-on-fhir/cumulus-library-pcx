@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_survival_timeline_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -12,8 +13,10 @@ SELECT  DISTINCT
         nlp.result.vital_status.vital_status                         AS vital_status,
         nlp.result.vital_status.death_date                           AS death_date,
         nlp.result.vital_status.death_date_precision                 AS death_date_precision,
+        {{ dates.llm_day_columns('nlp.result.vital_status.death_date', 'nlp.result.vital_status.death_date_precision', 'death_day') }},
         nlp.result.vital_status.last_known_alive_date                AS last_known_alive_date,
-        nlp.result.vital_status.last_known_alive_date_precision      AS last_known_alive_date_precision
+        nlp.result.vital_status.last_known_alive_date_precision      AS last_known_alive_date_precision,
+        {{ dates.llm_day_columns('nlp.result.vital_status.last_known_alive_date', 'nlp.result.vital_status.last_known_alive_date_precision', 'last_known_alive_day') }}
 FROM
         {{ table_name }} AS nlp
 WHERE

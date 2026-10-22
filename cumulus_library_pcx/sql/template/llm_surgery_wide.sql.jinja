@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_surgery_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -15,10 +16,12 @@ SELECT  DISTINCT
         surgery.residual_tumor_area_cm2                              AS residual_tumor_area_cm2,
         surgery.residual_assessment_date                             AS residual_assessment_date,
         surgery.residual_assessment_date_precision                   AS residual_assessment_date_precision,
+        {{ dates.llm_day_columns('surgery.residual_assessment_date', 'surgery.residual_assessment_date_precision', 'residual_assessment_day') }},
         surgery.surgery_type                                         AS surgery_type,
         surgery.extent_of_resection                                  AS extent_of_resection,
         surgery.surgery_date                                         AS surgery_date,
-        surgery.surgery_date_precision                               AS surgery_date_precision
+        surgery.surgery_date_precision                               AS surgery_date_precision,
+        {{ dates.llm_day_columns('surgery.surgery_date', 'surgery.surgery_date_precision', 'surgery_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.surgeries) WITH ORDINALITY AS surgery_t (surgery, surgery_index)

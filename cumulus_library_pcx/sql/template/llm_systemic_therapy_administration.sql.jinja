@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_systemic_therapy_administration AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -15,9 +16,12 @@ SELECT  DISTINCT
         administration_index,
         administration.delivery_status                               AS delivery_status,
         administration.phase                                         AS phase,
-        administration.cycle_name                                    AS cycle_name,
+        administration.cycle_num                                     AS cycle_num,
+        administration.cycle_day                                     AS cycle_day,
+        administration.cycle_name_verbatim                           AS cycle_name_verbatim,
         administration.administration_date                           AS administration_date,
         administration.administration_date_precision                 AS administration_date_precision,
+        {{ dates.llm_day_columns('administration.administration_date', 'administration.administration_date_precision', 'administration_day') }},
         administration.dose_amount                                   AS dose_amount,
         administration.dose_unit                                     AS dose_unit,
         administration.route                                         AS route,

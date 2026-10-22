@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_diagnosis_wide AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -16,8 +17,10 @@ SELECT  DISTINCT
         nlp.result.age_at_diagnosis.age_at_diagnosis_months                 AS age_at_diagnosis_months,
         nlp.result.diagnosis_date.diagnosis_date                            AS diagnosis_date,
         nlp.result.diagnosis_date.diagnosis_date_precision                  AS diagnosis_date_precision,
+        {{ dates.llm_day_columns('nlp.result.diagnosis_date.diagnosis_date', 'nlp.result.diagnosis_date.diagnosis_date_precision', 'diagnosis_day') }},
         nlp.result.diagnosis_date_gold.diagnosis_date_gold                  AS diagnosis_date_gold,
-        nlp.result.diagnosis_date_gold.diagnosis_date_gold_precision        AS diagnosis_date_gold_precision
+        nlp.result.diagnosis_date_gold.diagnosis_date_gold_precision        AS diagnosis_date_gold_precision,
+        {{ dates.llm_day_columns('nlp.result.diagnosis_date_gold.diagnosis_date_gold', 'nlp.result.diagnosis_date_gold.diagnosis_date_gold_precision', 'diagnosis_gold_day') }}
 FROM
         {{ table_name }} AS nlp
 WHERE

@@ -3,12 +3,13 @@ from enum import StrEnum
 
 
 class TreatmentPhase(StrEnum):
-    """Treatment phase as documented.
+    """Treatment phase as documented in the note.
     INDUCTION: induction.
-    CONSOLIDATION: consolidation.
-    POST_CONSOLIDATION: post-consolidation.
-    SALVAGE: salvage.
-    NONE_OF_THE_ABOVE: another documented phase, or phase not documented."""
+    CONSOLIDATION: consolidation, including high-dose chemotherapy with stem-cell rescue.
+    POST_CONSOLIDATION: first-line therapy after consolidation and before any relapse or progression, including maintenance.
+    SALVAGE: therapy for relapse, recurrence or progression, whenever it is given.
+    NONE_OF_THE_ABOVE: another documented phase (therapy before induction, bridging or palliative therapy), or phase not documented.
+    """
     INDUCTION = "INDUCTION"
     CONSOLIDATION = "CONSOLIDATION"
     POST_CONSOLIDATION = "POST_CONSOLIDATION"

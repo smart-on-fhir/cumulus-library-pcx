@@ -21,10 +21,18 @@ on how complete the site's medication and procedure data are. Open defects are i
 
 ## Time zero (t=0)
 
-`t0_day` is the start day of the first study-population encounter that carries a **tier 1 medulloblastoma** code from
-[casedef.csv](spreadsheet/casedef.csv) (`eligible_dx.sql`). Tier 2 codes (history of brain neoplasm, unspecified brain neoplasm)
-are evidence only: a subject with no tier 1 medulloblastoma code has a NULL `t0_day` and stays a candidate. The `etmr`,
-`pineoblastoma` and `cns_embryonal` subtypes in casedef.csv currently do **not** produce a t0 (see WORKPLAN.md).
+`t0_day` (`eligible_dx.sql`) comes from the first of these that exists, and `t0_source` names it:
+
+1. `llm_diagnosis_gold`: the earliest **day-precision** confirmatory tissue-diagnosis date (`diagnosis_date_gold`,
+   [diagnosis.py](cumulus_library_pcx/llm/models/diagnosis.py)) from a note naming any embryonal subtype, ATRT included
+   (ATRT is excluded separately). This is the gold standard and wins over a coded entry. Month or year precision does not
+   set t0.
+2. `casedef_tier1_medulloblastoma`: the start day of the first study-population encounter that carries a **tier 1
+   medulloblastoma** code from [casedef.csv](spreadsheet/casedef.csv). It is kept as `casedef_t0_day` either way.
+
+Tier 2 codes (history of brain neoplasm, unspecified brain neoplasm, the CHOP roster) are evidence only: a subject with
+neither source has a NULL `t0_day` and `t0_source` and stays a candidate. An `etmr`, `pineoblastoma` or `cns_embryonal`
+subject gets a t0 only from a gold date (see WORKPLAN.md).
 
 Age is `DATE_DIFF('month', birthdate, day)` from `core__patient.birthdate`; on Athena this is completed months
 (WORKPLAN.md makes it engine-independent). `pcx__cohort_casedef` keeps its own anchor (first casedef encounter of any
@@ -58,7 +66,7 @@ Required. The structured and LLM evidence are reported side by side and OR-ed in
 
 | file                                                         | criteria                                                                                                    |
 |--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| [casedef.csv](spreadsheet/casedef.csv)                       | `medulloblastoma_tier1_bool`: any tier 1 medulloblastoma code (this also sets t0)                          |
+| [casedef.csv](spreadsheet/casedef.csv)                       | `medulloblastoma_tier1_bool`: any tier 1 medulloblastoma code (sets t0 when no day-precision gold date)    |
 | [diagnosis.py](cumulus_library_pcx/llm/models/diagnosis.py)  | `llm_medulloblastoma_bool`: any note in `pcx__llm_diagnosis_wide` with `disease_subtype = MEDULLOBLASTOMA` |
 | [dx_medulloblastoma.csv](spreadsheet/dx_medulloblastoma.csv) | builds `pcx__cohort_dx_medulloblastoma` for discovery; **not read by the eligible SQL**, and its ICD-O-3 codes are absent from casedef.csv (see WORKPLAN.md) |
 
@@ -76,15 +84,28 @@ Optional in `pcx__eligible`, **required** in `pcx__eligible_trial` (a NULL age a
 
 ### Medication
 
-Methotrexate is the "causal contrast"; the six backbone agents are chemotherapy. `eligible_rx.sql` unions every
-dated candidate with its source and takes the earliest day per exposure:
+Methotrexate is the "causal contrast". The CHOP clinical team treats any methotrexate given to these patients as
+high-dose (2026-10-22), so **any administered** methotrexate counts, as does ACNS0334 Regimen B. The six backbone agents
+are chemotherapy. `eligible_rx.sql` unions every candidate with its source and takes the earliest day per exposure.
+
+Methotrexate exposure comes only from the LLM, and `methotrexate_source` lists which of these gave evidence:
+
+* `llm_administered`: methotrexate ADMINISTERED at the agent level or at the dose level, any route;
+* `llm_acns0334_regimen_b`: a regimen with `protocol_name = ACNS0334` and `documented_trial_arm = REGIMEN_B`.
+  The assignment alone counts, dated by the regimen start; methotrexate ADMINISTERED within that regimen adds its dates.
+
+Evidence that does not change exposure: the explicit high-dose label (`methotrexate_high_dose_*`), intrathecal or
+intraventricular doses (`methotrexate_intrathecal_or_ventricular_*`, counted today, open question to the clinician)
+and `methotrexate_not_received_bool`. Structured methotrexate orders and dispenses are not proof of receipt, so they
+are evidence only (`methotrexate_order_first_day`, `methotrexate_dispense_first_day`) and never set
+`methotrexate_first_day`.
 
 | file                                                                       | criteria                                                                                              |
 |----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** (MedicationRequest `authoredOn`); prior methotrexate excludes from the trial-like cohort like the backbone agents |
+| [rx_contrast_methotrexate.csv](spreadsheet/rx_contrast_methotrexate.csv)   | methotrexate **orders** and dispenses: evidence only, not exposure |
 | [rx_chemo_carboplatin.csv](spreadsheet/rx_chemo_carboplatin.csv), [cisplatin](spreadsheet/rx_chemo_cisplatin.csv), [cyclophosphamide](spreadsheet/rx_chemo_cyclophosphamide.csv), [etoposide](spreadsheet/rx_chemo_etoposide.csv), [thiotepa](spreadsheet/rx_chemo_thiotepa.csv), [vincristine](spreadsheet/rx_chemo_vincristine.csv) | chemotherapy **orders** |
 | `core__medicationdispense`                                                 | pharmacy **dispenses** (`whenHandedOver`, cancelled and declined dropped) for the same valuesets: closer to receipt than an order, not proof of administration |
-| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM agents with `delivery_status = ADMINISTERED` (receipt): methotrexate by agent name; **every** administered agent counts as chemotherapy, whatever the agent (WORKPLAN.md) |
+| [systemic_therapy.py](cumulus_library_pcx/llm/models/systemic_therapy.py)  | LLM receipt, `delivery_status = ADMINISTERED` on the agent **or** on any of its doses (earliest date wins): methotrexate and ACNS0334 Regimen B as above; **every** administered agent counts as chemotherapy, methotrexate of any dose and unlisted anticancer agents (`NONE_OF_THE_ABOVE`) included, except the supportive markers `LEUCOVORIN`, `MESNA` and `DEXRAZOXANE` (WORKPLAN.md) |
 
 Views by strictness, as implemented:
 
@@ -108,10 +129,12 @@ Views by strictness, as implemented:
 
 ### Prior chemotherapy
 
-`chemo_prior_to_t0_bool` and `methotrexate_prior_to_t0_bool` are TRUE when the first dated
-exposure (order, dispense or LLM-administered agent) is before `t0_day`. They are FALSE when
-`t0_day` is known and nothing is dated before it, including no evidence or only undated
-evidence, and NULL only when `t0_day` is NULL. The trial-like cohort excludes TRUE and NULL.
+`chemo_prior_to_t0_bool` and `methotrexate_prior_to_t0_bool` are TRUE when a dated record
+ends before `t0_day`: for chemo an order, dispense or LLM-administered agent or dose, for
+methotrexate an administered methotrexate or ACNS0334 Regimen B evidence. A month or year date
+covers its whole period ([pcx__exposure_record](cumulus_library_pcx/sql/custom/pcx__exposure_record.sql)),
+so one that straddles `t0_day` gives NULL. They are FALSE when `t0_day` is known and nothing is
+dated before it, including no evidence or only undated evidence, and NULL when `t0_day` is NULL. The trial-like cohort excludes TRUE and NULL.
 `chemo_any_bool` and `methotrexate_any_bool` report exposure at any time.
 
 ### Prior radiation therapy

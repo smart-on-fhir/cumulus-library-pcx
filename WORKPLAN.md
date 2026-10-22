@@ -111,30 +111,63 @@ No changes planned.
 
 ## Case definition
 
-- [ ] P2 · `casedef` · **SNOMED 428061005 in two files** (was 2.3). Tier 1 `atrt` in
-  `casedef.csv`, "Malignant tumor of brain" tier 3 in `dx_brain_cancer.csv`. Confirm the
-  concept and keep it in one file. `dx_atrt.csv` still lists the generic C71.9 and 191.9.
+- [ ] P3 · `casedef` · **Generic codes in dx_atrt.csv** (was 2.3). 428061005 and 93744007 are
+  out of the casedef `atrt` rows (done 2026-10-22, see Changelog). `dx_atrt.csv` still lists the
+  generic C71.9 and 191.9 (discovery only, not read by the eligible SQL).
 - [ ] P2 · `casedef` · **ICD-O-3 morphology codes** (was 2.4). `dx_medulloblastoma.csv` has
   9470/3-9474/3. `casedef.csv` has none, so they never set time zero. The old plan: add them
   to casedef at tier 1 and derive `dx_medulloblastoma.csv` from casedef.
-- [ ] P2 · decision · **sPNET arm** (was 2.5). ETMR, pineoblastoma and CNS embryonal never
-  get a time zero. Either anchor `t0_day` on any non-ATRT tier 1 subtype, or record that this
-  phase is medulloblastoma-only.
+- [ ] P2 · decision · **sPNET arm** (was 2.5). ETMR, pineoblastoma and CNS embryonal get a time
+  zero only from a day-precision LLM gold diagnosis date, never from a code. Either also anchor
+  `t0_day` on any non-ATRT tier 1 subtype, or record that this phase is medulloblastoma-only.
 - [ ] P2 · decision · **Two time zeros** (was 2.6, 2.8). `pcx__cohort_casedef` anchors note
   sampling on the first casedef encounter of any subtype or tier. `eligible_dx.sql` anchors
-  `t0_day` on the first tier 1 medulloblastoma encounter. Make the sampling anchor tier-aware
+  `t0_day` on the LLM gold diagnosis day, else the first tier 1 medulloblastoma encounter. Make the sampling anchor tier-aware
   or record that it is deliberately broader. Also undecided: whether time zero should come
   from the Condition onset or recorded date (`t0_condition_day` does not exist yet).
 
 ## Clinical notes
 
+- [ ] P1 · `eligible` · **Intrathecal / intraventricular methotrexate** (2026-10-22). Any
+  administered methotrexate, any route, is now the exposure (done, see Changelog). Open, asked
+  of the CHOP clinician: does intrathecal or intraventricular (Ommaya) methotrexate count? In
+  infants that is a different, low-dose strategy from IV high-dose MTX. If not, exclude doses
+  with `route IN ('INTRATHECAL', 'INTRAVENTRICULAR')` in `eligible_rx.sql` (they are already in
+  `methotrexate_intrathecal_or_ventricular_*`). No NLP rerun needed.
+- [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). Each `pcx__nlp_<task>_<model>` table
+  holds ONE task version: Cumulus Library builds it over the folder `..._v<version>` of the
+  current workflow version, and `--clean` deletes the older folders. BCH, checked in Athena
+  2026-10-21:
+  - `systemic_therapy` is version 1 (external Parquet over `nlp_systemic_therapy_gpt_oss_120b_v1`,
+    63,490 notes). The v2 templates name struct fields v1 lacks (`agent_name_verbatim`,
+    `cycle_num`, `cycle_day`), so `llm_clinical_wide` FAILS at analysis until it is rerun, it is
+    not empty. The selector `pcx__llm_document_task_systemic_therapy` has 139,015 rows over the
+    same 63,490 notes (0 new, 0 omitted), so the rerun re-sends exactly those notes.
+  - `radiation` is version 2 (44,968 notes), `document_topic` and `document_type` version 2
+    (180,226 notes). They are kept only by NOT rebuilding them: a rebuild repoints the table at
+    the workflow version and re-extracts every note. The radiation (2 or 3) and topic (1, 2 or 3)
+    templates read whichever version the table holds.
+  - Order: `--stage nlp_clinical_tasks --dev --nlp-subtask systemic_therapy` without `--clean-nlp`
+    (`--nlp-subtask` exists only with `--dev` in Cumulus Library 6.3.5, and `--clean-nlp` deletes
+    every `_v*` folder of the task), then
+    `llm_clinical_wide`, `eligible`, `outcome`, `client_views`. `laboratory` (version 3) has
+    never been run: `pcx__nlp_laboratory_gpt_oss_120b` exists with 0 rows, built over the empty
+    `nlp_laboratory_gpt_oss_120b_v2` folder (checked 2026-10-21). Every struct field the
+    laboratory templates read is in that v2 table, so `llm_clinical_wide` builds and the
+    laboratory tables are empty until a `--dev --nlp-subtask laboratory` run repoints it at `_v3`.
+  CHOP has not run notes yet and gets the current versions.
 - [ ] P3 · `llm` · **Radiation indication enum** (was 3.6). `radiation.py` `indication` is
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
   regenerated schemas. The surgery-role half no longer applies: `eligible_surgery.sql` takes
   the earliest resection and has no free-text match.
-- [ ] P3 · `llm` · **One validation switch** (was 4.6). `systemic_therapy.py`,
-  `survival_timeline.py` and `registry_eligibility.py` still `raise ValueError` directly, outside the
-  `CUMULUS_PCX_STRICT_MENTIONS` switch in `base.py`.
+- [ ] P3 · `llm` · **Validators are test-only** (was "One validation switch", 4.6). Cumulus
+  Library validates responses against the JSON schema, so the `@model_validator` checks and
+  `CUMULUS_PCX_STRICT_MENTIONS` run only in pytest. The checks that matter are SQL warn tables
+  (`pcx__warn_llm_model_rule`, `pcx__warn_llm_date_invalid`). Open: the evidence rule (a finding
+  needs verbatim spans) is unchecked, because the wide tables do not carry `has_mention` or
+  `spans`. Also open: numeric limits remain in other schemas and discard the whole note when
+  broken; the transition_of_care date `pattern` is the risky one. Remove them at each task's
+  next version bump.
 
 Deferred model fields. None is scheduled: each is restored only if an analysis needs it.
 Restoring one means a flat field on `DiagnosisAnnotation` (no mention wrapper), a task
@@ -176,11 +209,9 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - [ ] P3 · decision · **ATRT from one note** (was 2.9). A single LLM note with subtype ATRT
   excludes. The old plan: require two notes or a pathology-typed note.
 - [ ] P3 · `eligible`, `outcome` · **LLM date precision** (was 3.8). MONTH and YEAR precision
-  dates are cast to exact days.
-
-- [ ] P3 · `eligible` · `t0_source` is `'casedef_tier1_medulloblastoma'` even when `t0_day`
-  is NULL (`eligible_dx.sql:59`); the header says tiers 2 and 3 (`eligible_dx.sql:6`),
-  casedef has tiers 1-2.
+  dates are compared as exact days (the first day of the period). `<name>_day_precision` is
+  carried in the wide tables and `client_timeline.date_precision`, but not yet into the
+  `eligible` and `outcome` first-day columns.
 
 ## Outcomes
 
@@ -188,20 +219,21 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `outcome_vital_status.sql` uses `DATE(deceasedDateTime)`, which fails on Athena for a
   timestamp string. The old plan: `CAST(from_iso8601_timestamp(deceasedDateTime) AS DATE)`
   with a DuckDB macro in the tests. Before the first warehouse run of `outcome`.
-- [ ] P2 · `outcome` · **Event-task death does not reach OS** (was 3.1).
-  `outcome_first_event.sql` takes DECEASED from the event task. `outcome_vital_status.sql`
-  does not, so such a death counts for EFS but not OS.
 - [ ] P2 · `outcome` · **Events before time zero** (was 3.2). First-event candidates are not
   limited to `event_day >= t0_day`, so `efs_days` can be negative. Not re-checked since
   2026-09-11 beyond a search of the SQL.
+- [ ] P2 · `outcome` · **Reconcile undated events** (2026-10-21). An undated progression,
+  recurrence or second malignancy makes the EFS interval NULL (`efs_censor_source =
+  event_timing_uncertain`), even next to a dated event, and leaves exposures before the dated
+  event unordered. Measure the rate on BCH data (`pcx__warn_outcome_first_event_timing`,
+  `undated_event`), then decide how an undated mention is matched to a dated one or bounded
+  (note date, for example).
 - [ ] P3 · `outcome` · **Vital-status reconciliation** (was 3.9). The earliest death and
   latest alive dates win without cross-checking, and `efs_end_day` can exceed `os_end_day`.
 
 ## Analysis
 
-- [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only;
-  notes with conflicting dates get a NULL `note_author_date` and drop out of
-  `client_diagnosis.sql`.
+- [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only.
 - [ ] P3 · `client_views` · **Use the builder's client views.** The builder's opt-in
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
@@ -254,12 +286,289 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-22 — A month or year death date covers its whole period
+
+- External review: a death documented as "January 2021" was a single day (January 15) when treatment was placed against the first event, so radiation on January 20 counted as after it and gave `had_initial_radiation = No` and `chemo_only_no_initial_radiation`. `outcome_vital_status.sql` now keeps `death_earliest_day` and `death_latest_day`, and `outcome_first_event.sql` uses them as the death's range. `death_day` stays at the middle of the period for durations.
+- The earliest exact death day wins when no source's month or year ends before it: FHIR 2020-12-10 beside an LLM "2020" is 2020-12-10, not July 1, and not imputed.
+- `client_exposure`: chemotherapy `administered_bool` comes from new `pcx__eligible_rx.chemo_administered_bool` (any LLM ADMINISTERED agent, dated or not), not from an administration date, as for methotrexate.
+- New `test_a_month_or_year_death_covers_its_whole_period` fails on the old SQL.
+
+### 2026-10-22 — Timeline administrations name their drug
+
+- External review: `llm_therapy_administration` rows in `client_timeline.sql` had no drug, so two drugs given alike in one note became one row (`SELECT DISTINCT`, and the same `event_id`). The dose now joins its agent in the same extraction output (`note_ref`, `generated_on`, `regimen_index`, `agent_index`): `code` = agent, `code_system` = `pcx_llm_rx_agent`, and `rx_class` as on the agent rows. Route, dose, phase and status keep their columns.
+- No administration identifier: rows identical in every exported field stay one row, so the timeline lists distinct administrations, not a dose count, and a note run twice does not double its doses.
+
+### 2026-10-22 — Warn tables for the new date and exposure rules
+
+- `pcx__warn_llm_duplicate_output` replaces `pcx__warn_llm_molecular_duplicate_output`: notes with more than one extraction output for the molecular, systemic-therapy or diagnosis task, each output's values in the detail.
+- New `pcx__warn_exposure_timing_unknown`: treatment evidence whose timing is unknown, by reason. `prior_to_t0_unknown` (a month or year date straddles t0, so the subject is out of the trial view), `initial_unknown_event_timing`, `initial_unknown_possible_record`, `initial_unknown_outside_window_only`, and `methotrexate_intrathecal_or_ventricular_only` (sizes the open route question). Backed by new `*_initial_unknown_reason` columns on `pcx__outcome_exposure`.
+- `pcx__warn_eligible_rx_llm_agent_unrecognized` also reads dose-level ADMINISTERED agents (same output), as `pcx__eligible_rx` does. `pcx__warn_llm_date_after_note` also checks administration dates and ACNS0334 Regimen B start dates, which date methotrexate exposure.
+- Fixtures: `generated_on` on the diagnosis wide table, a second output for p8's systemic-therapy note and p1's diagnosis note, a temozolomide dose under a PLANNED agent (p10), a note date for note-p8-rx. New test for the straddle and intrathecal-only checks.
+
+### 2026-10-22 — A dose joins its drug within the same extraction output
+
+- `pcx__exposure_record.sql` (dose to agent, Regimen B to administration) and `eligible_rx.sql` (explicit non-receipt) now join on `generated_on` as well as `note_ref` and the array positions. A note run twice has two outputs whose agent positions can name different drugs. An external review showed a leucovorin dose from one output attaching to an explicitly-not-received methotrexate from the other, which fabricated methotrexate exposure and prior chemotherapy and removed the patient from the trial view. `generated_on` is set on every output by Cumulus Library; `system_fingerprint` can be NULL, so it is not a join key.
+- Test fixtures: `generated_on` appended to the systemic-therapy agent, administration and regimen tables. New `test_a_dose_joins_its_agent_within_the_same_extraction_output` fails on the old joins.
+- After the BCH systemic-therapy rerun, check `SELECT COUNT(*) FROM (SELECT note_ref FROM pcx__nlp_systemic_therapy_gpt_oss_120b GROUP BY note_ref HAVING COUNT(*) > 1)`.
+
+### 2026-10-22 — Two generic brain cancer codes no longer mean ATRT
+
+- `casedef.csv`: removed SNOMED 428061005 (malignant neoplasm of brain) and 93744007 (primary malignant neoplasm of CNS, per review lookup) from the tier 1 `atrt` rows. At BCH they gave 118 and 8 patients a tier 1 ATRT code, and 30 eligible patients were flagged ATRT on these codes alone (5 of them with a tier 1 medulloblastoma code), so they were wrongly out of the trial view. 428061005 stays a tier 3 candidate in `dx_brain_cancer.csv`. Patients whose only casedef evidence was one of these codes leave `pcx__cohort_casedef`, which also trims note sampling.
+
+### 2026-10-22 — Dates are ranges: coarse and undated mentions no longer blank the analysis
+
+- BCH Athena 2026-10-22: 62% of administered radiation mentions are undated, and 82% of radiated patients (220 of 269) have dated and undated mentions. Of 430 patients with progression, recurrence or second-malignancy mentions, 308 have both and 59 only undated ones, so the 10-21 rule left 85% of event patients without an EFS interval and with Unknown initial therapy. A fifth of dated radiation and a third of dated progression and recurrence dates are month or year dates.
+- New `pcx__exposure_record` (eligible stage): every chemotherapy, methotrexate and radiation record with `earliest_day` / `latest_day`. A month or year date covers its whole period. An undated LLM mention ends at its note date (`pcx__llm_note_date`, FHIR note metadata, now built first in the eligible stage), and is a restatement (`restated_bool`) when a dated record of the same treatment starts on or before that date. `eligible_rx` and `eligible_radiation` read it. The `*_first_day_from_t0` columns added this morning are gone.
+- Prior to t0: TRUE when a dated record ends before t0, NULL when a month or year date straddles t0 (so out of the trial view), undated evidence still never counts.
+- Initial therapy (`outcome_exposure`): each record is inside, outside or possibly inside `[t0, first event)`, and restatements are ignored. TRUE needs a record inside, FALSE needs none inside or possible. The sequence is set only when one therapy certainly starts first.
+- Events (`outcome_first_event`): the first event has `first_event_earliest_day` / `first_event_latest_day`. An undated mention in a note dated on or after the latest day is a restatement (`undated_event_restated_cnt`), otherwise it keeps `event_timing_uncertain_bool`. Events that are all undated stay events without an interval.
+- Durations use the middle of a month or year (the 15th, July 1): `first_event_day`, `death_day`, `last_known_alive_day`, with `*_imputed_bool` flags and `os_end_day_imputed_bool` / `efs_end_day_imputed_bool` on `pcx__outcome`.
+- Tests: coarse dates on both sides of t0 and of each other, undated restatements, an undated mention in a pre-t0 note, undated event mentions before and after the dated event. Also restores `test_sequence_uses_treatment_inside_the_window` and the pre-t0 plus in-window methotrexate case, which this morning's copy to the repo missed.
+
+### 2026-10-22 — Initial-therapy methotrexate and radiation, Kaplan strata no longer "ever"
+
+- Methotrexate exposure (`eligible_rx.sql`) is any LLM ADMINISTERED methotrexate, agent or dose level, any route (`llm_administered`, replaces `llm_high_dose`), or ACNS0334 Regimen B. CHOP clinician: any methotrexate given is high-dose. Evidence-only columns: `methotrexate_high_dose_*`, `methotrexate_intrathecal_or_ventricular_*`, `methotrexate_not_received_bool`. New `*_first_day_from_t0` and `*_undated_bool` in `eligible_rx` and `eligible_radiation`.
+- `outcome_exposure.sql`: initial therapy is t0 to the first event (first day on or after t0, before the first event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool`, `had_initial_radiation_bool` replace `*_prior_to_first_event_bool`: TRUE dated in the window, FALSE initial therapy documented without it (or explicitly not received), NULL unknown (no t0, uncertain event timing, undated exposure, nothing documented). `initial_therapy_sequence` comes from the same flags and adds NO_INITIAL_THERAPY.
+- Behaviour changes: pre-t0 exposure is no longer initial (fixture p2 is now RADIATION_BEFORE_CHEMOTHERAPY, methotrexate FALSE), and under uncertain event timing an exposure on or after the dated event is now unknown, not FALSE.
+- Kaplan cubes: `had_initial_methotrexate` and `had_initial_radiation` (Yes, No, Not Reported, Not Applicable) replace `ever_methotrexate` and `radiation`. Methotrexate given only after progression is now No, not Yes.
+- `pcx__outcome`, `pcx__client_subject` (adds `had_initial_chemo_bool`), `pcx__client_exposure` (`had_initial_bool`), the warn tables, both dictionaries, PROTOCOL §6, §7 and §8.1, eligible.md and limitations.md follow. New test `test_initial_methotrexate_is_yes_no_or_unknown`.
+- Review follow-up: `test_sequence_uses_treatment_inside_the_window` pins the diagnosis boundary. Chemotherapy before t0 no longer makes a radiation-first patient chemotherapy-first (the 10-21 SQL gave CHEMOTHERAPY_BEFORE_RADIATION), a subject without t0 gets no sequence, and methotrexate both before t0 and in the window is Yes.
+
+### 2026-10-22 — Systemic therapy v2 prompt, BCH rerun command
+
+- `systemic_therapy.py` (v2 amended in place, still not run anywhere): `high_dose_methotrexate_explicit_bool` no longer says "Numeric dose-based classification occurs downstream", which no SQL does and which invited the model to leave the flag null. Schema and summaries regenerated.
+- P1 "Rerun systemic therapy": the command is `--dev --nlp-subtask systemic_therapy` without `--clean-nlp` (corrected from `--nlp-subtask` without `--clean`, which 6.3.5 rejects).
+- New P1: any administered methotrexate counts as exposure (CHOP clinician), pending the intrathecal / intraventricular question.
+
+### 2026-10-21 — NLP tables hold one task version: comments and plan corrected
+
+- Comments in `llm_radiation_wide.sql.jinja`, `llm_document_topic_wide.sql.jinja` and both workflows no longer say older rows are "kept". Cumulus Library builds each NLP table over one `_v<version>` folder, so the multi-version filters read whichever version the table holds, never both. BCH keeps radiation v2 and topic v2 only by not rebuilding those tasks.
+- P1 "Rerun systemic therapy" now records the BCH Athena checks (systemic therapy v1 over the `_v1` folder, 63,490 notes, selector matches exactly) and the order: `--nlp-subtask systemic_therapy` without `--clean`, then the downstream stages. `llm_clinical_wide` fails, not empties, until then.
+
+### 2026-10-21 — Dates outside 1980 to today are cleared at the source, with their durations
+
+- LLM dates: `sql/template/date_macros.sql.jinja` treats a well-formed date outside 1980-01-01 to the build day as not usable, so its `<name>_day` and precision are NULL in every `pcx__llm_*` table (all 21 regenerated). Downstream it behaves like an undated value: an implausible event date makes the event undated (EFS `event_timing_uncertain`), an implausible death date leaves the subject deceased with `death_day` NULL.
+- FHIR: `pcx__outcome_vital_status` clears an implausible `deceasedDateTime` (still deceased, no FHIR death day) and ignores implausible encounter end days for `last_encounter_day`. A `deceasedDateTime` now sets `fhir_deceased_bool` even when its date is cleared.
+- So `pcx__outcome`, `pcx__kaplan_subject` and the client views compute `os_days`, `efs_days` and `days_t0_to_first_event` only from plausible dates. The client guards stay as a backstop and now also clear `value_number` when they clear its date (client_outcome rows, client_timeline DERIVED rows).
+- Warn checks: `llm_date_implausible` in `pcx__warn_llm_date_invalid`, `fhir_death_day_implausible` in `pcx__warn_outcome_vital_status_conflict`. Fixtures: Patient/p6 FHIR death 2031, Patient/p10 LLM diagnosis date 2031. `test_llm_dates.py` covers the window edges and today/tomorrow.
+
+### 2026-10-21 — Molecular: one report row per subject across re-runs, molecular warn tables
+
+- `pcx__client_diagnosis` now selects the molecular report as a single ROW (group, methods) with `MAX_BY`, never joined back by `note_ref#report_index`. Re-running the molecular task on a note produced two outputs with the same key, and the client table returned several rows per subject with mixed groups. All outputs are pooled. Order: real group, latest note, last report in the note, latest output (`generated_on`, `system_fingerprint`), then group and methods so the pick is deterministic.
+- New warn `pcx__warn_llm_molecular_duplicate_output`: notes with more than one molecular extraction output, each output's groups in the detail.
+- Reworked `pcx__warn_molecular_result_no_diagnosis` (real groups only): `molecular_no_diagnosis_evidence` (no named LLM diagnosis, no tier 1 casedef code), `molecular_diagnosis_not_medulloblastoma` (evidence exists, none of it medulloblastoma), `molecular_outside_discovery` (not in `pcx__eligible`). The first two are exclusive. Registered in `qa_athena.toml` and `pcx__warn_union`.
+- Tests: molecular fixture `tests/data/warn/pcx__llm_molecular_report.csv`, `generated_on` and `system_fingerprint` appended to its schema, an ATRT-only diagnosis row for Patient/p10, expectations for both warn tables, and two re-run cases in `tests/test_client_diagnosis_sql.py` (fails on the old SQL with 9 rows for 7 subjects).
+
+### 2026-10-21 — Molecular group: a real group is never replaced, method from the same report
+
+- `pcx__client_diagnosis` picks ONE molecular report per subject and takes `molecular_group_ever` and `molecular_group_method` from that same report. Order: a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats NOT_SUBGROUPED / INDETERMINATE, then the latest note (`pcx__llm_note_date`, undated notes last), then the last report in the note (`report_index`).
+- An uncertain result is shown only when the subject has no real group. Previously a later NOT_SUBGROUPED / INDETERMINATE overwrote an earlier real group, and the method could come from a different report.
+- `molecular_group_baseline` uses the same order among reports within 90 days of t0_day.
+- Test `tests/test_client_diagnosis_sql.py` (fails on the old SQL). Fixture columns appended to `tests/data/schema.sql` and `tests/data/warn/pcx__llm_diagnosis_wide.csv`. Descriptions updated in `spreadsheet/client_dictionary.csv`.
+
+### 2026-10-21 — Model rules checked in SQL, since the validators are test-only
+
+- Cumulus Library validates each LLM response against the JSON schema, not the Python models,
+  so the `@model_validator` checks never run at inference. New warn table
+  `pcx__warn_llm_model_rule` applies them to the stored answers: administration date on a dose not
+  ADMINISTERED, dose unit without an amount, negative dose, cycle number below 1, negative CD34,
+  death date on a status not DECEASED, last known alive after death in the same note.
+- `pcx__warn_llm_date_invalid` also lists `llm_date_precision_missing` (a date without its
+  precision, or the reverse).
+- Fixtures seed each check (administration rows for p2, new cycle and stem-cell CSVs for p8, an
+  ALIVE survival note for p2 that does not move its outcome). llm.md, cumulus-study.md
+  (`CUMULUS_PCX_STRICT_MENTIONS` is tests only) and the WORKPLAN validation item corrected.
+
+### 2026-10-21 — Systemic therapy v2: no numeric limits in the schema
+
+- `systemic_therapy.py` (v2 amended in place, not yet run): removed `ge=1` from the three
+  `cycle_num` fields and `ge=0` from `dose_amount` and `cd34_cells_per_kg`. Cumulus Library
+  validates each response against the JSON schema, so one out-of-range number discarded the whole
+  note. Out-of-range values are now kept, to be flagged by SQL warn tables. Schema and summary
+  regenerated, `test_llm_models` updated.
+
+### 2026-10-21 — Note dates for every selected note, Elasticsearch notes included
+
+- New `sql/custom/pcx__llm_note_date.sql` (first table of the `client_views` stage): one row per
+  note in `pcx__sample_task`. DocumentReference author day else `date`, DiagnosticReport
+  effectiveDateTime day else effectivePeriod start. Conflicting dates give NULL and
+  `note_date_conflict_bool`. Replaces `pcx__sample_casedef_author`, which covered casedef notes only.
+- `client_diagnosis.sql` left-joins it: diagnosis and molecular rows from Elasticsearch-only or
+  undated notes are kept for the `_ever`, count and conflict columns, never baseline, and are the
+  latest only when no dated note has a value (`note_order_day`). Was an inner join that dropped them.
+- `client_timeline.sql` and `pcx__warn_llm_date_after_note` read the same spine (`note_date`, was
+  `note_author_date`), so search-only notes get dates there too.
+- Tests: `test_every_selected_note_gets_a_date`; the warn fixture is now `pcx__llm_note_date.csv`.
+  client dictionary, cumulus-study.md and PROTOCOL updated.
+
+### 2026-10-21 — Survival timeline notes: last visit, death documents and unlinked notes
+
+- `pcx__llm_document_task_survival_timeline` keeps the last-visit notes (2026-10-20) and adds
+  END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any visit, so a documented death
+  is never dropped, and notes with no encounter or an encounter outside the study population
+  (LEFT JOIN, was an inner join that dropped them). The LLM extracts those notes' dates.
+- New `tests/test_document_task_sql.py` runs the selector SQL on eight hand-made notes; it fails
+  on the old SQL. PROTOCOL 5 decision added.
+
+### 2026-10-21 — Event-task death reaches OS and EFS alike
+
+- `outcome_vital_status.sql` is the one place deaths are reconciled: it now adds event-task
+  DECEASED mentions (new `llm_event_deceased_bool`, `llm_event_death_day`) to the FHIR and
+  survival-timeline deaths, for `deceased_bool` and the earliest `death_day`.
+- `outcome_first_event.sql` no longer reads DECEASED from the event task. Death comes only from
+  vital status, so OS and EFS see the same death. EFS output is unchanged.
+- `death_day_disagree` warn now compares all three death dates. New test
+  `test_event_task_death_reaches_os_and_efs_alike`. Closes the P2 item "Event-task death does
+  not reach OS". PROTOCOL 7 and the data dictionary updated.
+
+### 2026-10-21 — Methotrexate exposure is high-dose, from dose-level receipt too
+
+- `eligible_rx.sql`: methotrexate counts only from the LLM: an ADMINISTERED dose with
+  `high_dose_methotrexate_explicit_bool` TRUE (`llm_high_dose`), or an ACNS0334 regimen with
+  `documented_trial_arm = REGIMEN_B` (`llm_acns0334_regimen_b`, dated by the regimen start and by
+  methotrexate administered in it). New `methotrexate_source`, `_high_dose_first_day`,
+  `_regimen_b_first_day`, `_high_dose_bool`, `_regimen_b_bool`. `methotrexate_administered_*` removed.
+- Structured methotrexate orders and dispenses are evidence only (`_order_first_day`,
+  `_dispense_first_day`). Other methotrexate (intrathecal, not high-dose) is chemotherapy only.
+- LLM receipt is the agent-level or the dose-level ADMINISTERED, earliest wins, for chemo too:
+  a dose given under a PLANNED agent now counts.
+- `systemic_therapy.py` v2 amended in place (no results yet): `documented_trial_arm` is the
+  `TrialArm` enum (REGIMEN_A, REGIMEN_B, NONE_OF_THE_ABOVE) plus `documented_trial_arm_verbatim`.
+  Schema, summaries and the regimen wide SQL regenerated.
+- `client_exposure`, the `therapy_precedes_t0` and `exposure_order_only` warn checks, fixtures
+  (new administration CSV), tests, eligible.md, PROTOCOL 6 and 7, limitations 2 and both
+  dictionaries updated.
+
+### 2026-10-21 — t0 from the LLM gold diagnosis day first
+
+- `eligible_dx.sql`: `t0_day` is the earliest day-precision `diagnosis_gold_day` from a diagnosis
+  note of any subtype (ATRT included), else the first tier 1 medulloblastoma encounter. New
+  `t0_source` values `llm_diagnosis_gold` / `casedef_tier1_medulloblastoma`, NULL without a t0
+  (was always the casedef label). New columns `casedef_t0_day` and `llm_t0_gold_day`.
+- LLM-only and CHOP-roster subjects with a gold date now get a t0 and can reach the trial view.
+- The two `dx_date_disagree` warn checks compare the LLM date with `casedef_t0_day` (comparing it
+  with `t0_day` would compare the gold date with itself). `t0_anchor_casedef_later` can now fire.
+- Fixtures: p6 and p8 gold dates are month precision, so they keep their seeded scenarios and test
+  that a coarse gold date does not set t0. New test `test_t0_prefers_the_llm_gold_diagnosis_day`.
+  eligible.md, PROTOCOL 2, 4 and 6, and the data dictionary updated.
+
+### 2026-10-21 — CHOP roster rows are tier 2
+
+- `sql/custom/pcx__cohort_casedef_include.sql` (CHOP): `subject_ref` is now `enc.subject_ref`
+  (was the roster `patient_id`, which never matched the population), joined on `anon_id`.
+- Roster rows are tier 2, not 1. They sit on every encounter of a listed patient, so as tier 1
+  `eligible_dx` took the first encounter of any kind as t0. A roster-only patient is still a
+  case-definition subject, with a NULL t0 unless a tier 1 medulloblastoma code sets it.
+  `release/package` not updated: rebuild the release.
+
+### 2026-10-21 — Why eligible_dx ages come from birthdate
+
+- `eligible_dx.sql`: header comment now says why age stays in months from
+  `core__patient.birthdate` rather than `core__encounter.age_at_visit` (whole years). No SQL change.
+
+### 2026-10-21 — Undated EFS events are events, not censoring
+
+- `outcome_first_event.sql`: `dated_event_bool` (was `any_event_bool`), plus
+  `event_timing_uncertain_bool` (undated progression, recurrence or second malignancy),
+  `death_undated_bool` and `event_documented_bool`. `undated_event_cnt` excludes deaths.
+- `outcome.sql`: `efs_event_bool = event_documented_bool`. Undated events have NULL
+  `efs_end_day` / `efs_days`, `efs_censor_source` `event_timing_uncertain` or `event_undated`.
+- `outcome_exposure.sql`: prior-to-first-event flags are NULL when the timing is uncertain and
+  the exposure is not on or after the dated event. An undated death never makes them unknown.
+- `pcx__kaplan_subject.sql`: `initial_treatment_order` Not Reported when the timing is
+  uncertain. `client_outcome.sql`, the `undated_event` warn check, dictionaries, PROTOCOL 7 and
+  8.1, limitations 4 and tests updated. Open item: **Reconcile undated events** (Outcomes).
+- `pcx__kaplan_subject.sql`: `diagnosis` is now `disease_subtype_ever` or Not Reported (was always
+  Medulloblastoma). `test_counts_kaplan.py`, the data dictionary and PROTOCOL 8.1 match it.
+
+### 2026-10-21 — Systemic therapy v2: coded values instead of free text
+
+- `systemic_therapy.py`: `agent_name` is now `RxAgentName` (anticancer agents seen in BCH
+  output, plus leucovorin, mesna and dexrazoxane as markers). Other supportive care
+  (antiemetics, growth factors, antimicrobials, steroids) is no longer extracted. The note's
+  own wording moved to `agent_name_verbatim`.
+- `cycle_name` became `cycle_num` (int, as the note numbers it, not renumbered across phases)
+  and `cycle_name_verbatim`. Administrations also get `cycle_day` (consolidation days count
+  from the stem-cell infusion, day 0, so may be negative).
+- New enums: `TreatmentProtocol` (`protocol_name`, next to `protocol_name_verbatim`, on
+  regimens and cycles), `CycleCompletionStatus`, `AdministrationRoute`, `DoseUnit`.
+- `treatment.py`: `TreatmentPhase` wording only adds what the standard terms lack (maintenance
+  is POST_CONSOLIDATION, salvage is therapy for relapse or progression whenever given,
+  pre-induction therapy is NONE_OF_THE_ABOVE). Shared with radiation and laboratory, so those
+  bump too.
+- Workflow: `systemic_therapy` 1 → 2, `radiation` 2 → 3, `laboratory` 2 → 3. BCH must not
+  rebuild the radiation task: its table holds version 2 only, and `llm_radiation_wide.sql.jinja`
+  reads `task_version IN (2, 3)` so either version works (corrected 2026-10-21, the table never
+  holds both).
+- SQL: `eligible_rx.sql` and `client_timeline.sql` match `agent_name = 'METHOTREXATE'`
+  instead of `LIKE '%methotrexate%' OR '%mtx%'`. LLM chemo no longer counts the three
+  supportive markers. `client_timeline` shows the coded agent and protocol, and cycle rows
+  carry `cycle_num` in `value_number`. `pcx__warn_eligible_rx_llm_agent_unrecognized` lists
+  agent and verbatim spelling.
+- Tests: fixture `pcx__llm_systemic_therapy_agent.csv` uses coded agents (p1 gets a
+  temozolomide row for the warn check), new `test_systemic_therapy_values_are_coded`.
+
+### 2026-10-20 — Survival timeline notes come from the last clinical visit
+
+- `release/package/.../sql/custom/pcx__llm_document_task.sql` adds the view
+  `pcx__llm_document_task_survival_timeline` that `nlp_clinical_tasks.workflow` already selects by.
+  Same relevance or `DOCUMENT_TASKS["survival_timeline"]` document types as the other task views,
+  then only each subject's last clinical visit (latest encounter day among those notes), since
+  there are no visits after death.
+
+### 2026-10-20 — Kaplan-Meier cubes exported with the approved floor of 1
+
+- `min_subject = 1` is approved for PCX. `counts_kaplan.workflow` sets it on both cubes and is
+  the only Kaplan-Meier workflow; `counts_kaplan_site.workflow` and its `_site` cubes are gone.
+- `stage/counts_kaplan.py` checks the workflow with the builder's site-only rules (any explicit
+  positive floor with a description), because its shared rules require at least 10.
+
+### 2026-10-20 — Kaplan-Meier source is plain SQL, no site column
+
+- `sql/custom/kaplan_subject.sql.jinja` is now `sql/custom/pcx__kaplan_subject.sql`, run as is
+  from `sql/custom` like the other study SQL.
+- The `site` column is gone from `pcx__kaplan_subject` and all four cubes. The aggregator adds
+  site when it combines each site's export. `HOME_INSTITUTION_CODE` is removed from
+  `_settings.py`, the CHOP release script and cumulus-study.md.
+
+### 2026-10-20 — LLM dates parsed once, unreadable dates flagged
+
+- The eligible stage failed on Athena: `CAST(therapy_start_date AS DATE)` met `2020-09`.
+  Real BCH values also include `2012-04`, `202?-05-23` and `10-30`.
+- `sql/template/date_macros.sql.jinja`: every LLM wide table now adds `<name>_day` (DATE) and
+  `<name>_day_precision` next to each date. Only `YYYY-MM-DD`, `YYYY-MM` and `YYYY` are
+  understood, as the first day of the period, with the coarser of the shape and the stated
+  precision. Other text gets NULL, and so does a day not on the calendar such as `2024-02-30`
+  (seen in the BCH event results). The calendar check is string tests only, so it cannot error.
+- `eligible_*`, `outcome_*`, `client_timeline` and the warn tables read `<name>_day` instead
+  of casting the text. `client_timeline.date_precision` is the parsed precision, and a date
+  that cannot be understood falls back to the note date (`date_type = documented`).
+- New `pcx__warn_llm_date_invalid` lists every unreadable LLM date, all 44 date columns.
+  `pcx__warn_llm_date_coarse` uses the parsed precision.
+- Tests: `tests/test_llm_dates.py`, fixture columns and seeded bad dates (p1, p8).
+  `tests/sqltest.py` gives DuckDB a `from_iso8601_timestamp` macro for `outcome_vital_status.sql`.
+
+### 2026-10-19 — Kaplan-Meier count cubes
+
+- New opt-in `counts_kaplan` stage: `pcx__kaplan_subject`, then OS and EFS cubes with
+  the exact PCX-30 `_cube.csv` columns. `counts_kaplan.workflow` is shared (floor 10, exported),
+  `counts_kaplan_site.workflow` is site-only (floor 1, never exported).
+- `HOME_INSTITUTION_CODE` (default BCH) fills the `site` column. The CHOP release sets it to CHOP.
+- Tests: `tests/test_counts_kaplan.py`. Dictionary rows added, PROTOCOL 8.1 updated.
+
+### 2026-10-19 — outcome_vital_status parses FHIR deceasedDateTime
+
+- `outcome_vital_status.sql`: `DATE(FROM_ISO8601_TIMESTAMP(deceasedDateTime))` instead of
+  `DATE(deceasedDateTime)`, which failed the outcome stage on full timestamps like
+  `2024-08-25T23:21:00Z`. Still a hard parse: malformed values error.
+
 ### 2026-10-16 — document_topic wide table reads versions 1 and 3
 
 - `llm_document_topic_wide.sql.jinja`: UNION ALL of `task_version = 1` (no `survival_timeline`
   topic, columns NULL) and `task_version = 3` (`survival_timeline` read through JSON, NULL
   until a version 3 run adds the field to the table). Versions are hardcoded, not taken
-  from the workflow. Existing BCH results are version 1 (42,060 rows).
+  from the workflow. Existing BCH results are version 1 (42,060 rows). (Corrected 2026-10-21:
+  BCH's table is version 2, 180,226 notes, and the table only ever holds one version.)
 - `nlp_document_tasks.workflow`: `document_topic` version 3, so new runs land in the
   version 3 branch. `llm.md` lists the new version.
 

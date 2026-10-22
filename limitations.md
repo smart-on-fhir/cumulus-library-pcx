@@ -40,11 +40,15 @@ evidence as further nullable criteria. Do not convert undocumented criteria into
 
 ## 2. Any-dose methotrexate is insufficient treatment specificity
 
-**Gap:** The exposure is any methotrexate order, pharmacy dispense or LLM-administered methotrexate. That
-does not identify the study treatment strategy (high-dose, 5 g/m², with leucovorin rescue
-and serum levels) described in the reference paper.
+**Gap:** Since 2026-10-22 the exposure is any LLM-documented administered methotrexate (the CHOP
+clinical team treats any methotrexate as high-dose), or ACNS0334 Regimen B. Structured orders and
+dispenses are not proof of receipt and are evidence only. Dose is not checked, and intrathecal or
+intraventricular methotrexate (in infants a different, low-dose strategy) counts until the
+clinician says otherwise. A Regimen B assignment counts as exposure without proof of delivery, so
+it mixes intended with delivered treatment. Neither captures the full
+strategy (5 g/m², with leucovorin rescue and serum levels) described in the reference paper.
 
-**Resolution:** Retain any-dose exposure for discovery, then capture dose and units,
+**Resolution:** Settle the intrathecal and intraventricular question, then capture dose and units,
 route, administration dates, induction/consolidation phase, companion agents,
 stem-cell rescue, interruptions and discontinuation. Add methotrexate-level and leucovorin
 valuesets as structured markers. Separate protocol documentation, intended treatment and
@@ -74,8 +78,9 @@ date for another or assume the registered EFS origin establishes every OS conven
 last_known_alive_provisional`) because event-free follow-up is not adjudicated. Baseline
 response evaluability and treatment-phase response assessments are extracted by the
 `response` task and projected to `pcx__llm_response_wide`, which only the client timeline
-reads: no eligibility or outcome SQL uses it. Undated events are
-invisible to EFS; events before time zero are not excluded.
+reads: no eligibility or outcome SQL uses it. Undated events count as EFS events with a NULL
+interval (`efs_censor_source` event_timing_uncertain or event_undated) until they are
+reconciled with the dated events; events before time zero are not excluded.
 
 **Resolution:** Promote EFS to the core reproduction specification and add baseline
 measurable/evaluable disease, dated response assessments, consolidation completion,
@@ -87,7 +92,7 @@ response state rather than automatically counting it as an adverse EFS event.
 ## 5. Radiation needs temporal context
 
 **Gap:** The paper allowed discretionary radiation after protocol treatment. The
-`radiation_prior_to_first_event_bool` flag and the chemotherapy/radiation sequence are
+`had_initial_radiation_bool` flag and the chemotherapy/radiation sequence are
 implemented in `pcx__outcome_exposure` by date comparison only. Radiation receipt rests on
 procedure or encounter codes and LLM administered rounds; the tier 2 "history of irradiation"
 codes are ignored; and the LLM `indication` is free text.

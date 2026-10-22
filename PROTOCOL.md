@@ -30,8 +30,8 @@ build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
   molecular Group 3. An observational treatment-effect analysis is not yet specified.
 - [source eligible] Design: a discovery cohort (`pcx__eligible`, every criterion as a nullable
   boolean) and a trial-like cohort (`pcx__eligible_trial`, strict intersection).
-- [source eligible] Analysis unit: subject; time zero is the first study-population encounter with
-  a tier 1 medulloblastoma code.
+- [source eligible] Analysis unit: subject; time zero is the LLM gold (tissue) diagnosis day,
+  else the first study-population encounter with a tier 1 medulloblastoma code.
 - [decided] Prefix `pcx`. Stages in `cumulus_library_pcx/stage/manifest.py`: study_population,
   study_variable, study_variable_wide, casedef, elastic_upload, sample, counts, study_meta by
   default; llm_schema, the NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
@@ -68,13 +68,18 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 ## 4. Case definition
 
 - [source] `spreadsheet/casedef.csv`: 55 rows, subtypes medulloblastoma, atrt, cns_embryonal,
-  etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero; tier 2 codes are evidence.
-- [source eligible] Index event: first study-population encounter carrying a tier 1
-  medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
+  etmr, pineoblastoma; tiers 1-2. Tier 1 medulloblastoma sets time zero when no LLM gold diagnosis
+  day exists; tier 2 codes (and the CHOP roster) are evidence.
+- [source eligible] Index event: the earliest day-precision LLM gold diagnosis day, else the first
+  study-population encounter carrying a tier 1 medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
   (first casedef encounter of any subtype or tier) for note sampling ([WORKPLAN](WORKPLAN.md#case-definition)).
-- [open] SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in
-  dx_brain_cancer.csv. ICD-O-3 morphology codes are absent from casedef.csv. etmr,
-  pineoblastoma and cns_embryonal never produce a time zero. All three are in
+- [decided] 2026-10-22, Andy: SNOMED 428061005 (malignant neoplasm of brain) and 93744007
+  (primary malignant neoplasm of CNS, per review lookup) are generic brain cancer codes, not
+  ATRT, so they are removed from the casedef.csv `atrt` rows. At BCH they gave 118 and 8
+  patients a tier 1 ATRT code and flagged 30 eligible patients ATRT on these codes alone.
+  428061005 stays a tier 3 candidate in dx_brain_cancer.csv.
+- [open] ICD-O-3 morphology codes are absent from casedef.csv. etmr, pineoblastoma and
+  cns_embryonal get a time zero only from an LLM gold date. Both are in
   [WORKPLAN](WORKPLAN.md#case-definition).
 
 ## 5. Clinical notes
@@ -89,6 +94,16 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [decided] 2026-10-08, Andy: the document tasks (`document_topic`, `document_type`) select every
   note in `pcx__sample_task`, the casedef notes plus the Elasticsearch notes, which the `sample`
   stage builds at every site.
+- [decided] 2026-10-21, Andy: note dates for the client views and date warnings come from
+  `pcx__llm_note_date`, one row per note in `pcx__sample_task`, so Elasticsearch-only notes are
+  dated too: DocumentReference author day else `date`, DiagnosticReport effectiveDateTime day else
+  effectivePeriod start. In `client_diagnosis`, a note without a usable date still counts in the
+  `_ever`, count and conflict columns, is never baseline, and is the latest only when no dated note
+  has a value.
+- [decided] 2026-10-21, Andy: the survival_timeline task reads the qualifying notes from each
+  subject's last visit, plus END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any
+  visit, plus notes not on a study-population visit (no encounter, or one outside the
+  population), whose dates the LLM extracts (`pcx__llm_document_task_survival_timeline`).
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created. Supply reviewed selectors, each with a `note_ref` column,
   before running it. The tables are declared as site-supplied under `[builder] external_tables`.
@@ -104,7 +119,11 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
 `pcx__eligible` is the discovery cohort: every criterion is a yes/no flag, never an exclusion.
 `pcx__eligible_trial` applies the strict ACNS0334 intersection on top of it.
 
-- [source] Time zero `t0_day`: first tier 1 medulloblastoma casedef encounter (section 4).
+- [source] Time zero `t0_day`: the LLM gold diagnosis day, else the first tier 1 medulloblastoma
+  casedef encounter (section 4). `t0_source` names which; `casedef_t0_day` keeps the coded day.
+- [decided] 2026-10-21, Andy: the LLM gold diagnosis day (`diagnosis_date_gold`) is the gold
+  standard and sets t0 ahead of a casedef code. Day precision only. Any subtype the diagnosis task
+  names counts, ATRT included; ATRT is excluded separately.
 - [source] I1 Diagnosis: tier 1 medulloblastoma casedef code OR an LLM diagnosis of
   MEDULLOBLASTOMA (`pcx__llm_diagnosis_wide`).
 - [source] I2 Definitive surgery under 36 months of age: earliest LLM resection (gross total,
@@ -114,16 +133,35 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   surgery flag is a trial criterion.
 - [source] E1 ATRT: tier 1 atrt casedef code or any single LLM note with subtype ATRT.
 - [source] E2 Prior chemotherapy before t0: earliest chemotherapy order, pharmacy dispense or
-  LLM-administered agent.
+  LLM-administered agent or dose. Prior methotrexate: earliest administered methotrexate or
+  ACNS0334 Regimen B evidence.
 - [source] E3 Prior radiation before t0: earliest tier 1 radiation procedure, tier 1 radiation
   encounter code, or LLM-administered radiation.
 - [decided] 2026-09-30, Andy: prior therapy is three flags, `methotrexate_prior_to_t0_bool`,
   `chemo_prior_to_t0_bool` and `radiation_prior_to_t0_bool`. TRUE = dated exposure before
   `t0_day`. FALSE = t0 known and nothing dated before it, including no evidence or only undated
   evidence. NULL only when `t0_day` is NULL, which keeps the subject out of the trial view.
+  Since 2026-10-22 a month or year date that straddles `t0_day` also gives NULL (dates are
+  ranges, section 7).
   `*_any_bool` is exposure at any time, FALSE when there is no evidence.
 - [decided] 2026-09-30, Andy: ACNS0334 excludes any prior chemotherapy, so prior methotrexate
   excludes from `pcx__eligible_trial` like the six backbone agents.
+- [decided] 2026-10-21, Andy: the methotrexate exposure is high-dose methotrexate. It counts from
+  an ADMINISTERED dose explicitly called high-dose (`llm_high_dose`) or an ACNS0334 regimen with
+  `documented_trial_arm = REGIMEN_B` (`llm_acns0334_regimen_b`: the assignment alone counts, and
+  methotrexate administered in it adds its dates). `methotrexate_source` names which. Structured
+  methotrexate orders and dispenses are evidence only. LLM receipt is the agent-level or the
+  dose-level `ADMINISTERED`, earliest date wins. Other methotrexate (intrathecal, not high-dose)
+  is chemotherapy only. Systemic therapy v2 amended in place: `documented_trial_arm` is the
+  `TrialArm` enum (REGIMEN_A, REGIMEN_B, NONE_OF_THE_ABOVE) with `documented_trial_arm_verbatim`.
+- [decided] 2026-10-22, Andy (CHOP clinician, Leary): any methotrexate given is high-dose, so the
+  exposure is any LLM-documented ADMINISTERED methotrexate, agent or dose level, any route
+  (`llm_administered`, replaces `llm_high_dose`), or ACNS0334 Regimen B as above. Structured
+  orders and dispenses stay evidence only. The explicit high-dose label
+  (`methotrexate_high_dose_*`), intrathecal or intraventricular doses
+  (`methotrexate_intrathecal_or_ventricular_*`) and `methotrexate_not_received_bool` are kept as
+  evidence. Open: whether intrathecal or intraventricular methotrexate should count (asked of
+  the clinician).
 - [decided] 2026-09-30, Andy: MedicationDispense hand-overs (`core__medicationdispense`
   `whenhandedover_day`, cancelled and declined dropped) are structured evidence beside
   MedicationRequest orders. A dispense is closer to receipt than an order but is not proof of
@@ -144,15 +182,69 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   event-free survival, where an event is progression, recurrence, a second malignancy or
   death. EFS is provisional until event-free follow-up is adjudicated ([limitations.md](limitations.md)).
 - [source limitations] Vital status (`outcome_vital_status.sql`): raw `patient.deceasedBoolean` /
-  `deceasedDateTime`, the last study-population encounter, and LLM vital-status mentions; the
-  earliest death and latest alive dates win without cross-checking. The raw FHIR Patient
+  `deceasedDateTime`, the last study-population encounter, LLM survival-timeline vital status and
+  LLM event-task DECEASED mentions; the earliest death and latest alive dates win without
+  cross-checking. It is the one place deaths are reconciled: `outcome_first_event.sql` takes
+  death from it, so OS and EFS always see the same death. The raw FHIR Patient
   deceased fields are a site prerequisite: the site's ETL must expose them.
-- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS; a death
-  recorded only by the event task reaches EFS but not OS. Coarse LLM dates are consumed as exact days.
+- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS.
+- [decided] 2026-10-22, Andy: dates are ranges. Every treatment record (`pcx__exposure_record`)
+  and event carries the range of days it can fall on. A month or year date covers its whole
+  period. An undated LLM mention happened on or before the date of its note (`pcx__llm_note_date`,
+  FHIR note metadata), with no lower bound. BCH 2026-10-22: 62% of administered radiation mentions
+  and a quarter to a half of progression, recurrence and second-malignancy mentions are undated;
+  a fifth to two fifths of the dated ones are month or year dates.
+  - Comparisons (prior to t0, inside the initial window, before the first event, which therapy
+    came first) are certain only when the whole range is on one side, otherwise unknown. Prior to
+    t0 straddled by a month or year date is NULL (out of the trial view). Undated evidence still
+    never counts as prior therapy.
+  - Durations (`os_days`, `efs_days`, `days_t0_to_first_event`) use a coarse date at the middle
+    of its period (the 15th of the month, July 1 of the year), flagged by
+    `death_day_imputed_bool`, `last_known_alive_day_imputed_bool`, `first_event_day_imputed_bool`,
+    `os_end_day_imputed_bool` and `efs_end_day_imputed_bool`.
+  - Death has a range too (`death_earliest_day`, `death_latest_day`), so treatment inside a month
+    or year death date is not certainly before or after it. The earliest exact death day wins
+    when no source's month or year ends before it (FHIR 2020-12-10 beside an LLM "2020").
+  - An undated treatment mention is a restatement, ignored, when a dated record of the same
+    treatment starts on or before its note date (`restated_bool`). An undated progression,
+    recurrence or second malignancy is a restatement when its note is dated on or after the
+    latest day the dated first event can be. Otherwise it may precede the dated event:
+    `event_timing_uncertain_bool`, EFS interval NULL. Events that are all undated stay events
+    without an interval.
+- [decided] 2026-10-21, Andy: a documented EFS event without a usable date is an event with an
+  uncomputable interval, not a censored observation. `efs_event_bool` is `event_documented_bool`
+  (dated event, undated event, or a death without a date).
+  - An undated progression, recurrence or second malignancy (`event_timing_uncertain_bool`) makes
+    the EFS interval NULL even next to a dated event, pending reconciliation: it may be earlier
+    or a repeat. The earliest dated event stays in `first_event_day` as evidence.
+    `efs_censor_source = event_timing_uncertain`.
+  - A deceased flag without a death date is an event with a NULL interval, as for OS
+    (`efs_censor_source = event_undated`). A conflicting LLM `ALIVE` statement is kept for review
+    (`llm_deceased_bool`, `llm_last_known_alive_day` in `pcx__outcome_vital_status`, listed by
+    the `deceased_without_death_day` warning), since it may describe an earlier time.
+  - The patient was alive for every dated event and exposure, so an undated death never
+    makes the timing uncertain: a dated event before it is still the first event, and every
+    dated exposure precedes it.
+- [decided] 2026-10-22, Andy: initial therapy runs from t0 to the first event. An exposure is
+  initial when a record of it is certainly inside `[t0_day, first event)` by the date ranges above
+  (open-ended with no dated event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool` and
+  `had_initial_radiation_bool` (`pcx__outcome_exposure`, replacing `*_prior_to_first_event_bool`):
+  - TRUE: a record certainly inside the window.
+  - FALSE: no record inside or possibly inside, and initial therapy is documented without it
+    (dated chemotherapy in the window for methotrexate and radiation, dated radiation for
+    chemotherapy), or the exposure is EXPLICITLY_NOT_RECEIVED (methotrexate, radiation).
+  - NULL: unknown. No t0, an undated progression, recurrence or second malignancy of unknown
+    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no initial
+    therapy documented.
+    Missing documentation is never FALSE.
+  - `initial_therapy_sequence` orders chemotherapy and radiation from the same flags and adds
+    NO_INITIAL_THERAPY (dated chemotherapy or radiation exists, none in the window).
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
-  source. Structured exposure is orders and pharmacy dispenses, not administration; LLM
-  ADMINISTERED mentions are the only receipt evidence, and every administered agent counts as
-  chemotherapy ([WORKPLAN](WORKPLAN.md#eligibility)).
+  source. Methotrexate is administered methotrexate or ACNS0334 Regimen B LLM evidence only. Structured
+  chemotherapy is orders and pharmacy dispenses, not administration; LLM ADMINISTERED agents and
+  doses are the only receipt evidence, and every administered agent counts as chemotherapy
+  except the supportive markers leucovorin, mesna and dexrazoxane
+  ([WORKPLAN](WORKPLAN.md#eligibility)).
 
 ## 8. Analysis
 
@@ -177,6 +269,34 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   keeps `age_group`. With ages 0-120, single years would add many small suppressed cells.
 - [open] Output column order changed for `cube_patient_variable_union` (`age_group` is now
   last); the values and names are the same. Counts have not been run in the warehouse.
+- [decided] 2026-10-19, Andy: Kaplan-Meier cubes in the PCX-30 OS and EFS `_cube.csv` layout,
+  in their own `counts_kaplan` stage (`stage/counts_kaplan.py`). Source
+  `pcx__kaplan_subject`, one labeled row per `pcx__outcome` subject. `cube_kaplan_os` and
+  `cube_kaplan_efs` (`counts_kaplan.workflow`, exported). Counted unit: distinct patients.
+- [decided] Exact PCX-30 columns, order and labels, except `site`. Survival years are
+  FLOOR(days / 365.25) from t0, capped at >=10. `diagnosis` was always Medulloblastoma
+  until 2026-10-21 (below), `subtype` is the latest documented molecular group or NOS/NEC. EFS
+  keeps the provisional censoring.
+- [decided] 2026-10-22, Andy: the exposure strata are initial therapy, not ever-exposure.
+  `had_initial_methotrexate` and `had_initial_radiation` replace PCX-30's `ever_methotrexate` and
+  `radiation` in both cubes: Yes, No, Not Reported (unknown) or Not Applicable (no t0), from
+  the `had_initial_*_bool` flags (section 7). Salvage after relapse is not counted, and a
+  documented No is separate from missing documentation.
+- [decided] 2026-10-20, Andy: no `site` column. Each site's export reaches the aggregator
+  under that site, which adds it when cubes are combined. The source is plain SQL,
+  `sql/custom/pcx__kaplan_subject.sql`, with no build-time values.
+- [decided] 2026-10-20, Andy: `min_subject = 1` is approved for PCX. The Kaplan-Meier cubes are
+  exported with a floor of 1, like the unsuppressed PCX-30 files, and the site-only copies
+  (`counts_kaplan_site.workflow`) are removed. `stage/counts_kaplan.py` checks the workflow with
+  the builder's site-only rules, since its shared rules require a floor of at least 10.
+- [decided] 2026-10-21, Andy: `diagnosis` is the latest documented CNS embryonal subtype
+  (`pcx__client_diagnosis.disease_subtype_ever`, codes such as MEDULLOBLASTOMA or ATRT), Not
+  Reported when none is documented. `pcx__kaplan_subject` applies no diagnosis, age or
+  prior-treatment exclusion.
+- [decided] 2026-10-21, Andy: a documented EFS event without a usable date is `efs_status`
+  event with `event_free_survival_years` Not Reported. Curve calculations downstream must count
+  the event but use no duration for it. `initial_treatment_order` is Not Reported when the
+  event timing is uncertain.
 
 ### 8.2 Exports and statistical plan
 
@@ -197,8 +317,7 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
 - [open] Inherited items of the 2026-09-11 workplan, now listed in WORKPLAN.md under their
   sections: keep, schedule or close.
 - [open] Review 2026-09-19, tracked in WORKPLAN.md:
-  encounter-only joins in `client_timeline.sql`; notes with conflicting dates have a NULL
-  `note_author_date` and drop out of `client_diagnosis.sql`. The builder `cohort_casedef`
+  encounter-only joins in `client_timeline.sql`. The builder `cohort_casedef`
   duplicate `subject_ref` defect was not re-checked against 0.5.0.
 
 ## 10. Decision log

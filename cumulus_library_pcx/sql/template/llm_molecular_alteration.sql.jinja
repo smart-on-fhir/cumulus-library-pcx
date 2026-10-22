@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_molecular_alteration AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -16,6 +17,7 @@ SELECT  DISTINCT
         alteration.status                                            AS status,
         alteration.report_date                                       AS report_date,
         alteration.report_date_precision                             AS report_date_precision,
+        {{ dates.llm_day_columns('alteration.report_date', 'alteration.report_date_precision', 'report_day') }},
         alteration.testing_method                                    AS testing_method
 FROM
         {{ table_name }} AS nlp

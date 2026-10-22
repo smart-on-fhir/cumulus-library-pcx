@@ -1,0 +1,78 @@
+{#- LLM date strings as DATE columns, for the llm_*.sql.jinja projections.
+
+    The models write a date as text plus a stated precision (DAY, MONTH, YEAR).
+    Only three shapes are understood: YYYY-MM-DD, YYYY-MM and YYYY, and only
+    when the month and day exist on the calendar. Any other text (no year, a
+    '?', words, 2024-02-30, 2023-02-29, 2020-13) gives a NULL day and a NULL
+    precision, and pcx__warn_llm_date_invalid lists it.
+
+    A date must also be plausible: from 1980-01-01 to the build day. A date
+    outside that window (a placeholder, a typo, a planned future visit) is
+    not an observation, so it too gives a NULL day and precision, and every
+    duration computed downstream is NULL with it. The check compares the date
+    padded to YYYY-MM-DD, so 2031 or a day later this month is out.
+    pcx__warn_llm_date_invalid lists these as llm_date_implausible.
+
+    The calendar check uses only string tests, so it cannot error whatever order
+    the engine evaluates it in. The CAST to DATE runs only on a date that passed.
+
+    The precision is the coarser of the shape and the stated precision, so
+    2020-09-15 stated MONTH is MONTH. The day is the first day of that period,
+    so a YEAR date always sorts on or before every DAY date of the same year.
+
+    llm_day_columns('agent.therapy_start_date', 'agent.therapy_start_date_precision', 'therapy_start_day')
+    gives therapy_start_day DATE and therapy_start_day_precision VARCHAR.
+-#}
+
+{%- set shape = "'^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$'" -%}
+
+{#- Gregorian leap years: divisible by 4, and century years only when divisible by 400 -#}
+{%- set leap_year = "'^([0-9]{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[13579][26])00)$'" -%}
+
+{#- The date padded to YYYY-MM-DD with -01: 2020 is 2020-01-01, 2020-09 is 2020-09-01 -#}
+{%- macro padded(value) -%}
+SUBSTR(CONCAT({{ value }}, '-01-01'), 1, 10)
+{%- endmacro -%}
+
+{%- macro understood(value) -%}
+(REGEXP_LIKE({{ value }}, {{ shape }})
+            AND SUBSTR({{ padded(value) }}, 6, 2) BETWEEN '01' AND '12'
+            AND SUBSTR({{ padded(value) }}, 9, 2) BETWEEN '01' AND
+                CASE
+                    WHEN SUBSTR({{ padded(value) }}, 6, 2) IN ('04', '06', '09', '11')    THEN '30'
+                    WHEN SUBSTR({{ padded(value) }}, 6, 2) <> '02'                        THEN '31'
+                    WHEN REGEXP_LIKE(SUBSTR({{ value }}, 1, 4), {{ leap_year }})          THEN '29'
+                    ELSE                                                                       '28'
+                END)
+{%- endmacro -%}
+
+{%- macro plausible(value) -%}
+({{ padded(value) }} BETWEEN '1980-01-01' AND CAST(CURRENT_DATE AS VARCHAR))
+{%- endmacro -%}
+
+{%- macro llm_day(value, precision) -%}
+CASE
+            WHEN {{ value }} IS NULL                                    THEN NULL
+            WHEN NOT {{ understood(value) }}                            THEN NULL
+            WHEN NOT {{ plausible(value) }}                             THEN NULL
+            WHEN LENGTH({{ value }}) = 4 OR {{ precision }} = 'YEAR'     THEN CAST(CONCAT(SUBSTR({{ value }}, 1, 4), '-01-01') AS DATE)
+            WHEN LENGTH({{ value }}) = 7 OR {{ precision }} = 'MONTH'    THEN CAST(CONCAT(SUBSTR({{ value }}, 1, 7), '-01') AS DATE)
+            ELSE                                                             CAST({{ value }} AS DATE)
+        END
+{%- endmacro -%}
+
+{%- macro llm_date_precision(value, precision) -%}
+CASE
+            WHEN {{ value }} IS NULL                                    THEN NULL
+            WHEN NOT {{ understood(value) }}                            THEN NULL
+            WHEN NOT {{ plausible(value) }}                             THEN NULL
+            WHEN LENGTH({{ value }}) = 4 OR {{ precision }} = 'YEAR'     THEN 'YEAR'
+            WHEN LENGTH({{ value }}) = 7 OR {{ precision }} = 'MONTH'    THEN 'MONTH'
+            ELSE                                                             'DAY'
+        END
+{%- endmacro -%}
+
+{%- macro llm_day_columns(value, precision, name) -%}
+{{ llm_day(value, precision) }} AS {{ name }},
+        {{ llm_date_precision(value, precision) }} AS {{ name }}_precision
+{%- endmacro -%}

@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_systemic_therapy_agent AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -14,12 +15,16 @@ SELECT  DISTINCT
         agent_index,
         agent.delivery_status                                        AS delivery_status,
         agent.agent_name                                             AS agent_name,
+        agent.agent_name_verbatim                                    AS agent_name_verbatim,
         agent.therapy_start_date                                     AS therapy_start_date,
         agent.therapy_start_date_precision                           AS therapy_start_date_precision,
+        {{ dates.llm_day_columns('agent.therapy_start_date', 'agent.therapy_start_date_precision', 'therapy_start_day') }},
         agent.therapy_stop_date                                      AS therapy_stop_date,
         agent.therapy_stop_date_precision                            AS therapy_stop_date_precision,
+        {{ dates.llm_day_columns('agent.therapy_stop_date', 'agent.therapy_stop_date_precision', 'therapy_stop_day') }},
         agent.assessed_through_date                                  AS assessed_through_date,
-        agent.assessed_through_date_precision                        AS assessed_through_date_precision
+        agent.assessed_through_date_precision                        AS assessed_through_date_precision,
+        {{ dates.llm_day_columns('agent.assessed_through_date', 'agent.assessed_through_date_precision', 'assessed_through_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.regimens) WITH ORDINALITY AS regimen_t (regimen, regimen_index)

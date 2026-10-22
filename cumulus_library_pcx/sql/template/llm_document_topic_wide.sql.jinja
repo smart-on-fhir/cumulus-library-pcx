@@ -4,7 +4,10 @@
     Version 3 adds survival_timeline. Athena resolves struct fields from the table
     definition, not from the rows, so result.survival_timeline cannot be named until a
     version 3 run has added it to the table. Until then it is read through JSON,
-    which is NULL when the field is absent. -#}
+    which is NULL when the field is absent.
+    The NLP table holds ONE task version, the folder it was last built over, so only one
+    branch has rows at a time. Nothing keeps older rows beside newer ones: rebuilding the
+    document_topic task repoints the table at version 3 and re-extracts every note. -#}
 {%- macro shared_columns(table_name) %}
         nlp.note_ref,
         nlp.encounter_ref,

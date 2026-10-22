@@ -24,9 +24,9 @@ structured AS (
 ),
 llm AS (
     SELECT  subject_ref,
-            MIN(CAST(surgery_date AS DATE))                             AS llm_surgery_first_day,
+            MIN(surgery_day)                                            AS llm_surgery_first_day,
             MIN(CASE WHEN extent_of_resection IN ('GROSS_TOTAL_RESECTION', 'NEAR_TOTAL_RESECTION', 'PARTIAL_RESECTION')
-                     THEN CAST(surgery_date AS DATE) END)               AS llm_definitive_surgery_day,
+                     THEN surgery_day END)                              AS llm_definitive_surgery_day,
             MIN(CASE WHEN extent_of_resection IN ('GROSS_TOTAL_RESECTION', 'NEAR_TOTAL_RESECTION', 'PARTIAL_RESECTION')
                      THEN age_at_surgery_months END)                    AS llm_age_at_definitive_surgery_months,
             MIN(residual_tumor_area_cm2)                                AS llm_residual_tumor_area_cm2_min,

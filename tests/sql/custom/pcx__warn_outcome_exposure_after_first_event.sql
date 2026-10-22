@@ -2,8 +2,8 @@
 -- Warning: treatment that started on or after the first event (salvage).
 --
 -- These subjects have methotrexate or radiation evidence, but the earliest
--- day is not before first_event_day, so the prior-to-first-event flag is
--- FALSE and the exposure is not counted as initial therapy. That is the
+-- day is not before first_event_day, so that first exposure is not initial
+-- therapy (had_initial_*_bool counts only exposure from t0 to the first event). That is the
 -- intended rule (README section 2). The rows are listed because the flag
 -- silently depends on event ascertainment: a first event that is really a
 -- misdated remission or a pseudo-progression turns initial therapy into
@@ -22,7 +22,7 @@ SELECT  'methotrexate_after_first_event'                                        
 FROM    pcx__outcome_exposure
 WHERE   methotrexate_first_day IS NOT NULL
 AND     first_event_day IS NOT NULL
-AND     NOT methotrexate_prior_to_first_event_bool
+AND     methotrexate_first_day >= first_event_day
 
 UNION ALL
 
@@ -37,5 +37,5 @@ SELECT  'radiation_after_first_event'                                           
 FROM    pcx__outcome_exposure
 WHERE   radiation_first_day IS NOT NULL
 AND     first_event_day IS NOT NULL
-AND     NOT radiation_prior_to_first_event_bool
+AND     radiation_first_day >= first_event_day
 ;

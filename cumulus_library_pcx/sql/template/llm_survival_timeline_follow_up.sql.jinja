@@ -1,4 +1,5 @@
 {%- import 'syntax.sql.jinja' as syntax -%}
+{%- import 'date_macros.sql.jinja' as dates -%}
 CREATE TABLE {{ prefix }}__llm_survival_timeline_follow_up AS
 {%- for table_name in table_names %}
 SELECT  DISTINCT
@@ -13,7 +14,8 @@ SELECT  DISTINCT
         follow_up_index,
         follow_up.event_free                                         AS event_free,
         follow_up.assessment_date                                    AS assessment_date,
-        follow_up.assessment_date_precision                          AS assessment_date_precision
+        follow_up.assessment_date_precision                          AS assessment_date_precision,
+        {{ dates.llm_day_columns('follow_up.assessment_date', 'follow_up.assessment_date_precision', 'assessment_day') }}
 FROM
         {{ table_name }} AS nlp
 CROSS JOIN UNNEST(nlp.result.event_free_follow_up) WITH ORDINALITY AS follow_up_t (follow_up, follow_up_index)

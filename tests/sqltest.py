@@ -11,7 +11,8 @@ from cumulus_study_builder.tools import filetool
 SCHEMA = filetool.path_tests_data('schema.sql')
 
 # custom/ SQL in dependency order
-ELIGIBLE_OUTCOME = ['eligible_dx',
+ELIGIBLE_OUTCOME = ['pcx__exposure_record',
+                    'eligible_dx',
                     'eligible_surgery',
                     'eligible_rx',
                     'eligible_radiation',
@@ -31,6 +32,7 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
         data_dir = filetool.path_tests_data_warn()
     con = duckdb.connect()
     con.execute("CREATE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
+    con.execute("CREATE MACRO from_iso8601_timestamp(s) AS CAST(s AS TIMESTAMPTZ)")
     con.execute(SCHEMA.read_text())
     for (table,) in con.execute('SHOW TABLES').fetchall():
         csv_file = data_dir / f'{table}.csv'

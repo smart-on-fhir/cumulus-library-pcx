@@ -1,7 +1,9 @@
-subject_ref,note_ref,disease_subtype,medulloblastoma_histology,chang_m_stage,diagnosis_date,diagnosis_date_precision,diagnosis_date_gold,diagnosis_date_gold_precision,age_at_diagnosis_months
-Patient/p1,note-p1-dx,MEDULLOBLASTOMA,CLASSIC,M0,2020-01-25,DAY,2020-01-28,DAY,24
-Patient/p2,note-p2-dx,MEDULLOBLASTOMA,LARGE_CELL_ANAPLASTIC,M3,2014-12-20,DAY,2014-12-22,DAY,54
-Patient/p3,note-p3-dx,MEDULLOBLASTOMA,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,,,,
-Patient/p6,note-p6-dx1,MEDULLOBLASTOMA,CLASSIC,M0,2019-12-01,DAY,2019-12-01,DAY,30
-Patient/p6,note-p6-dx2,ATRT,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,,,,
-Patient/p8,note-p8-dx,MEDULLOBLASTOMA,CLASSIC,M0,2020-06-01,DAY,2020-06-01,DAY,
+subject_ref,note_ref,disease_subtype,medulloblastoma_histology,chang_m_stage,diagnosis_date,diagnosis_date_precision,diagnosis_day,diagnosis_day_precision,diagnosis_date_gold,diagnosis_date_gold_precision,diagnosis_gold_day,diagnosis_gold_day_precision,age_at_diagnosis_months,historical_diagnosis_term,generated_on
+Patient/p1,note-p1-dx,MEDULLOBLASTOMA,CLASSIC,M0,2020-01-25,DAY,2020-01-25,DAY,2020-01-28,DAY,2020-01-28,DAY,24,,2026-10-01T00:00:00+00:00
+Patient/p2,note-p2-dx,MEDULLOBLASTOMA,LARGE_CELL_ANAPLASTIC,M3,2014-12-20,DAY,2014-12-20,DAY,2014-12-22,DAY,2014-12-22,DAY,54,,2026-10-01T00:00:00+00:00
+Patient/p3,note-p3-dx,MEDULLOBLASTOMA,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,,,,,,,,,,2026-10-01T00:00:00+00:00
+Patient/p6,note-p6-dx1,MEDULLOBLASTOMA,CLASSIC,M0,2019-12-01,DAY,2019-12-01,DAY,2019-12,MONTH,2019-12-01,MONTH,30,,2026-10-01T00:00:00+00:00
+Patient/p6,note-p6-dx2,ATRT,NONE_OF_THE_ABOVE,NONE_OF_THE_ABOVE,,,,,,,,,,,2026-10-01T00:00:00+00:00
+Patient/p8,note-p8-dx,MEDULLOBLASTOMA,CLASSIC,M0,2020-06-01,DAY,2020-06-01,DAY,2020-06,MONTH,2020-06-01,MONTH,,,2026-10-01T00:00:00+00:00
+Patient/p10,note-p10-dx,ATRT,,,2031-03-01,DAY,,,,,,,,,2026-10-01T00:00:00+00:00
+Patient/p1,note-p1-dx,MEDULLOBLASTOMA,CLASSIC,M0,2020-01-25,DAY,2020-01-25,DAY,2020-01-28,DAY,2020-01-28,DAY,24,,2026-10-02T00:00:00+00:00
