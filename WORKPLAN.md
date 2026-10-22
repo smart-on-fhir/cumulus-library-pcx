@@ -234,6 +234,12 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 ## Analysis
 
 - [ ] P2 · `client_views` · **Client views.** `client_timeline.sql` joins on encounter only.
+- [ ] P2 · `client_views` · **Drug identity on timeline administrations** (external review
+  2026-10-22). The `llm_therapy_administration` rows of `client_timeline.sql` carry route, dose and
+  status but not the drug, and `SELECT DISTINCT` merges two drugs with the same dose details in one
+  note. Join the agent (`note_ref`, `generated_on`, `regimen_index`, `agent_index`), choose which of
+  the 20 contract columns carries the drug, and keep an administration identifier. Same in 0.4.3,
+  flat export only.
 - [ ] P3 · `client_views` · **Use the builder's client views.** The builder's opt-in
   `client_views` stage has templates for `client_subject`, `client_encounter`,
   `client_timeline`, `client_timeline_latest`, `client_dictionary_coverage` and
@@ -285,6 +291,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-22 — A month or year death date covers its whole period
+
+- External review: a death documented as "January 2021" was a single day (January 15) when treatment was placed against the first event, so radiation on January 20 counted as after it and gave `had_initial_radiation = No` and `chemo_only_no_initial_radiation`. `outcome_vital_status.sql` now keeps `death_earliest_day` and `death_latest_day`, and `outcome_first_event.sql` uses them as the death's range. `death_day` stays at the middle of the period for durations.
+- The earliest exact death day wins when no source's month or year ends before it: FHIR 2020-12-10 beside an LLM "2020" is 2020-12-10, not July 1, and not imputed.
+- `client_exposure`: chemotherapy `administered_bool` comes from new `pcx__eligible_rx.chemo_administered_bool` (any LLM ADMINISTERED agent, dated or not), not from an administration date, as for methotrexate.
+- New `test_a_month_or_year_death_covers_its_whole_period` fails on the old SQL. Timeline drug identity is a new P2 under Analysis.
 
 ### 2026-10-22 — Warn tables for the new date and exposure rules
 

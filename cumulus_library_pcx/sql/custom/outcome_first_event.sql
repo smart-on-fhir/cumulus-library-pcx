@@ -17,7 +17,8 @@
 --    first_event_day is the day used for durations: a coarse date at the
 --    middle of its period (the 15th of the month, July 1 of the year), with
 --    first_event_day_imputed_bool TRUE. The per-type first days use the same
---    day. A death counts at death_day from outcome_vital_status.
+--    day. A death covers death_earliest_day to death_latest_day and counts at
+--    death_day for durations, all from outcome_vital_status.
 --    An undated progression, recurrence or second malignancy happened on or
 --    before the date of its note (pcx__llm_note_date, FHIR metadata):
 --      note dated on or after first_event_latest_day   a restatement of the
@@ -74,8 +75,8 @@ candidate AS (
     UNION ALL
     SELECT  subject_ref,
             'DECEASED',
-            death_day,
-            death_day,
+            death_earliest_day,
+            death_latest_day,
             death_day,
             NOT death_day_imputed_bool
     FROM    pcx__outcome_vital_status

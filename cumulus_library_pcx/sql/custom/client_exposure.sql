@@ -35,7 +35,7 @@ exposure AS (
             rx.chemo_dispense_first_day,
             rx.chemo_administered_first_day,
             rx.chemo_any_bool,
-            (rx.chemo_administered_first_day IS NOT NULL),
+            rx.chemo_administered_bool,
             rx.chemo_prior_to_t0_bool,
             outcome.had_initial_chemo_bool
     FROM    pcx__eligible_rx            AS rx

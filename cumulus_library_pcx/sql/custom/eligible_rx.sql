@@ -117,6 +117,7 @@ first_day AS (
             BOOL_OR(exposure = 'methotrexate' AND source = 'llm_acns0334_regimen_b')    AS methotrexate_regimen_b_bool,
             BOOL_OR(exposure = 'methotrexate' AND exposure_day IS NULL)                 AS methotrexate_undated_bool,
             BOOL_OR(exposure = 'chemo')                                                 AS chemo_any_bool,
+            BOOL_OR(exposure = 'chemo' AND source = 'llm_administered')                 AS chemo_administered_bool,
             BOOL_OR(exposure = 'chemo' AND exposure_day IS NULL)                        AS chemo_undated_bool,
             -- prior to t0 by range: ends before t0, or straddles it
             BOOL_OR(exposure = 'methotrexate' AND latest_day < t0_day AND exposure_day IS NOT NULL)  AS methotrexate_before_t0_bool,
@@ -149,6 +150,7 @@ SELECT  dx.subject_ref,
                                                                             AS methotrexate_intrathecal_or_ventricular_bool,
         (mtx_not_received.subject_ref IS NOT NULL)                          AS methotrexate_not_received_bool,
         COALESCE(first_day.chemo_any_bool, FALSE)                           AS chemo_any_bool,
+        COALESCE(first_day.chemo_administered_bool, FALSE)                  AS chemo_administered_bool,
         COALESCE(first_day.chemo_undated_bool, FALSE)                       AS chemo_undated_bool,
         CASE
             WHEN dx.t0_day IS NULL                                          THEN NULL

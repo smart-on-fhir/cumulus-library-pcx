@@ -34,7 +34,7 @@ pcx__client_subject,had_initial_chemo_bool,,"Chemotherapy received as initial th
 pcx__client_subject,initial_therapy_sequence,,"CHEMOTHERAPY_BEFORE_RADIATION, RADIATION_BEFORE_CHEMOTHERAPY, SAME_DAY, CHEMOTHERAPY_ONLY, RADIATION_ONLY within initial therapy (t0 to first event), NO_INITIAL_THERAPY when dated chemotherapy or radiation exists only outside it, NULL when unknown",treatment,varchar,,,,
 pcx__client_subject,protocol_names,,"Distinct treatment protocol names documented for the subject, pipe separated",treatment,varchar,,,,
 pcx__client_subject,os_event_bool,,Overall survival event: the patient died,outcome,boolean,,,,
-pcx__client_subject,death_day,,Earliest recorded death date across FHIR and LLM sources,outcome,date,,,,
+pcx__client_subject,death_day,,"Earliest recorded death date across FHIR and LLM sources, an exact day preferred over a month or year date that contains it",outcome,date,,,,
 pcx__client_subject,last_known_alive_day,,Latest date the patient is documented alive,censoring,date,,,,
 pcx__client_subject,os_end_day,,"death_day for deceased patients, otherwise last_known_alive_day",outcome,date,,,,
 pcx__client_subject,os_days,,Days from t0_day to os_end_day,outcome,bigint,,,,

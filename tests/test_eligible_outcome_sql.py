@@ -317,6 +317,24 @@ def test_coarse_dates_count_only_when_their_whole_period_is_on_one_side():
         == ('first_event', date(2021, 1, 15), True)
 
 
+def test_a_month_or_year_death_covers_its_whole_period():
+    chemo = [(date(2020, 6, 1), 'DAY', 'n-chemo')]
+    radiation = [(date(2021, 1, 20), 'DAY', 'n-rt')]
+    # death "January 2021" is dated January 15 for survival, but radiation on January 20
+    # is not certainly after it: unknown, not "no initial radiation"
+    row = p5_outcome(chemo, radiation, events=[('DECEASED', date(2021, 1, 1), 'MONTH', 'n-ev')])
+    assert (row['first_event_day'], row['efs_end_day_imputed_bool']) == (date(2021, 1, 15), True)
+    assert (row['had_initial_chemo_bool'], row['had_initial_radiation_bool'], row['initial_therapy_sequence']) \
+        == (True, None, None)
+    # an exact death day inside that month wins over it, and radiation two days before is initial
+    row = p5_outcome(chemo, [(date(2021, 1, 18), 'DAY', 'n-rt')],
+                     events=[('DECEASED', date(2021, 1, 1), 'MONTH', 'n-ev'),
+                             ('DECEASED', date(2021, 1, 20), 'DAY', 'n-ev2')])
+    assert (row['first_event_day'], row['efs_end_day_imputed_bool']) == (date(2021, 1, 20), False)
+    assert (row['had_initial_radiation_bool'], row['initial_therapy_sequence']) \
+        == (True, 'CHEMOTHERAPY_BEFORE_RADIATION')
+
+
 def test_undated_mentions_are_bounded_by_their_note_date():
     chemo = [(date(2020, 6, 1), 'DAY', 'n-chemo')]
     # radiation given before t0, restated without a date in a later note: a documented "no initial radiation"

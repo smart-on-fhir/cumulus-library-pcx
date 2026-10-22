@@ -202,6 +202,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
     of its period (the 15th of the month, July 1 of the year), flagged by
     `death_day_imputed_bool`, `last_known_alive_day_imputed_bool`, `first_event_day_imputed_bool`,
     `os_end_day_imputed_bool` and `efs_end_day_imputed_bool`.
+  - Death has a range too (`death_earliest_day`, `death_latest_day`), so treatment inside a month
+    or year death date is not certainly before or after it. The earliest exact death day wins
+    when no source's month or year ends before it (FHIR 2020-12-10 beside an LLM "2020").
   - An undated treatment mention is a restatement, ignored, when a dated record of the same
     treatment starts on or before its note date (`restated_bool`). An undated progression,
     recurrence or second malignancy is a restatement when its note is dated on or after the
