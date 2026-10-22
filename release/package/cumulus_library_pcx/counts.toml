@@ -4,7 +4,6 @@ type = "build:serial"
 files = [
     "sql/generated/pcx__counts.workflow",
 ]
-skip_by_default = true
 
 [[actions]]
 label = "Shared counts only"
@@ -12,4 +11,3 @@ type = "export:counts"
 tables = [
     "sql/generated/pcx__counts.workflow",
 ]
-skip_by_default = true

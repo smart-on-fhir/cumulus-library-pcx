@@ -2,6 +2,8 @@
 label = "eligible"
 type = "build:serial"
 files = [
+    "sql/custom/pcx__llm_note_date.sql",
+    "sql/custom/pcx__exposure_record.sql",
     "sql/custom/eligible_dx.sql",
     "sql/custom/eligible_surgery.sql",
     "sql/custom/eligible_rx.sql",

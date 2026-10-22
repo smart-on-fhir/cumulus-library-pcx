@@ -4,9 +4,21 @@
 --  OS (README section 3): origin t0_day, event = death, event day = death_day,
 --  censor at last_known_alive_day. A deceased flag without a death day gives
 --  os_event_bool TRUE and os_days NULL, never a substituted date.
---  EFS (README section 5, reach goal): event = first_event_day. Censoring uses
---  last_known_alive_day as a PROVISIONAL stand-in until dated event-free
---  follow-up is adjudicated, so efs_censor_source says so on every row.
+--  EFS (README section 5, reach goal): event = event_documented_bool, which
+--  includes events without a usable date. efs_censor_source says how the row ends:
+--    first_event                   dated first event, efs_end_day = first_event_day
+--    event_timing_uncertain        an undated progression, recurrence or second
+--                                  malignancy that may precede the dated event (not a
+--                                  restatement, see pcx__outcome_first_event). Event
+--                                  TRUE, interval NULL until it is reconciled,
+--                                  first_event_day kept as evidence.
+--    event_undated                 the only event is a death without a date.
+--                                  Event TRUE, interval NULL, the same rule as OS.
+--    last_known_alive_provisional  no documented event. Censoring uses
+--                                  last_known_alive_day as a PROVISIONAL stand-in
+--                                  until dated event-free follow-up is adjudicated.
+--  A month or year date is used at the middle of its period for durations:
+--  os_end_day_imputed_bool / efs_end_day_imputed_bool say when the end day is.
 --  =====================================================================
 CREATE  TABLE   pcx__outcome AS
 SELECT  elig.subject_ref,
@@ -27,25 +39,42 @@ SELECT  elig.subject_ref,
             WHEN vital.deceased_bool    THEN DATE_DIFF('day', elig.t0_day, vital.death_day)
             ELSE                             DATE_DIFF('day', elig.t0_day, vital.last_known_alive_day)
         END                                                                 AS os_days,
+        CASE
+            WHEN vital.deceased_bool    THEN vital.death_day_imputed_bool
+            ELSE                             vital.last_known_alive_day_imputed_bool
+        END                                                                 AS os_end_day_imputed_bool,
         -- event-free survival, provisional
-        event.any_event_bool                                                AS efs_event_bool,
+        event.event_documented_bool                                         AS efs_event_bool,
         event.first_event_day,
         event.first_event_type,
         CASE
-            WHEN event.any_event_bool   THEN event.first_event_day
-            ELSE                             vital.last_known_alive_day
+            WHEN event.event_timing_uncertain_bool  THEN NULL
+            WHEN event.dated_event_bool             THEN event.first_event_day
+            WHEN event.death_undated_bool           THEN NULL
+            ELSE                                         vital.last_known_alive_day
         END                                                                 AS efs_end_day,
         CASE
-            WHEN event.any_event_bool   THEN DATE_DIFF('day', elig.t0_day, event.first_event_day)
-            ELSE                             DATE_DIFF('day', elig.t0_day, vital.last_known_alive_day)
+            WHEN event.event_timing_uncertain_bool  THEN NULL
+            WHEN event.dated_event_bool             THEN DATE_DIFF('day', elig.t0_day, event.first_event_day)
+            WHEN event.death_undated_bool           THEN NULL
+            ELSE                                         DATE_DIFF('day', elig.t0_day, vital.last_known_alive_day)
         END                                                                 AS efs_days,
         CASE
-            WHEN event.any_event_bool   THEN 'first_event'
-            ELSE                             'last_known_alive_provisional'
+            WHEN event.event_timing_uncertain_bool  THEN NULL
+            WHEN event.dated_event_bool             THEN event.first_event_day_imputed_bool
+            WHEN event.death_undated_bool           THEN NULL
+            ELSE                                         vital.last_known_alive_day_imputed_bool
+        END                                                                 AS efs_end_day_imputed_bool,
+        CASE
+            WHEN event.event_timing_uncertain_bool  THEN 'event_timing_uncertain'
+            WHEN event.dated_event_bool             THEN 'first_event'
+            WHEN event.death_undated_bool           THEN 'event_undated'
+            ELSE                                         'last_known_alive_provisional'
         END                                                                 AS efs_censor_source,
         -- exposures as initial therapy
-        exposure.methotrexate_prior_to_first_event_bool,
-        exposure.radiation_prior_to_first_event_bool,
+        exposure.had_initial_methotrexate_bool,
+        exposure.had_initial_chemo_bool,
+        exposure.had_initial_radiation_bool,
         exposure.initial_therapy_sequence,
         exposure.protocol_names,
         exposure.methotrexate_first_day,

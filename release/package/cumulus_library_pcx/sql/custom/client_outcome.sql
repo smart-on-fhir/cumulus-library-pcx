@@ -84,6 +84,8 @@ UNION ALL
 -- ------------------------------------------------------------------------
 -- pcx__outcome_first_event (first EFS-type event)
 --   value_text = event type(s) on that day, value_number = days from t0
+--   dated events only. A documented event without a usable date shows in
+--   the event_free_survival row (efs_event_bool TRUE, efs_days NULL)
 -- ------------------------------------------------------------------------
 SELECT  subject_ref,
         'first_event'                       AS variable,
@@ -92,7 +94,7 @@ SELECT  subject_ref,
         first_event_type                    AS value_text,
         CAST(days_t0_to_first_event AS DOUBLE)
                                             AS value_number,
-        any_event_bool                      AS value_boolean,
+        dated_event_bool                    AS value_boolean,
         CAST(NULL AS BIGINT)                AS episode_number,
         'pcx__outcome_first_event'          AS source_table
 FROM    pcx__outcome_first_event
@@ -134,7 +136,9 @@ WHERE   second_malignancy_first_day IS NOT NULL
 -- A date outside [1980-01-01, today] is not a real observation - it is a
 -- placeholder, a typo, or a mis-parsed partial date - so it is reported as
 -- unknown rather than passed to downstream survival arithmetic. Rows are
--- never dropped, only their dates are cleared.
+-- never dropped, only their dates are cleared. The outcome stage already
+-- applies the same window to its inputs, so this is a backstop. When it does
+-- clear a date, value_number (the duration computed from it) is cleared too.
 -- ------------------------------------------------------------------------
 SELECT  events.subject_ref,
         events.variable,
@@ -149,7 +153,11 @@ SELECT  events.subject_ref,
             ELSE NULL
         END                                 AS outcome_end_date,
         events.value_text,
-        events.value_number,
+        CASE
+            WHEN events.outcome_date     NOT BETWEEN DATE '1980-01-01' AND CURRENT_DATE THEN NULL
+            WHEN events.outcome_end_date NOT BETWEEN DATE '1980-01-01' AND CURRENT_DATE THEN NULL
+            ELSE events.value_number
+        END                                 AS value_number,
         events.value_boolean,
         events.episode_number,
         events.source_table

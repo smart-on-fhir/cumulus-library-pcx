@@ -6,13 +6,16 @@
 -- LLM chart-review task that has a wide table, and the derived anchors and
 -- outcomes. Same 20-column contract as the IBD client timeline so downstream
 -- tooling is shared. therapy_line_number is always NULL in PCX, rx_class
--- carries METHOTREXATE / CHEMOTHERAPY for medication rows.
+-- carries METHOTREXATE / CHEMOTHERAPY for medication rows (NULL for the LLM
+-- supportive markers LEUCOVORIN, MESNA and DEXRAZOXANE).
 --
 -- Dates: coded rows use the resource date, else the encounter start. LLM rows
--- use the extracted date when the model gave one (date_type = extracted, with
--- its precision), else the note author date from the shared spine
--- (date_type = documented). Extracted dates are hard CAST to DATE so a
--- malformed value fails the build instead of vanishing.
+-- use the extracted date when the model gave one that can be understood
+-- (date_type = extracted, with its precision), else the note author date from
+-- the shared spine (date_type = documented). The LLM wide tables parse each
+-- date into <name>_day and <name>_day_precision (sql/template/date_macros.sql.jinja),
+-- a coarse date being the first day of its month or year. A date that cannot be
+-- understood is NULL there and listed in pcx__warn_llm_date_invalid.
 -- Document routing tasks (document_type, document_topic) are not events.
 -- ============================================================================
 CREATE TABLE pcx__client_timeline AS
@@ -173,7 +176,7 @@ WHERE   src.subtype IS NOT NULL
 UNION ALL
 
 -- ========================================================================
--- SECTION: LLM CHART REVIEW (note dates from pcx__sample_casedef_author)
+-- SECTION: LLM CHART REVIEW (note dates from pcx__llm_note_date, every selected note)
 -- ========================================================================
 
 -- ----------------------------------------------------------------------
@@ -183,8 +186,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_disease_subtype'                                        AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.disease_subtype                                          AS value_text,
@@ -201,7 +204,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.disease_subtype <> 'NONE_OF_THE_ABOVE'
@@ -215,8 +218,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_medulloblastoma_histology'                              AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.medulloblastoma_histology                                AS value_text,
@@ -233,7 +236,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.medulloblastoma_histology <> 'NONE_OF_THE_ABOVE'
@@ -247,8 +250,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_chang_m_stage'                                          AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.chang_m_stage                                            AS value_text,
@@ -265,7 +268,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.chang_m_stage <> 'NONE_OF_THE_ABOVE'
@@ -279,8 +282,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_age_at_diagnosis_months'                                AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
@@ -297,7 +300,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.age_at_diagnosis_months IS NOT NULL
@@ -311,10 +314,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_diagnosis_date'                                         AS variable,
-        CASE WHEN src.diagnosis_date IS NOT NULL THEN CAST(src.diagnosis_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.diagnosis_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.diagnosis_date_precision                                 AS date_precision,
+        CASE WHEN src.diagnosis_day IS NOT NULL THEN src.diagnosis_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.diagnosis_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.diagnosis_day_precision                                  AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         TRUE                                                         AS value_boolean,
@@ -329,10 +332,10 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.diagnosis_date IS NOT NULL
+WHERE   src.diagnosis_day IS NOT NULL
 
 UNION ALL
 
@@ -343,10 +346,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_diagnosis_date_gold'                                    AS variable,
-        CASE WHEN src.diagnosis_date_gold IS NOT NULL THEN CAST(src.diagnosis_date_gold AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.diagnosis_date_gold IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.diagnosis_date_gold_precision                            AS date_precision,
+        CASE WHEN src.diagnosis_gold_day IS NOT NULL THEN src.diagnosis_gold_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.diagnosis_gold_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.diagnosis_gold_day_precision                             AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         TRUE                                                         AS value_boolean,
@@ -361,10 +364,10 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_diagnosis_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.diagnosis_date_gold IS NOT NULL
+WHERE   src.diagnosis_gold_day IS NOT NULL
 
 UNION ALL
 
@@ -375,10 +378,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_surgery'                                                AS variable,
-        CASE WHEN src.surgery_date IS NOT NULL THEN CAST(src.surgery_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.surgery_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.surgery_date_precision                                   AS date_precision,
+        CASE WHEN src.surgery_day IS NOT NULL THEN src.surgery_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.surgery_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.surgery_day_precision                                    AS date_precision,
         src.surgery_type                                             AS value_text,
         src.age_at_surgery_months                                    AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -393,7 +396,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_surgery_wide                AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -406,10 +409,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_surgery_residual_area'                                  AS variable,
-        CASE WHEN src.residual_assessment_date IS NOT NULL THEN CAST(src.residual_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.residual_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.residual_assessment_date_precision                       AS date_precision,
+        CASE WHEN src.residual_assessment_day IS NOT NULL THEN src.residual_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.residual_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.residual_assessment_day_precision                        AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
         src.residual_tumor_area_cm2                                  AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -424,7 +427,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_surgery_wide                AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.residual_tumor_area_cm2 IS NOT NULL
@@ -438,10 +441,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_radiation'                                              AS variable,
-        CASE WHEN src.radiation_start_date IS NOT NULL THEN CAST(src.radiation_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.radiation_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.radiation_start_date_precision                           AS date_precision,
+        CASE WHEN src.radiation_start_day IS NOT NULL THEN src.radiation_start_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.radiation_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.radiation_start_day_precision                            AS date_precision,
         src.radiation_field                                          AS value_text,
         src.total_dose_to_primary_site                               AS value_number,
         (src.delivery_status = 'ADMINISTERED')                       AS value_boolean,
@@ -456,7 +459,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_radiation_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -469,10 +472,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_radiation_craniospinal_dose'                            AS variable,
-        CASE WHEN src.radiation_start_date IS NOT NULL THEN CAST(src.radiation_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.radiation_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.radiation_start_date_precision                           AS date_precision,
+        CASE WHEN src.radiation_start_day IS NOT NULL THEN src.radiation_start_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.radiation_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.radiation_start_day_precision                            AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
         src.craniospinal_dose                                        AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -487,7 +490,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_radiation_wide              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.craniospinal_dose IS NOT NULL
@@ -501,10 +504,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_event'                                                  AS variable,
-        CASE WHEN src.event_date IS NOT NULL THEN CAST(src.event_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.event_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.event_date_precision                                     AS date_precision,
+        CASE WHEN src.event_day IS NOT NULL THEN src.event_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.event_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.event_day_precision                                      AS date_precision,
         src.event_type                                               AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -519,7 +522,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_event_wide                  AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.event_type <> 'NONE_OF_THE_ABOVE'
@@ -533,10 +536,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_death'                                                  AS variable,
-        CASE WHEN src.death_date IS NOT NULL THEN CAST(src.death_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.death_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.death_date_precision                                     AS date_precision,
+        CASE WHEN src.death_day IS NOT NULL THEN src.death_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.death_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.death_day_precision                                      AS date_precision,
         src.vital_status                                             AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         TRUE                                                         AS value_boolean,
@@ -551,7 +554,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_survival_timeline_wide                AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.vital_status = 'DECEASED'
@@ -565,10 +568,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_last_known_alive'                                       AS variable,
-        CASE WHEN src.last_known_alive_date IS NOT NULL THEN CAST(src.last_known_alive_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.last_known_alive_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.last_known_alive_date_precision                          AS date_precision,
+        CASE WHEN src.last_known_alive_day IS NOT NULL THEN src.last_known_alive_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.last_known_alive_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.last_known_alive_day_precision                           AS date_precision,
         src.vital_status                                             AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         TRUE                                                         AS value_boolean,
@@ -583,10 +586,10 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_survival_timeline_wide                AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   src.last_known_alive_date IS NOT NULL
+WHERE   src.last_known_alive_day IS NOT NULL
 
 UNION ALL
 
@@ -597,10 +600,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_timeline_anchor'                                        AS variable,
-        CASE WHEN src.anchor_date IS NOT NULL THEN CAST(src.anchor_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.anchor_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.anchor_date_precision                                    AS date_precision,
+        CASE WHEN src.anchor_day IS NOT NULL THEN src.anchor_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.anchor_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.anchor_day_precision                                     AS date_precision,
         src.anchor                                                   AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -615,7 +618,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_survival_timeline_anchor              AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -628,10 +631,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_event_free_follow_up'                                   AS variable,
-        CASE WHEN src.assessment_date IS NOT NULL THEN CAST(src.assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.assessment_date_precision                                AS date_precision,
+        CASE WHEN src.assessment_day IS NOT NULL THEN src.assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.assessment_day_precision                                 AS date_precision,
         CAST(NULL AS VARCHAR)                                        AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         src.event_free                                               AS value_boolean,
@@ -646,7 +649,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_survival_timeline_follow_up           AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -659,10 +662,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_therapy_agent'                                          AS variable,
-        CASE WHEN src.therapy_start_date IS NOT NULL THEN CAST(src.therapy_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.therapy_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.therapy_start_date_precision                             AS date_precision,
+        CASE WHEN src.therapy_start_day IS NOT NULL THEN src.therapy_start_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.therapy_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.therapy_start_day_precision                              AS date_precision,
         src.agent_name                                               AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         (src.delivery_status = 'ADMINISTERED')                       AS value_boolean,
@@ -675,9 +678,12 @@ SELECT  DISTINCT
         'evidence'                                                   AS assertion_level,
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CASE WHEN LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%' THEN 'METHOTREXATE' WHEN src.agent_name IS NOT NULL THEN 'CHEMOTHERAPY' END AS rx_class
+        CASE
+            WHEN src.agent_name = 'METHOTREXATE'                                        THEN 'METHOTREXATE'
+            WHEN src.agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')           THEN 'CHEMOTHERAPY'
+        END                                                          AS rx_class
 FROM    pcx__llm_systemic_therapy_agent      AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -690,11 +696,11 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_therapy_regimen'                                        AS variable,
-        CASE WHEN src.regimen_start_date IS NOT NULL THEN CAST(src.regimen_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.regimen_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.regimen_start_date_precision                             AS date_precision,
-        src.protocol_name_verbatim                                   AS value_text,
+        CASE WHEN src.regimen_start_day IS NOT NULL THEN src.regimen_start_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.regimen_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.regimen_start_day_precision                              AS date_precision,
+        src.protocol_name                                            AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
@@ -708,7 +714,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_systemic_therapy_regimen    AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -716,30 +722,40 @@ UNION ALL
 
 -- ----------------------------------------------------------------------
 -- pcx__llm_systemic_therapy_administration
+-- The drug comes from the dose's agent in the same extraction output, as code
+-- with rx_class like the agent rows. Two drugs given alike are two rows.
 -- ----------------------------------------------------------------------
 SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_therapy_administration'                                 AS variable,
-        CASE WHEN src.administration_date IS NOT NULL THEN CAST(src.administration_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.administration_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.administration_date_precision                            AS date_precision,
+        CASE WHEN src.administration_day IS NOT NULL THEN src.administration_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.administration_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.administration_day_precision                             AS date_precision,
         src.route                                                    AS value_text,
         src.dose_amount                                              AS value_number,
         src.high_dose_methotrexate_explicit_bool                     AS value_boolean,
         src.dose_unit                                                AS unit,
         src.phase                                                    AS interpretation,
         src.delivery_status                                          AS status,
-        CAST(NULL AS VARCHAR)                                        AS code,
-        CAST(NULL AS VARCHAR)                                        AS code_system,
+        agent.agent_name                                             AS code,
+        'pcx_llm_rx_agent'                                           AS code_system,
         'LLM'                                                        AS source_type,
         'evidence'                                                   AS assertion_level,
         src.note_ref                                                 AS source_ref,
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
-        CAST(NULL AS VARCHAR)                                        AS rx_class
+        CASE
+            WHEN agent.agent_name = 'METHOTREXATE'                                      THEN 'METHOTREXATE'
+            WHEN agent.agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')         THEN 'CHEMOTHERAPY'
+        END                                                          AS rx_class
 FROM    pcx__llm_systemic_therapy_administration AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_systemic_therapy_agent      AS agent
+  ON    agent.note_ref      = src.note_ref
+ AND    agent.generated_on  = src.generated_on
+ AND    agent.regimen_index = src.regimen_index
+ AND    agent.agent_index   = src.agent_index
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -752,12 +768,12 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_therapy_cycle'                                          AS variable,
-        CASE WHEN src.cycle_start_date IS NOT NULL THEN CAST(src.cycle_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.cycle_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.cycle_start_date_precision                               AS date_precision,
-        src.cycle_name                                               AS value_text,
-        CAST(NULL AS DOUBLE)                                         AS value_number,
+        CASE WHEN src.cycle_start_day IS NOT NULL THEN src.cycle_start_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.cycle_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.cycle_start_day_precision                                AS date_precision,
+        src.protocol_name                                            AS value_text,
+        CAST(src.cycle_num AS DOUBLE)                                AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
         CAST(NULL AS VARCHAR)                                        AS unit,
         src.phase                                                    AS interpretation,
@@ -770,7 +786,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_systemic_therapy_cycle      AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -783,10 +799,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_stem_cell_infusion'                                     AS variable,
-        CASE WHEN src.infusion_date IS NOT NULL THEN CAST(src.infusion_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.infusion_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.infusion_date_precision                                  AS date_precision,
+        CASE WHEN src.infusion_day IS NOT NULL THEN src.infusion_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.infusion_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.infusion_day_precision                                   AS date_precision,
         src.cell_source                                              AS value_text,
         src.cd34_cells_per_kg                                        AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -801,7 +817,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_systemic_therapy_stem_cell_infusion AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -814,10 +830,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_response'                                               AS variable,
-        CASE WHEN src.assessment_date IS NOT NULL THEN CAST(src.assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.assessment_date_precision                                AS date_precision,
+        CASE WHEN src.assessment_day IS NOT NULL THEN src.assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.assessment_day_precision                                 AS date_precision,
         src.response                                                 AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         src.radiologically_evaluable                                 AS value_boolean,
@@ -832,7 +848,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_response_wide               AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.response <> 'NONE_OF_THE_ABOVE' OR src.radiologically_evaluable IS NOT NULL OR src.cytologically_evaluable IS NOT NULL
@@ -846,10 +862,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_csf_cytology'                                           AS variable,
-        CASE WHEN src.csf_collection_date IS NOT NULL THEN CAST(src.csf_collection_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.csf_collection_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.csf_collection_date_precision                            AS date_precision,
+        CASE WHEN src.csf_collection_day IS NOT NULL THEN src.csf_collection_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.csf_collection_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.csf_collection_day_precision                             AS date_precision,
         src.csf_cytology                                             AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -864,7 +880,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_metastasis_wide             AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.csf_cytology <> 'NONE_OF_THE_ABOVE'
@@ -878,10 +894,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_spine_mri'                                              AS variable,
-        CASE WHEN src.spine_mri_date IS NOT NULL THEN CAST(src.spine_mri_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.spine_mri_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.spine_mri_date_precision                                 AS date_precision,
+        CASE WHEN src.spine_mri_day IS NOT NULL THEN src.spine_mri_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.spine_mri_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.spine_mri_day_precision                                  AS date_precision,
         src.spine_mri_findings                                       AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -896,7 +912,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_metastasis_wide             AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.spine_mri_findings <> 'NONE_OF_THE_ABOVE'
@@ -910,10 +926,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_brain_mri'                                              AS variable,
-        CASE WHEN src.brain_mri_date IS NOT NULL THEN CAST(src.brain_mri_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.brain_mri_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.brain_mri_date_precision                                 AS date_precision,
+        CASE WHEN src.brain_mri_day IS NOT NULL THEN src.brain_mri_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.brain_mri_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.brain_mri_day_precision                                  AS date_precision,
         src.brain_mri_findings                                       AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -928,7 +944,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_metastasis_wide             AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.brain_mri_findings <> 'NONE_OF_THE_ABOVE'
@@ -942,8 +958,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_extraneural_metastasis'                                 AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.extraneural_metastasis                                   AS value_text,
@@ -960,7 +976,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_metastasis_wide             AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.extraneural_metastasis <> 'NONE_OF_THE_ABOVE'
@@ -974,10 +990,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_metastatic_site'                                        AS variable,
-        CASE WHEN src.site_date IS NOT NULL THEN CAST(src.site_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.site_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.site_date_precision                                      AS date_precision,
+        CASE WHEN src.site_day IS NOT NULL THEN src.site_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.site_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.site_day_precision                                       AS date_precision,
         src.site                                                     AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -992,7 +1008,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_metastasis_site             AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.site <> 'NONE_OF_THE_ABOVE'
@@ -1006,10 +1022,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_molecular_group'                                        AS variable,
-        CASE WHEN src.report_date IS NOT NULL THEN CAST(src.report_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.report_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.report_date_precision                                    AS date_precision,
+        CASE WHEN src.report_day IS NOT NULL THEN src.report_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.report_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.report_day_precision                                     AS date_precision,
         src.molecular_group                                          AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -1024,7 +1040,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_molecular_report            AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.molecular_group <> 'NONE_OF_THE_ABOVE'
@@ -1038,10 +1054,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_methotrexate_any_dose'                                  AS variable,
-        CASE WHEN src.therapy_start_date IS NOT NULL THEN CAST(src.therapy_start_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        CASE WHEN src.assessed_through_date IS NOT NULL THEN CAST(src.assessed_through_date AS DATE) ELSE note_day.note_author_date END AS evidence_date,
-        CASE WHEN src.therapy_start_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.therapy_start_date_precision                             AS date_precision,
+        CASE WHEN src.therapy_start_day IS NOT NULL THEN src.therapy_start_day ELSE note_day.note_date END AS event_date,
+        CASE WHEN src.assessed_through_day IS NOT NULL THEN src.assessed_through_day ELSE note_day.note_date END AS evidence_date,
+        CASE WHEN src.therapy_start_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.therapy_start_day_precision                              AS date_precision,
         src.delivery_status                                          AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         (src.delivery_status = 'ADMINISTERED')                       AS value_boolean,
@@ -1056,10 +1072,10 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         'METHOTREXATE'                                               AS rx_class
 FROM    pcx__llm_systemic_therapy_agent      AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
-WHERE   (LOWER(src.agent_name) LIKE '%methotrexate%' OR LOWER(src.agent_name) LIKE '%mtx%')
+WHERE   src.agent_name = 'METHOTREXATE'
 AND     src.delivery_status IN ('ADMINISTERED', 'EXPLICITLY_NOT_RECEIVED')
 
 UNION ALL
@@ -1071,10 +1087,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_age_under_36_months_at_definitive_surgery'        AS variable,
-        CASE WHEN src.age_under_36_months_at_definitive_surgery_assessment_date IS NOT NULL THEN CAST(src.age_under_36_months_at_definitive_surgery_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.age_under_36_months_at_definitive_surgery_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.age_under_36_months_at_definitive_surgery_assessment_date_precision AS date_precision,
+        CASE WHEN src.age_under_36_months_at_definitive_surgery_assessment_day IS NOT NULL THEN src.age_under_36_months_at_definitive_surgery_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.age_under_36_months_at_definitive_surgery_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.age_under_36_months_at_definitive_surgery_assessment_day_precision  AS date_precision,
         src.age_under_36_months_at_definitive_surgery_status         AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.age_under_36_months_at_definitive_surgery_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1089,7 +1105,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.age_under_36_months_at_definitive_surgery_status <> 'NONE_OF_THE_ABOVE'
@@ -1103,10 +1119,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_newly_diagnosed_embryonal_tumor'                  AS variable,
-        CASE WHEN src.newly_diagnosed_embryonal_tumor_assessment_date IS NOT NULL THEN CAST(src.newly_diagnosed_embryonal_tumor_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.newly_diagnosed_embryonal_tumor_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.newly_diagnosed_embryonal_tumor_assessment_date_precision AS date_precision,
+        CASE WHEN src.newly_diagnosed_embryonal_tumor_assessment_day IS NOT NULL THEN src.newly_diagnosed_embryonal_tumor_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.newly_diagnosed_embryonal_tumor_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.newly_diagnosed_embryonal_tumor_assessment_day_precision  AS date_precision,
         src.newly_diagnosed_embryonal_tumor_status                   AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.newly_diagnosed_embryonal_tumor_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1121,7 +1137,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.newly_diagnosed_embryonal_tumor_status <> 'NONE_OF_THE_ABOVE'
@@ -1135,10 +1151,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_high_risk_disease'                                AS variable,
-        CASE WHEN src.high_risk_disease_assessment_date IS NOT NULL THEN CAST(src.high_risk_disease_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.high_risk_disease_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.high_risk_disease_assessment_date_precision              AS date_precision,
+        CASE WHEN src.high_risk_disease_assessment_day IS NOT NULL THEN src.high_risk_disease_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.high_risk_disease_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.high_risk_disease_assessment_day_precision               AS date_precision,
         src.high_risk_disease_status                                 AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.high_risk_disease_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1153,7 +1169,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.high_risk_disease_status <> 'NONE_OF_THE_ABOVE'
@@ -1167,10 +1183,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_atrt_excluded'                                    AS variable,
-        CASE WHEN src.atrt_excluded_assessment_date IS NOT NULL THEN CAST(src.atrt_excluded_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.atrt_excluded_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.atrt_excluded_assessment_date_precision                  AS date_precision,
+        CASE WHEN src.atrt_excluded_assessment_day IS NOT NULL THEN src.atrt_excluded_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.atrt_excluded_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.atrt_excluded_assessment_day_precision                   AS date_precision,
         src.atrt_excluded_status                                     AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.atrt_excluded_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1185,7 +1201,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.atrt_excluded_status <> 'NONE_OF_THE_ABOVE'
@@ -1199,10 +1215,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_no_prior_chemotherapy'                            AS variable,
-        CASE WHEN src.no_prior_chemotherapy_assessment_date IS NOT NULL THEN CAST(src.no_prior_chemotherapy_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.no_prior_chemotherapy_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.no_prior_chemotherapy_assessment_date_precision          AS date_precision,
+        CASE WHEN src.no_prior_chemotherapy_assessment_day IS NOT NULL THEN src.no_prior_chemotherapy_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.no_prior_chemotherapy_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.no_prior_chemotherapy_assessment_day_precision           AS date_precision,
         src.no_prior_chemotherapy_status                             AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.no_prior_chemotherapy_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1217,7 +1233,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.no_prior_chemotherapy_status <> 'NONE_OF_THE_ABOVE'
@@ -1231,10 +1247,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_no_prior_radiation'                               AS variable,
-        CASE WHEN src.no_prior_radiation_assessment_date IS NOT NULL THEN CAST(src.no_prior_radiation_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.no_prior_radiation_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.no_prior_radiation_assessment_date_precision             AS date_precision,
+        CASE WHEN src.no_prior_radiation_assessment_day IS NOT NULL THEN src.no_prior_radiation_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.no_prior_radiation_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.no_prior_radiation_assessment_day_precision              AS date_precision,
         src.no_prior_radiation_status                                AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.no_prior_radiation_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1249,7 +1265,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.no_prior_radiation_status <> 'NONE_OF_THE_ABOVE'
@@ -1263,10 +1279,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_adequate_renal_function'                          AS variable,
-        CASE WHEN src.adequate_renal_function_assessment_date IS NOT NULL THEN CAST(src.adequate_renal_function_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.adequate_renal_function_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.adequate_renal_function_assessment_date_precision        AS date_precision,
+        CASE WHEN src.adequate_renal_function_assessment_day IS NOT NULL THEN src.adequate_renal_function_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.adequate_renal_function_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.adequate_renal_function_assessment_day_precision         AS date_precision,
         src.adequate_renal_function_status                           AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.adequate_renal_function_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1281,7 +1297,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_renal_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1295,10 +1311,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_adequate_hepatic_function'                        AS variable,
-        CASE WHEN src.adequate_hepatic_function_assessment_date IS NOT NULL THEN CAST(src.adequate_hepatic_function_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.adequate_hepatic_function_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.adequate_hepatic_function_assessment_date_precision      AS date_precision,
+        CASE WHEN src.adequate_hepatic_function_assessment_day IS NOT NULL THEN src.adequate_hepatic_function_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.adequate_hepatic_function_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.adequate_hepatic_function_assessment_day_precision       AS date_precision,
         src.adequate_hepatic_function_status                         AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.adequate_hepatic_function_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1313,7 +1329,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_hepatic_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1327,10 +1343,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_adequate_cardiac_function'                        AS variable,
-        CASE WHEN src.adequate_cardiac_function_assessment_date IS NOT NULL THEN CAST(src.adequate_cardiac_function_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.adequate_cardiac_function_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.adequate_cardiac_function_assessment_date_precision      AS date_precision,
+        CASE WHEN src.adequate_cardiac_function_assessment_day IS NOT NULL THEN src.adequate_cardiac_function_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.adequate_cardiac_function_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.adequate_cardiac_function_assessment_day_precision       AS date_precision,
         src.adequate_cardiac_function_status                         AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.adequate_cardiac_function_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1345,7 +1361,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_cardiac_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1359,10 +1375,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_adequate_pulmonary_function'                      AS variable,
-        CASE WHEN src.adequate_pulmonary_function_assessment_date IS NOT NULL THEN CAST(src.adequate_pulmonary_function_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.adequate_pulmonary_function_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.adequate_pulmonary_function_assessment_date_precision    AS date_precision,
+        CASE WHEN src.adequate_pulmonary_function_assessment_day IS NOT NULL THEN src.adequate_pulmonary_function_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.adequate_pulmonary_function_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.adequate_pulmonary_function_assessment_day_precision     AS date_precision,
         src.adequate_pulmonary_function_status                       AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.adequate_pulmonary_function_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1377,7 +1393,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_pulmonary_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1391,10 +1407,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_trial_adequate_marrow_function'                         AS variable,
-        CASE WHEN src.adequate_marrow_function_assessment_date IS NOT NULL THEN CAST(src.adequate_marrow_function_assessment_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.adequate_marrow_function_assessment_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.adequate_marrow_function_assessment_date_precision       AS date_precision,
+        CASE WHEN src.adequate_marrow_function_assessment_day IS NOT NULL THEN src.adequate_marrow_function_assessment_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.adequate_marrow_function_assessment_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.adequate_marrow_function_assessment_day_precision        AS date_precision,
         src.adequate_marrow_function_status                          AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CASE src.adequate_marrow_function_status WHEN 'MET' THEN TRUE WHEN 'NOT_MET' THEN FALSE END AS value_boolean,
@@ -1409,7 +1425,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_registry_eligibility_wide   AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.adequate_marrow_function_status <> 'NONE_OF_THE_ABOVE'
@@ -1423,10 +1439,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_transfer_in'                                            AS variable,
-        CASE WHEN src.transfer_in_date IS NOT NULL THEN CAST(src.transfer_in_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.transfer_in_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.transfer_in_date_precision                               AS date_precision,
+        CASE WHEN src.transfer_in_day IS NOT NULL THEN src.transfer_in_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.transfer_in_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.transfer_in_day_precision                                AS date_precision,
         src.transfer_in_timing                                       AS value_text,
         CAST(NULL AS DOUBLE)                                         AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -1441,7 +1457,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_transition_of_care_wide     AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.transfer_in_timing <> 'NONE_OF_THE_ABOVE'
@@ -1455,8 +1471,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_diagnosis_setting'                                      AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.diagnosis_setting                                        AS value_text,
@@ -1473,7 +1489,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_transition_of_care_wide     AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.diagnosis_setting <> 'NONE_OF_THE_ABOVE' OR src.imaging_detected_externally IS NOT NULL
@@ -1487,8 +1503,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_surgery_setting'                                        AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.surgery_setting                                          AS value_text,
@@ -1505,7 +1521,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_transition_of_care_wide     AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.surgery_setting <> 'NONE_OF_THE_ABOVE'
@@ -1519,8 +1535,8 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_prior_therapy_at_entry'                                 AS variable,
-        note_day.note_author_date                                    AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
+        note_day.note_date                                    AS event_date,
+        note_day.note_date                                    AS evidence_date,
         'documented'                                                 AS date_type,
         CAST(NULL AS VARCHAR)                                        AS date_precision,
         src.prior_therapy_exposure                                   AS value_text,
@@ -1537,7 +1553,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_transition_of_care_wide     AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 WHERE   src.prior_therapy_exposure <> 'NONE_OF_THE_ABOVE'
@@ -1551,10 +1567,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_laboratory_result'                                      AS variable,
-        CASE WHEN src.collection_date IS NOT NULL THEN CAST(src.collection_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.collection_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.collection_date_precision                                AS date_precision,
+        CASE WHEN src.collection_day IS NOT NULL THEN src.collection_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.collection_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.collection_day_precision                                 AS date_precision,
         CAST(src.test AS VARCHAR)                                    AS value_text,
         src.value_numeric                                            AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -1569,7 +1585,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_laboratory_result           AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -1582,10 +1598,10 @@ SELECT  DISTINCT
         src.subject_ref                                              AS subject_ref,
         src.encounter_ref                                            AS encounter_ref,
         'llm_toxicity'                                               AS variable,
-        CASE WHEN src.event_date IS NOT NULL THEN CAST(src.event_date AS DATE) ELSE note_day.note_author_date END AS event_date,
-        note_day.note_author_date                                    AS evidence_date,
-        CASE WHEN src.event_date IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
-        src.event_date_precision                                     AS date_precision,
+        CASE WHEN src.event_day IS NOT NULL THEN src.event_day ELSE note_day.note_date END AS event_date,
+        note_day.note_date                                    AS evidence_date,
+        CASE WHEN src.event_day IS NOT NULL THEN 'extracted' ELSE 'documented' END AS date_type,
+        src.event_day_precision                                      AS date_precision,
         src.toxicity                                                 AS value_text,
         CAST(src.grade AS DOUBLE)                                    AS value_number,
         CAST(NULL AS BOOLEAN)                                        AS value_boolean,
@@ -1600,7 +1616,7 @@ SELECT  DISTINCT
         CAST(NULL AS INTEGER)                                        AS therapy_line_number,
         CAST(NULL AS VARCHAR)                                        AS rx_class
 FROM    pcx__llm_laboratory_toxicity         AS src
-LEFT JOIN pcx__sample_casedef_author AS note_day
+LEFT JOIN pcx__llm_note_date AS note_day
   ON    src.subject_ref = note_day.subject_ref
  AND    src.note_ref    = note_day.note_ref
 
@@ -1761,7 +1777,10 @@ WHERE   src.last_known_alive_day IS NOT NULL
 -- before the fingerprint, keeps event_id consistent with the row it names, and
 -- lets pcx__client_timeline_latest and pcx__client_dictionary_coverage inherit
 -- the rule instead of restating it. Rows are never dropped, only their dates
--- are cleared.
+-- are cleared. LLM dates and the outcome inputs already get the same window
+-- upstream, so this is a backstop. A DERIVED row's value_number is computed
+-- from its date (age at t0, days from t0 to the first event), so clearing
+-- that date clears the number too. A measured value (a lab result) is kept.
 guarded AS (
     SELECT  events.subject_ref,
             events.encounter_ref,
@@ -1781,7 +1800,12 @@ guarded AS (
             events.date_type,
             events.date_precision,
             events.value_text,
-            events.value_number,
+            CASE
+                WHEN events.source_type = 'DERIVED'
+                 AND events.event_date NOT BETWEEN DATE '1980-01-01' AND CURRENT_DATE
+                THEN NULL
+                ELSE events.value_number
+            END                                                 AS value_number,
             events.value_boolean,
             events.unit,
             events.interpretation,

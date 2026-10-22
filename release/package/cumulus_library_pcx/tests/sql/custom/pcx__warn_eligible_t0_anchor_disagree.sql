@@ -3,12 +3,13 @@
 --
 -- pcx__cohort_casedef anchors days_since / casedef_period (pre, peri, post)
 -- on enc_period_start_day_min, the first casedef encounter of ANY subtype and
--- ANY tier. pcx__eligible_dx anchors t0_day on the first TIER 1
--- medulloblastoma encounter. When the two differ, note sampling temporality
--- and eligibility age are measured from different days.
+-- ANY tier. pcx__eligible_dx anchors t0_day on the LLM gold diagnosis day,
+-- else the first TIER 1 medulloblastoma encounter. When the two differ, note
+-- sampling temporality and eligibility age are measured from different days.
 --
---   t0_anchor_casedef_earlier   a tier 2/3 or ATRT encounter precedes t0_day
---   t0_anchor_casedef_later     should not happen, t0_day is itself a casedef encounter
+--   t0_anchor_casedef_earlier   a casedef encounter precedes t0_day
+--   t0_anchor_casedef_later     t0_day is an LLM gold diagnosis day before
+--                               the first casedef encounter
 -- ============================================================================
 CREATE TABLE pcx__warn_eligible_t0_anchor_disagree AS
 

@@ -1,9 +1,10 @@
 -- ============================================================================
 -- Warning: case-definition subject with no time zero.
 --
--- pcx__eligible_dx sets t0_day from the first TIER 1 medulloblastoma casedef
--- encounter. A subject with only tier 2 codes (C71.6 / 191.6 cerebellum) or
--- only LLM diagnosis evidence has a NULL t0_day, a NULL age band, and is
+-- pcx__eligible_dx sets t0_day from the LLM gold diagnosis day (day
+-- precision only), else the first TIER 1 medulloblastoma casedef encounter.
+-- A subject with only tier 2 codes (C71.6 / 191.6 cerebellum, CHOP roster)
+-- and no day-precision gold date has a NULL t0_day, a NULL age band, and is
 -- dropped from pcx__eligible_trial. When the LLM names medulloblastoma but no
 -- tier 1 code exists, the casedef valueset is the likely gap (ICD-O 9473/3,
 -- 9475/3 to 9478/3 are not in spreadsheet/casedef.csv).

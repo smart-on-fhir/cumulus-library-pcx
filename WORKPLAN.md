@@ -13,14 +13,15 @@ appear in EHR cohorts? The study builds a discovery cohort and a trial-like coho
 must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
 treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
-Validated 2026-10-09 on builder 0.5.6 and Cumulus Library 6.3.5: `skills check`,
-`starter check`, build, validate and the tests.
+Validated 2026-10-22 on builder 0.5.7 and Cumulus Library 6.3.5: build, validate and the
+tests (98 passed).
 
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
 dependency is Cumulus Library (`>=6.3.5,<6.4`), so neither the site nor the package needs
-cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). This release is
-**0.4.0**; **0.4.1** is planned for patch fixes after it.
+cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
+**0.5.0**: the new `counts_kaplan` stage, initial-therapy exposures, date ranges and
+systemic therapy v2. 0.4.3 on PyPI still has the old rules.
 
 ## Release 0.4.0
 
@@ -56,6 +57,12 @@ In order:
 - [ ] P1 · release · **Publish 0.4.0.** `pyproject.toml` says 0.4.0. Commit, build with the
   script, upload with the printed `twine upload` (Andy or @msa2984, straight to PyPI), tag
   `v0.4.0`. *Done when* 0.4.0 is on PyPI and tagged. Patch fixes after it go in 0.4.1.
+
+- [ ] P1 · release · **Publish 0.5.0.** `pyproject.toml` says 0.5.0. Run
+  `python release/make_chop_release.py`, then `cumulus-study build` to restore the BCH build,
+  upload with the printed `twine upload`, tag `v0.5.0`, and publish the GitHub release notes.
+  *Done when* 0.5.0 is on PyPI and tagged. At BCH, rerun systemic therapy v2 before the eligible
+  stage (Clinical notes).
 
 ## Open questions
 
@@ -285,6 +292,15 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-22 — version 0.5.0
+
+- `pyproject.toml` 0.5.0, a minor release: new `counts_kaplan` stage, and changed columns in
+  the eligible, outcome and client tables (initial-therapy flags, date ranges, systemic therapy
+  v2). `data_package_version` stays 2: the Kaplan-Meier cubes are new tables and the existing
+  count cubes are unchanged.
+- `requirements-tested.txt` header describes the 2026-10-22 run (builder 0.5.7, 98 passed).
+  Pins unchanged.
 
 ### 2026-10-22 — A month or year death date covers its whole period
 

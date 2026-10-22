@@ -37,6 +37,9 @@ Clinical document:
 # Version 1 (2026-09-10): initial PCX configuration (study-neutral CCDA-era types).
 # Version 2 (2026-09-10): PCX task-selector types replace the CCDA-era list.
 # Version 3 (2026-10-16): predisposition topic removed, patient topic renamed survival_timeline.
+# The NLP table holds one version, the folder it was last built over. BCH's is version 2
+# and is deliberately not rebuilt (a rebuild re-extracts every note and replaces it).
+# llm_document_topic_wide.sql.jinja reads version 1, 2 or 3.
 response_schema = "llm/schemas/pcx-document-topic-annotation.json"
 select_by_table = "pcx__sample_task"
 version = 3

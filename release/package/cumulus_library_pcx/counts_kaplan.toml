@@ -1,0 +1,33 @@
+[[actions]]
+label = "Kaplan-Meier count source"
+type = "build:serial"
+files = [
+    "sql/custom/pcx__kaplan_subject.sql",
+]
+skip_by_default = true
+
+[[actions]]
+label = "Kaplan-Meier counts"
+type = "build:serial"
+files = [
+    "counts_kaplan.workflow",
+]
+skip_by_default = true
+
+[[actions]]
+label = "Kaplan-Meier counts"
+type = "export:counts"
+tables = [
+    "pcx__cube_kaplan_os",
+    "pcx__cube_kaplan_efs",
+]
+skip_by_default = true
+
+[[actions]]
+label = "Study metadata"
+type = "export:meta"
+tables = [
+    "pcx__meta_date",
+    "pcx__meta_version",
+]
+skip_by_default = true

@@ -1,5 +1,32 @@
 {
   "$defs": {
+    "AdministrationRoute": {
+      "description": "Route of administration as documented.\nINTRAVENOUS: intravenous (IV).\nORAL: by mouth or feeding tube (PO, NG, G-tube).\nINTRATHECAL: intrathecal by lumbar puncture (IT).\nINTRAVENTRICULAR: intraventricular, including through an Ommaya reservoir.\nSUBCUTANEOUS: subcutaneous (SC, SQ).\nINTRAMUSCULAR: intramuscular (IM).\nNONE_OF_THE_ABOVE: another route, or route not documented.",
+      "enum": [
+        "INTRAVENOUS",
+        "ORAL",
+        "INTRATHECAL",
+        "INTRAVENTRICULAR",
+        "SUBCUTANEOUS",
+        "INTRAMUSCULAR",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "AdministrationRoute",
+      "type": "string"
+    },
+    "CycleCompletionStatus": {
+      "description": "Explicitly documented status of a treatment cycle; do not infer completion from dates alone.\nPLANNED: planned or scheduled, not yet started.\nSTARTED: started and ongoing.\nCOMPLETED: completed as planned.\nINTERRUPTED: held, delayed or paused, then resumed or with the outcome not stated.\nDISCONTINUED: stopped before completion and not resumed.\nNONE_OF_THE_ABOVE: status not documented.",
+      "enum": [
+        "PLANNED",
+        "STARTED",
+        "COMPLETED",
+        "INTERRUPTED",
+        "DISCONTINUED",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "CycleCompletionStatus",
+      "type": "string"
+    },
     "DatePrecision": {
       "description": "Precision supported by the source text for a date field; null when the date is null.\nDAY: day, month and year explicitly stated.\nMONTH: month and year explicitly stated.\nYEAR: only the year explicitly stated.",
       "enum": [
@@ -23,6 +50,23 @@
       "title": "DeliveryStatus",
       "type": "string"
     },
+    "DoseUnit": {
+      "description": "Unit of dose_amount, including its denominator.\nMG_PER_M2: mg/m2.\nG_PER_M2: g/m2.\nMCG_PER_M2: mcg/m2.\nMG_PER_KG: mg/kg.\nMCG_PER_KG: mcg/kg.\nMG: mg, a flat dose.\nG: g, a flat dose.\nMCG: mcg, a flat dose.\nAUC: carboplatin target area under the curve (mg/mL x min).\nNONE_OF_THE_ABOVE: another unit, or unit not documented.",
+      "enum": [
+        "MG_PER_M2",
+        "G_PER_M2",
+        "MCG_PER_M2",
+        "MG_PER_KG",
+        "MCG_PER_KG",
+        "MG",
+        "G",
+        "MCG",
+        "AUC",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "DoseUnit",
+      "type": "string"
+    },
     "MedicalTherapyCycleMention": {
       "description": "A named or numbered chemotherapy cycle (for protocols that use cycles).",
       "properties": {
@@ -42,7 +86,12 @@
         "phase": {
           "$ref": "#/$defs/TreatmentPhase",
           "default": "NONE_OF_THE_ABOVE",
-          "description": "Documented induction, consolidation or salvage phase."
+          "description": "Documented phase of this cycle."
+        },
+        "protocol_name": {
+          "$ref": "#/$defs/TreatmentProtocol",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Protocol linking this cycle to its regimen, if stated."
         },
         "protocol_name_verbatim": {
           "anyOf": [
@@ -54,21 +103,12 @@
             }
           ],
           "default": null,
-          "description": "Protocol linking this cycle to its regimen if stated.",
+          "description": "Protocol name exactly as written (for QA). Null if none.",
           "title": "Protocol Name Verbatim"
         },
         "completion_status": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Explicit planned, started, completed, interrupted or discontinued cycle status.",
-          "title": "Completion Status"
+          "$ref": "#/$defs/CycleCompletionStatus",
+          "default": "NONE_OF_THE_ABOVE"
         },
         "interruption_reason": {
           "anyOf": [
@@ -83,7 +123,20 @@
           "description": "Reason for interruption/discontinuation only if stated; do not infer toxicity or progression.",
           "title": "Interruption Reason"
         },
-        "cycle_name": {
+        "cycle_num": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle number exactly as the note numbers it, an integer: 'Cycle 3' is 3, 'Induction cycle 2' is 2, 'C1D8' is 1, 'maintenance cycle 1' is 1. Do not renumber across phases (phase is recorded separately). A day or week within a cycle is not a cycle number. Null if no cycle number is stated.",
+          "title": "Cycle Num"
+        },
+        "cycle_name_verbatim": {
           "anyOf": [
             {
               "type": "string"
@@ -93,8 +146,8 @@
             }
           ],
           "default": null,
-          "description": "Cycle name or number as written (e.g. 'Induction Cycle 2', 'Cycle 3'). Null if none.",
-          "title": "Cycle Name"
+          "description": "Cycle name or number exactly as written (for QA), such as 'Induction Cycle 2' or 'C1D8'. Null if none.",
+          "title": "Cycle Name Verbatim"
         },
         "cycle_start_date": {
           "anyOf": [
@@ -175,6 +228,11 @@
           "default": "NONE_OF_THE_ABOVE"
         },
         "documented_trial_arm": {
+          "$ref": "#/$defs/TrialArm",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Explicitly documented randomized arm assignment. Do not infer the arm from observed treatment, such as high-dose methotrexate being given."
+        },
+        "documented_trial_arm_verbatim": {
           "anyOf": [
             {
               "type": "string"
@@ -184,8 +242,12 @@
             }
           ],
           "default": null,
-          "description": "Explicit randomized arm assignment, if any. Do not infer randomization from observed treatment.",
-          "title": "Documented Trial Arm"
+          "description": "Arm exactly as written (for QA), such as 'Regimen B' or 'randomized to Arm B'. Null if no arm is documented.",
+          "title": "Documented Trial Arm Verbatim"
+        },
+        "protocol_name": {
+          "$ref": "#/$defs/TreatmentProtocol",
+          "default": "NONE_OF_THE_ABOVE"
         },
         "protocol_name_verbatim": {
           "anyOf": [
@@ -197,7 +259,7 @@
             }
           ],
           "default": null,
-          "description": "Treatment protocol name as written (e.g. 'ACNS0334', 'CCG99703', 'Head Start'). Null if the note states the patient is not treated per a protocol, or no protocol is named.",
+          "description": "Treatment protocol name exactly as written (for QA), such as 'ACNS0334', 'CCG99703', 'modified Head Start'. Null if the note states the patient is not treated per a protocol, or no protocol is named.",
           "title": "Protocol Name Verbatim"
         },
         "regimen_start_date": {
@@ -266,6 +328,47 @@
       "title": "MedicalTherapyRegimenMention",
       "type": "object"
     },
+    "RxAgentName": {
+      "description": "Anticancer agent, or one of three supportive drugs that mark a regimen (leucovorin, mesna, dexrazoxane).\nMap brand names, abbreviations and misspellings to the generic member.\nVINCRISTINE: vincristine (Oncovin, VCR).\nCYCLOPHOSPHAMIDE: cyclophosphamide (Cytoxan, CTX).\nCISPLATIN: cisplatin (CDDP).\nCARBOPLATIN: carboplatin (carbo).\nETOPOSIDE: etoposide (VP-16), intravenous or oral.\nMETHOTREXATE: methotrexate (MTX) at any dose or route, including high-dose, intrathecal and intraventricular.\nTHIOTEPA: thiotepa.\nTEMOZOLOMIDE: temozolomide (Temodar, TMZ).\nIRINOTECAN: irinotecan (CPT-11).\nTOPOTECAN: topotecan.\nLOMUSTINE: lomustine (CCNU).\nPROCARBAZINE: procarbazine.\nVINBLASTINE: vinblastine.\nCYTARABINE: cytarabine (Ara-C), including intrathecal.\nDOXORUBICIN: doxorubicin (Adriamycin).\nIFOSFAMIDE: ifosfamide.\nBEVACIZUMAB: bevacizumab (Avastin).\nTHALIDOMIDE: thalidomide.\nCELECOXIB: celecoxib (Celebrex) given as part of an antitumor regimen.\nFENOFIBRATE: fenofibrate given as part of an antitumor regimen.\nISOTRETINOIN: isotretinoin (13-cis-retinoic acid).\nVORINOSTAT: vorinostat.\nDABRAFENIB: dabrafenib (Tafinlar).\nTRAMETINIB: trametinib (Mekinist).\nSELUMETINIB: selumetinib (Koselugo).\nTOVORAFENIB: tovorafenib (Ojemda).\nEVEROLIMUS: everolimus (Afinitor).\nINDOXIMOD: indoximod.\nNIVOLUMAB: nivolumab (Opdivo).\nIPILIMUMAB: ipilimumab (Yervoy).\nLEUCOVORIN: leucovorin (folinic acid) rescue, supportive, marks high-dose methotrexate.\nMESNA: mesna, supportive, marks high-dose cyclophosphamide or ifosfamide.\nDEXRAZOXANE: dexrazoxane (Zinecard), supportive, marks anthracycline therapy.\nNONE_OF_THE_ABOVE: another anticancer agent, or a drug class or chemotherapy named without a specific agent.",
+      "enum": [
+        "VINCRISTINE",
+        "CYCLOPHOSPHAMIDE",
+        "CISPLATIN",
+        "CARBOPLATIN",
+        "ETOPOSIDE",
+        "METHOTREXATE",
+        "THIOTEPA",
+        "TEMOZOLOMIDE",
+        "IRINOTECAN",
+        "TOPOTECAN",
+        "LOMUSTINE",
+        "PROCARBAZINE",
+        "VINBLASTINE",
+        "CYTARABINE",
+        "DOXORUBICIN",
+        "IFOSFAMIDE",
+        "BEVACIZUMAB",
+        "THALIDOMIDE",
+        "CELECOXIB",
+        "FENOFIBRATE",
+        "ISOTRETINOIN",
+        "VORINOSTAT",
+        "DABRAFENIB",
+        "TRAMETINIB",
+        "SELUMETINIB",
+        "TOVORAFENIB",
+        "EVEROLIMUS",
+        "INDOXIMOD",
+        "NIVOLUMAB",
+        "IPILIMUMAB",
+        "LEUCOVORIN",
+        "MESNA",
+        "DEXRAZOXANE",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "RxAgentName",
+      "type": "string"
+    },
     "StemCellInfusionMention": {
       "properties": {
         "has_mention": {
@@ -314,7 +417,20 @@
           "default": null,
           "description": "Precision for infusion_date; null if absent."
         },
-        "cycle_name": {
+        "cycle_num": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Consolidation cycle this infusion rescues, only when documented. Cycle number exactly as the note numbers it, an integer: 'Cycle 3' is 3, 'Induction cycle 2' is 2, 'C1D8' is 1, 'maintenance cycle 1' is 1. Do not renumber across phases (phase is recorded separately). A day or week within a cycle is not a cycle number. Null if no cycle number is stated.",
+          "title": "Cycle Num"
+        },
+        "cycle_name_verbatim": {
           "anyOf": [
             {
               "type": "string"
@@ -324,8 +440,8 @@
             }
           ],
           "default": null,
-          "description": "Associated consolidation cycle, only when documented.",
-          "title": "Cycle Name"
+          "description": "Cycle name or number exactly as written (for QA), such as 'Induction Cycle 2' or 'C1D8'. Null if none.",
+          "title": "Cycle Name Verbatim"
         },
         "cell_source": {
           "anyOf": [
@@ -343,7 +459,6 @@
         "cd34_cells_per_kg": {
           "anyOf": [
             {
-              "minimum": 0,
               "type": "number"
             },
             {
@@ -388,7 +503,33 @@
           "default": "NONE_OF_THE_ABOVE",
           "description": "Documented phase of this dose; never infer from drug name alone."
         },
-        "cycle_name": {
+        "cycle_num": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cycle this administration belongs to. Cycle number exactly as the note numbers it, an integer: 'Cycle 3' is 3, 'Induction cycle 2' is 2, 'C1D8' is 1, 'maintenance cycle 1' is 1. Do not renumber across phases (phase is recorded separately). A day or week within a cycle is not a cycle number. Null if no cycle number is stated.",
+          "title": "Cycle Num"
+        },
+        "cycle_day": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Day within the cycle on which this dose was given or planned, as written: 'Day 8' is 8, 'C1D15' is 15. Consolidation days are counted from the stem-cell infusion, which is day 0, so 'Day -3' is -3. A week number is not a day. Null if not stated.",
+          "title": "Cycle Day"
+        },
+        "cycle_name_verbatim": {
           "anyOf": [
             {
               "type": "string"
@@ -398,8 +539,8 @@
             }
           ],
           "default": null,
-          "description": "Cycle linked to this administration, if stated.",
-          "title": "Cycle Name"
+          "description": "Cycle name or number exactly as written (for QA), such as 'Induction Cycle 2' or 'C1D8'. Null if none.",
+          "title": "Cycle Name Verbatim"
         },
         "administration_date": {
           "anyOf": [
@@ -429,7 +570,6 @@
         "dose_amount": {
           "anyOf": [
             {
-              "minimum": 0,
               "type": "number"
             },
             {
@@ -441,30 +581,13 @@
           "title": "Dose Amount"
         },
         "dose_unit": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Dose unit exactly as written, including denominator when present, such as 'g/m2', 'mg/m2', or 'mg/kg'. Null when dose_amount is null.",
-          "title": "Dose Unit"
+          "$ref": "#/$defs/DoseUnit",
+          "default": "NONE_OF_THE_ABOVE",
+          "description": "Unit of dose_amount. NONE_OF_THE_ABOVE when dose_amount is null."
         },
         "route": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Administration route as written, such as intravenous, intrathecal, or oral. Null if not stated.",
-          "title": "Route"
+          "$ref": "#/$defs/AdministrationRoute",
+          "default": "NONE_OF_THE_ABOVE"
         },
         "high_dose_methotrexate_explicit_bool": {
           "anyOf": [
@@ -476,7 +599,7 @@
             }
           ],
           "default": null,
-          "description": "True only when this administration is explicitly called high-dose methotrexate. False only when explicitly characterized as not high-dose; null when unknown. Numeric dose-based classification occurs downstream. This label does not establish receipt; inspect delivery_status.",
+          "description": "True only when this administration is explicitly called high-dose methotrexate. False only when explicitly characterized as not high-dose; null when unknown. This label does not establish receipt; inspect delivery_status.",
           "title": "High Dose Methotrexate Explicit Bool"
         }
       },
@@ -488,7 +611,7 @@
       "type": "object"
     },
     "TherapyAgentMention": {
-      "description": "A single systemic agent documented in treatment planning or delivery. Emit one per distinct\nagent (e.g. vincristine, cisplatin, cyclophosphamide, methotrexate).",
+      "description": "A single anticancer agent documented in treatment planning or delivery. Emit one per distinct\nagent (e.g. vincristine, cisplatin, cyclophosphamide, methotrexate). Also emit leucovorin, mesna and\ndexrazoxane. Do not emit other supportive-care drugs: antiemetics, growth factors (filgrastim,\npegfilgrastim), antimicrobials and infection prophylaxis, steroids, analgesics, anticonvulsants,\nhydration or electrolytes.",
       "properties": {
         "has_mention": {
           "description": "Indicates whether the concept was mentioned in the text.",
@@ -509,6 +632,10 @@
           "description": "Receipt of this agent when individual doses are not detailed. Plans do not establish exposure."
         },
         "agent_name": {
+          "$ref": "#/$defs/RxAgentName",
+          "default": "NONE_OF_THE_ABOVE"
+        },
+        "agent_name_verbatim": {
           "anyOf": [
             {
               "type": "string"
@@ -518,8 +645,8 @@
             }
           ],
           "default": null,
-          "description": "Therapeutic agent name as written (generic preferred). Null if none documented.",
-          "title": "Agent Name"
+          "description": "Agent name exactly as written in the note (for QA), such as 'Cytoxan' or 'HD MTX'. Null if none documented.",
+          "title": "Agent Name Verbatim"
         },
         "therapy_start_date": {
           "anyOf": [
@@ -613,7 +740,7 @@
       "type": "object"
     },
     "TreatmentPhase": {
-      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nNONE_OF_THE_ABOVE: another documented phase, or phase not documented.",
+      "description": "Treatment phase as documented in the note.\nINDUCTION: induction.\nCONSOLIDATION: consolidation, including high-dose chemotherapy with stem-cell rescue.\nPOST_CONSOLIDATION: first-line therapy after consolidation and before any relapse or progression, including maintenance.\nSALVAGE: therapy for relapse, recurrence or progression, whenever it is given.\nNONE_OF_THE_ABOVE: another documented phase (therapy before induction, bridging or palliative therapy), or phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",
@@ -622,6 +749,38 @@
         "NONE_OF_THE_ABOVE"
       ],
       "title": "TreatmentPhase",
+      "type": "string"
+    },
+    "TreatmentProtocol": {
+      "description": "Named treatment protocol the patient is treated on or according to, including a modified or protocol-based version (the verbatim field keeps the qualifier).\nACNS0334: COG ACNS0334, high-dose chemotherapy with or without high-dose methotrexate for young children with high-risk medulloblastoma or embryonal tumors.\nCCG99703: CCG 99703, induction then tandem carboplatin and thiotepa consolidation with stem-cell rescue.\nCCG9921: CCG 9921, infant embryonal tumor induction regimens.\nHEAD_START: Head Start I, II or III, induction then a single myeloablative consolidation with stem-cell rescue.\nHEAD_START_4: Head Start 4, randomized single versus tandem consolidation.\nPBTC_026: PBTC-026, vorinostat and isotretinoin added to induction, consolidation and maintenance.\nSJYC07: St Jude SJYC07, risk-adapted therapy for young children.\nHIT_SKK: German HIT-SKK or HIT 2000 SKK, systemic and intraventricular chemotherapy without radiation.\nACNS0331: COG ACNS0331, average-risk medulloblastoma.\nACNS0332: COG ACNS0332, high-risk medulloblastoma.\nACNS0333: COG ACNS0333, atypical teratoid rhabdoid tumor.\nACNS1422: COG ACNS1422, reduced therapy for WNT medulloblastoma.\nSJMB12: St Jude SJMB12, molecularly risk-stratified medulloblastoma.\nMEMMAT: MEMMAT metronomic antiangiogenic therapy for relapsed medulloblastoma.\nNONE_OF_THE_ABOVE: another named protocol, no protocol named, or the note states the patient is not treated per a protocol.",
+      "enum": [
+        "ACNS0334",
+        "CCG99703",
+        "CCG9921",
+        "HEAD_START",
+        "HEAD_START_4",
+        "PBTC_026",
+        "SJYC07",
+        "HIT_SKK",
+        "ACNS0331",
+        "ACNS0332",
+        "ACNS0333",
+        "ACNS1422",
+        "SJMB12",
+        "MEMMAT",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "TreatmentProtocol",
+      "type": "string"
+    },
+    "TrialArm": {
+      "description": "Randomized arm the note explicitly assigns the patient to, read together with protocol_name.\nREGIMEN_A: Regimen A or Arm A, such as ACNS0334 Regimen A (without high-dose methotrexate).\nREGIMEN_B: Regimen B or Arm B, such as ACNS0334 Regimen B (with high-dose methotrexate).\nNONE_OF_THE_ABOVE: another arm, a non-randomized or off-study treatment, or no arm documented.",
+      "enum": [
+        "REGIMEN_A",
+        "REGIMEN_B",
+        "NONE_OF_THE_ABOVE"
+      ],
+      "title": "TrialArm",
       "type": "string"
     }
   },
