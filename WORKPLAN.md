@@ -111,9 +111,9 @@ No changes planned.
 
 ## Case definition
 
-- [ ] P2 · `casedef` · **SNOMED 428061005 in two files** (was 2.3). Tier 1 `atrt` in
-  `casedef.csv`, "Malignant tumor of brain" tier 3 in `dx_brain_cancer.csv`. Confirm the
-  concept and keep it in one file. `dx_atrt.csv` still lists the generic C71.9 and 191.9.
+- [ ] P3 · `casedef` · **Generic codes in dx_atrt.csv** (was 2.3). 428061005 and 93744007 are
+  out of the casedef `atrt` rows (done 2026-10-22, see Changelog). `dx_atrt.csv` still lists the
+  generic C71.9 and 191.9 (discovery only, not read by the eligible SQL).
 - [ ] P2 · `casedef` · **ICD-O-3 morphology codes** (was 2.4). `dx_medulloblastoma.csv` has
   9470/3-9474/3. `casedef.csv` has none, so they never set time zero. The old plan: add them
   to casedef at tier 1 and derive `dx_medulloblastoma.csv` from casedef.
@@ -285,6 +285,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-22 — Two generic brain cancer codes no longer mean ATRT
+
+- `casedef.csv`: removed SNOMED 428061005 (malignant neoplasm of brain) and 93744007 (primary malignant neoplasm of CNS, per review lookup) from the tier 1 `atrt` rows. At BCH they gave 118 and 8 patients a tier 1 ATRT code, and 30 eligible patients were flagged ATRT on these codes alone (5 of them with a tier 1 medulloblastoma code), so they were wrongly out of the trial view. 428061005 stays a tier 3 candidate in `dx_brain_cancer.csv`. Patients whose only casedef evidence was one of these codes leave `pcx__cohort_casedef`, which also trims note sampling.
 
 ### 2026-10-22 — Dates are ranges: coarse and undated mentions no longer blank the analysis
 

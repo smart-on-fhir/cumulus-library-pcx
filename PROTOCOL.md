@@ -73,9 +73,13 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
 - [source eligible] Index event: the earliest day-precision LLM gold diagnosis day, else the first
   study-population encounter carrying a tier 1 medulloblastoma code (`eligible_dx.sql`). `pcx__cohort_casedef` keeps a second anchor
   (first casedef encounter of any subtype or tier) for note sampling ([WORKPLAN](WORKPLAN.md#case-definition)).
-- [open] SNOMED 428061005 is tier 1 ATRT in casedef.csv but "Malignant tumor of brain" in
-  dx_brain_cancer.csv. ICD-O-3 morphology codes are absent from casedef.csv. etmr,
-  pineoblastoma and cns_embryonal get a time zero only from an LLM gold date. All three are in
+- [decided] 2026-10-22, Andy: SNOMED 428061005 (malignant neoplasm of brain) and 93744007
+  (primary malignant neoplasm of CNS, per review lookup) are generic brain cancer codes, not
+  ATRT, so they are removed from the casedef.csv `atrt` rows. At BCH they gave 118 and 8
+  patients a tier 1 ATRT code and flagged 30 eligible patients ATRT on these codes alone.
+  428061005 stays a tier 3 candidate in dx_brain_cancer.csv.
+- [open] ICD-O-3 morphology codes are absent from casedef.csv. etmr, pineoblastoma and
+  cns_embryonal get a time zero only from an LLM gold date. Both are in
   [WORKPLAN](WORKPLAN.md#case-definition).
 
 ## 5. Clinical notes
