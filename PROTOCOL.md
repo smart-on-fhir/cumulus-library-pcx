@@ -129,8 +129,8 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   surgery flag is a trial criterion.
 - [source] E1 ATRT: tier 1 atrt casedef code or any single LLM note with subtype ATRT.
 - [source] E2 Prior chemotherapy before t0: earliest chemotherapy order, pharmacy dispense or
-  LLM-administered agent or dose. Prior methotrexate: earliest high-dose dose or ACNS0334
-  Regimen B evidence.
+  LLM-administered agent or dose. Prior methotrexate: earliest administered methotrexate or
+  ACNS0334 Regimen B evidence.
 - [source] E3 Prior radiation before t0: earliest tier 1 radiation procedure, tier 1 radiation
   encounter code, or LLM-administered radiation.
 - [decided] 2026-09-30, Andy: prior therapy is three flags, `methotrexate_prior_to_t0_bool`,
@@ -148,6 +148,14 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   dose-level `ADMINISTERED`, earliest date wins. Other methotrexate (intrathecal, not high-dose)
   is chemotherapy only. Systemic therapy v2 amended in place: `documented_trial_arm` is the
   `TrialArm` enum (REGIMEN_A, REGIMEN_B, NONE_OF_THE_ABOVE) with `documented_trial_arm_verbatim`.
+- [decided] 2026-10-22, Andy (CHOP clinician, Leary): any methotrexate given is high-dose, so the
+  exposure is any LLM-documented ADMINISTERED methotrexate, agent or dose level, any route
+  (`llm_administered`, replaces `llm_high_dose`), or ACNS0334 Regimen B as above. Structured
+  orders and dispenses stay evidence only. The explicit high-dose label
+  (`methotrexate_high_dose_*`), intrathecal or intraventricular doses
+  (`methotrexate_intrathecal_or_ventricular_*`) and `methotrexate_not_received_bool` are kept as
+  evidence. Open: whether intrathecal or intraventricular methotrexate should count (asked of
+  the clinician).
 - [decided] 2026-09-30, Andy: MedicationDispense hand-overs (`core__medicationdispense`
   `whenhandedover_day`, cancelled and declined dropped) are structured evidence beside
   MedicationRequest orders. A dispense is closer to receipt than an order but is not proof of
@@ -189,10 +197,21 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   - The patient was alive for every dated event and exposure, so an undated death never
     makes the timing uncertain: a dated event before it is still the first event, and every
     dated exposure precedes it.
-  - Prior-to-first-event exposure flags are NULL (unknown) when the timing is uncertain and the
-    exposure is not on or after the dated event. On or after it is still FALSE.
+- [decided] 2026-10-22, Andy: initial therapy runs from t0 to the first event. An exposure is
+  initial when its first day on or after `t0_day` is before `first_event_day` (open-ended with
+  no dated event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool` and
+  `had_initial_radiation_bool` (`pcx__outcome_exposure`, replacing `*_prior_to_first_event_bool`):
+  - TRUE: a dated exposure in the window.
+  - FALSE: none in the window and none undated, and initial therapy is documented without it
+    (dated chemotherapy in the window for methotrexate and radiation, dated radiation for
+    chemotherapy), or the exposure is EXPLICITLY_NOT_RECEIVED (methotrexate, radiation).
+  - NULL: unknown. No t0, an undated progression, recurrence or second malignancy
+    (`event_timing_uncertain_bool`), an undated exposure, or no initial therapy documented.
+    Missing documentation is never FALSE.
+  - `initial_therapy_sequence` orders chemotherapy and radiation from the same flags and adds
+    NO_INITIAL_THERAPY (dated chemotherapy or radiation exists, none in the window).
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
-  source. Methotrexate is high-dose or ACNS0334 Regimen B LLM evidence only. Structured
+  source. Methotrexate is administered methotrexate or ACNS0334 Regimen B LLM evidence only. Structured
   chemotherapy is orders and pharmacy dispenses, not administration; LLM ADMINISTERED agents and
   doses are the only receipt evidence, and every administered agent counts as chemotherapy
   except the supportive markers leucovorin, mesna and dexrazoxane
@@ -227,8 +246,13 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   `cube_kaplan_efs` (`counts_kaplan.workflow`, exported). Counted unit: distinct patients.
 - [decided] Exact PCX-30 columns, order and labels, except `site`. Survival years are
   FLOOR(days / 365.25) from t0, capped at >=10. `diagnosis` was always Medulloblastoma
-  until 2026-10-21 (below), `subtype` is the latest documented molecular group or NOS/NEC. No exposure
-  evidence is Not Reported, never No. EFS keeps the provisional censoring.
+  until 2026-10-21 (below), `subtype` is the latest documented molecular group or NOS/NEC. EFS
+  keeps the provisional censoring.
+- [decided] 2026-10-22, Andy: the exposure strata are initial therapy, not ever-exposure.
+  `had_initial_methotrexate` and `had_initial_radiation` replace PCX-30's `ever_methotrexate` and
+  `radiation` in both cubes: Yes, No, Not Reported (unknown) or Not Applicable (no t0), from
+  the `had_initial_*_bool` flags (section 7). Salvage after relapse is not counted, and a
+  documented No is separate from missing documentation.
 - [decided] 2026-10-20, Andy: no `site` column. Each site's export reaches the aggregator
   under that site, which adds it when cubes are combined. The source is plain SQL,
   `sql/custom/pcx__kaplan_subject.sql`, with no build-time values.

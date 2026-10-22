@@ -4,9 +4,14 @@
 -- NULL dimensions are avoided so cube NULLs represent subtotals.
 -- A documented EFS event without a usable date is efs_status event with
 -- event_free_survival_years Not Reported: curves count the event but use no
--- duration for it. Its initial_treatment_order is Not Reported when
--- efs_censor_source is event_timing_uncertain, since an undated event may
--- precede every exposure.
+-- duration for it.
+-- Exposure strata are INITIAL therapy, from time zero to the first event
+-- (pcx__outcome_exposure), never ever-exposure, so salvage therapy after
+-- relapse is not counted. had_initial_methotrexate and had_initial_radiation
+-- are Yes, No (initial therapy documented without it, or explicitly not
+-- received), Not Reported (unknown, including an undated event that may
+-- precede every exposure) or Not Applicable (no t0). Missing documentation is
+-- Not Reported, never No.
 
 CREATE TABLE pcx__kaplan_subject AS
 SELECT  outcome.subject_ref,
@@ -59,16 +64,24 @@ SELECT  outcome.subject_ref,
         END AS age_at_diagnosis_under_36mo,
 
         CASE
-            WHEN outcome.methotrexate_first_day IS NOT NULL
+            WHEN outcome.t0_day IS NULL
+            THEN 'Not Applicable'
+            WHEN outcome.had_initial_methotrexate_bool
             THEN 'Yes'
+            WHEN NOT outcome.had_initial_methotrexate_bool
+            THEN 'No'
             ELSE 'Not Reported'
-        END AS ever_methotrexate,
+        END AS had_initial_methotrexate,
 
         CASE
-            WHEN outcome.radiation_first_day IS NOT NULL
+            WHEN outcome.t0_day IS NULL
+            THEN 'Not Applicable'
+            WHEN outcome.had_initial_radiation_bool
             THEN 'Yes'
+            WHEN NOT outcome.had_initial_radiation_bool
+            THEN 'No'
             ELSE 'Not Reported'
-        END AS radiation,
+        END AS had_initial_radiation,
 
         CASE dx.molecular_group_ever
             WHEN 'WNT'             THEN 'WNT'
@@ -92,11 +105,9 @@ SELECT  outcome.subject_ref,
             THEN 'chemo_only_no_initial_radiation'
             WHEN outcome.initial_therapy_sequence = 'RADIATION_ONLY'
             THEN 'radiation_only_no_initial_chemo'
-            WHEN outcome.chemo_first_day IS NULL AND outcome.radiation_first_day IS NULL
-            THEN 'Not Reported'
-            WHEN outcome.efs_censor_source = 'event_timing_uncertain'
-            THEN 'Not Reported'
-            ELSE 'no_initial_radiation_or_chemo'
+            WHEN outcome.initial_therapy_sequence = 'NO_INITIAL_THERAPY'
+            THEN 'no_initial_radiation_or_chemo'
+            ELSE 'Not Reported'
         END AS initial_treatment_order
 
 FROM pcx__outcome AS outcome

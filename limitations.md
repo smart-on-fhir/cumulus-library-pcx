@@ -40,14 +40,15 @@ evidence as further nullable criteria. Do not convert undocumented criteria into
 
 ## 2. Any-dose methotrexate is insufficient treatment specificity
 
-**Gap:** Since 2026-10-21 the exposure is high-dose methotrexate from the LLM only: a dose the note
-explicitly calls high-dose, or ACNS0334 Regimen B. Structured orders and dispenses carry no dose or
-route and are evidence only. A note that gives "5 g/m2" without calling it high-dose does not count
-(numeric dose classification is not implemented), and a Regimen B assignment counts as exposure
-without proof of delivery, so it mixes intended with delivered treatment. Neither captures the full
+**Gap:** Since 2026-10-22 the exposure is any LLM-documented administered methotrexate (the CHOP
+clinical team treats any methotrexate as high-dose), or ACNS0334 Regimen B. Structured orders and
+dispenses are not proof of receipt and are evidence only. Dose is not checked, and intrathecal or
+intraventricular methotrexate (in infants a different, low-dose strategy) counts until the
+clinician says otherwise. A Regimen B assignment counts as exposure without proof of delivery, so
+it mixes intended with delivered treatment. Neither captures the full
 strategy (5 g/m², with leucovorin rescue and serum levels) described in the reference paper.
 
-**Resolution:** Classify high dose from `dose_amount` and `dose_unit` too, then capture dose and units,
+**Resolution:** Settle the intrathecal and intraventricular question, then capture dose and units,
 route, administration dates, induction/consolidation phase, companion agents,
 stem-cell rescue, interruptions and discontinuation. Add methotrexate-level and leucovorin
 valuesets as structured markers. Separate protocol documentation, intended treatment and
@@ -91,7 +92,7 @@ response state rather than automatically counting it as an adverse EFS event.
 ## 5. Radiation needs temporal context
 
 **Gap:** The paper allowed discretionary radiation after protocol treatment. The
-`radiation_prior_to_first_event_bool` flag and the chemotherapy/radiation sequence are
+`had_initial_radiation_bool` flag and the chemotherapy/radiation sequence are
 implemented in `pcx__outcome_exposure` by date comparison only. Radiation receipt rests on
 procedure or encounter codes and LLM administered rounds; the tier 2 "history of irradiation"
 codes are ignored; and the LLM `indication` is free text.

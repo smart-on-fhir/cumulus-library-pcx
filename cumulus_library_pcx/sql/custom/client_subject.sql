@@ -77,10 +77,11 @@ SELECT  elig.subject_ref,
 
         -- exposures as initial therapy (README section 2)
         elig.methotrexate_any_bool,
-        outcome.methotrexate_prior_to_first_event_bool,
+        outcome.had_initial_methotrexate_bool,
         elig.radiation_any_bool,
-        outcome.radiation_prior_to_first_event_bool,
+        outcome.had_initial_radiation_bool,
         elig.chemo_any_bool,
+        outcome.had_initial_chemo_bool,
         outcome.initial_therapy_sequence,
         outcome.protocol_names,
 

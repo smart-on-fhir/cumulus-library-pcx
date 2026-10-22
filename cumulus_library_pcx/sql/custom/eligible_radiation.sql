@@ -10,6 +10,9 @@
 --    radiation_prior_to_t0_bool  first dated radiation before t0_day. FALSE when
 --                                t0 is known and nothing is dated before it,
 --                                NULL only when t0_day is NULL
+--    radiation_undated_bool      ADMINISTERED LLM radiation with no usable date
+--  radiation_first_day_from_t0 is the first radiation on or after t0_day, the
+--  start of the initial-therapy window that pcx__outcome_exposure applies.
 --  pcx__eligible_trial applies radiation_prior_to_t0_bool as the ACNS0334
 --  no-prior-radiation criterion.
 --  =====================================================================
@@ -35,14 +38,17 @@ candidate AS (
     WHERE   delivery_status = 'ADMINISTERED'
 ),
 first_day AS (
-    SELECT  subject_ref,
+    SELECT  candidate.subject_ref,
             MIN(exposure_day)                                                   AS radiation_first_day,
+            MIN(CASE WHEN exposure_day >= dx.t0_day THEN exposure_day END)      AS radiation_first_day_from_t0,
             MIN(CASE WHEN source = 'proc_radiation'   THEN exposure_day END)    AS radiation_proc_first_day,
             MIN(CASE WHEN source = 'dx_radiation'     THEN exposure_day END)    AS radiation_dx_first_day,
             MIN(CASE WHEN source = 'llm_administered' THEN exposure_day END)    AS radiation_administered_first_day,
-            BOOL_OR(source = 'llm_administered')                                AS radiation_administered_bool
+            BOOL_OR(source = 'llm_administered')                                AS radiation_administered_bool,
+            BOOL_OR(exposure_day IS NULL)                                       AS radiation_undated_bool
     FROM    candidate
-    GROUP BY subject_ref
+    JOIN    pcx__eligible_dx    AS dx ON dx.subject_ref = candidate.subject_ref
+    GROUP BY candidate.subject_ref
 ),
 llm_field AS (
     SELECT  subject_ref,
@@ -55,11 +61,13 @@ llm_field AS (
 SELECT  dx.subject_ref,
         dx.t0_day,
         first_day.radiation_first_day,
+        first_day.radiation_first_day_from_t0,
         first_day.radiation_proc_first_day,
         first_day.radiation_dx_first_day,
         first_day.radiation_administered_first_day,
         (first_day.subject_ref IS NOT NULL)                                 AS radiation_any_bool,
         first_day.radiation_administered_bool,
+        COALESCE(first_day.radiation_undated_bool, FALSE)                   AS radiation_undated_bool,
         llm_field.llm_craniospinal_bool,
         llm_field.llm_proton_bool,
         llm_field.llm_explicitly_not_received_bool,

@@ -128,14 +128,12 @@ No changes planned.
 
 ## Clinical notes
 
-- [ ] P1 · `eligible` · **Methotrexate exposure: any administered MTX** (2026-10-22). The CHOP
-  clinician says methotrexate need not be called high-dose: a patient given methotrexate is
-  assumed to have had high dose. Today `eligible_rx.sql` counts only a dose explicitly called
-  high-dose (`high_dose_methotrexate_explicit_bool`) or ACNS0334 Regimen B. Planned: any
-  ADMINISTERED methotrexate (agent or dose level) counts, Regimen B still counts, structured
-  orders and dispenses stay evidence only, and the explicit high-dose flag stays as a descriptive
-  column. Open, asked of the clinician: does intrathecal or intraventricular (Ommaya)
-  methotrexate count? In infants that is a different, low-dose strategy from IV high-dose MTX.
+- [ ] P1 · `eligible` · **Intrathecal / intraventricular methotrexate** (2026-10-22). Any
+  administered methotrexate, any route, is now the exposure (done, see Changelog). Open, asked
+  of the CHOP clinician: does intrathecal or intraventricular (Ommaya) methotrexate count? In
+  infants that is a different, low-dose strategy from IV high-dose MTX. If not, exclude doses
+  with `route IN ('INTRATHECAL', 'INTRAVENTRICULAR')` in `eligible_rx.sql` (they are already in
+  `methotrexate_intrathecal_or_ventricular_*`). No NLP rerun needed.
 - [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). Each `pcx__nlp_<task>_<model>` table
   holds ONE task version: Cumulus Library builds it over the folder `..._v<version>` of the
   current workflow version, and `--clean` deletes the older folders. BCH, checked in Athena
@@ -287,6 +285,14 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-22 — Initial-therapy methotrexate and radiation, Kaplan strata no longer "ever"
+
+- Methotrexate exposure (`eligible_rx.sql`) is any LLM ADMINISTERED methotrexate, agent or dose level, any route (`llm_administered`, replaces `llm_high_dose`), or ACNS0334 Regimen B. CHOP clinician: any methotrexate given is high-dose. Evidence-only columns: `methotrexate_high_dose_*`, `methotrexate_intrathecal_or_ventricular_*`, `methotrexate_not_received_bool`. New `*_first_day_from_t0` and `*_undated_bool` in `eligible_rx` and `eligible_radiation`.
+- `outcome_exposure.sql`: initial therapy is t0 to the first event (first day on or after t0, before the first event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool`, `had_initial_radiation_bool` replace `*_prior_to_first_event_bool`: TRUE dated in the window, FALSE initial therapy documented without it (or explicitly not received), NULL unknown (no t0, uncertain event timing, undated exposure, nothing documented). `initial_therapy_sequence` comes from the same flags and adds NO_INITIAL_THERAPY.
+- Behaviour changes: pre-t0 exposure is no longer initial (fixture p2 is now RADIATION_BEFORE_CHEMOTHERAPY, methotrexate FALSE), and under uncertain event timing an exposure on or after the dated event is now unknown, not FALSE.
+- Kaplan cubes: `had_initial_methotrexate` and `had_initial_radiation` (Yes, No, Not Reported, Not Applicable) replace `ever_methotrexate` and `radiation`. Methotrexate given only after progression is now No, not Yes.
+- `pcx__outcome`, `pcx__client_subject` (adds `had_initial_chemo_bool`), `pcx__client_exposure` (`had_initial_bool`), the warn tables, both dictionaries, PROTOCOL §6, §7 and §8.1, eligible.md and limitations.md follow. New test `test_initial_methotrexate_is_yes_no_or_unknown`.
 
 ### 2026-10-22 — Systemic therapy v2 prompt, BCH rerun command
 

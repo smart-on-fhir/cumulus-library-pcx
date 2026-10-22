@@ -58,8 +58,9 @@ SELECT  elig.subject_ref,
             ELSE                                         'last_known_alive_provisional'
         END                                                                 AS efs_censor_source,
         -- exposures as initial therapy
-        exposure.methotrexate_prior_to_first_event_bool,
-        exposure.radiation_prior_to_first_event_bool,
+        exposure.had_initial_methotrexate_bool,
+        exposure.had_initial_chemo_bool,
+        exposure.had_initial_radiation_bool,
         exposure.initial_therapy_sequence,
         exposure.protocol_names,
         exposure.methotrexate_first_day,

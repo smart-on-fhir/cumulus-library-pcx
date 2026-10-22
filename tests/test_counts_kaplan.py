@@ -9,34 +9,29 @@ from tests.conftest import ROOT
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
 
 # Headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
-# the aggregator adds site when it combines each site's export
+# the aggregator adds site when it combines each site's export. The two exposure strata are
+# initial therapy (had_initial_*) instead of PCX-30's ever_methotrexate and radiation.
 OS_COLS = ['cnt', 'diagnosis', 'overall_survival_years', 'vital_status', 'age_at_diagnosis_under_36mo',
-           'ever_methotrexate', 'radiation', 'subtype']
+           'had_initial_methotrexate', 'had_initial_radiation', 'subtype']
 EFS_COLS = ['cnt', 'diagnosis', 'event_free_survival_years', 'efs_status', 'age_at_diagnosis_under_36mo',
-            'ever_methotrexate', 'radiation', 'subtype', 'initial_treatment_order']
+            'had_initial_methotrexate', 'had_initial_radiation', 'subtype', 'initial_treatment_order']
 
 T0 = datetime.date(2015, 1, 1)
 
 
-def day(n: int) -> datetime.date:
-    return T0 + datetime.timedelta(days=n)
-
-
 def outcome(i, t0=T0, os_event=False, os_days=400, efs_event=False, efs_days=400, under_36=False,
-            methotrexate=None, chemo=None, radiation=None, sequence=None, censor=None):
-    return (f'Patient/{i}', t0, os_event, os_days, efs_event, efs_days, under_36,
-            methotrexate, chemo, radiation, sequence, censor)
+            methotrexate=None, radiation=None, sequence=None):
+    return (f'Patient/{i}', t0, os_event, os_days, efs_event, efs_days, under_36, methotrexate, radiation, sequence)
 
 
 def load(con, outcome_rows: list, molecular_rows: list):
     con.execute('CREATE OR REPLACE TABLE pcx__outcome (subject_ref VARCHAR, t0_day DATE, os_event_bool BOOLEAN, '
                 'os_days BIGINT, efs_event_bool BOOLEAN, efs_days BIGINT, '
-                'age_under_36_months_at_definitive_surgery BOOLEAN, methotrexate_first_day DATE, '
-                'chemo_first_day DATE, radiation_first_day DATE, initial_therapy_sequence VARCHAR, '
-                'efs_censor_source VARCHAR)')
+                'age_under_36_months_at_definitive_surgery BOOLEAN, had_initial_methotrexate_bool BOOLEAN, '
+                'had_initial_radiation_bool BOOLEAN, initial_therapy_sequence VARCHAR)')
     con.execute('CREATE OR REPLACE TABLE pcx__client_diagnosis (subject_ref VARCHAR, molecular_group_ever VARCHAR, '
                 'disease_subtype_ever VARCHAR)')
-    con.executemany('INSERT INTO pcx__outcome VALUES (' + ', '.join(['?'] * 12) + ')', outcome_rows)
+    con.executemany('INSERT INTO pcx__outcome VALUES (' + ', '.join(['?'] * 10) + ')', outcome_rows)
     if molecular_rows:
         con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?, ?)', molecular_rows)
     con.execute('DROP TABLE IF EXISTS pcx__kaplan_subject')
@@ -65,11 +60,12 @@ def test_labels():
             outcome(3, os_days=3652), outcome(4, os_days=3653),
             outcome(5, t0=None, os_days=None, efs_days=None, under_36=None),
             outcome(6, os_event=True, os_days=None), outcome(7, os_days=-3),
-            outcome(8, efs_event=True, under_36=True, methotrexate=day(10), chemo=day(10), radiation=day(40),
+            outcome(8, efs_event=True, under_36=True, methotrexate=True, radiation=True,
                     sequence='CHEMOTHERAPY_BEFORE_RADIATION'),
-            outcome(9, chemo=day(900)),
+            outcome(9, sequence='NO_INITIAL_THERAPY'),
             outcome(10),
-            outcome(11, efs_event=True, efs_days=None, chemo=day(10), censor='event_timing_uncertain')]
+            outcome(11, efs_event=True, efs_days=None),
+            outcome(12, efs_event=True, methotrexate=False, radiation=False, sequence='CHEMOTHERAPY_ONLY')]
     molecular = [('Patient/0', 'WNT', 'MEDULLOBLASTOMA'), ('Patient/1', 'GROUP_3', 'MEDULLOBLASTOMA'),
                  ('Patient/2', 'NON_WNT_NON_SHH', 'MEDULLOBLASTOMA'), ('Patient/3', 'NOT_SUBGROUPED', 'ATRT'),
                  ('Patient/4', 'INDETERMINATE', None)]
@@ -84,11 +80,13 @@ def test_labels():
     assert (s[6]['vital_status'], s[0]['vital_status']) == ('deceased', 'alive')
     assert (s[8]['efs_status'], s[0]['efs_status']) == ('event', 'event-free')
     assert [s[i]['age_at_diagnosis_under_36mo'] for i in (8, 0, 5)] == ['Yes', 'No', 'Not Reported']
-    # no exposure evidence is unknown, never No
-    assert (s[8]['ever_methotrexate'], s[8]['radiation']) == ('Yes', 'Yes')
-    assert (s[0]['ever_methotrexate'], s[0]['radiation']) == ('Not Reported', 'Not Reported')
-    assert [s[i]['initial_treatment_order'] for i in (8, 9, 10, 5)] == \
-        ['chemo_before_radiation', 'no_initial_radiation_or_chemo', 'Not Reported', 'Not Applicable']
+    # initial-therapy strata: Yes, a documented No, unknown, and no t0
+    strata = [(s[i]['had_initial_methotrexate'], s[i]['had_initial_radiation']) for i in (8, 12, 0, 5)]
+    assert strata == [('Yes', 'Yes'), ('No', 'No'), ('Not Reported', 'Not Reported'),
+                      ('Not Applicable', 'Not Applicable')]
+    assert [s[i]['initial_treatment_order'] for i in (8, 12, 9, 10, 5)] == \
+        ['chemo_before_radiation', 'chemo_only_no_initial_radiation', 'no_initial_radiation_or_chemo',
+         'Not Reported', 'Not Applicable']
     # an event without a usable date counts as an event with no duration, and its exposures are unordered
     assert (s[11]['efs_status'], s[11]['event_free_survival_years'], s[11]['initial_treatment_order']) == \
         ('event', 'Not Reported', 'Not Reported')

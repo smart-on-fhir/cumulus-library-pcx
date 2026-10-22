@@ -105,15 +105,19 @@ def test_prior_methotrexate_is_a_flag_here_and_an_exclusion_in_the_trial():
     assert 'Patient/p7' not in trial(con)
 
 
-def test_methotrexate_is_high_dose_or_acns0334_regimen_b(con):
+def test_methotrexate_is_any_administration_or_acns0334_regimen_b(con):
     rows = {r[0]: r[1:] for r in con.execute(
-        "SELECT subject_ref, methotrexate_source, methotrexate_first_day, methotrexate_high_dose_first_day, "
-        "methotrexate_regimen_b_first_day, chemo_administered_first_day FROM pcx__eligible_rx").fetchall()}
+        "SELECT subject_ref, methotrexate_source, methotrexate_first_day, methotrexate_regimen_b_first_day, "
+        "methotrexate_high_dose_first_day, methotrexate_intrathecal_or_ventricular_first_day, "
+        "chemo_administered_first_day FROM pcx__eligible_rx").fetchall()}
     # p1: on ACNS0334 Regimen B with no regimen start date, dated by its administered methotrexate.
     # Its cisplatin agent is only PLANNED, but a cisplatin dose is ADMINISTERED: dose-level receipt is chemo.
-    assert rows['Patient/p1'] == ('llm_acns0334_regimen_b', date(2020, 2, 12), None, date(2020, 2, 12), date(2020, 2, 5))
-    # p8: the explicitly high-dose dose counts. The earlier intrathecal, not high-dose dose is chemo only.
-    assert rows['Patient/p8'] == ('llm_high_dose', date(2021, 2, 1), date(2021, 2, 1), None, date(2021, 1, 15))
+    assert rows['Patient/p1'] == ('llm_acns0334_regimen_b,llm_administered', date(2020, 2, 12), date(2020, 2, 12),
+                                  None, None, date(2020, 2, 5))
+    # p8: any administered methotrexate counts (CHOP: any methotrexate is high-dose), so the earlier
+    # intrathecal dose is the first day. The high-dose label and the route are kept as evidence.
+    assert rows['Patient/p8'] == ('llm_administered', date(2021, 1, 15), None,
+                                  date(2021, 2, 1), date(2021, 1, 15), date(2021, 1, 15))
 
 
 def test_dispense_is_structured_evidence_not_receipt(con):
@@ -162,12 +166,14 @@ def test_surgery_type_none_of_the_above_is_a_documented_operation(con):
 
 def test_first_event_and_exposure_order(con):
     rows = {r[0]: r[1:] for r in con.execute("SELECT subject_ref, first_event_type, "
-                                             "methotrexate_prior_to_first_event_bool, "
-                                             "radiation_prior_to_first_event_bool, "
+                                             "had_initial_methotrexate_bool, "
+                                             "had_initial_radiation_bool, "
                                              "initial_therapy_sequence, protocol_names "
                                              "FROM pcx__outcome_exposure").fetchall()}
     assert rows['Patient/p1'] == ('PROGRESSION', True, True, 'CHEMOTHERAPY_BEFORE_RADIATION', 'ACNS0334')
-    assert rows['Patient/p2'] == ('DECEASED', None, True, 'CHEMOTHERAPY_BEFORE_RADIATION', 'Head Start')
+    # p2: cisplatin before t0 is not initial therapy, so inside the window radiation comes first.
+    # Initial chemotherapy without methotrexate is a documented "no", not unknown.
+    assert rows['Patient/p2'] == ('DECEASED', False, True, 'RADIATION_BEFORE_CHEMOTHERAPY', 'Head Start')
     assert rows['Patient/p3'] == (None, None, None, None, None)      # no t0: nothing is ordered
     # p6: an undated recurrence may precede its exposures, so none is ordered against it
     assert rows['Patient/p6'][1:4] == (None, None, None)
@@ -196,8 +202,8 @@ def test_undated_events_are_events_without_an_interval():
     sqltest.run_custom(con)
     rows = {r[0]: r[1:] for r in con.execute("SELECT subject_ref, efs_event_bool, efs_days IS NULL, "
                                              "efs_censor_source, first_event_day, "
-                                             "methotrexate_prior_to_first_event_bool, "
-                                             "radiation_prior_to_first_event_bool, initial_therapy_sequence "
+                                             "had_initial_methotrexate_bool, "
+                                             "had_initial_radiation_bool, initial_therapy_sequence "
                                              "FROM pcx__outcome").fetchall()}
     # a death without a day is an event with no interval, after every dated exposure
     assert rows['Patient/p6'][:4] == (True, True, 'event_undated', None)
@@ -206,5 +212,37 @@ def test_undated_events_are_events_without_an_interval():
     assert rows['Patient/p1'] == (True, False, 'first_event', date(2021, 3, 1), True, True,
                                   'CHEMOTHERAPY_BEFORE_RADIATION')
     # dated plus undated: the dated event stays as evidence, the interval waits for reconciliation,
-    # and exposures on or after the dated event are still salvage
-    assert rows['Patient/p8'] == (True, True, 'event_timing_uncertain', date(2021, 1, 1), False, False, None)
+    # and the end of the initial window is unknown, so every initial-therapy flag is unknown
+    assert rows['Patient/p8'] == (True, True, 'event_timing_uncertain', date(2021, 1, 1), None, None, None)
+
+
+def initial_methotrexate(agents: list[tuple], events: list[tuple] = ()) -> tuple:
+    """p5 (t0 2020-05-01, no other therapy or event evidence) with the given LLM agents and events."""
+    con = sqltest.connect()
+    for i, (agent, status, day) in enumerate(agents, start=1):
+        con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, agent_name, "
+                    "therapy_start_day, regimen_index, agent_index) VALUES ('Patient/p5', 'note-p5-rx', ?, ?, ?, 1, ?)",
+                    [status, agent, day, i])
+    for event_type, day in events:
+        con.execute("INSERT INTO pcx__llm_event_wide (subject_ref, note_ref, event_type, event_day) "
+                    "VALUES ('Patient/p5', 'note-p5-ev', ?, ?)", [event_type, day])
+    sqltest.run_custom(con)
+    return con.execute("SELECT had_initial_methotrexate_bool, had_initial_chemo_bool FROM pcx__outcome "
+                       "WHERE subject_ref = 'Patient/p5'").fetchone()
+
+
+def test_initial_methotrexate_is_yes_no_or_unknown():
+    initial_chemo = ('VINCRISTINE', 'ADMINISTERED', date(2020, 6, 1))
+    # any administered methotrexate in the window counts, high-dose label or not
+    assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', date(2020, 6, 8))]) == (True, True)
+    # methotrexate only after progression is salvage: initial chemotherapy without it is "no"
+    assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', date(2021, 2, 1))],
+                                [('PROGRESSION', date(2021, 1, 1))]) == (False, True)
+    # explicit non-receipt is "no" even without other initial therapy
+    assert initial_methotrexate([('METHOTREXATE', 'EXPLICITLY_NOT_RECEIVED', None)]) == (False, None)
+    # an undated administration may fall in the window: unknown
+    assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', None)]) == (None, True)
+    # methotrexate before t0 is not initial, and with no initial therapy documented the answer is unknown
+    assert initial_methotrexate([('METHOTREXATE', 'ADMINISTERED', date(2020, 4, 1))]) == (None, None)
+    # no documentation at all is unknown, never "no"
+    assert initial_methotrexate([]) == (None, None)
