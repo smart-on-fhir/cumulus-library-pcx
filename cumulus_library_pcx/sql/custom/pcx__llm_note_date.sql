@@ -9,7 +9,9 @@
 --  the same rule pcx__sample_casedef uses to sort notes. A note with
 --  conflicting dates has a NULL note_date and note_date_conflict_bool TRUE.
 --  A note with no date at all still has a row, with a NULL note_date.
---  Read by client_diagnosis, client_timeline and pcx__warn_llm_date_after_note.
+--  Built first in the eligible stage. Read by pcx__exposure_record and
+--  pcx__outcome_first_event (an undated mention happened on or before its note
+--  date), client_diagnosis, client_timeline and pcx__warn_llm_date_after_note.
 --  =====================================================================
 CREATE  TABLE   pcx__llm_note_date AS
 WITH

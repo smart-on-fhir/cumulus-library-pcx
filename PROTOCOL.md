@@ -137,6 +137,8 @@ From [eligible.md](eligible.md); SQL in `cumulus_library_pcx/sql/custom/`, opt-i
   `chemo_prior_to_t0_bool` and `radiation_prior_to_t0_bool`. TRUE = dated exposure before
   `t0_day`. FALSE = t0 known and nothing dated before it, including no evidence or only undated
   evidence. NULL only when `t0_day` is NULL, which keeps the subject out of the trial view.
+  Since 2026-10-22 a month or year date that straddles `t0_day` also gives NULL (dates are
+  ranges, section 7).
   `*_any_bool` is exposure at any time, FALSE when there is no evidence.
 - [decided] 2026-09-30, Andy: ACNS0334 excludes any prior chemotherapy, so prior methotrexate
   excludes from `pcx__eligible_trial` like the six backbone agents.
@@ -181,8 +183,27 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   cross-checking. It is the one place deaths are reconciled: `outcome_first_event.sql` takes
   death from it, so OS and EFS always see the same death. The raw FHIR Patient
   deceased fields are a site prerequisite: the site's ETL must expose them.
-- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS. Coarse
-  LLM dates are consumed as exact days.
+- [source limitations] First event (`outcome_first_event.sql`) supports a provisional EFS.
+- [decided] 2026-10-22, Andy: dates are ranges. Every treatment record (`pcx__exposure_record`)
+  and event carries the range of days it can fall on. A month or year date covers its whole
+  period. An undated LLM mention happened on or before the date of its note (`pcx__llm_note_date`,
+  FHIR note metadata), with no lower bound. BCH 2026-10-22: 62% of administered radiation mentions
+  and a quarter to a half of progression, recurrence and second-malignancy mentions are undated;
+  a fifth to two fifths of the dated ones are month or year dates.
+  - Comparisons (prior to t0, inside the initial window, before the first event, which therapy
+    came first) are certain only when the whole range is on one side, otherwise unknown. Prior to
+    t0 straddled by a month or year date is NULL (out of the trial view). Undated evidence still
+    never counts as prior therapy.
+  - Durations (`os_days`, `efs_days`, `days_t0_to_first_event`) use a coarse date at the middle
+    of its period (the 15th of the month, July 1 of the year), flagged by
+    `death_day_imputed_bool`, `last_known_alive_day_imputed_bool`, `first_event_day_imputed_bool`,
+    `os_end_day_imputed_bool` and `efs_end_day_imputed_bool`.
+  - An undated treatment mention is a restatement, ignored, when a dated record of the same
+    treatment starts on or before its note date (`restated_bool`). An undated progression,
+    recurrence or second malignancy is a restatement when its note is dated on or after the
+    latest day the dated first event can be. Otherwise it may precede the dated event:
+    `event_timing_uncertain_bool`, EFS interval NULL. Events that are all undated stay events
+    without an interval.
 - [decided] 2026-10-21, Andy: a documented EFS event without a usable date is an event with an
   uncomputable interval, not a censored observation. `efs_event_bool` is `event_documented_bool`
   (dated event, undated event, or a death without a date).
@@ -198,15 +219,16 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
     makes the timing uncertain: a dated event before it is still the first event, and every
     dated exposure precedes it.
 - [decided] 2026-10-22, Andy: initial therapy runs from t0 to the first event. An exposure is
-  initial when its first day on or after `t0_day` is before `first_event_day` (open-ended with
-  no dated event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool` and
+  initial when a record of it is certainly inside `[t0_day, first event)` by the date ranges above
+  (open-ended with no dated event). `had_initial_methotrexate_bool`, `had_initial_chemo_bool` and
   `had_initial_radiation_bool` (`pcx__outcome_exposure`, replacing `*_prior_to_first_event_bool`):
-  - TRUE: a dated exposure in the window.
-  - FALSE: none in the window and none undated, and initial therapy is documented without it
+  - TRUE: a record certainly inside the window.
+  - FALSE: no record inside or possibly inside, and initial therapy is documented without it
     (dated chemotherapy in the window for methotrexate and radiation, dated radiation for
     chemotherapy), or the exposure is EXPLICITLY_NOT_RECEIVED (methotrexate, radiation).
-  - NULL: unknown. No t0, an undated progression, recurrence or second malignancy
-    (`event_timing_uncertain_bool`), an undated exposure, or no initial therapy documented.
+  - NULL: unknown. No t0, an undated progression, recurrence or second malignancy of unknown
+    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no initial
+    therapy documented.
     Missing documentation is never FALSE.
   - `initial_therapy_sequence` orders chemotherapy and radiation from the same flags and adds
     NO_INITIAL_THERAPY (dated chemotherapy or radiation exists, none in the window).

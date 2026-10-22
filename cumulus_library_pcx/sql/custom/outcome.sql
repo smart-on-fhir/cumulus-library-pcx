@@ -8,13 +8,17 @@
 --  includes events without a usable date. efs_censor_source says how the row ends:
 --    first_event                   dated first event, efs_end_day = first_event_day
 --    event_timing_uncertain        an undated progression, recurrence or second
---                                  malignancy exists. Event TRUE, interval NULL until
---                                  it is reconciled, first_event_day kept as evidence.
+--                                  malignancy that may precede the dated event (not a
+--                                  restatement, see pcx__outcome_first_event). Event
+--                                  TRUE, interval NULL until it is reconciled,
+--                                  first_event_day kept as evidence.
 --    event_undated                 the only event is a death without a date.
 --                                  Event TRUE, interval NULL, the same rule as OS.
 --    last_known_alive_provisional  no documented event. Censoring uses
 --                                  last_known_alive_day as a PROVISIONAL stand-in
 --                                  until dated event-free follow-up is adjudicated.
+--  A month or year date is used at the middle of its period for durations:
+--  os_end_day_imputed_bool / efs_end_day_imputed_bool say when the end day is.
 --  =====================================================================
 CREATE  TABLE   pcx__outcome AS
 SELECT  elig.subject_ref,
@@ -35,6 +39,10 @@ SELECT  elig.subject_ref,
             WHEN vital.deceased_bool    THEN DATE_DIFF('day', elig.t0_day, vital.death_day)
             ELSE                             DATE_DIFF('day', elig.t0_day, vital.last_known_alive_day)
         END                                                                 AS os_days,
+        CASE
+            WHEN vital.deceased_bool    THEN vital.death_day_imputed_bool
+            ELSE                             vital.last_known_alive_day_imputed_bool
+        END                                                                 AS os_end_day_imputed_bool,
         -- event-free survival, provisional
         event.event_documented_bool                                         AS efs_event_bool,
         event.first_event_day,
@@ -51,6 +59,12 @@ SELECT  elig.subject_ref,
             WHEN event.death_undated_bool           THEN NULL
             ELSE                                         DATE_DIFF('day', elig.t0_day, vital.last_known_alive_day)
         END                                                                 AS efs_days,
+        CASE
+            WHEN event.event_timing_uncertain_bool  THEN NULL
+            WHEN event.dated_event_bool             THEN event.first_event_day_imputed_bool
+            WHEN event.death_undated_bool           THEN NULL
+            ELSE                                         vital.last_known_alive_day_imputed_bool
+        END                                                                 AS efs_end_day_imputed_bool,
         CASE
             WHEN event.event_timing_uncertain_bool  THEN 'event_timing_uncertain'
             WHEN event.dated_event_bool             THEN 'first_event'

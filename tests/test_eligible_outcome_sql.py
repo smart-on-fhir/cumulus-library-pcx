@@ -244,5 +244,96 @@ def test_initial_methotrexate_is_yes_no_or_unknown():
     assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', None)]) == (None, True)
     # methotrexate before t0 is not initial, and with no initial therapy documented the answer is unknown
     assert initial_methotrexate([('METHOTREXATE', 'ADMINISTERED', date(2020, 4, 1))]) == (None, None)
+    # methotrexate both before t0 and inside the window: the window record counts, not the lifetime first
+    assert initial_methotrexate([('METHOTREXATE', 'ADMINISTERED', date(2020, 4, 1)),
+                                 ('METHOTREXATE', 'ADMINISTERED', date(2020, 6, 8))]) == (True, True)
     # no documentation at all is unknown, never "no"
     assert initial_methotrexate([]) == (None, None)
+
+
+def test_sequence_uses_treatment_inside_the_window():
+    con = sqltest.connect()
+    # p5 (t0 2020-05-01): vincristine before diagnosis, then radiation, then vincristine again.
+    # p3 (no t0): the same records, which must not be ordered at all.
+    for subject in ('Patient/p5', 'Patient/p3'):
+        for i, day in enumerate((date(2020, 3, 1), date(2020, 9, 1)), start=1):
+            con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, "
+                        "agent_name, therapy_start_day, regimen_index, agent_index) "
+                        "VALUES (?, 'note-rx', 'ADMINISTERED', 'VINCRISTINE', ?, 1, ?)", [subject, day, i])
+        con.execute("INSERT INTO pcx__llm_radiation_wide (subject_ref, note_ref, delivery_status, radiation_start_day) "
+                    "VALUES (?, 'note-rt', 'ADMINISTERED', DATE '2020-06-01')", [subject])
+    sqltest.run_custom(con)
+    rows = {r[0]: r[1:] for r in con.execute(
+        "SELECT subject_ref, had_initial_chemo_bool, had_initial_radiation_bool, initial_therapy_sequence "
+        "FROM pcx__outcome_exposure WHERE subject_ref IN ('Patient/p5', 'Patient/p3')").fetchall()}
+    # chemotherapy before diagnosis does not make p5 chemotherapy-first: radiation was first after t0
+    assert rows['Patient/p5'] == (True, True, 'RADIATION_BEFORE_CHEMOTHERAPY')
+    assert rows['Patient/p3'] == (None, None, None)
+
+
+def p5_outcome(chemo=(), radiation=(), events=(), notes=()) -> dict:
+    """p5 (t0 2020-05-01, no other therapy or events) with LLM records given as
+    (day, precision, note_ref): chemo is vincristine, radiation a round, events (type, day, precision, note_ref).
+    notes are (note_ref, note_date) rows of the FHIR note-date spine."""
+    con = sqltest.connect()
+    for i, (day, precision, note) in enumerate(chemo, start=1):
+        con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, agent_name, "
+                    "therapy_start_day, therapy_start_day_precision, regimen_index, agent_index) "
+                    "VALUES ('Patient/p5', ?, 'ADMINISTERED', 'VINCRISTINE', ?, ?, 1, ?)", [note, day, precision, i])
+    for day, precision, note in radiation:
+        con.execute("INSERT INTO pcx__llm_radiation_wide (subject_ref, note_ref, delivery_status, radiation_start_day, "
+                    "radiation_start_day_precision) VALUES ('Patient/p5', ?, 'ADMINISTERED', ?, ?)", [note, day, precision])
+    for event_type, day, precision, note in events:
+        con.execute("INSERT INTO pcx__llm_event_wide (subject_ref, note_ref, event_type, event_day, event_day_precision) "
+                    "VALUES ('Patient/p5', ?, ?, ?, ?)", [note, event_type, day, precision])
+    for note, note_date in notes:
+        con.execute("INSERT INTO pcx__llm_note_date VALUES ('Patient/p5', ?, ?)", [note, note_date])
+    sqltest.run_custom(con)
+    columns = ['radiation_prior_to_t0_bool', 'had_initial_chemo_bool', 'had_initial_radiation_bool',
+               'initial_therapy_sequence', 'efs_censor_source', 'first_event_day', 'efs_end_day_imputed_bool']
+    row = con.execute(f"SELECT {', '.join('o.' + c if c != 'radiation_prior_to_t0_bool' else 'e.' + c for c in columns)} "
+                      "FROM pcx__outcome AS o JOIN pcx__eligible AS e ON e.subject_ref = o.subject_ref "
+                      "WHERE o.subject_ref = 'Patient/p5'").fetchone()
+    return dict(zip(columns, row))
+
+
+def test_coarse_dates_count_only_when_their_whole_period_is_on_one_side():
+    chemo = [(date(2020, 6, 1), 'DAY', 'n-chemo')]
+    # radiation "2020" covers t0 (2020-05-01): neither prior nor initial is certain
+    row = p5_outcome(chemo, radiation=[(date(2020, 1, 1), 'YEAR', 'n-rt')])
+    assert (row['radiation_prior_to_t0_bool'], row['had_initial_radiation_bool'], row['initial_therapy_sequence']) \
+        == (None, None, None)
+    # radiation "June 2020" is initial, but chemotherapy on 2020-06-01 falls inside that month: order unknown
+    row = p5_outcome(chemo, radiation=[(date(2020, 6, 1), 'MONTH', 'n-rt')])
+    assert (row['had_initial_chemo_bool'], row['had_initial_radiation_bool'], row['initial_therapy_sequence']) \
+        == (True, True, None)
+    # radiation "July 2020" certainly follows the chemotherapy
+    row = p5_outcome(chemo, radiation=[(date(2020, 7, 1), 'MONTH', 'n-rt')])
+    assert row['initial_therapy_sequence'] == 'CHEMOTHERAPY_BEFORE_RADIATION'
+    # a progression "January 2021" is dated at the middle of its month for EFS, flagged as imputed
+    row = p5_outcome(chemo, events=[('PROGRESSION', date(2021, 1, 1), 'MONTH', 'n-ev')])
+    assert (row['efs_censor_source'], row['first_event_day'], row['efs_end_day_imputed_bool']) \
+        == ('first_event', date(2021, 1, 15), True)
+
+
+def test_undated_mentions_are_bounded_by_their_note_date():
+    chemo = [(date(2020, 6, 1), 'DAY', 'n-chemo')]
+    # radiation given before t0, restated without a date in a later note: a documented "no initial radiation"
+    row = p5_outcome(chemo, radiation=[(date(2019, 1, 10), 'DAY', 'n-rt'), (None, None, 'n-rt-later')],
+                     notes=[('n-rt-later', date(2021, 1, 1))])
+    assert (row['had_initial_radiation_bool'], row['initial_therapy_sequence']) == (False, 'CHEMOTHERAPY_ONLY')
+    # an undated mention in a note written before t0 cannot be initial therapy
+    row = p5_outcome(chemo, radiation=[(None, None, 'n-rt-old')], notes=[('n-rt-old', date(2020, 3, 1))])
+    assert row['had_initial_radiation_bool'] is False
+    # an undated mention in a note after t0, with no dated record before it, may be initial: unknown
+    row = p5_outcome(chemo, radiation=[(None, None, 'n-rt-new')], notes=[('n-rt-new', date(2020, 9, 1))])
+    assert row['had_initial_radiation_bool'] is None
+    progression = ('PROGRESSION', date(2021, 1, 10), 'DAY', 'n-ev')
+    # "s/p recurrence" without a date in a note after the dated progression restates it: EFS keeps its interval
+    row = p5_outcome(chemo, events=[progression, ('RECURRENCE', None, None, 'n-ev-later')],
+                     notes=[('n-ev-later', date(2021, 6, 1))])
+    assert (row['efs_censor_source'], row['first_event_day']) == ('first_event', date(2021, 1, 10))
+    # the same mention in a note written before the dated progression means an earlier event: timing unknown
+    row = p5_outcome(chemo, events=[progression, ('RECURRENCE', None, None, 'n-ev-early')],
+                     notes=[('n-ev-early', date(2020, 11, 1))])
+    assert row['efs_censor_source'] == 'event_timing_uncertain'

@@ -1,35 +1,45 @@
 --  =====================================================================
 --  Outcome: treatment exposure in initial therapy (README section 2)
 --
---  Initial therapy runs from time zero to the first event: an exposure is
---  initial when its first day ON OR AFTER t0_day is BEFORE first_event_day.
---  With no dated event the window is open-ended. A death without a date
---  follows every dated exposure, since the patient was alive for it.
---  Exposure definitions come from pcx__eligible_rx (methotrexate, chemo) and
---  pcx__eligible_radiation (radiation).
+--  Initial therapy runs from time zero to the first event. Every record in
+--  pcx__exposure_record has the range of days it can fall on (a month or
+--  year date covers the whole period, an undated mention ends at its note
+--  date), and the first event a range too (pcx__outcome_first_event). Each
+--  record is placed against the window [t0_day, first event):
+--    inside    certainly in it: starts on or after t0_day, and ends before
+--              the first event can have happened (or there is no dated event)
+--    outside   certainly not in it: ends before t0_day, or starts on or after
+--              the latest day the first event can be
+--    possible  could be either, including an undated mention whose note is
+--              dated on or after t0_day
+--    restated  an undated mention of treatment already on record on or before
+--              its note date (pcx__exposure_record.restated_bool), ignored
+--  A death without a date follows every dated exposure, since the patient was
+--  alive for it.
 --
 --  had_initial_methotrexate_bool / _chemo_bool / _radiation_bool
---    TRUE   a dated exposure in the window
---    FALSE  none in the window and none undated, and initial therapy is
---           documented without it: for methotrexate and radiation a dated
---           chemotherapy in the window, for chemotherapy a dated radiation in
---           the window. An explicit EXPLICITLY_NOT_RECEIVED also gives FALSE
---           for methotrexate and radiation.
+--    TRUE   a record inside the window
+--    FALSE  no record inside or possibly inside, and initial therapy is
+--           documented without it: for methotrexate and radiation a
+--           chemotherapy record inside the window, for chemotherapy a
+--           radiation record inside it. An explicit EXPLICITLY_NOT_RECEIVED
+--           also gives FALSE for methotrexate and radiation.
 --    NULL   unknown: no t0, an undated progression, recurrence or second
---           malignancy (event_timing_uncertain_bool, the window end is
---           unknown), an undated exposure that may fall in the window, or no
---           initial therapy documented at all. Missing documentation is
---           never read as "not given".
+--           malignancy of unknown timing (event_timing_uncertain_bool), a
+--           record possibly inside, or no initial therapy documented at all.
+--           Missing documentation is never read as "not given".
 --  initial_therapy_sequence orders chemotherapy and radiation inside the
---  window (Sarah's stratifier), from the same flags:
---    CHEMOTHERAPY_BEFORE_RADIATION, RADIATION_BEFORE_CHEMOTHERAPY, SAME_DAY
---                       both initial, by first day in the window
+--  window (Sarah's stratifier). Each exposure's first day in the window lies
+--  between the earliest day any inside or possible record could be (not
+--  before t0_day) and the earliest end of an inside record:
+--    CHEMOTHERAPY_BEFORE_RADIATION / RADIATION_BEFORE_CHEMOTHERAPY
+--                       both initial, and one certainly starts first
+--    SAME_DAY           both initial on the same exact day
 --    CHEMOTHERAPY_ONLY  chemo initial, radiation FALSE
 --    RADIATION_ONLY     radiation initial, chemo FALSE
---    NO_INITIAL_THERAPY t0 known, timing certain, dated chemotherapy or
---                       radiation exists but none of it is in the window and
---                       none is undated
---    NULL               unknown
+--    NO_INITIAL_THERAPY t0 known, timing certain, chemotherapy or radiation
+--                       records exist and every one is outside the window
+--    NULL               unknown, including overlapping coarse dates
 --  protocol_names is every distinct protocol named in regimen or anchor evidence.
 --  =====================================================================
 CREATE  TABLE   pcx__outcome_exposure AS
@@ -49,7 +59,52 @@ protocol AS (
     FROM    protocol_candidate
     GROUP BY subject_ref
 ),
-evidence AS (
+-- each record placed against the initial-therapy window
+placed AS (
+    SELECT  record.subject_ref,
+            record.exposure,
+            record.earliest_day,
+            record.latest_day,
+            elig.t0_day,
+            CASE
+                WHEN record.restated_bool                                           THEN 'restated'
+                WHEN record.latest_day < elig.t0_day                                THEN 'outside'
+                WHEN record.earliest_day >= event.first_event_latest_day            THEN 'outside'
+                WHEN record.earliest_day >= elig.t0_day
+                 AND (event.first_event_earliest_day IS NULL
+                      OR record.latest_day < event.first_event_earliest_day)        THEN 'inside'
+                ELSE                                                                     'possible'
+            END                                                                     AS window_position
+    FROM    pcx__exposure_record       AS record
+    JOIN    pcx__eligible              AS elig  ON elig.subject_ref  = record.subject_ref
+    LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref = record.subject_ref
+    WHERE   record.exposure IN ('methotrexate', 'chemo', 'radiation')
+    AND     elig.t0_day IS NOT NULL
+),
+in_window AS (
+    SELECT  subject_ref,
+            BOOL_OR(exposure = 'methotrexate' AND window_position = 'inside')              AS methotrexate_inside_bool,
+            BOOL_OR(exposure = 'methotrexate' AND window_position = 'possible')            AS methotrexate_possible_bool,
+            BOOL_OR(exposure = 'chemo'        AND window_position = 'inside')              AS chemo_inside_bool,
+            BOOL_OR(exposure = 'chemo'        AND window_position = 'possible')            AS chemo_possible_bool,
+            BOOL_OR(exposure = 'radiation'    AND window_position = 'inside')              AS radiation_inside_bool,
+            BOOL_OR(exposure = 'radiation'    AND window_position = 'possible')            AS radiation_possible_bool,
+            BOOL_OR(exposure IN ('chemo', 'radiation') AND window_position <> 'restated')  AS therapy_recorded_bool,
+            -- range of each exposure's first day in the window
+            MIN(CASE WHEN exposure = 'chemo' AND window_position IN ('inside', 'possible')
+                     THEN CASE WHEN earliest_day >= t0_day THEN earliest_day ELSE t0_day END END)
+                                                                                    AS chemo_initial_earliest_day,
+            MIN(CASE WHEN exposure = 'chemo' AND window_position = 'inside' THEN latest_day END)
+                                                                                    AS chemo_initial_latest_day,
+            MIN(CASE WHEN exposure = 'radiation' AND window_position IN ('inside', 'possible')
+                     THEN CASE WHEN earliest_day >= t0_day THEN earliest_day ELSE t0_day END END)
+                                                                                    AS radiation_initial_earliest_day,
+            MIN(CASE WHEN exposure = 'radiation' AND window_position = 'inside' THEN latest_day END)
+                                                                                    AS radiation_initial_latest_day
+    FROM    placed
+    GROUP BY subject_ref
+),
+initial AS (
     SELECT  elig.subject_ref,
             elig.t0_day,
             event.first_event_day,
@@ -58,50 +113,39 @@ evidence AS (
             rx.methotrexate_first_day,
             rx.chemo_first_day,
             rt.radiation_first_day,
-            rx.methotrexate_first_day_from_t0,
-            rx.chemo_first_day_from_t0,
-            rt.radiation_first_day_from_t0,
-            rx.methotrexate_undated_bool,
-            rx.chemo_undated_bool,
-            rt.radiation_undated_bool,
-            rx.methotrexate_not_received_bool,
-            COALESCE(rt.llm_explicitly_not_received_bool, FALSE)                    AS radiation_not_received_bool,
-            -- a dated exposure inside the window, never NULL
-            (rx.methotrexate_first_day_from_t0 IS NOT NULL
-             AND (event.first_event_day IS NULL OR rx.methotrexate_first_day_from_t0 < event.first_event_day))
-                                                                                    AS methotrexate_in_window_bool,
-            (rx.chemo_first_day_from_t0 IS NOT NULL
-             AND (event.first_event_day IS NULL OR rx.chemo_first_day_from_t0 < event.first_event_day))
-                                                                                    AS chemo_in_window_bool,
-            (rt.radiation_first_day_from_t0 IS NOT NULL
-             AND (event.first_event_day IS NULL OR rt.radiation_first_day_from_t0 < event.first_event_day))
-                                                                                    AS radiation_in_window_bool
+            in_window.methotrexate_inside_bool,
+            in_window.chemo_inside_bool,
+            in_window.chemo_possible_bool,
+            in_window.radiation_inside_bool,
+            in_window.radiation_possible_bool,
+            in_window.therapy_recorded_bool,
+            in_window.chemo_initial_earliest_day,
+            in_window.chemo_initial_latest_day,
+            in_window.radiation_initial_earliest_day,
+            in_window.radiation_initial_latest_day,
+            CASE
+                WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
+                WHEN in_window.methotrexate_inside_bool                                THEN TRUE
+                WHEN in_window.methotrexate_possible_bool                              THEN NULL
+                WHEN in_window.chemo_inside_bool OR rx.methotrexate_not_received_bool  THEN FALSE
+            END                                                                     AS had_initial_methotrexate_bool,
+            CASE
+                WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
+                WHEN in_window.chemo_inside_bool                                       THEN TRUE
+                WHEN in_window.chemo_possible_bool                                     THEN NULL
+                WHEN in_window.radiation_inside_bool                                   THEN FALSE
+            END                                                                     AS had_initial_chemo_bool,
+            CASE
+                WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
+                WHEN in_window.radiation_inside_bool                                   THEN TRUE
+                WHEN in_window.radiation_possible_bool                                 THEN NULL
+                WHEN in_window.chemo_inside_bool OR rt.llm_explicitly_not_received_bool THEN FALSE
+            END                                                                     AS had_initial_radiation_bool
     FROM    pcx__eligible              AS elig
-    JOIN    pcx__eligible_rx           AS rx    ON rx.subject_ref    = elig.subject_ref
-    JOIN    pcx__eligible_radiation    AS rt    ON rt.subject_ref    = elig.subject_ref
-    LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref = elig.subject_ref
-),
-initial AS (
-    SELECT  evidence.*,
-            CASE
-                WHEN t0_day IS NULL OR event_timing_uncertain_bool          THEN NULL
-                WHEN methotrexate_in_window_bool                            THEN TRUE
-                WHEN methotrexate_undated_bool                              THEN NULL
-                WHEN chemo_in_window_bool OR methotrexate_not_received_bool THEN FALSE
-            END                                                             AS had_initial_methotrexate_bool,
-            CASE
-                WHEN t0_day IS NULL OR event_timing_uncertain_bool          THEN NULL
-                WHEN chemo_in_window_bool                                   THEN TRUE
-                WHEN chemo_undated_bool                                     THEN NULL
-                WHEN radiation_in_window_bool                               THEN FALSE
-            END                                                             AS had_initial_chemo_bool,
-            CASE
-                WHEN t0_day IS NULL OR event_timing_uncertain_bool          THEN NULL
-                WHEN radiation_in_window_bool                               THEN TRUE
-                WHEN radiation_undated_bool                                 THEN NULL
-                WHEN chemo_in_window_bool OR radiation_not_received_bool    THEN FALSE
-            END                                                             AS had_initial_radiation_bool
-    FROM    evidence
+    JOIN    pcx__eligible_rx           AS rx    ON rx.subject_ref     = elig.subject_ref
+    JOIN    pcx__eligible_radiation    AS rt    ON rt.subject_ref     = elig.subject_ref
+    LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref  = elig.subject_ref
+    LEFT JOIN in_window                         ON in_window.subject_ref = elig.subject_ref
 )
 SELECT  initial.subject_ref,
         initial.t0_day,
@@ -116,20 +160,21 @@ SELECT  initial.subject_ref,
         initial.had_initial_radiation_bool,
         CASE
             WHEN had_initial_chemo_bool AND had_initial_radiation_bool
-             AND chemo_first_day_from_t0 < radiation_first_day_from_t0          THEN 'CHEMOTHERAPY_BEFORE_RADIATION'
+             AND chemo_initial_latest_day < radiation_initial_earliest_day          THEN 'CHEMOTHERAPY_BEFORE_RADIATION'
             WHEN had_initial_chemo_bool AND had_initial_radiation_bool
-             AND chemo_first_day_from_t0 > radiation_first_day_from_t0          THEN 'RADIATION_BEFORE_CHEMOTHERAPY'
-            WHEN had_initial_chemo_bool AND had_initial_radiation_bool          THEN 'SAME_DAY'
-            WHEN had_initial_chemo_bool AND NOT had_initial_radiation_bool      THEN 'CHEMOTHERAPY_ONLY'
-            WHEN had_initial_radiation_bool AND NOT had_initial_chemo_bool      THEN 'RADIATION_ONLY'
+             AND radiation_initial_latest_day < chemo_initial_earliest_day          THEN 'RADIATION_BEFORE_CHEMOTHERAPY'
+            WHEN had_initial_chemo_bool AND had_initial_radiation_bool
+             AND chemo_initial_earliest_day = chemo_initial_latest_day
+             AND radiation_initial_earliest_day = radiation_initial_latest_day
+             AND chemo_initial_earliest_day = radiation_initial_earliest_day        THEN 'SAME_DAY'
+            WHEN had_initial_chemo_bool AND NOT had_initial_radiation_bool          THEN 'CHEMOTHERAPY_ONLY'
+            WHEN had_initial_radiation_bool AND NOT had_initial_chemo_bool          THEN 'RADIATION_ONLY'
             WHEN t0_day IS NOT NULL
              AND NOT event_timing_uncertain_bool
-             AND NOT chemo_undated_bool
-             AND NOT radiation_undated_bool
-             AND (chemo_first_day IS NOT NULL OR radiation_first_day IS NOT NULL)
-             AND NOT chemo_in_window_bool
-             AND NOT radiation_in_window_bool                                   THEN 'NO_INITIAL_THERAPY'
-        END                                                                     AS initial_therapy_sequence,
+             AND therapy_recorded_bool
+             AND NOT (chemo_inside_bool OR chemo_possible_bool
+                      OR radiation_inside_bool OR radiation_possible_bool)          THEN 'NO_INITIAL_THERAPY'
+        END                                                                         AS initial_therapy_sequence,
         protocol.protocol_names
 FROM    initial
 LEFT JOIN protocol ON protocol.subject_ref = initial.subject_ref

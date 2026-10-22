@@ -1,6 +1,9 @@
 --  =====================================================================
 --  Eligibility: medications
 --
+--  Evidence comes from pcx__exposure_record, one row per record with its
+--  source and the range of days it can fall on.
+--
 --  Methotrexate is the causal contrast. The CHOP clinical team treats any
 --  methotrexate given to these patients as high-dose (2026-10-22), so it
 --  counts from LLM evidence, two sources:
@@ -26,138 +29,41 @@
 --
 --  Chemotherapy is the six backbone agents (structured orders and
 --  dispenses), plus every LLM agent ADMINISTERED at the agent level or at
---  the dose level, earliest date wins, any methotrexate included, except
---  the supportive markers LEUCOVORIN, MESNA and DEXRAZOXANE
---  (NONE_OF_THE_ABOVE is an unlisted anticancer agent, so chemo).
+--  the dose level, any methotrexate included, except the supportive markers
+--  LEUCOVORIN, MESNA and DEXRAZOXANE (NONE_OF_THE_ABOVE is an unlisted
+--  anticancer agent, so chemo).
 --    rx_order     MedicationRequest authoredOn, an ORDER, not proof of receipt
 --                 (pcx__cohort_variable_union_rx, built on core__medicationrequest)
 --    rx_dispense  core__medicationdispense whenHandedOver, the pharmacy handed
 --                 it over. Closer to receipt, still not administration. Epic
 --                 dispensing is where infusion-center and inpatient doses appear.
---  Every candidate is unioned with its source, then the earliest date per
---  exposure is taken, so adding a source is one more UNION branch.
 --  Orders are linked to study_population encounters, dispenses are matched for
 --  every case subject.
 --  Flags are yes/no, they never remove a subject:
 --    *_any_bool          ever exposed, any date. FALSE = no evidence
---    *_prior_to_t0_bool  first dated exposure before t0_day. FALSE when t0 is
---                        known and nothing is dated before it (including no
---                        evidence at all), NULL only when t0_day is NULL
---    *_undated_bool      an exposure with no usable date exists, so its
---                        timing is unknown
---  *_first_day_from_t0 is the first exposure on or after t0_day, the start of
---  the initial-therapy window that pcx__outcome_exposure applies.
+--    *_undated_bool      an exposure with no usable date exists
+--    *_prior_to_t0_bool  dated exposure before t0_day, by the range of days a
+--                        record can fall on (a month or year date covers the
+--                        whole period):
+--                          TRUE   a record ends before t0_day
+--                          NULL   t0_day is NULL, or no record ends before it
+--                                 but one straddles it (a month or year date
+--                                 that includes t0_day)
+--                          FALSE  otherwise, including no evidence at all.
+--                                 Undated evidence never counts here.
+--  *_first_day is the earliest recorded day, the first day of its month or
+--  year for a coarse date.
 --  pcx__eligible_trial applies the prior-to-t0 flags as the ACNS0334
 --  no-prior-chemotherapy criterion, methotrexate included.
 --  =====================================================================
 CREATE  TABLE   pcx__eligible_rx AS
 WITH
-rx_valueset AS (
-    SELECT  'methotrexate_structured' AS exposure, "system", code FROM pcx__valueset_rx_contrast_methotrexate
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_carboplatin
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_cisplatin
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_cyclophosphamide
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_etoposide
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_thiotepa
-    UNION ALL
-    SELECT  'chemo', "system", code FROM pcx__valueset_rx_chemo_vincristine
-),
--- every LLM administration, at the agent level and at the dose level
-llm_administered AS (
-    SELECT  subject_ref,
-            note_ref,
-            regimen_index,
-            agent_name,
-            therapy_start_day                       AS exposure_day,
-            CAST(NULL AS BOOLEAN)                   AS high_dose_bool,
-            CAST(NULL AS VARCHAR)                   AS route
-    FROM    pcx__llm_systemic_therapy_agent
-    WHERE   delivery_status = 'ADMINISTERED'
-    UNION ALL
-    SELECT  dose.subject_ref,
-            dose.note_ref,
-            dose.regimen_index,
-            agent.agent_name,
-            dose.administration_day,
-            dose.high_dose_methotrexate_explicit_bool,
-            dose.route
-    FROM    pcx__llm_systemic_therapy_administration    AS dose
-    JOIN    pcx__llm_systemic_therapy_agent             AS agent
-    ON      agent.note_ref      = dose.note_ref
-    AND     agent.regimen_index = dose.regimen_index
-    AND     agent.agent_index   = dose.agent_index
-    WHERE   dose.delivery_status = 'ADMINISTERED'
-),
-regimen_b AS (
-    SELECT  subject_ref,
-            note_ref,
-            regimen_index,
-            regimen_start_day
-    FROM    pcx__llm_systemic_therapy_regimen
-    WHERE   protocol_name = 'ACNS0334'
-    AND     documented_trial_arm = 'REGIMEN_B'
-),
-candidate AS (
-    SELECT  subject_ref,
-            'methotrexate_structured'   AS exposure,
-            'rx_order'                  AS source,
-            rx_authoredon_date          AS exposure_day
-    FROM    pcx__cohort_variable_union_rx
-    WHERE   variable = 'rx_contrast_methotrexate'
-    UNION ALL
-    SELECT  subject_ref,
-            'chemo'                     AS exposure,
-            'rx_order'                  AS source,
-            rx_authoredon_date          AS exposure_day
-    FROM    pcx__cohort_variable_union_rx
-    WHERE   variable LIKE 'rx_chemo_%'
-    UNION ALL
-    -- core__medicationdispense already drops entered-in-error
-    SELECT  md.subject_ref,
-            rx_valueset.exposure,
-            'rx_dispense'               AS source,
-            md.whenhandedover_day       AS exposure_day
-    FROM    core__medicationdispense    AS md
-    JOIN    rx_valueset
-    ON      rx_valueset."system" = md.medication_system
-    AND     rx_valueset.code = md.medication_code
-    WHERE   md.whenhandedover_day IS NOT NULL
-    AND     md.status NOT IN ('cancelled', 'declined')
-    UNION ALL
-    SELECT  subject_ref,
-            'methotrexate'              AS exposure,
-            'llm_administered'          AS source,
-            exposure_day
-    FROM    llm_administered
-    WHERE   agent_name = 'METHOTREXATE'
-    UNION ALL
-    SELECT  subject_ref,
-            'methotrexate'              AS exposure,
-            'llm_acns0334_regimen_b'    AS source,
-            regimen_start_day           AS exposure_day
-    FROM    regimen_b
-    UNION ALL
-    SELECT  administered.subject_ref,
-            'methotrexate'              AS exposure,
-            'llm_acns0334_regimen_b'    AS source,
-            administered.exposure_day
-    FROM    llm_administered    AS administered
-    JOIN    regimen_b
-    ON      regimen_b.note_ref      = administered.note_ref
-    AND     regimen_b.regimen_index = administered.regimen_index
-    WHERE   administered.agent_name = 'METHOTREXATE'
-    UNION ALL
-    SELECT  subject_ref,
-            'chemo'                     AS exposure,
-            'llm_administered'          AS source,
-            exposure_day
-    FROM    llm_administered
-    WHERE   agent_name NOT IN ('LEUCOVORIN', 'MESNA', 'DEXRAZOXANE')
+record AS (
+    SELECT  record.*,
+            dx.t0_day
+    FROM    pcx__exposure_record    AS record
+    JOIN    pcx__eligible_dx        AS dx ON dx.subject_ref = record.subject_ref
+    WHERE   record.exposure IN ('methotrexate', 'methotrexate_structured', 'chemo')
 ),
 -- methotrexate evidence that does not change exposure
 methotrexate_detail AS (
@@ -167,8 +73,9 @@ methotrexate_detail AS (
             MIN(CASE WHEN route IN ('INTRATHECAL', 'INTRAVENTRICULAR') THEN exposure_day END)
                                                                                             AS methotrexate_intrathecal_or_ventricular_first_day,
             BOOL_OR(route IN ('INTRATHECAL', 'INTRAVENTRICULAR'))                           AS methotrexate_intrathecal_or_ventricular_bool
-    FROM    llm_administered
-    WHERE   agent_name = 'METHOTREXATE'
+    FROM    record
+    WHERE   exposure = 'methotrexate'
+    AND     source = 'llm_administered'
     GROUP BY subject_ref
 ),
 methotrexate_not_received AS (
@@ -189,20 +96,18 @@ methotrexate_not_received AS (
 methotrexate_source AS (
     SELECT  subject_ref,
             ARRAY_JOIN(ARRAY_SORT(ARRAY_AGG(DISTINCT source)), ',')                AS methotrexate_source
-    FROM    candidate
+    FROM    record
     WHERE   exposure = 'methotrexate'
     GROUP BY subject_ref
 ),
 first_day AS (
-    SELECT  candidate.subject_ref,
+    SELECT  subject_ref,
             MIN(CASE WHEN exposure = 'methotrexate'                                     THEN exposure_day END) AS methotrexate_first_day,
-            MIN(CASE WHEN exposure = 'methotrexate' AND exposure_day >= dx.t0_day      THEN exposure_day END) AS methotrexate_first_day_from_t0,
             MIN(CASE WHEN exposure = 'methotrexate' AND source = 'llm_administered'     THEN exposure_day END) AS methotrexate_administered_first_day,
             MIN(CASE WHEN exposure = 'methotrexate' AND source = 'llm_acns0334_regimen_b' THEN exposure_day END) AS methotrexate_regimen_b_first_day,
             MIN(CASE WHEN exposure = 'methotrexate_structured' AND source = 'rx_order'  THEN exposure_day END) AS methotrexate_order_first_day,
             MIN(CASE WHEN exposure = 'methotrexate_structured' AND source = 'rx_dispense' THEN exposure_day END) AS methotrexate_dispense_first_day,
             MIN(CASE WHEN exposure = 'chemo'                                            THEN exposure_day END) AS chemo_first_day,
-            MIN(CASE WHEN exposure = 'chemo' AND exposure_day >= dx.t0_day             THEN exposure_day END) AS chemo_first_day_from_t0,
             MIN(CASE WHEN exposure = 'chemo' AND source = 'rx_order'                    THEN exposure_day END) AS chemo_order_first_day,
             MIN(CASE WHEN exposure = 'chemo' AND source = 'rx_dispense'                 THEN exposure_day END) AS chemo_dispense_first_day,
             MIN(CASE WHEN exposure = 'chemo' AND source = 'llm_administered'            THEN exposure_day END) AS chemo_administered_first_day,
@@ -211,15 +116,18 @@ first_day AS (
             BOOL_OR(exposure = 'methotrexate' AND source = 'llm_acns0334_regimen_b')    AS methotrexate_regimen_b_bool,
             BOOL_OR(exposure = 'methotrexate' AND exposure_day IS NULL)                 AS methotrexate_undated_bool,
             BOOL_OR(exposure = 'chemo')                                                 AS chemo_any_bool,
-            BOOL_OR(exposure = 'chemo' AND exposure_day IS NULL)                        AS chemo_undated_bool
-    FROM    candidate
-    JOIN    pcx__eligible_dx    AS dx ON dx.subject_ref = candidate.subject_ref
-    GROUP BY candidate.subject_ref
+            BOOL_OR(exposure = 'chemo' AND exposure_day IS NULL)                        AS chemo_undated_bool,
+            -- prior to t0 by range: ends before t0, or straddles it
+            BOOL_OR(exposure = 'methotrexate' AND latest_day < t0_day AND exposure_day IS NOT NULL)  AS methotrexate_before_t0_bool,
+            BOOL_OR(exposure = 'methotrexate' AND exposure_day < t0_day)                AS methotrexate_may_precede_t0_bool,
+            BOOL_OR(exposure = 'chemo' AND latest_day < t0_day AND exposure_day IS NOT NULL)         AS chemo_before_t0_bool,
+            BOOL_OR(exposure = 'chemo' AND exposure_day < t0_day)                       AS chemo_may_precede_t0_bool
+    FROM    record
+    GROUP BY subject_ref
 )
 SELECT  dx.subject_ref,
         dx.t0_day,
         first_day.methotrexate_first_day,
-        first_day.methotrexate_first_day_from_t0,
         mtx_source.methotrexate_source,
         first_day.methotrexate_administered_first_day,
         first_day.methotrexate_regimen_b_first_day,
@@ -228,7 +136,6 @@ SELECT  dx.subject_ref,
         first_day.methotrexate_order_first_day,
         first_day.methotrexate_dispense_first_day,
         first_day.chemo_first_day,
-        first_day.chemo_first_day_from_t0,
         first_day.chemo_order_first_day,
         first_day.chemo_dispense_first_day,
         first_day.chemo_administered_first_day,
@@ -244,12 +151,14 @@ SELECT  dx.subject_ref,
         COALESCE(first_day.chemo_undated_bool, FALSE)                       AS chemo_undated_bool,
         CASE
             WHEN dx.t0_day IS NULL                                          THEN NULL
-            WHEN first_day.methotrexate_first_day < dx.t0_day               THEN TRUE
+            WHEN first_day.methotrexate_before_t0_bool                      THEN TRUE
+            WHEN first_day.methotrexate_may_precede_t0_bool                 THEN NULL
             ELSE                                                                 FALSE
         END                                                                 AS methotrexate_prior_to_t0_bool,
         CASE
             WHEN dx.t0_day IS NULL                                          THEN NULL
-            WHEN first_day.chemo_first_day < dx.t0_day                      THEN TRUE
+            WHEN first_day.chemo_before_t0_bool                             THEN TRUE
+            WHEN first_day.chemo_may_precede_t0_bool                        THEN NULL
             ELSE                                                                 FALSE
         END                                                                 AS chemo_prior_to_t0_bool
 FROM    pcx__eligible_dx   AS dx

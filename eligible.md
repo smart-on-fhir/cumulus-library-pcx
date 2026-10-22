@@ -129,11 +129,12 @@ Views by strictness, as implemented:
 
 ### Prior chemotherapy
 
-`chemo_prior_to_t0_bool` and `methotrexate_prior_to_t0_bool` are TRUE when the first dated
-exposure is before `t0_day`: for chemo an order, dispense or LLM-administered agent or dose, for
-methotrexate an administered methotrexate or ACNS0334 Regimen B evidence. They are FALSE when
-`t0_day` is known and nothing is dated before it, including no evidence or only undated
-evidence, and NULL only when `t0_day` is NULL. The trial-like cohort excludes TRUE and NULL.
+`chemo_prior_to_t0_bool` and `methotrexate_prior_to_t0_bool` are TRUE when a dated record
+ends before `t0_day`: for chemo an order, dispense or LLM-administered agent or dose, for
+methotrexate an administered methotrexate or ACNS0334 Regimen B evidence. A month or year date
+covers its whole period ([pcx__exposure_record](cumulus_library_pcx/sql/custom/pcx__exposure_record.sql)),
+so one that straddles `t0_day` gives NULL. They are FALSE when `t0_day` is known and nothing is
+dated before it, including no evidence or only undated evidence, and NULL when `t0_day` is NULL. The trial-like cohort excludes TRUE and NULL.
 `chemo_any_bool` and `methotrexate_any_bool` report exposure at any time.
 
 ### Prior radiation therapy

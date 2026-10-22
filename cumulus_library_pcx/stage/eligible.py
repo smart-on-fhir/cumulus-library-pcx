@@ -2,7 +2,7 @@
 from cumulus_study_builder.tools import sql_stage, toml_tool, filetool
 from cumulus_study_builder.tools.actions import FileAction, UploadWorkflow
 
-FILES = ['eligible_dx.sql', 'eligible_surgery.sql', 'eligible_rx.sql', 'eligible_radiation.sql', 'eligible.sql', 'eligible_trial.sql']
+FILES = ['pcx__llm_note_date.sql', 'pcx__exposure_record.sql', 'eligible_dx.sql', 'eligible_surgery.sql', 'eligible_rx.sql', 'eligible_radiation.sql', 'eligible.sql', 'eligible_trial.sql']
 
 
 def make():

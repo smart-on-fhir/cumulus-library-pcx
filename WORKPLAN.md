@@ -286,6 +286,16 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-22 — Dates are ranges: coarse and undated mentions no longer blank the analysis
+
+- BCH Athena 2026-10-22: 62% of administered radiation mentions are undated, and 82% of radiated patients (220 of 269) have dated and undated mentions. Of 430 patients with progression, recurrence or second-malignancy mentions, 308 have both and 59 only undated ones, so the 10-21 rule left 85% of event patients without an EFS interval and with Unknown initial therapy. A fifth of dated radiation and a third of dated progression and recurrence dates are month or year dates.
+- New `pcx__exposure_record` (eligible stage): every chemotherapy, methotrexate and radiation record with `earliest_day` / `latest_day`. A month or year date covers its whole period. An undated LLM mention ends at its note date (`pcx__llm_note_date`, FHIR note metadata, now built first in the eligible stage), and is a restatement (`restated_bool`) when a dated record of the same treatment starts on or before that date. `eligible_rx` and `eligible_radiation` read it. The `*_first_day_from_t0` columns added this morning are gone.
+- Prior to t0: TRUE when a dated record ends before t0, NULL when a month or year date straddles t0 (so out of the trial view), undated evidence still never counts.
+- Initial therapy (`outcome_exposure`): each record is inside, outside or possibly inside `[t0, first event)`, and restatements are ignored. TRUE needs a record inside, FALSE needs none inside or possible. The sequence is set only when one therapy certainly starts first.
+- Events (`outcome_first_event`): the first event has `first_event_earliest_day` / `first_event_latest_day`. An undated mention in a note dated on or after the latest day is a restatement (`undated_event_restated_cnt`), otherwise it keeps `event_timing_uncertain_bool`. Events that are all undated stay events without an interval.
+- Durations use the middle of a month or year (the 15th, July 1): `first_event_day`, `death_day`, `last_known_alive_day`, with `*_imputed_bool` flags and `os_end_day_imputed_bool` / `efs_end_day_imputed_bool` on `pcx__outcome`.
+- Tests: coarse dates on both sides of t0 and of each other, undated restatements, an undated mention in a pre-t0 note, undated event mentions before and after the dated event. Also restores `test_sequence_uses_treatment_inside_the_window` and the pre-t0 plus in-window methotrexate case, which this morning's copy to the repo missed.
+
 ### 2026-10-22 — Initial-therapy methotrexate and radiation, Kaplan strata no longer "ever"
 
 - Methotrexate exposure (`eligible_rx.sql`) is any LLM ADMINISTERED methotrexate, agent or dose level, any route (`llm_administered`, replaces `llm_high_dose`), or ACNS0334 Regimen B. CHOP clinician: any methotrexate given is high-dose. Evidence-only columns: `methotrexate_high_dose_*`, `methotrexate_intrathecal_or_ventricular_*`, `methotrexate_not_received_bool`. New `*_first_day_from_t0` and `*_undated_bool` in `eligible_rx` and `eligible_radiation`.
@@ -293,6 +303,7 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 - Behaviour changes: pre-t0 exposure is no longer initial (fixture p2 is now RADIATION_BEFORE_CHEMOTHERAPY, methotrexate FALSE), and under uncertain event timing an exposure on or after the dated event is now unknown, not FALSE.
 - Kaplan cubes: `had_initial_methotrexate` and `had_initial_radiation` (Yes, No, Not Reported, Not Applicable) replace `ever_methotrexate` and `radiation`. Methotrexate given only after progression is now No, not Yes.
 - `pcx__outcome`, `pcx__client_subject` (adds `had_initial_chemo_bool`), `pcx__client_exposure` (`had_initial_bool`), the warn tables, both dictionaries, PROTOCOL §6, §7 and §8.1, eligible.md and limitations.md follow. New test `test_initial_methotrexate_is_yes_no_or_unknown`.
+- Review follow-up: `test_sequence_uses_treatment_inside_the_window` pins the diagnosis boundary. Chemotherapy before t0 no longer makes a radiation-first patient chemotherapy-first (the 10-21 SQL gave CHEMOTHERAPY_BEFORE_RADIATION), a subject without t0 gets no sequence, and methotrexate both before t0 and in the window is Yes.
 
 ### 2026-10-22 — Systemic therapy v2 prompt, BCH rerun command
 

@@ -11,7 +11,8 @@ from cumulus_study_builder.tools import filetool
 SCHEMA = filetool.path_tests_data('schema.sql')
 
 # custom/ SQL in dependency order
-ELIGIBLE_OUTCOME = ['eligible_dx',
+ELIGIBLE_OUTCOME = ['pcx__exposure_record',
+                    'eligible_dx',
                     'eligible_surgery',
                     'eligible_rx',
                     'eligible_radiation',
