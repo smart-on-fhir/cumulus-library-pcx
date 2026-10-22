@@ -41,6 +41,9 @@ SELECT COUNT(*) AS cnt, 'pcx__warn_eligible_t0_missing' AS test
 SELECT COUNT(*) AS cnt, 'pcx__warn_eligible_therapy_precedes_t0' AS test 
  FROM pcx__warn_eligible_therapy_precedes_t0
  UNION ALL 
+SELECT COUNT(*) AS cnt, 'pcx__warn_exposure_timing_unknown' AS test 
+ FROM pcx__warn_exposure_timing_unknown
+ UNION ALL 
 SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_after_note' AS test 
  FROM pcx__warn_llm_date_after_note
  UNION ALL 
@@ -50,11 +53,11 @@ SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_coarse' AS test
 SELECT COUNT(*) AS cnt, 'pcx__warn_llm_date_invalid' AS test 
  FROM pcx__warn_llm_date_invalid
  UNION ALL 
+SELECT COUNT(*) AS cnt, 'pcx__warn_llm_duplicate_output' AS test 
+ FROM pcx__warn_llm_duplicate_output
+ UNION ALL 
 SELECT COUNT(*) AS cnt, 'pcx__warn_llm_model_rule' AS test 
  FROM pcx__warn_llm_model_rule
- UNION ALL 
-SELECT COUNT(*) AS cnt, 'pcx__warn_llm_molecular_duplicate_output' AS test 
- FROM pcx__warn_llm_molecular_duplicate_output
  UNION ALL 
 SELECT COUNT(*) AS cnt, 'pcx__warn_molecular_result_no_diagnosis' AS test 
  FROM pcx__warn_molecular_result_no_diagnosis

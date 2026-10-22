@@ -29,7 +29,8 @@ EXPECTED = {
                                             ("surgery_llm_without_role", "Patient/p2"),
                                             ("surgery_llm_without_role", "Patient/p3")},
     "pcx__warn_eligible_therapy_precedes_t0": {("chemo_precedes_t0", "Patient/p2")},
-    "pcx__warn_eligible_rx_llm_agent_unrecognized": {("rx_llm_agent_unrecognized", "Patient/p1")},
+    "pcx__warn_eligible_rx_llm_agent_unrecognized": {("rx_llm_agent_unrecognized", "Patient/p1"),
+                                                     ("rx_llm_agent_unrecognized", "Patient/p10")},
     "pcx__warn_eligible_radiation_evidence_conflict": {("radiation_not_received_vs_evidence", "Patient/p6"),
                                                        ("radiation_history_code_ignored", "Patient/p6")},
     "pcx__warn_eligible_subject_missing_patient": {("subject_missing_core_patient", "Patient/p4"),
@@ -49,11 +50,13 @@ EXPECTED = {
                                         ("os_days_zero", "Patient/p8")},
     "pcx__warn_llm_date_coarse": {("llm_date_coarse_month", "Patient/p1"), ("llm_date_coarse_year", "Patient/p6"),
                                   ("llm_date_coarse_month", "Patient/p6"), ("llm_date_coarse_month", "Patient/p8")},
-    "pcx__warn_llm_date_after_note": {("llm_date_after_note", "Patient/p7")},
+    "pcx__warn_llm_date_after_note": {("llm_date_after_note", "Patient/p7"), ("llm_date_after_note", "Patient/p8")},
     "pcx__warn_llm_date_invalid": {("llm_date_invalid", "Patient/p1"), ("llm_date_invalid", "Patient/p8"),
                                    ("llm_date_implausible", "Patient/p10"),
                                    ("llm_date_precision_missing", "Patient/p8")},
-    "pcx__warn_llm_molecular_duplicate_output": {("molecular_note_multiple_outputs", "Patient/p1")},
+    "pcx__warn_llm_duplicate_output": {("molecular_note_multiple_outputs", "Patient/p1"),
+                                       ("systemic_therapy_note_multiple_outputs", "Patient/p8"),
+                                       ("diagnosis_note_multiple_outputs", "Patient/p1")},
     "pcx__warn_llm_model_rule": {("administration_date_not_administered", "Patient/p2"),
                                  ("dose_unit_without_amount", "Patient/p2"), ("dose_amount_negative", "Patient/p2"),
                                  ("cycle_num_below_1", "Patient/p2"), ("cycle_num_below_1", "Patient/p8"),
@@ -64,6 +67,9 @@ EXPECTED = {
                                                 ("molecular_diagnosis_not_medulloblastoma", "Patient/p10"),
                                                 ("molecular_outside_discovery", "Patient/p10"),
                                                 ("molecular_outside_discovery", "Patient/p4")},
+    "pcx__warn_exposure_timing_unknown": {("initial_unknown_event_timing", "Patient/p6"),
+                                          ("initial_unknown_outside_window_only", "Patient/p8"),
+                                          ("initial_unknown_possible_record", "Patient/p8")},
     "pcx__warn_study_period_null_end": {("null_end_in_window", "Patient/p1"), ("null_end_history", "Patient/p6")},
 }
 
@@ -123,3 +129,21 @@ def test_qa_athena_toml_lists_every_warn_table():
     listed = {pathlib.Path(f).stem for action in toml["actions"] for f in action["files"]}
     assert listed >= {f.stem for f in sqltest.list_athena("pcx__warn_*.sql")}
     assert listed >= {f.stem for f in sqltest.list_athena("pcx__qa_*.sql")}
+
+
+def test_exposure_timing_unknown_lists_a_straddled_t0_and_intrathecal_only_methotrexate():
+    # p5 (t0 2020-05-01): radiation "2020" straddles t0, and its only methotrexate is an intrathecal dose
+    con = sqltest.connect()
+    con.execute("INSERT INTO pcx__llm_radiation_wide (subject_ref, note_ref, delivery_status, radiation_start_day, "
+                "radiation_start_day_precision) VALUES ('Patient/p5', 'note-p5-rt', 'ADMINISTERED', DATE '2020-01-01', 'YEAR')")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, generated_on, delivery_status, "
+                "agent_name, regimen_index, agent_index) VALUES ('Patient/p5', 'note-p5-rx', 'run-1', 'PLANNED', "
+                "'METHOTREXATE', 1, 1)")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, generated_on, "
+                "administration_day, administration_day_precision, regimen_index, agent_index, delivery_status, route) "
+                "VALUES ('Patient/p5', 'note-p5-rx', 'run-1', DATE '2020-06-01', 'DAY', 1, 1, 'ADMINISTERED', 'INTRATHECAL')")
+    sqltest.run_custom(con)
+    sqltest.run_athena(con, "pcx__warn_exposure_timing_unknown.sql")
+    rows = set(con.execute("SELECT warn_check, subject_ref FROM pcx__warn_exposure_timing_unknown").fetchall())
+    assert {("prior_to_t0_unknown", "Patient/p5"),
+            ("methotrexate_intrathecal_or_ventricular_only", "Patient/p5")} <= rows

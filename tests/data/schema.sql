@@ -78,7 +78,8 @@ CREATE TABLE pcx__llm_diagnosis_wide (
     diagnosis_gold_day DATE,
     diagnosis_gold_day_precision VARCHAR,
     age_at_diagnosis_months BIGINT,
-    historical_diagnosis_term VARCHAR
+    historical_diagnosis_term VARCHAR,
+    generated_on VARCHAR
 );
 
 CREATE TABLE pcx__cohort_proc_craniotomy (

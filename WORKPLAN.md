@@ -286,6 +286,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-22 — Warn tables for the new date and exposure rules
+
+- `pcx__warn_llm_duplicate_output` replaces `pcx__warn_llm_molecular_duplicate_output`: notes with more than one extraction output for the molecular, systemic-therapy or diagnosis task, each output's values in the detail.
+- New `pcx__warn_exposure_timing_unknown`: treatment evidence whose timing is unknown, by reason. `prior_to_t0_unknown` (a month or year date straddles t0, so the subject is out of the trial view), `initial_unknown_event_timing`, `initial_unknown_possible_record`, `initial_unknown_outside_window_only`, and `methotrexate_intrathecal_or_ventricular_only` (sizes the open route question). Backed by new `*_initial_unknown_reason` columns on `pcx__outcome_exposure`.
+- `pcx__warn_eligible_rx_llm_agent_unrecognized` also reads dose-level ADMINISTERED agents (same output), as `pcx__eligible_rx` does. `pcx__warn_llm_date_after_note` also checks administration dates and ACNS0334 Regimen B start dates, which date methotrexate exposure.
+- Fixtures: `generated_on` on the diagnosis wide table, a second output for p8's systemic-therapy note and p1's diagnosis note, a temozolomide dose under a PLANNED agent (p10), a note date for note-p8-rx. New test for the straddle and intrathecal-only checks.
+
 ### 2026-10-22 — A dose joins its drug within the same extraction output
 
 - `pcx__exposure_record.sql` (dose to agent, Regimen B to administration) and `eligible_rx.sql` (explicit non-receipt) now join on `generated_on` as well as `note_ref` and the array positions. A note run twice has two outputs whose agent positions can name different drugs. An external review showed a leucovorin dose from one output attaching to an explicitly-not-received methotrexate from the other, which fabricated methotrexate exposure and prior chemotherapy and removed the patient from the trial view. `generated_on` is set on every output by Cumulus Library; `system_fingerprint` can be NULL, so it is not a join key.

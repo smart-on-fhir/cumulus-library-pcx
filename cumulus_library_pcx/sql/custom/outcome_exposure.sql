@@ -28,6 +28,11 @@
 --           malignancy of unknown timing (event_timing_uncertain_bool), a
 --           record possibly inside, or no initial therapy documented at all.
 --           Missing documentation is never read as "not given".
+--  *_initial_unknown_reason says why a flag is NULL: no_t0,
+--  event_timing_uncertain, possible_record, or no_initial_therapy_documented
+--  (no record possibly inside, and nothing documents initial therapy without
+--  it). NULL when the flag is known. pcx__warn_exposure_timing_unknown lists
+--  the subjects whose exposure evidence exists but whose flag is unknown.
 --  initial_therapy_sequence orders chemotherapy and radiation inside the
 --  window (Sarah's stratifier). Each exposure's first day in the window lies
 --  between the earliest day any inside or possible record could be (not
@@ -114,6 +119,7 @@ initial AS (
             rx.chemo_first_day,
             rt.radiation_first_day,
             in_window.methotrexate_inside_bool,
+            in_window.methotrexate_possible_bool,
             in_window.chemo_inside_bool,
             in_window.chemo_possible_bool,
             in_window.radiation_inside_bool,
@@ -158,6 +164,28 @@ SELECT  initial.subject_ref,
         initial.had_initial_methotrexate_bool,
         initial.had_initial_chemo_bool,
         initial.had_initial_radiation_bool,
+        -- why a had_initial flag is NULL, NULL when it is known
+        CASE
+            WHEN had_initial_methotrexate_bool IS NOT NULL                          THEN NULL
+            WHEN t0_day IS NULL                                                     THEN 'no_t0'
+            WHEN event_timing_uncertain_bool                                        THEN 'event_timing_uncertain'
+            WHEN methotrexate_possible_bool                                         THEN 'possible_record'
+            ELSE                                                                         'no_initial_therapy_documented'
+        END                                                                         AS methotrexate_initial_unknown_reason,
+        CASE
+            WHEN had_initial_chemo_bool IS NOT NULL                                 THEN NULL
+            WHEN t0_day IS NULL                                                     THEN 'no_t0'
+            WHEN event_timing_uncertain_bool                                        THEN 'event_timing_uncertain'
+            WHEN chemo_possible_bool                                                THEN 'possible_record'
+            ELSE                                                                         'no_initial_therapy_documented'
+        END                                                                         AS chemo_initial_unknown_reason,
+        CASE
+            WHEN had_initial_radiation_bool IS NOT NULL                             THEN NULL
+            WHEN t0_day IS NULL                                                     THEN 'no_t0'
+            WHEN event_timing_uncertain_bool                                        THEN 'event_timing_uncertain'
+            WHEN radiation_possible_bool                                            THEN 'possible_record'
+            ELSE                                                                         'no_initial_therapy_documented'
+        END                                                                         AS radiation_initial_unknown_reason,
         CASE
             WHEN had_initial_chemo_bool AND had_initial_radiation_bool
              AND chemo_initial_latest_day < radiation_initial_earliest_day          THEN 'CHEMOTHERAPY_BEFORE_RADIATION'

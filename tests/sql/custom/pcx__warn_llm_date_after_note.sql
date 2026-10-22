@@ -1,8 +1,10 @@
 -- ============================================================================
 -- Warning: an LLM date later than the note that states it.
 --
--- A diagnosis, death, last-alive, event, administered therapy or radiation
--- start date cannot fall after the date of the note it was read from.
+-- A diagnosis, death, last-alive, event, administered therapy (agent or dose),
+-- ACNS0334 Regimen B start or radiation start date cannot fall after the date
+-- of the note it was read from. The dose and Regimen B dates set methotrexate
+-- exposure.
 -- Such a date is a misread (year typo, a scheduled date taken as delivered)
 -- and the eligible / outcome stages consume it as fact. Surgery dates are
 -- included because eligible_surgery does not check delivery status, so a
@@ -49,6 +51,19 @@ WITH candidate AS (
     FROM    pcx__llm_systemic_therapy_agent
     WHERE   therapy_start_day IS NOT NULL
     AND     delivery_status = 'ADMINISTERED'
+    UNION ALL
+    SELECT  'pcx__llm_systemic_therapy_administration', 'administration_date',
+            subject_ref, note_ref, administration_day
+    FROM    pcx__llm_systemic_therapy_administration
+    WHERE   administration_day IS NOT NULL
+    AND     delivery_status = 'ADMINISTERED'
+    UNION ALL
+    SELECT  'pcx__llm_systemic_therapy_regimen', 'regimen_start_date',
+            subject_ref, note_ref, regimen_start_day
+    FROM    pcx__llm_systemic_therapy_regimen
+    WHERE   regimen_start_day IS NOT NULL
+    AND     protocol_name = 'ACNS0334'
+    AND     documented_trial_arm = 'REGIMEN_B'
     UNION ALL
     SELECT  'pcx__llm_radiation_wide', 'radiation_start_date',
             subject_ref, note_ref, radiation_start_day

@@ -84,7 +84,7 @@ diagnosis AS (
 -- method always describes the selected group, and no report is joined back by
 -- key. A CLINICAL_SUMMARY method is not methylation confirmation.
 -- Every extraction output counts, re-runs of the same note included
--- (pcx__warn_llm_molecular_duplicate_output lists them). Report order:
+-- (pcx__warn_llm_duplicate_output lists them). Report order:
 --   1. a real group (WNT, SHH, GROUP_3, GROUP_4, NON_WNT_NON_SHH) beats
 --      NOT_SUBGROUPED and INDETERMINATE, which are absence of a result. Those
 --      are reported only when the subject has no real group.
