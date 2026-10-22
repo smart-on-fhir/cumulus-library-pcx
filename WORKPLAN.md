@@ -128,6 +128,14 @@ No changes planned.
 
 ## Clinical notes
 
+- [ ] P1 · `eligible` · **Methotrexate exposure: any administered MTX** (2026-10-22). The CHOP
+  clinician says methotrexate need not be called high-dose: a patient given methotrexate is
+  assumed to have had high dose. Today `eligible_rx.sql` counts only a dose explicitly called
+  high-dose (`high_dose_methotrexate_explicit_bool`) or ACNS0334 Regimen B. Planned: any
+  ADMINISTERED methotrexate (agent or dose level) counts, Regimen B still counts, structured
+  orders and dispenses stay evidence only, and the explicit high-dose flag stays as a descriptive
+  column. Open, asked of the clinician: does intrathecal or intraventricular (Ommaya)
+  methotrexate count? In infants that is a different, low-dose strategy from IV high-dose MTX.
 - [ ] P1 · `nlp` · **Rerun systemic therapy** (2026-10-21). Each `pcx__nlp_<task>_<model>` table
   holds ONE task version: Cumulus Library builds it over the folder `..._v<version>` of the
   current workflow version, and `--clean` deletes the older folders. BCH, checked in Athena
@@ -141,12 +149,14 @@ No changes planned.
     (180,226 notes). They are kept only by NOT rebuilding them: a rebuild repoints the table at
     the workflow version and re-extracts every note. The radiation (2 or 3) and topic (1, 2 or 3)
     templates read whichever version the table holds.
-  - Order: `--stage nlp_clinical_tasks --nlp-subtask systemic_therapy` without `--clean`, then
+  - Order: `--stage nlp_clinical_tasks --dev --nlp-subtask systemic_therapy` without `--clean-nlp`
+    (`--nlp-subtask` exists only with `--dev` in Cumulus Library 6.3.5, and `--clean-nlp` deletes
+    every `_v*` folder of the task), then
     `llm_clinical_wide`, `eligible`, `outcome`, `client_views`. `laboratory` (version 3) has
     never been run: `pcx__nlp_laboratory_gpt_oss_120b` exists with 0 rows, built over the empty
     `nlp_laboratory_gpt_oss_120b_v2` folder (checked 2026-10-21). Every struct field the
     laboratory templates read is in that v2 table, so `llm_clinical_wide` builds and the
-    laboratory tables are empty until a `--nlp-subtask laboratory` run repoints it at `_v3`.
+    laboratory tables are empty until a `--dev --nlp-subtask laboratory` run repoints it at `_v3`.
   CHOP has not run notes yet and gets the current versions.
 - [ ] P3 · `llm` · **Radiation indication enum** (was 3.6). `radiation.py` `indication` is
   free text. The old plan was a `RadiationIndication` enum, with a task version bump and
@@ -277,6 +287,12 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-22 — Systemic therapy v2 prompt, BCH rerun command
+
+- `systemic_therapy.py` (v2 amended in place, still not run anywhere): `high_dose_methotrexate_explicit_bool` no longer says "Numeric dose-based classification occurs downstream", which no SQL does and which invited the model to leave the flag null. Schema and summaries regenerated.
+- P1 "Rerun systemic therapy": the command is `--dev --nlp-subtask systemic_therapy` without `--clean-nlp` (corrected from `--nlp-subtask` without `--clean`, which 6.3.5 rejects).
+- New P1: any administered methotrexate counts as exposure (CHOP clinician), pending the intrathecal / intraventricular question.
 
 ### 2026-10-21 — NLP tables hold one task version: comments and plan corrected
 

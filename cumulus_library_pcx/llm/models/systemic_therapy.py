@@ -260,7 +260,7 @@ class TherapyAdministrationMention(SpanAugmentedMention):
         description=(
             "True only when this administration is explicitly called high-dose "
             "methotrexate. False only when explicitly characterized as not high-dose; "
-            "null when unknown. Numeric dose-based classification occurs downstream. "
+            "null when unknown. "
             "This label does not establish receipt; inspect delivery_status."
         ),
     )
