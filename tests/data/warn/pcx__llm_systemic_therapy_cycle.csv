@@ -1,0 +1,2 @@
+subject_ref,note_ref,cycle_start_date,cycle_start_date_precision,cycle_start_day,cycle_start_day_precision,cycle_stop_date,cycle_stop_date_precision,cycle_stop_day,cycle_stop_day_precision,cycle_num
+Patient/p8,note-p8-cy,2021-03-01,,2021-03-01,DAY,,,,,0

@@ -1,0 +1,7 @@
+subject_ref,note_ref,report_date,report_date_precision,report_day,report_day_precision,report_index,molecular_group,methods,generated_on,system_fingerprint
+Patient/p1,note-p1-mol,2020-01-28,DAY,2020-01-28,DAY,1,SHH,SEQUENCING,2026-09-01T00:00:00,fp_a
+Patient/p4,note-p4-mol,,,,,1,GROUP_4,DNA_METHYLATION,2026-09-01T00:00:00,fp_a
+Patient/p5,note-p5-mol,,,,,1,INDETERMINATE,,2026-09-01T00:00:00,fp_a
+Patient/p9,note-p9-mol,,,,,1,WNT,,2026-09-01T00:00:00,fp_a
+Patient/p10,note-p10-mol,,,,,1,SHH,,2026-09-01T00:00:00,fp_a
+Patient/p1,note-p1-mol,2020-01-28,DAY,2020-01-28,DAY,1,GROUP_3,DNA_METHYLATION,2026-10-01T00:00:00,fp_a
