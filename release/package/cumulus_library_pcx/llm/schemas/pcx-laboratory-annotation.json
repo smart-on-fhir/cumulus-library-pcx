@@ -282,7 +282,7 @@
       "type": "object"
     },
     "TreatmentPhase": {
-      "description": "Treatment phase as documented.\nINDUCTION: induction.\nCONSOLIDATION: consolidation.\nPOST_CONSOLIDATION: post-consolidation.\nSALVAGE: salvage.\nNONE_OF_THE_ABOVE: another documented phase, or phase not documented.",
+      "description": "Treatment phase as documented in the note.\nINDUCTION: induction.\nCONSOLIDATION: consolidation, including high-dose chemotherapy with stem-cell rescue.\nPOST_CONSOLIDATION: first-line therapy after consolidation and before any relapse or progression, including maintenance.\nSALVAGE: therapy for relapse, recurrence or progression, whenever it is given.\nNONE_OF_THE_ABOVE: another documented phase (therapy before induction, bridging or palliative therapy), or phase not documented.",
       "enum": [
         "INDUCTION",
         "CONSOLIDATION",

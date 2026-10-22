@@ -37,6 +37,18 @@ files = [
     "sample.toml",
 ]
 
+[[stages.study_meta]]
+type = "submanifest"
+files = [
+    "study_meta.toml",
+]
+
+[[stages.counts]]
+type = "submanifest"
+files = [
+    "counts.toml",
+]
+
 [[stages.llm_schema]]
 skip_by_default = true
 type = "submanifest"
@@ -98,15 +110,9 @@ files = [
     "qa_athena.toml",
 ]
 
-[[stages.counts]]
+[[stages.counts_kaplan]]
 skip_by_default = true
 type = "submanifest"
 files = [
-    "counts.toml",
-]
-
-[[stages.study_meta]]
-type = "submanifest"
-files = [
-    "study_meta.toml",
+    "counts_kaplan.toml",
 ]

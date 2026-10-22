@@ -4,20 +4,34 @@
 -- Task views below select from this table.
 -- Document types per task follow DOCUMENT_TASKS in
 -- llm/models/document_type.py
+--
+-- pcx__cohort_casedef has one row per subject x encounter x
+-- casedef code, so it is collapsed to its subject attributes
+-- first. Joining it on subject_ref alone multiplied every
+-- note by every encounter of that subject before DISTINCT.
 -----------------------------------------------------------
 CREATE  TABLE   pcx__llm_document_task AS
+WITH
+casedef_subject AS (
+    SELECT  DISTINCT
+            subject_ref,
+            subtype,
+            enc_period_start_day_min,
+            age_at_casedef_min
+    FROM    pcx__cohort_casedef
+)
 SELECT  DISTINCT
         T.document_type,
         R.*,
-        casedef.subtype,
-        casedef.enc_period_start_day_min,
-        casedef.age_at_casedef_min
-FROM    pcx__llm_document_type_wide     AS T,
-        pcx__llm_document_topic_wide    AS R,
-        pcx__cohort_casedef             AS casedef
-WHERE   T.note_ref = R.note_ref
-AND     T.subject_ref = casedef.subject_ref
-AND     R.subject_ref = casedef.subject_ref
+        casedef_subject.subtype,
+        casedef_subject.enc_period_start_day_min,
+        casedef_subject.age_at_casedef_min
+FROM    pcx__llm_document_type_wide     AS T
+JOIN    pcx__llm_document_topic_wide    AS R
+ON      T.note_ref = R.note_ref
+AND     T.subject_ref = R.subject_ref
+JOIN    casedef_subject
+ON      R.subject_ref = casedef_subject.subject_ref
 ;
 
 -----------------------------------------------------------
@@ -235,4 +249,63 @@ WHERE   task.document_type IN (
             'DISCHARGE_SUMMARY',
             'NEUROSURGERY_NOTE',
             'ONCOLOGY_NOTE')
+;
+
+-----------------------------------------------------------
+-- Survival timeline
+-- relevance: explicit/implicit
+-- or document type in DOCUMENT_TASKS["survival_timeline"]
+--
+-- Of the qualifying notes, keep:
+--   notes from each subject's last clinical visit, the latest
+--   encounter day among the qualifying notes. Vital status and
+--   last known alive are documented at the last visit, there
+--   are no visits after death.
+--   END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes
+--   from any visit, so a documented death is never dropped.
+--   notes not on a study-population visit (no encounter_ref,
+--   or an encounter outside the population). They cannot be
+--   ordered, so they are kept and the LLM extracts their dates.
+-----------------------------------------------------------
+CREATE OR REPLACE VIEW pcx__llm_document_task_survival_timeline AS
+WITH
+encounter_day AS (
+    SELECT  DISTINCT
+            encounter_ref,
+            enc_period_start_day
+    FROM    pcx__cohort_study_population
+),
+survival_note AS (
+    SELECT  task.survival_timeline_relevance,
+            task.survival_timeline_confidence,
+            task.document_type,
+            task.note_ref,
+            task.encounter_ref,
+            task.subject_ref,
+            encounter_day.enc_period_start_day
+    FROM    pcx__llm_document_task AS task
+    LEFT JOIN encounter_day
+    ON      task.encounter_ref = encounter_day.encounter_ref
+    WHERE   task.survival_timeline_relevance IN ('EXPLICIT', 'IMPLICIT')
+    OR      task.document_type IN (
+                'RESEARCH_PROTOCOL_DOCUMENT',
+                'DISCHARGE_SUMMARY',
+                'END_OF_LIFE_DOCUMENT',
+                'ONCOLOGY_NOTE',
+                'NONE_OF_THE_ABOVE')
+),
+last_visit AS (
+    SELECT  subject_ref,
+            MAX(enc_period_start_day) AS enc_period_start_day
+    FROM    survival_note
+    GROUP BY subject_ref
+)
+SELECT  survival_note.*
+FROM    survival_note
+JOIN    last_visit
+ON      survival_note.subject_ref = last_visit.subject_ref
+WHERE   survival_note.enc_period_start_day = last_visit.enc_period_start_day
+OR      survival_note.enc_period_start_day IS NULL
+OR      survival_note.document_type = 'END_OF_LIFE_DOCUMENT'
+OR      survival_note.survival_timeline_relevance = 'EXPLICIT'
 ;

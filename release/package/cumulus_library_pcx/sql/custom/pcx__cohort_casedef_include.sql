@@ -5,7 +5,7 @@
 --    system              	{'http://hl7.org/fhir/sid/icd-10-cm','http://snomed.info/sct', ...}
 --    code                	vocabulary concept ID
 --    display             	vocabulary concept display
---    tier                	1: best code match; 2: lower but still a match
+--    tier                	1: best code match, 2: lower but still a match
 --    resource_ref        	FHIR Condition/$id
 --    subject_ref         	FHIR Patient/$id
 --    encounter_ref_link  	FHIR Encounter/$id
@@ -19,8 +19,11 @@ WITH site_chop AS
             'SITE_CHOP'             as system,
             'SITE_CHOP'             as code,
             diagnosis_type_cohort   as display,
-            -- tier is always "1" highest quality match
-            1   as tier,
+            -- tier 2: the roster marks a case-definition subject but has no
+            -- diagnosis date. Each roster row sits on every population encounter,
+            -- so tier 1 would make eligible_dx take the patient's first encounter
+            -- of any kind as t0. t0 still comes from tier 1 coded medulloblastoma.
+            2   as tier,
             -- subtype
             CASE diagnosis_type_cohort
                 WHEN 'Medulloblastoma'                  THEN 'medulloblastoma'
@@ -28,7 +31,7 @@ WITH site_chop AS
                 ELSE CONCAT('UNKNOWN:',diagnosis_type_cohort)
                 END AS subtype,
             -- FHIR linkage
-            patient_id          as subject_ref,
+            enc.subject_ref     as subject_ref,
             enc.encounter_ref   as encounter_ref_link,
             NULL                as resource_ref
     FROM    radiant_data_dev.pcx_patient_list   as pcx_patient_list
