@@ -286,6 +286,12 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-22 — A dose joins its drug within the same extraction output
+
+- `pcx__exposure_record.sql` (dose to agent, Regimen B to administration) and `eligible_rx.sql` (explicit non-receipt) now join on `generated_on` as well as `note_ref` and the array positions. A note run twice has two outputs whose agent positions can name different drugs. An external review showed a leucovorin dose from one output attaching to an explicitly-not-received methotrexate from the other, which fabricated methotrexate exposure and prior chemotherapy and removed the patient from the trial view. `generated_on` is set on every output by Cumulus Library; `system_fingerprint` can be NULL, so it is not a join key.
+- Test fixtures: `generated_on` appended to the systemic-therapy agent, administration and regimen tables. New `test_a_dose_joins_its_agent_within_the_same_extraction_output` fails on the old joins.
+- After the BCH systemic-therapy rerun, check `SELECT COUNT(*) FROM (SELECT note_ref FROM pcx__nlp_systemic_therapy_gpt_oss_120b GROUP BY note_ref HAVING COUNT(*) > 1)`.
+
 ### 2026-10-22 — Two generic brain cancer codes no longer mean ATRT
 
 - `casedef.csv`: removed SNOMED 428061005 (malignant neoplasm of brain) and 93744007 (primary malignant neoplasm of CNS, per review lookup) from the tier 1 `atrt` rows. At BCH they gave 118 and 8 patients a tier 1 ATRT code, and 30 eligible patients were flagged ATRT on these codes alone (5 of them with a tier 1 medulloblastoma code), so they were wrongly out of the trial view. 428061005 stays a tier 3 candidate in `dx_brain_cancer.csv`. Patients whose only casedef evidence was one of these codes leave `pcx__cohort_casedef`, which also trims note sampling.

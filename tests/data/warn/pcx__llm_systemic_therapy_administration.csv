@@ -1,7 +1,7 @@
-subject_ref,note_ref,administration_date,administration_date_precision,administration_day,administration_day_precision,regimen_index,agent_index,delivery_status,route,high_dose_methotrexate_explicit_bool,dose_amount,dose_unit,cycle_num
-Patient/p1,note-p1-rx,2020-02-05,DAY,2020-02-05,DAY,1,3,ADMINISTERED,INTRAVENOUS,,,NONE_OF_THE_ABOVE,
-Patient/p8,note-p8-rx,2021-02-01,DAY,2021-02-01,DAY,1,1,ADMINISTERED,INTRAVENOUS,true,,NONE_OF_THE_ABOVE,
-Patient/p8,note-p8-rx,2021-01-15,DAY,2021-01-15,DAY,1,1,ADMINISTERED,INTRATHECAL,false,,NONE_OF_THE_ABOVE,
-Patient/p2,note-p2-rx9,2015-02-01,DAY,2015-02-01,DAY,9,9,PLANNED,INTRAVENOUS,,,NONE_OF_THE_ABOVE,
-Patient/p2,note-p2-rx9,,,,,9,9,PLANNED,INTRAVENOUS,,,MG_PER_M2,
-Patient/p2,note-p2-rx9,,,,,9,9,NONE_OF_THE_ABOVE,INTRAVENOUS,,-5,MG_PER_M2,0
+subject_ref,note_ref,administration_date,administration_date_precision,administration_day,administration_day_precision,regimen_index,agent_index,delivery_status,route,high_dose_methotrexate_explicit_bool,dose_amount,dose_unit,cycle_num,generated_on
+Patient/p1,note-p1-rx,2020-02-05,DAY,2020-02-05,DAY,1,3,ADMINISTERED,INTRAVENOUS,,,NONE_OF_THE_ABOVE,,2026-10-01T00:00:00+00:00
+Patient/p8,note-p8-rx,2021-02-01,DAY,2021-02-01,DAY,1,1,ADMINISTERED,INTRAVENOUS,true,,NONE_OF_THE_ABOVE,,2026-10-01T00:00:00+00:00
+Patient/p8,note-p8-rx,2021-01-15,DAY,2021-01-15,DAY,1,1,ADMINISTERED,INTRATHECAL,false,,NONE_OF_THE_ABOVE,,2026-10-01T00:00:00+00:00
+Patient/p2,note-p2-rx9,2015-02-01,DAY,2015-02-01,DAY,9,9,PLANNED,INTRAVENOUS,,,NONE_OF_THE_ABOVE,,2026-10-01T00:00:00+00:00
+Patient/p2,note-p2-rx9,,,,,9,9,PLANNED,INTRAVENOUS,,,MG_PER_M2,,2026-10-01T00:00:00+00:00
+Patient/p2,note-p2-rx9,,,,,9,9,NONE_OF_THE_ABOVE,INTRAVENOUS,,-5,MG_PER_M2,0,2026-10-01T00:00:00+00:00

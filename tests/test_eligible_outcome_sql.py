@@ -94,11 +94,12 @@ def test_prior_methotrexate_is_a_flag_here_and_an_exclusion_in_the_trial():
     # which is also prior chemotherapy, so p7 leaves the trial view
     con = sqltest.connect()
     con.execute(order)
-    con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, agent_name, "
-                "regimen_index, agent_index) VALUES ('Patient/p7', 'note-p7-rx', 'NONE_OF_THE_ABOVE', 'METHOTREXATE', 1, 1)")
-    con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, administration_day, "
-                "regimen_index, agent_index, delivery_status, high_dose_methotrexate_explicit_bool) VALUES "
-                "('Patient/p7', 'note-p7-rx', DATE '2019-12-01', 1, 1, 'ADMINISTERED', TRUE)")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, generated_on, delivery_status, "
+                "agent_name, regimen_index, agent_index) VALUES "
+                "('Patient/p7', 'note-p7-rx', 'run-1', 'NONE_OF_THE_ABOVE', 'METHOTREXATE', 1, 1)")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, generated_on, "
+                "administration_day, regimen_index, agent_index, delivery_status, high_dose_methotrexate_explicit_bool) "
+                "VALUES ('Patient/p7', 'note-p7-rx', 'run-1', DATE '2019-12-01', 1, 1, 'ADMINISTERED', TRUE)")
     sqltest.run_custom(con)
     row = eligible(con)['Patient/p7']
     assert (row['methotrexate_prior_to_t0_bool'], row['chemo_prior_to_t0_bool'], row['methotrexate_any_bool']) == (True, True, True)
@@ -337,3 +338,23 @@ def test_undated_mentions_are_bounded_by_their_note_date():
     row = p5_outcome(chemo, events=[progression, ('RECURRENCE', None, None, 'n-ev-early')],
                      notes=[('n-ev-early', date(2020, 11, 1))])
     assert row['efs_censor_source'] == 'event_timing_uncertain'
+
+
+def test_a_dose_joins_its_agent_within_the_same_extraction_output():
+    # p7 (t0 2020-01-01, otherwise untreated, in the trial view): note-p7-rx was run twice.
+    # Output A: agent 1 is methotrexate, explicitly not received.
+    # Output B: agent 1 is leucovorin, with an administered dose on 2019-12-01.
+    con = sqltest.connect()
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, generated_on, delivery_status, "
+                "agent_name, regimen_index, agent_index) VALUES "
+                "('Patient/p7', 'note-p7-rx', 'run-a', 'EXPLICITLY_NOT_RECEIVED', 'METHOTREXATE', 1, 1), "
+                "('Patient/p7', 'note-p7-rx', 'run-b', 'NONE_OF_THE_ABOVE', 'LEUCOVORIN', 1, 1)")
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, generated_on, "
+                "administration_day, regimen_index, agent_index, delivery_status) VALUES "
+                "('Patient/p7', 'note-p7-rx', 'run-b', DATE '2019-12-01', 1, 1, 'ADMINISTERED')")
+    sqltest.run_custom(con)
+    row = con.execute("SELECT methotrexate_administered_bool, methotrexate_first_day, chemo_prior_to_t0_bool, "
+                      "methotrexate_not_received_bool FROM pcx__eligible_rx WHERE subject_ref = 'Patient/p7'").fetchone()
+    # the leucovorin dose stays leucovorin (a supportive marker, not chemotherapy)
+    assert row == (False, None, False, True)
+    assert 'Patient/p7' in trial(con)

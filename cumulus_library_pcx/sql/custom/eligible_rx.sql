@@ -88,6 +88,7 @@ methotrexate_not_received AS (
     FROM    pcx__llm_systemic_therapy_administration    AS dose
     JOIN    pcx__llm_systemic_therapy_agent             AS agent
     ON      agent.note_ref      = dose.note_ref
+    AND     agent.generated_on  = dose.generated_on
     AND     agent.regimen_index = dose.regimen_index
     AND     agent.agent_index   = dose.agent_index
     WHERE   agent.agent_name = 'METHOTREXATE'
