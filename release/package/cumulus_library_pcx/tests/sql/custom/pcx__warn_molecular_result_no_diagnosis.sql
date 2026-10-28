@@ -51,10 +51,12 @@ casedef AS (
 flagged AS (
     SELECT  molecular.subject_ref,
             CASE
-                WHEN llm_dx.named_bool IS NOT TRUE
-                 AND casedef.tier1_bool IS NOT TRUE                         THEN 'molecular_no_diagnosis_evidence'
-                WHEN llm_dx.medulloblastoma_bool IS NOT TRUE
-                 AND casedef.tier1_medulloblastoma_bool IS NOT TRUE         THEN 'molecular_diagnosis_not_medulloblastoma'
+                WHEN llm_dx.named_bool IS DISTINCT FROM TRUE
+                AND casedef.tier1_bool IS DISTINCT FROM TRUE
+                THEN 'molecular_no_diagnosis_evidence'
+                WHEN llm_dx.medulloblastoma_bool IS DISTINCT FROM TRUE
+                AND casedef.tier1_medulloblastoma_bool IS DISTINCT FROM TRUE
+                THEN 'molecular_diagnosis_not_medulloblastoma'
             END                                                             AS dx_check,
             eligible.subject_ref IS NULL                                    AS outside_discovery_bool,
             CONCAT_WS('|',
