@@ -68,8 +68,10 @@ subject_t0 AS (
     SELECT  subj.subject_ref,
             COALESCE(llm.llm_t0_gold_day, mb.t0_day)                AS t0_day,
             CASE
-                WHEN llm.llm_t0_gold_day IS NOT NULL    THEN 'llm_diagnosis_gold'
-                WHEN mb.t0_day IS NOT NULL              THEN 'casedef_tier1_medulloblastoma'
+                WHEN llm.llm_t0_gold_day IS NOT NULL
+                THEN 'llm_diagnosis_gold'
+                WHEN mb.t0_day IS NOT NULL
+                THEN 'casedef_tier1_medulloblastoma'
             END                                                     AS t0_source,
             mb.t0_day                                               AS casedef_t0_day
     FROM    casedef_subject         AS subj
