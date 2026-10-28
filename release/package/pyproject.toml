@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "cumulus-library-pcx"
-version = "0.5.1"
+version = "0.5.2"
 description = "PCX methotrexate study: rendered Cumulus SQL and data files, no Python code."
 requires-python = ">=3.11"
 dependencies = ["cumulus-library>=6.3.7,<6.4"]
