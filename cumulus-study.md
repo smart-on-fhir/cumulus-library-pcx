@@ -19,6 +19,15 @@ python -m pip install -c requirements-tested.txt -e '.[test]'
 
 [requirements-tested.txt](requirements-tested.txt) pins the versions of the last passing run.
 
+## Prerequisite studies
+
+**Required**
+- [RxNorm](https://github.com/smart-on-fhir/cumulus-library-rxnorm)
+- [LOINC](https://github.com/smart-on-fhir/cumulus-library-loinc)
+- [Core](https://github.com/smart-on-fhir/cumulus-library/tree/main/cumulus_library/studies/core)
+
+All of these studies are publicly available via PyPI, and maintained by the SMART team. Follow the instructions in these packages to populate the prerequisite data.
+
 ## Commands
 
 Run them from the repository root.
