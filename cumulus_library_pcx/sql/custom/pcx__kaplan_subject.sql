@@ -17,25 +17,40 @@
 -- Not Reported, never No.
 -- protocol_name is the coded protocol of any systemic therapy regimen ever
 -- documented (pcx__llm_systemic_therapy_regimen, dated or not, not only initial
--- therapy): the one protocol named, Multiple when more than one is named, Not
--- Reported when none is (NONE_OF_THE_ABOVE is not a protocol). Naming a
--- protocol does not establish enrollment.
+-- therapy): every distinct protocol named, sorted and comma-joined (such as
+-- ACNS0334,HEAD_START), Not Reported when none is (NONE_OF_THE_ABOVE is not a
+-- protocol). Naming a protocol does not establish enrollment.
+-- protocol_name_by_date lists the same protocols in the order they are first
+-- documented: the earliest regimen_start_day, else the date of the note that
+-- names the protocol (pcx__llm_note_date, an upper bound on when it started).
+-- Undated protocols go last, ties are alphabetical. Not in the cubes, which
+-- keep the alphabetical label so a set of protocols is always one stratum.
 -- documented_trial_arm is the explicitly documented arm of an ACNS0334
 -- regimen only, so REGIMEN_B is always the high-dose methotrexate arm:
--- REGIMEN_A, REGIMEN_B, Multiple when notes document both, Not Reported when
--- an ACNS0334 regimen documents no arm, Not Applicable when no ACNS0334
--- regimen is documented. Arms of other protocols are ignored.
+-- REGIMEN_A, REGIMEN_B, Conflicting when notes document both (a patient is
+-- randomized once, so this needs chart review), Not Reported when an ACNS0334
+-- regimen documents no arm, Not Applicable when no ACNS0334 regimen is
+-- documented. Arms of other protocols are ignored.
 
 CREATE TABLE pcx__kaplan_subject AS
 WITH
+protocol_named AS (
+    SELECT  regimen.subject_ref,
+            regimen.protocol_name,
+            MIN(COALESCE(regimen.regimen_start_day, note_day.note_date)) AS first_day
+    FROM    pcx__llm_systemic_therapy_regimen AS regimen
+    LEFT JOIN pcx__llm_note_date AS note_day
+      ON    note_day.subject_ref = regimen.subject_ref
+     AND    note_day.note_ref    = regimen.note_ref
+    WHERE   regimen.protocol_name <> 'NONE_OF_THE_ABOVE'
+    GROUP BY regimen.subject_ref, regimen.protocol_name
+),
 protocol AS (
     SELECT  subject_ref,
-            CASE
-                WHEN COUNT(DISTINCT protocol_name) > 1 THEN 'Multiple'
-                ELSE MIN(protocol_name)
-            END AS protocol_name
-    FROM    pcx__llm_systemic_therapy_regimen
-    WHERE   protocol_name <> 'NONE_OF_THE_ABOVE'
+            ARRAY_JOIN(ARRAY_AGG(protocol_name ORDER BY protocol_name), ',') AS protocol_name,
+            ARRAY_JOIN(ARRAY_AGG(protocol_name ORDER BY first_day NULLS LAST, protocol_name), ',')
+                                                                    AS protocol_name_by_date
+    FROM    protocol_named
     GROUP BY subject_ref
 ),
 acns0334_arm AS (
@@ -47,7 +62,7 @@ acns0334_arm AS (
 trial_arm AS (
     SELECT  subject_ref,
             CASE
-                WHEN COUNT(DISTINCT arm) > 1 THEN 'Multiple'
+                WHEN COUNT(DISTINCT arm) > 1 THEN 'Conflicting'
                 WHEN COUNT(DISTINCT arm) = 1 THEN MIN(arm)
                 ELSE 'Not Reported'
             END AS documented_trial_arm
@@ -173,6 +188,7 @@ SELECT  outcome.subject_ref,
         END AS initial_treatment_order,
 
         COALESCE(protocol.protocol_name, 'Not Reported') AS protocol_name,
+        COALESCE(protocol.protocol_name_by_date, 'Not Reported') AS protocol_name_by_date,
         COALESCE(trial_arm.documented_trial_arm, 'Not Applicable') AS documented_trial_arm
 
 FROM pcx__outcome AS outcome

@@ -302,14 +302,20 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   beside the years columns.
 - [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries `protocol_name` and
   `documented_trial_arm` from any systemic therapy regimen ever documented (not only initial
-  therapy). One coded value per subject, Multiple when more than one is named. The arm comes
-  from ACNS0334 regimens only, Not Applicable without one.
+  therapy). Every coded protocol named, sorted and comma-joined (previously Multiple when
+  more than one was named), with `protocol_name_by_date` beside it in first-documented order
+  (subject table only). The arm comes from ACNS0334 regimens only, Not Applicable without one,
+  and Conflicting (previously Multiple) when notes document both arms.
 - [decided] 2026-10-29, Andy: the Kaplan-Meier cubes leave the exact PCX-30 layout.
   `cube_kaplan_os` and `cube_kaplan_efs` use `overall_survival_months` and
   `event_free_survival_months` in place of the years columns, and add `protocol_name` and
   `documented_trial_arm` as their last two columns. Supersedes "Survival years are FLOOR(days /
   365.25) from t0, capped at >=10" above for the cubes; the years columns stay in
   `pcx__kaplan_subject`.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject_demo` (counts_kaplan stage, not exported) is
+  the demo cohort: medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334,
+  PBTC_026 or CCG99703 regimen (documented arm or not) or high-dose methotrexate in initial therapy, and plottable on both curves (valid t0
+  and whole-month OS and EFS durations).
 
 ### 8.2 Exports and statistical plan
 

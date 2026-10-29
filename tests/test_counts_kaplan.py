@@ -7,6 +7,7 @@ from cumulus_library import CountsBuilder, StudyManifest
 from tests.conftest import ROOT
 
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
+DEMO = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject_demo.sql'
 
 # Based on the headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
 # the aggregator adds site when it combines each site's export. Survival is in months instead of
@@ -26,7 +27,11 @@ def outcome(i, t0=T0, os_event=False, os_days=400, efs_event=False, efs_days=400
     return (f'Patient/{i}', t0, os_event, os_days, efs_event, efs_days, under_36, methotrexate, radiation, sequence)
 
 
-def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = ()):
+def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = (), note_date_rows: list = ()):
+    """regimen_rows are (subject_ref, protocol_name, documented_trial_arm[, regimen_start_day[, note_ref]]),
+    note_date_rows are (subject_ref, note_ref, note_date)."""
+    # Athena ARRAY_JOIN, as in tests/sqltest.py
+    con.execute("CREATE OR REPLACE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
     con.execute('CREATE OR REPLACE TABLE pcx__outcome (subject_ref VARCHAR, t0_day DATE, os_event_bool BOOLEAN, '
                 'os_days BIGINT, efs_event_bool BOOLEAN, efs_days BIGINT, '
                 'age_under_36_months_at_definitive_surgery BOOLEAN, had_initial_methotrexate_bool BOOLEAN, '
@@ -37,9 +42,15 @@ def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = ())
     if molecular_rows:
         con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?, ?)', molecular_rows)
     con.execute('CREATE OR REPLACE TABLE pcx__llm_systemic_therapy_regimen (subject_ref VARCHAR, '
-                'protocol_name VARCHAR, documented_trial_arm VARCHAR)')
-    if regimen_rows:
-        con.executemany('INSERT INTO pcx__llm_systemic_therapy_regimen VALUES (?, ?, ?)', regimen_rows)
+                'protocol_name VARCHAR, documented_trial_arm VARCHAR, regimen_start_day DATE, note_ref VARCHAR)')
+    padded = list()
+    for row in regimen_rows:
+        padded.append(tuple(row) + (None,) * (5 - len(row)))
+    if padded:
+        con.executemany('INSERT INTO pcx__llm_systemic_therapy_regimen VALUES (?, ?, ?, ?, ?)', padded)
+    con.execute('CREATE OR REPLACE TABLE pcx__llm_note_date (subject_ref VARCHAR, note_ref VARCHAR, note_date DATE)')
+    if note_date_rows:
+        con.executemany('INSERT INTO pcx__llm_note_date VALUES (?, ?, ?)', note_date_rows)
     con.execute('DROP TABLE IF EXISTS pcx__kaplan_subject')
     con.execute(SOURCE.read_text())
 
@@ -110,13 +121,66 @@ def test_labels():
         ('event', 'Not Reported', 'Not Reported')
     # diagnosis is the latest documented subtype, not an exclusion: ATRT stays, none documented is Not Reported
     assert [s[i]['diagnosis'] for i in (0, 3, 4, 6)] == ['MEDULLOBLASTOMA', 'ATRT', 'Not Reported', 'Not Reported']
-    # protocol: one coded protocol, Multiple, or Not Reported (NONE_OF_THE_ABOVE is not a protocol).
+    # protocol: every coded protocol, sorted and comma-joined, or Not Reported (NONE_OF_THE_ABOVE is not a protocol).
     # arm: ACNS0334 regimens only, so the CCG99703 arm of Patient/5 is ignored.
     assert [(s[i]['protocol_name'], s[i]['documented_trial_arm']) for i in range(7)] == \
         [('ACNS0334', 'REGIMEN_B'), ('ACNS0334', 'REGIMEN_A'), ('ACNS0334', 'Not Reported'),
-         ('Multiple', 'Multiple'), ('Not Reported', 'Not Applicable'), ('CCG99703', 'Not Applicable'),
+         ('ACNS0334,HEAD_START', 'Conflicting'), ('Not Reported', 'Not Applicable'), ('CCG99703', 'Not Applicable'),
          ('Not Reported', 'Not Applicable')]
     assert df.drop(columns='subject_ref').isna().sum().sum() == 0
+
+
+def test_protocol_order_by_date():
+    con = duckdb.connect()
+    day = datetime.date
+    regimens = [
+        # alphabetical and date order differ, and the earliest of a protocol's rows counts
+        ('Patient/0', 'ACNS0334', 'REGIMEN_A', day(2016, 1, 1)), ('Patient/0', 'ACNS0334', 'REGIMEN_A', day(2018, 1, 1)),
+        ('Patient/0', 'HEAD_START', 'NONE_OF_THE_ABOVE', day(2015, 3, 1)),
+        # no start date: the note date stands in
+        ('Patient/1', 'ACNS0334', 'NONE_OF_THE_ABOVE', None, 'DocumentReference/n1'),
+        ('Patient/1', 'CCG99703', 'NONE_OF_THE_ABOVE', day(2016, 6, 1)),
+        # no start date and no note date: last
+        ('Patient/2', 'ACNS0334', 'NONE_OF_THE_ABOVE'), ('Patient/2', 'SJYC07', 'NONE_OF_THE_ABOVE', day(2015, 5, 1))]
+    notes = [('Patient/1', 'DocumentReference/n1', day(2017, 1, 1))]
+    load(con, [outcome(i) for i in range(4)], [], regimens, notes)
+    rows = con.execute('SELECT subject_ref, protocol_name, protocol_name_by_date FROM pcx__kaplan_subject '
+                       'ORDER BY subject_ref').fetchall()
+    assert rows == [('Patient/0', 'ACNS0334,HEAD_START', 'HEAD_START,ACNS0334'),
+                    ('Patient/1', 'ACNS0334,CCG99703', 'CCG99703,ACNS0334'),
+                    ('Patient/2', 'ACNS0334,SJYC07', 'SJYC07,ACNS0334'),
+                    ('Patient/3', 'Not Reported', 'Not Reported')]
+
+
+def test_demo_cohort():
+    con = duckdb.connect()
+    rows = [outcome(0), outcome(1, methotrexate=True), outcome(2), outcome(3), outcome(4), outcome(5, methotrexate=False),
+            outcome(6, t0=None, os_days=None, efs_days=None), outcome(7, efs_event=True, efs_days=None),
+            outcome(8, os_event=True, os_days=None), outcome(9), outcome(10), outcome(11), outcome(12)]
+    molecular = [('Patient/0', 'GROUP_3', 'MEDULLOBLASTOMA'), ('Patient/1', 'GROUP_4', 'MEDULLOBLASTOMA'),
+                 ('Patient/2', 'NON_WNT_NON_SHH', 'MEDULLOBLASTOMA'), ('Patient/3', 'SHH', 'MEDULLOBLASTOMA'),
+                 ('Patient/4', 'GROUP_3', 'ATRT'), ('Patient/5', 'GROUP_3', 'MEDULLOBLASTOMA'),
+                 ('Patient/6', 'GROUP_3', 'MEDULLOBLASTOMA'), ('Patient/7', 'GROUP_3', 'MEDULLOBLASTOMA'),
+                 ('Patient/8', 'GROUP_3', 'MEDULLOBLASTOMA'), ('Patient/9', 'GROUP_3', 'MEDULLOBLASTOMA'),
+                 ('Patient/10', 'GROUP_4', 'MEDULLOBLASTOMA'), ('Patient/11', 'GROUP_4', 'MEDULLOBLASTOMA'),
+                 ('Patient/12', 'GROUP_4', 'MEDULLOBLASTOMA')]
+    nota = 'NONE_OF_THE_ABOVE'
+    regimens = [('Patient/0', 'ACNS0334', 'REGIMEN_A'), ('Patient/2', 'ACNS0334', nota),
+                ('Patient/3', 'ACNS0334', 'REGIMEN_B'), ('Patient/4', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/6', 'ACNS0334', 'REGIMEN_B'), ('Patient/7', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/8', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/9', 'HEAD_START', nota), ('Patient/9', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/10', 'CCG99703', nota), ('Patient/11', 'PBTC_026', nota), ('Patient/12', 'HEAD_START', nota)]
+    load(con, rows, molecular, regimens)
+    con.execute(DEMO.read_text())
+    demo = con.execute('SELECT subject_ref, protocol_name, os_months, efs_months FROM pcx__kaplan_subject_demo '
+                       'ORDER BY CAST(SUBSTR(subject_ref, 9) AS INTEGER)').fetchall()
+    # kept: ACNS0334 with an arm, initial methotrexate without a listed protocol, ACNS0334 without an arm,
+    # ACNS0334 beside another protocol, CCG99703 and PBTC_026. Left out: SHH, ATRT, neither
+    # treatment, no t0, an undated EFS event, an undated death, and Head Start (not a listed protocol).
+    assert demo == [('Patient/0', 'ACNS0334', 13, 13), ('Patient/1', 'Not Reported', 13, 13),
+                    ('Patient/2', 'ACNS0334', 13, 13), ('Patient/9', 'ACNS0334,HEAD_START', 13, 13),
+                    ('Patient/10', 'CCG99703', 13, 13), ('Patient/11', 'PBTC_026', 13, 13)]
 
 
 def test_cube_columns_and_floor_of_one():
