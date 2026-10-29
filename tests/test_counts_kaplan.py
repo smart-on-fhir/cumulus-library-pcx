@@ -24,7 +24,7 @@ def outcome(i, t0=T0, os_event=False, os_days=400, efs_event=False, efs_days=400
     return (f'Patient/{i}', t0, os_event, os_days, efs_event, efs_days, under_36, methotrexate, radiation, sequence)
 
 
-def load(con, outcome_rows: list, molecular_rows: list):
+def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = ()):
     con.execute('CREATE OR REPLACE TABLE pcx__outcome (subject_ref VARCHAR, t0_day DATE, os_event_bool BOOLEAN, '
                 'os_days BIGINT, efs_event_bool BOOLEAN, efs_days BIGINT, '
                 'age_under_36_months_at_definitive_surgery BOOLEAN, had_initial_methotrexate_bool BOOLEAN, '
@@ -34,6 +34,10 @@ def load(con, outcome_rows: list, molecular_rows: list):
     con.executemany('INSERT INTO pcx__outcome VALUES (' + ', '.join(['?'] * 10) + ')', outcome_rows)
     if molecular_rows:
         con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?, ?)', molecular_rows)
+    con.execute('CREATE OR REPLACE TABLE pcx__llm_systemic_therapy_regimen (subject_ref VARCHAR, '
+                'protocol_name VARCHAR, documented_trial_arm VARCHAR)')
+    if regimen_rows:
+        con.executemany('INSERT INTO pcx__llm_systemic_therapy_regimen VALUES (?, ?, ?)', regimen_rows)
     con.execute('DROP TABLE IF EXISTS pcx__kaplan_subject')
     con.execute(SOURCE.read_text())
 
@@ -69,13 +73,25 @@ def test_labels():
     molecular = [('Patient/0', 'WNT', 'MEDULLOBLASTOMA'), ('Patient/1', 'GROUP_3', 'MEDULLOBLASTOMA'),
                  ('Patient/2', 'NON_WNT_NON_SHH', 'MEDULLOBLASTOMA'), ('Patient/3', 'NOT_SUBGROUPED', 'ATRT'),
                  ('Patient/4', 'INDETERMINATE', None)]
-    load(con, rows, molecular)
+    nota = 'NONE_OF_THE_ABOVE'
+    regimens = [('Patient/0', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/1', 'ACNS0334', nota), ('Patient/1', 'ACNS0334', 'REGIMEN_A'),
+                ('Patient/2', 'ACNS0334', nota),
+                ('Patient/3', 'HEAD_START', nota), ('Patient/3', 'ACNS0334', 'REGIMEN_A'),
+                ('Patient/3', 'ACNS0334', 'REGIMEN_B'),
+                ('Patient/4', nota, 'REGIMEN_A'),
+                ('Patient/5', 'CCG99703', 'REGIMEN_B')]
+    load(con, rows, molecular, regimens)
     df = con.execute('SELECT * FROM pcx__kaplan_subject ORDER BY CAST(SUBSTR(subject_ref, 9) AS INTEGER)').fetchdf()
     s = df.to_dict('records')
 
     # 3652 days is 9.9986 years, 3653 is 10.0014
     assert [r['overall_survival_years'] for r in s[:8]] == \
         ['0', '0', '1', '9', '>=10', 'Not Applicable', 'Not Reported', 'Not Reported']
+    # months are FLOOR(days / 30.4375) with no cap: 364 days is 11.96 months, 366 is 12.02
+    assert [r['overall_survival_months'] for r in s[:8]] == \
+        ['11', '11', '12', '119', '120', 'Not Applicable', 'Not Reported', 'Not Reported']
+    assert [s[i]['event_free_survival_months'] for i in (0, 5, 11)] == ['13', 'Not Applicable', 'Not Reported']
     assert [r['subtype'] for r in s[:6]] == ['WNT', 'Group 3', 'non-WNT/non-SHH', 'NOS/NEC', 'NOS/NEC', 'NOS/NEC']
     assert (s[6]['vital_status'], s[0]['vital_status']) == ('deceased', 'alive')
     assert (s[8]['efs_status'], s[0]['efs_status']) == ('event', 'event-free')
@@ -92,6 +108,12 @@ def test_labels():
         ('event', 'Not Reported', 'Not Reported')
     # diagnosis is the latest documented subtype, not an exclusion: ATRT stays, none documented is Not Reported
     assert [s[i]['diagnosis'] for i in (0, 3, 4, 6)] == ['MEDULLOBLASTOMA', 'ATRT', 'Not Reported', 'Not Reported']
+    # protocol: one coded protocol, Multiple, or Not Reported (NONE_OF_THE_ABOVE is not a protocol).
+    # arm: ACNS0334 regimens only, so the CCG99703 arm of Patient/5 is ignored.
+    assert [(s[i]['protocol_name'], s[i]['documented_trial_arm']) for i in range(7)] == \
+        [('ACNS0334', 'REGIMEN_B'), ('ACNS0334', 'REGIMEN_A'), ('ACNS0334', 'Not Reported'),
+         ('Multiple', 'Multiple'), ('Not Reported', 'Not Applicable'), ('CCG99703', 'Not Applicable'),
+         ('Not Reported', 'Not Applicable')]
     assert df.drop(columns='subject_ref').isna().sum().sum() == 0
 
 
