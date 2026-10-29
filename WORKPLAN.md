@@ -293,6 +293,18 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — Kaplan subject protocol and trial arm
+
+- `pcx__kaplan_subject` has new `protocol_name` and `documented_trial_arm`, from any systemic therapy regimen ever documented. `protocol_name` is the one coded protocol, Multiple, or Not Reported. `documented_trial_arm` is read from ACNS0334 regimens only: REGIMEN_A, REGIMEN_B, Multiple, Not Reported (ACNS0334 without an arm) or Not Applicable (no ACNS0334 regimen). The cubes are unchanged.
+
+### 2026-10-29 — Kaplan subject survival in months
+
+- `pcx__kaplan_subject` has new `overall_survival_months` and `event_free_survival_months` beside the years columns: whole months, FLOOR(days / 30.4375) (the year divided by 12), no cap, with the same Not Applicable and Not Reported rules. The OS and EFS cubes are unchanged (PCX-30 years layout).
+
+### 2026-10-28 — qa_athena: Athena rejects IS NOT TRUE
+
+- `pcx__warn_molecular_result_no_diagnosis.sql` used `IS NOT TRUE`, which DuckDB accepts but Athena (Trino) does not ("mismatched input 'TRUE'"), so the qa_athena stage failed. Now `IS DISTINCT FROM TRUE`: same result, NULL included, and valid in both engines.
+
 ### 2026-10-22 — version 0.5.0
 
 - `pyproject.toml` 0.5.0, a minor release: new `counts_kaplan` stage, and changed columns in

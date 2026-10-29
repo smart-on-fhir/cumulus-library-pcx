@@ -297,6 +297,13 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   event with `event_free_survival_years` Not Reported. Curve calculations downstream must count
   the event but use no duration for it. `initial_treatment_order` is Not Reported when the
   event timing is uncertain.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries whole months,
+  `overall_survival_months` and `event_free_survival_months` (FLOOR(days / 30.4375), no cap),
+  beside the years columns. The cubes keep the PCX-30 years layout.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries `protocol_name` and
+  `documented_trial_arm` from any systemic therapy regimen ever documented (not only initial
+  therapy). One coded value per subject, Multiple when more than one is named. The arm comes
+  from ACNS0334 regimens only, Not Applicable without one. Not in the cubes.
 
 ### 8.2 Exports and statistical plan
 
