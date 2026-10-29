@@ -312,10 +312,17 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   `documented_trial_arm` as their last two columns. Supersedes "Survival years are FLOOR(days /
   365.25) from t0, capped at >=10" above for the cubes; the years columns stay in
   `pcx__kaplan_subject`.
-- [decided] 2026-10-29, Andy: `pcx__kaplan_subject_demo` (counts_kaplan stage, not exported) is
-  the demo cohort: medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334,
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject_strict` (counts_kaplan stage, renamed from
+  `pcx__kaplan_subject_demo`) is the strict cohort: medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334,
   PBTC_026 or CCG99703 regimen (documented arm or not) or high-dose methotrexate in initial therapy, and plottable on both curves (valid t0
-  and whole-month OS and EFS durations).
+  and whole-month OS and EFS durations). It is counted by its own exported cubes,
+  `cube_kaplan_strict_os` and `cube_kaplan_strict_efs`, with the same columns as the
+  all-subject cubes, which keep `pcx__kaplan_subject` as their source.
+- [decided] 2026-10-29, Andy: the `counts_kaplan` stage also exports cubes of the tables that
+  feed the Kaplan source, `pcx__eligible` (`cube_eligible_casedef`, `_prior_therapy`, `_risk`,
+  `_exposure`) and `pcx__outcome` (`cube_outcome_os`, `_efs`, `_initial_therapy`), 4-6 columns
+  each, distinct patients with the same approved floor of 1. Dates, day counts, continuous ages
+  and `protocol_names` are left out. New tables, so `data_package_version` stays 3.
 
 ### 8.2 Exports and statistical plan
 

@@ -293,6 +293,20 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — Strict cohort cubes
+
+- `pcx__kaplan_subject_demo` is renamed `pcx__kaplan_subject_strict`. Drop the old table in Athena.
+- New exported `cube_kaplan_strict_os` and `cube_kaplan_strict_efs` count the strict cohort with the same columns as `cube_kaplan_os` and `cube_kaplan_efs`, which still count all subjects from `pcx__kaplan_subject`. New tables, so `data_package_version` stays 3. `test_strict_cohort` also builds the two strict cubes.
+
+### 2026-10-29 — outcome.sql: missing END
+
+- The `os_end_day` CASE in `outcome.sql` had lost its `END`, so the outcome stage failed to parse. Restored. No change to results.
+
+### 2026-10-29 — Cubes of pcx__eligible and pcx__outcome
+
+- `counts_kaplan.workflow` adds seven exported cubes of the tables that feed the Kaplan source: `cube_eligible_casedef`, `cube_eligible_prior_therapy`, `cube_eligible_risk`, `cube_eligible_exposure` (from `pcx__eligible`) and `cube_outcome_os`, `cube_outcome_efs`, `cube_outcome_initial_therapy` (from `pcx__outcome`). Floor of 1, like the Kaplan cubes. `stage/counts_kaplan.py` exports them.
+- New `test_source_cubes_on_built_eligible_and_outcome` builds the cubes on the real eligible and outcome SQL over the seeded fixtures.
+
 ### 2026-10-29 — Kaplan protocol order by date, Conflicting ACNS0334 arm
 
 - New `pcx__kaplan_subject.protocol_name_by_date`: the same protocols in first-documented order (earliest regimen start date, else the note date). Subject table only, the cubes keep the alphabetical `protocol_name`.
@@ -303,9 +317,9 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 - `pcx__kaplan_subject.protocol_name` (and so the OS and EFS cubes) now lists every coded protocol a patient has, sorted and comma-joined (such as `ACNS0334,HEAD_START`), instead of `Multiple`. `documented_trial_arm` still says `Multiple` when both ACNS0334 arms are documented.
 
-### 2026-10-29 — Kaplan demo cohort
+### 2026-10-29 — Kaplan strict cohort
 
-- New `pcx__kaplan_subject_demo` in the `counts_kaplan` stage (not exported): medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334, PBTC_026 or CCG99703 regimen (from `pcx__llm_systemic_therapy_regimen`, arm documented or not) or initial high-dose methotrexate, and a valid t0 with whole-month OS and EFS durations. Adds integer `os_months` and `efs_months` for plotting. New `test_demo_cohort`.
+- New `pcx__kaplan_subject_strict` in the `counts_kaplan` stage (not exported): medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334, PBTC_026 or CCG99703 regimen (from `pcx__llm_systemic_therapy_regimen`, arm documented or not) or initial high-dose methotrexate, and a valid t0 with whole-month OS and EFS durations. Adds integer `os_months` and `efs_months` for plotting. New `test_strict_cohort`.
 
 ### 2026-10-29 — Kaplan cubes in months, with protocol and trial arm
 

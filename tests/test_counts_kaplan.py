@@ -1,13 +1,15 @@
 """Kaplan-Meier count cubes: the source SQL and counts workflow, executed in DuckDB."""
 import datetime
+import tomllib
 
 import duckdb
 from cumulus_library import CountsBuilder, StudyManifest
 
+from tests import sqltest
 from tests.conftest import ROOT
 
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
-DEMO = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject_demo.sql'
+STRICT = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject_strict.sql'
 
 # Based on the headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
 # the aggregator adds site when it combines each site's export. Survival is in months instead of
@@ -152,7 +154,7 @@ def test_protocol_order_by_date():
                     ('Patient/3', 'Not Reported', 'Not Reported')]
 
 
-def test_demo_cohort():
+def test_strict_cohort():
     con = duckdb.connect()
     rows = [outcome(0), outcome(1, methotrexate=True), outcome(2), outcome(3), outcome(4), outcome(5, methotrexate=False),
             outcome(6, t0=None, os_days=None, efs_days=None), outcome(7, efs_event=True, efs_days=None),
@@ -172,15 +174,24 @@ def test_demo_cohort():
                 ('Patient/9', 'HEAD_START', nota), ('Patient/9', 'ACNS0334', 'REGIMEN_B'),
                 ('Patient/10', 'CCG99703', nota), ('Patient/11', 'PBTC_026', nota), ('Patient/12', 'HEAD_START', nota)]
     load(con, rows, molecular, regimens)
-    con.execute(DEMO.read_text())
-    demo = con.execute('SELECT subject_ref, protocol_name, os_months, efs_months FROM pcx__kaplan_subject_demo '
+    con.execute(STRICT.read_text())
+    strict = con.execute('SELECT subject_ref, protocol_name, os_months, efs_months FROM pcx__kaplan_subject_strict '
                        'ORDER BY CAST(SUBSTR(subject_ref, 9) AS INTEGER)').fetchall()
     # kept: ACNS0334 with an arm, initial methotrexate without a listed protocol, ACNS0334 without an arm,
     # ACNS0334 beside another protocol, CCG99703 and PBTC_026. Left out: SHH, ATRT, neither
     # treatment, no t0, an undated EFS event, an undated death, and Head Start (not a listed protocol).
-    assert demo == [('Patient/0', 'ACNS0334', 13, 13), ('Patient/1', 'Not Reported', 13, 13),
-                    ('Patient/2', 'ACNS0334', 13, 13), ('Patient/9', 'ACNS0334,HEAD_START', 13, 13),
-                    ('Patient/10', 'CCG99703', 13, 13), ('Patient/11', 'PBTC_026', 13, 13)]
+    assert strict == [('Patient/0', 'ACNS0334', 13, 13), ('Patient/1', 'Not Reported', 13, 13),
+                      ('Patient/2', 'ACNS0334', 13, 13), ('Patient/9', 'ACNS0334,HEAD_START', 13, 13),
+                      ('Patient/10', 'CCG99703', 13, 13), ('Patient/11', 'PBTC_026', 13, 13)]
+
+    # the strict cubes: same columns as the all-subject cubes, counting only the six strict patients
+    strict_os = cube(con, 'counts_kaplan.workflow', 'pcx__cube_kaplan_strict_os')
+    strict_efs = cube(con, 'counts_kaplan.workflow', 'pcx__cube_kaplan_strict_efs')
+    assert list(strict_os.columns) == OS_COLS
+    assert list(strict_efs.columns) == EFS_COLS
+    assert strict_os[strict_os[OS_COLS[1:]].isna().all(axis=1)].cnt.tolist() == [6]
+    assert strict_efs[strict_efs[EFS_COLS[1:]].isna().all(axis=1)].cnt.tolist() == [6]
+    assert set(strict_efs.event_free_survival_months.dropna()) == {'13'}
 
 
 def test_cube_columns_and_floor_of_one():
@@ -201,3 +212,22 @@ def test_cube_columns_and_floor_of_one():
     deceased = os_cube[(os_cube.vital_status == 'deceased') & os_cube[others].isna().all(axis=1)]
     # the approved floor of 1 keeps the 3 deaths in the exported cube
     assert deceased.cnt.tolist() == [3]
+
+
+def test_source_cubes_on_built_eligible_and_outcome():
+    """The cube_eligible_* and cube_outcome_* cubes read columns the real eligible and outcome SQL builds."""
+    con = sqltest.connect()
+    sqltest.run_custom(con)
+    workflow = tomllib.loads((ROOT / 'cumulus_library_pcx' / 'counts_kaplan.workflow').read_text())
+    source_cubes = list()
+    for name, table in workflow['tables'].items():
+        if table['source_table'] in ('pcx__eligible', 'pcx__outcome'):
+            source_cubes.append((f'pcx__{name}', table))
+    assert len(source_cubes) == 7
+    for table_name, table in source_cubes:
+        df = cube(con, 'counts_kaplan.workflow', table_name)
+        assert list(df.columns) == ['cnt'] + table['table_cols'], table_name
+        subjects = con.execute(f"SELECT COUNT(DISTINCT subject_ref) FROM {table['source_table']}").fetchone()[0]
+        # the floor of 1 keeps every patient in the grand total
+        grand = df[df[table['table_cols']].isna().all(axis=1)]
+        assert grand.cnt.tolist() == [subjects], table_name

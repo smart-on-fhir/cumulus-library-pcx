@@ -34,7 +34,8 @@ SELECT  eligible.subject_ref,
         CASE
             WHEN    vital.deceased_bool
             THEN    vital.death_day
-            ELSE    vital.last_known_alive_day  AS os_end_day,
+            ELSE    vital.last_known_alive_day
+        END                                     AS os_end_day,
         CASE
             WHEN    vital.deceased_bool
             THEN    DATE_DIFF('day', eligible.t0_day, vital.death_day)
