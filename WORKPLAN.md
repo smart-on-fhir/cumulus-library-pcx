@@ -293,6 +293,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — Counts of the document-task notes
+
+- `counts.workflow` adds `cube_patient_sample_task` (patients) and `cube_note_sample_task` (notes, `secondary_id = note_ref`) over `pcx__sample_task`, by `topic` and `note_display`. Floor of 10 like the other `counts` cubes. They export with the `counts` stage and, through `counts_cubes()`, with `counts_kaplan`.
+
 ### 2026-10-29 — One export zip for every cube
 
 - The study `counts` cubes never reached the aggregator: `export --stage counts_kaplan` held only that stage's cubes, and `export --stage counts` has no meta tables, which `upload` rejects. `stage/counts_kaplan.py` now also exports the `counts` cubes, with names read from `counts.workflow`, so `export --stage counts_kaplan` is the one zip to upload. New `test_counts_kaplan_export_holds_every_cube_and_meta`.
