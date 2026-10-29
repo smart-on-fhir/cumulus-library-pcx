@@ -299,11 +299,17 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   event timing is uncertain.
 - [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries whole months,
   `overall_survival_months` and `event_free_survival_months` (FLOOR(days / 30.4375), no cap),
-  beside the years columns. The cubes keep the PCX-30 years layout.
+  beside the years columns.
 - [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries `protocol_name` and
   `documented_trial_arm` from any systemic therapy regimen ever documented (not only initial
   therapy). One coded value per subject, Multiple when more than one is named. The arm comes
-  from ACNS0334 regimens only, Not Applicable without one. Not in the cubes.
+  from ACNS0334 regimens only, Not Applicable without one.
+- [decided] 2026-10-29, Andy: the Kaplan-Meier cubes leave the exact PCX-30 layout.
+  `cube_kaplan_os` and `cube_kaplan_efs` use `overall_survival_months` and
+  `event_free_survival_months` in place of the years columns, and add `protocol_name` and
+  `documented_trial_arm` as their last two columns. Supersedes "Survival years are FLOOR(days /
+  365.25) from t0, capped at >=10" above for the cubes; the years columns stay in
+  `pcx__kaplan_subject`.
 
 ### 8.2 Exports and statistical plan
 

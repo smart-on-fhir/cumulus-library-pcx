@@ -1,4 +1,4 @@
-"""Kaplan-Meier count cubes in the PCX-30 OS and EFS cube layout.
+"""Kaplan-Meier count cubes based on the PCX-30 OS and EFS cubes, in months.
 
 Builds pcx__kaplan_subject (one labeled row per eligible subject),
 then the cubes in counts_kaplan.workflow (shared, exported).

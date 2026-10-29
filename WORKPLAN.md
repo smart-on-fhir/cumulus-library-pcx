@@ -293,6 +293,11 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — Kaplan cubes in months, with protocol and trial arm
+
+- `pcx__cube_kaplan_os` and `pcx__cube_kaplan_efs` (`counts_kaplan.workflow`) now count survival in whole months (`overall_survival_months`, `event_free_survival_months`) instead of years, and add `protocol_name` and `documented_trial_arm` as their last columns. The cubes are no longer an exact PCX-30 column match. The years columns stay in `pcx__kaplan_subject`.
+- `data_package_version` is unchanged (2), although the columns of two exported tables changed.
+
 ### 2026-10-29 — Kaplan subject protocol and trial arm
 
 - `pcx__kaplan_subject` has new `protocol_name` and `documented_trial_arm`, from any systemic therapy regimen ever documented. `protocol_name` is the one coded protocol, Multiple, or Not Reported. `documented_trial_arm` is read from ACNS0334 regimens only: REGIMEN_A, REGIMEN_B, Multiple, Not Reported (ACNS0334 without an arm) or Not Applicable (no ACNS0334 regimen). The cubes are unchanged.

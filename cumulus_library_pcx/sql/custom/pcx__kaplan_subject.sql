@@ -6,8 +6,8 @@
 -- event_free_survival_years and event_free_survival_months Not Reported:
 -- curves count the event but use no duration for it.
 -- Survival is labeled in whole years (FLOOR(days / 365.25), capped at >=10,
--- the PCX-30 cube label) and in whole months (FLOOR(days / 30.4375), the
--- year divided by 12, no cap). The exported cubes use years only.
+-- the PCX-30 label) and in whole months (FLOOR(days / 30.4375), the year
+-- divided by 12, no cap). The exported cubes use months.
 -- Exposure strata are INITIAL therapy, from time zero to the first event
 -- (pcx__outcome_exposure), never ever-exposure, so salvage therapy after
 -- relapse is not counted. had_initial_methotrexate and had_initial_radiation

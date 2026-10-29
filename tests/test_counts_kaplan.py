@@ -8,13 +8,15 @@ from tests.conftest import ROOT
 
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
 
-# Headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
-# the aggregator adds site when it combines each site's export. The two exposure strata are
-# initial therapy (had_initial_*) instead of PCX-30's ever_methotrexate and radiation.
-OS_COLS = ['cnt', 'diagnosis', 'overall_survival_years', 'vital_status', 'age_at_diagnosis_under_36mo',
-           'had_initial_methotrexate', 'had_initial_radiation', 'subtype']
-EFS_COLS = ['cnt', 'diagnosis', 'event_free_survival_years', 'efs_status', 'age_at_diagnosis_under_36mo',
-            'had_initial_methotrexate', 'had_initial_radiation', 'subtype', 'initial_treatment_order']
+# Based on the headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
+# the aggregator adds site when it combines each site's export. Survival is in months instead of
+# years, the two exposure strata are initial therapy (had_initial_*) instead of PCX-30's
+# ever_methotrexate and radiation, and protocol_name and documented_trial_arm are added at the end.
+OS_COLS = ['cnt', 'diagnosis', 'overall_survival_months', 'vital_status', 'age_at_diagnosis_under_36mo',
+           'had_initial_methotrexate', 'had_initial_radiation', 'subtype', 'protocol_name', 'documented_trial_arm']
+EFS_COLS = ['cnt', 'diagnosis', 'event_free_survival_months', 'efs_status', 'age_at_diagnosis_under_36mo',
+            'had_initial_methotrexate', 'had_initial_radiation', 'subtype', 'initial_treatment_order',
+            'protocol_name', 'documented_trial_arm']
 
 T0 = datetime.date(2015, 1, 1)
 
@@ -117,9 +119,9 @@ def test_labels():
     assert df.drop(columns='subject_ref').isna().sum().sum() == 0
 
 
-def test_columns_match_pcx30_and_floor_of_one():
+def test_cube_columns_and_floor_of_one():
     con = duckdb.connect()
-    # 12 alive at 0 years, 3 deceased at 1 year
+    # 12 alive at 3 months, 3 deceased at 13 months
     rows = [outcome(i, os_days=100) for i in range(12)] + [outcome(100 + i, os_event=True, os_days=400) for i in range(3)]
     load(con, rows, [])
 
