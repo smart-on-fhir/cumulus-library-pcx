@@ -293,6 +293,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — One export zip for every cube
+
+- The study `counts` cubes never reached the aggregator: `export --stage counts_kaplan` held only that stage's cubes, and `export --stage counts` has no meta tables, which `upload` rejects. `stage/counts_kaplan.py` now also exports the `counts` cubes, with names read from `counts.workflow`, so `export --stage counts_kaplan` is the one zip to upload. New `test_counts_kaplan_export_holds_every_cube_and_meta`.
+
 ### 2026-10-29 — Strict cohort cubes
 
 - `pcx__kaplan_subject_demo` is renamed `pcx__kaplan_subject_strict`. Drop the old table in Athena.

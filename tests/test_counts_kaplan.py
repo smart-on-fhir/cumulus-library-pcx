@@ -231,3 +231,17 @@ def test_source_cubes_on_built_eligible_and_outcome():
         # the floor of 1 keeps every patient in the grand total
         grand = df[df[table['table_cols']].isna().all(axis=1)]
         assert grand.cnt.tolist() == [subjects], table_name
+
+
+def test_counts_kaplan_export_holds_every_cube_and_meta():
+    """One `export --stage counts_kaplan` zip must be uploadable on its own: every cube of both
+    workflows plus pcx__meta_date (upload rejects a zip without it)."""
+    manifest = StudyManifest(ROOT / 'cumulus_library_pcx')
+    exported = list()
+    for table in manifest.get_export_table_list('counts_kaplan'):
+        exported.append(table.name)
+    expected = ['pcx__meta_date', 'pcx__meta_version']
+    for workflow in ('counts.workflow', 'counts_kaplan.workflow'):
+        for name in tomllib.loads((ROOT / 'cumulus_library_pcx' / workflow).read_text())['tables']:
+            expected.append(f'pcx__{name}')
+    assert sorted(exported) == sorted(expected)

@@ -323,6 +323,10 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   `_exposure`) and `pcx__outcome` (`cube_outcome_os`, `_efs`, `_initial_therapy`), 4-6 columns
   each, distinct patients with the same approved floor of 1. Dates, day counts, continuous ages
   and `protocol_names` are left out. New tables, so `data_package_version` stays 3.
+- [decided] 2026-10-29, Andy: the `counts_kaplan` export also lists the `counts` stage cubes
+  (names read from `counts.workflow`, floor of 10 unchanged) and the meta tables, so one
+  `export --stage counts_kaplan` zip uploads every cube. Exporting `counts` alone has no meta
+  tables, which `upload` rejects, and each export clears the previous one.
 
 ### 8.2 Exports and statistical plan
 
