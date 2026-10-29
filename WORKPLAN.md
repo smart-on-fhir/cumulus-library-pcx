@@ -293,13 +293,17 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-29 — kaplan_survival.md
+
+- New [kaplan_survival.md](kaplan_survival.md): how the Kaplan tables feed the cubes, how to read a cube, a table of what each of the eleven `counts_kaplan` cubes counts, the label values, the strict cohort, and export. Linked from README.md and the `counts_kaplan` row in cumulus-study.md.
+
 ### 2026-10-29 — Counts of the document-task notes
 
-- `counts.workflow` adds `cube_patient_sample_task` (patients) and `cube_note_sample_task` (notes, `secondary_id = note_ref`) over `pcx__sample_task`, by `topic` and `note_display`. Floor of 10 like the other `counts` cubes. They export with the `counts` stage and, through `counts_cubes()`, with `counts_kaplan`.
+- `counts.workflow` adds `cube_patient_sample_task` (patients) and `cube_note_sample_task` (notes, `secondary_id = note_ref`) over `pcx__sample_task`, by `topic` and `note_display`. Floor of 10 like the other `counts` cubes. They export with the `counts` stage.
 
-### 2026-10-29 — One export zip for every cube
+### 2026-10-29 — counts_kaplan export: its own cubes and meta only
 
-- The study `counts` cubes never reached the aggregator: `export --stage counts_kaplan` held only that stage's cubes, and `export --stage counts` has no meta tables, which `upload` rejects. `stage/counts_kaplan.py` now also exports the `counts` cubes, with names read from `counts.workflow`, so `export --stage counts_kaplan` is the one zip to upload. New `test_counts_kaplan_export_holds_every_cube_and_meta`.
+- `export --stage counts_kaplan` exports the `counts_kaplan.workflow` cubes and the meta tables, not the `counts` cubes: uploading those stays a deliberate, separate step. New `test_counts_kaplan_export_holds_its_cubes_and_meta`.
 
 ### 2026-10-29 — Strict cohort cubes
 

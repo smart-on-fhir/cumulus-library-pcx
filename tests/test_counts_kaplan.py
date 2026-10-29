@@ -233,15 +233,15 @@ def test_source_cubes_on_built_eligible_and_outcome():
         assert grand.cnt.tolist() == [subjects], table_name
 
 
-def test_counts_kaplan_export_holds_every_cube_and_meta():
-    """One `export --stage counts_kaplan` zip must be uploadable on its own: every cube of both
-    workflows plus pcx__meta_date (upload rejects a zip without it)."""
+def test_counts_kaplan_export_holds_its_cubes_and_meta():
+    """One `export --stage counts_kaplan` zip must be uploadable on its own: every cube in
+    counts_kaplan.workflow plus pcx__meta_date (upload rejects a zip without it). The counts
+    stage's cubes are deliberately left out: uploading them is a separate, manual step."""
     manifest = StudyManifest(ROOT / 'cumulus_library_pcx')
     exported = list()
     for table in manifest.get_export_table_list('counts_kaplan'):
         exported.append(table.name)
     expected = ['pcx__meta_date', 'pcx__meta_version']
-    for workflow in ('counts.workflow', 'counts_kaplan.workflow'):
-        for name in tomllib.loads((ROOT / 'cumulus_library_pcx' / workflow).read_text())['tables']:
-            expected.append(f'pcx__{name}')
+    for name in tomllib.loads((ROOT / 'cumulus_library_pcx' / 'counts_kaplan.workflow').read_text())['tables']:
+        expected.append(f'pcx__{name}')
     assert sorted(exported) == sorted(expected)

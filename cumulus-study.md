@@ -89,7 +89,7 @@ The build order is the `STAGES` list in
 | `client_views` | opt-in | PCX | `pcx__client_*` tables for timeline and survival analysis |
 | `qa_athena` | opt-in | PCX | `pcx__qa_*` and `pcx__warn_*` data-quality tables |
 | `counts` | default | builder | the count tables in [counts.workflow](cumulus_library_pcx/counts.workflow) |
-| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes (all subjects and the strict cohort) and cubes of `pcx__eligible` and `pcx__outcome`, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), floor of 1. Its export also carries the `counts` cubes and the meta tables, so `export --stage counts_kaplan` is the one zip to upload |
+| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes (all subjects and the strict cohort) and cubes of `pcx__eligible` and `pcx__outcome`, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), floor of 1. Its export carries the meta tables but not the `counts` cubes, which are uploaded separately ([kaplan_survival.md](kaplan_survival.md)) |
 | `study_meta` | default | builder | study metadata tables |
 
 "PCX" stages are modules in `cumulus_library_pcx/stage/`. "Builder" stages come from the
