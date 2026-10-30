@@ -8,8 +8,8 @@ depend on: keep the numbers and their order, add subsections freely.
 
 Open work and the changelog are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git
 tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built with
-cumulus-study-builder 0.5.6 and run by Cumulus Library 6.3.5. Other sites run the study from
-the data-only PyPI package `cumulus-library-pcx` (`release/make_data_release.py`), which
+cumulus-study-builder 0.5.7 and run by Cumulus Library 6.3.7. Other sites run the study from
+the data-only PyPI package `cumulus-library-pcx` (`release/make_chop_release.py`), which
 ships the whole manifest and every stage, or from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. This release is 0.4.1, the CHOP
 build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.

@@ -1,7 +1,7 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
-Open, study-specific work only, on cumulus-study-builder **0.5.6** (git tag `v0.5.6`, not on
-PyPI) and Cumulus Library **6.3.5**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
+Open, study-specific work only, on cumulus-study-builder **0.5.7** (git tag `v0.5.7`, not on
+PyPI) and Cumulus Library **6.3.7**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
 Done work is in the [Changelog](#changelog) at the end.
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
 Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
@@ -13,15 +13,16 @@ appear in EHR cohorts? The study builds a discovery cohort and a trial-like coho
 must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
 treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
-Validated 2026-10-22 on builder 0.5.7 and Cumulus Library 6.3.5: build, validate and the
-tests (98 passed).
+Validated 2026-10-30 on builder 0.5.7 and Cumulus Library 6.3.7: build, validate and the
+release checks (`release/make_chop_release.py`).
 
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
-dependency is Cumulus Library (`>=6.3.5,<6.4`), so neither the site nor the package needs
+dependency is Cumulus Library (`>=6.3.7,<6.4`), so neither the site nor the package needs
 cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
-**0.5.0**: the new `counts_kaplan` stage, initial-therapy exposures, date ranges and
-systemic therapy v2. 0.4.3 on PyPI still has the old rules.
+**0.5.3**: the Kaplan-Meier cubes in months with protocol and ACNS0334 arm, the strict cohort
+and its cubes, and cubes of the eligible, outcome and document-task tables (Changelog,
+2026-10-30). 0.4.3 on PyPI still has the old rules.
 
 ## Release 0.4.0
 
@@ -58,10 +59,10 @@ In order:
   script, upload with the printed `twine upload` (Andy or @msa2984, straight to PyPI), tag
   `v0.4.0`. *Done when* 0.4.0 is on PyPI and tagged. Patch fixes after it go in 0.4.1.
 
-- [ ] P1 · release · **Publish 0.5.0.** `pyproject.toml` says 0.5.0. Run
+- [ ] P1 · release · **Publish 0.5.3.** `pyproject.toml` says 0.5.3. Run
   `python release/make_chop_release.py`, then `cumulus-study build` to restore the BCH build,
-  upload with the printed `twine upload`, tag `v0.5.0`, and publish the GitHub release notes.
-  *Done when* 0.5.0 is on PyPI and tagged. At BCH, rerun systemic therapy v2 before the eligible
+  upload with the printed `twine upload`, tag `v0.5.3`, and publish the GitHub release notes.
+  *Done when* 0.5.3 is on PyPI and tagged. At BCH, rerun systemic therapy v2 before the eligible
   stage (Clinical notes).
 
 ## Open questions
@@ -292,6 +293,22 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-30 — version 0.5.3
+
+- Built with `release/make_chop_release.py` on builder 0.5.7 and Cumulus Library 6.3.7 (CHOP schemas, CHOP casedef include). Nobody else has had a 0.5.3 build.
+- Since 0.5.0, see the 2026-10-28 and 2026-10-29 entries below:
+  - `pcx__kaplan_subject`: survival in months beside years, `protocol_name` (every protocol, comma-joined), `protocol_name_by_date`, `documented_trial_arm` (`Conflicting` when notes disagree).
+  - `cube_kaplan_os` / `_efs` count survival in months and add protocol and arm. They are no longer an exact PCX-30 match.
+  - New strict cohort `pcx__kaplan_subject_strict` and its cubes `cube_kaplan_strict_os` / `_efs`.
+  - New cubes of `pcx__eligible`, `pcx__outcome` (`counts_kaplan`) and `pcx__sample_task` (`counts`).
+  - `outcome.sql` parses again (missing `END`). `qa_athena` runs on Athena (`IS DISTINCT FROM TRUE`).
+- `data_package_version` is 3 (was 2): two exported cubes changed columns.
+- `requirements-tested.txt` pins the development venv: Cumulus Library 6.3.7 (was 6.3.5, below the `>=6.3.7` the package requires), pydantic 2.14.1, pytest 9.2.0, sqlglot 30.25.0. `cumulus-study.md` set up points at builder `v0.5.7`, the release section at `make_chop_release.py`, settings at data package version 3. `PROTOCOL.md` names builder 0.5.7, Cumulus Library 6.3.7 and `make_chop_release.py`.
+
+### 2026-10-30 — install.md
+
+- New [install.md](install.md): pre-requirements (cumulus-library, RxNorm, LOINC, pointing to cumulus-study.md), first-time install, and the CHOP upgrade steps (clean pcx, uninstall, reinstall).
 
 ### 2026-10-29 — kaplan_survival.md
 
