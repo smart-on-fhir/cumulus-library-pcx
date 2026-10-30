@@ -60,7 +60,7 @@ WITH candidate AS (
     UNION ALL
     SELECT  'pcx__llm_systemic_therapy_regimen', 'regimen_start_date',
             subject_ref, note_ref, regimen_start_day
-    FROM    pcx__llm_systemic_therapy_regimen
+    FROM    pcx__systemic_therapy_protocol
     WHERE   regimen_start_day IS NOT NULL
     AND     protocol_name = 'ACNS0334'
     AND     documented_trial_arm = 'REGIMEN_B'

@@ -327,6 +327,13 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   and whole-month OS and EFS durations). It is counted by its own exported cubes,
   `cube_kaplan_strict_os` and `cube_kaplan_strict_efs`, with the same columns as the
   all-subject cubes, which keep `pcx__kaplan_subject` as their source.
+- [decided] 2026-10-30, Andy (clinical team, issue #31): DFCI 07-308 is the Dana-Farber local
+  number for ACNS0334 (there is no COG 07308). `spreadsheet/include_trial_protocol.csv` lists the
+  strict-cohort protocols and the verbatim spellings that mean each one. A regimen whose
+  `protocol_name_verbatim` is listed (exact, ignoring case) takes the sheet's protocol, even over
+  another coded protocol ("HeadStart II (07-308)" is ACNS0334). This applies everywhere ACNS0334
+  is read (`pcx__systemic_therapy_protocol`): Regimen B methotrexate exposure, the Kaplan protocol
+  and arm labels, and the strict cohort.
 - [decided] 2026-10-29, Andy: the `counts_kaplan` stage also exports cubes of the tables that
   feed the Kaplan source, `pcx__eligible` (`cube_eligible_casedef`, `_prior_therapy`, `_risk`,
   `_exposure`) and `pcx__outcome` (`cube_outcome_os`, `_efs`, `_initial_therapy`), 4-6 columns

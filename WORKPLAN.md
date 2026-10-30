@@ -366,6 +366,15 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-30 — DFCI 07-308 is ACNS0334 (issue #31)
+
+- Clinical team: DFCI 07-308 is the Dana-Farber local number for ACNS0334 (there is no COG 07308). New `spreadsheet/include_trial_protocol.csv` lists the protocols of the strict Kaplan cohort (ACNS0334, PBTC_026, CCG99703) and the verbatim spellings that mean each one (the 07-308 spellings). The eligible stage uploads it as `pcx__include_trial_protocol`.
+- New `pcx__systemic_therapy_protocol` (eligible stage): one row per LLM regimen. `protocol_name` is the sheet's protocol when `protocol_name_verbatim` is listed (exact, ignoring case), else the LLM code, which stays in `protocol_name_llm`. A listed verbatim wins over another coded protocol ("HeadStart II (07-308)" is ACNS0334). No prompt change and no LLM rerun.
+- Everything that reads ACNS0334 reads this table: ACNS0334 Regimen B methotrexate exposure (`pcx__exposure_record`), the Kaplan `protocol_name` and `documented_trial_arm`, the strict cohort (any protocol in the sheet) and the Regimen B date warn check. A "DFCI 07-308, regimen B" patient has methotrexate exposure and Kaplan arm REGIMEN_B.
+- Elasticsearch `systemic_therapy` topic adds "07-308", "07 308", "07–308" and 07308.
+- `include_trial_protocol.csv`: PBTC026 maps to PBTC_026 (the enum value), duplicate en-dash row removed.
+- Tests: `test_dfci_07_308_regimen_b_is_acns0334_methotrexate`, `test_include_trial_protocol_maps_each_verbatim_to_one_protocol`, `test_include_trial_protocol_resolves_dfci_07_308`.
+
 ### 2026-10-30 — CHOP casedef include: typed resource_ref
 
 - `sql/custom/pcx__cohort_casedef_include.sql` (CHOP): `resource_ref` is `CAST(NULL AS VARCHAR)`. Athena rejected the untyped `NULL` (COLUMN_TYPE_UNKNOWN), so the CHOP casedef stage failed in 0.5.2 and 0.5.3. DuckDB accepts it, so the tests missed it. BCH builds the generated include and is unaffected. Ships in 0.5.4.
