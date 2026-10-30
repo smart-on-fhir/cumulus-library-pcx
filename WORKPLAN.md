@@ -366,6 +366,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-30 — CHOP casedef include: typed resource_ref
+
+- `sql/custom/pcx__cohort_casedef_include.sql` (CHOP): `resource_ref` is `CAST(NULL AS VARCHAR)`. Athena rejected the untyped `NULL` (COLUMN_TYPE_UNKNOWN), so the CHOP casedef stage failed in 0.5.2 and 0.5.3. DuckDB accepts it, so the tests missed it. BCH builds the generated include and is unaffected. Ships in 0.5.4.
+
 ### 2026-10-30 — 0.5.3 scope: Kaplan tables for the Nov 12 demo
 
 - 0.5.3 must deliver the Kaplan subject tables and their `counts_kaplan` export from BCH for the 2026-11-12 demo. The 2026-10-30 review findings are deferred to a later release ("Release 0.5.3 scope and deferred items" above), so 0.5.3 has no SQL change from them.

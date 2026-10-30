@@ -27,9 +27,10 @@ SELECT  DISTINCT
             ELSE CONCAT('UNKNOWN:',diagnosis_type_cohort)
             END AS subtype,
         -- FHIR linkage
-        enc.subject_ref     as subject_ref,
-        enc.encounter_ref   as encounter_ref_link,
-        NULL                as resource_ref
+        enc.subject_ref         as subject_ref,
+        enc.encounter_ref       as encounter_ref_link,
+        -- typed NULL: Athena cannot create a column from an untyped NULL
+        CAST(NULL AS VARCHAR)   as resource_ref
 FROM    radiant_data_dev.pcx_patient_list   as pcx_patient_list
 JOIN    pcx__cohort_study_population        as enc
 ON      CONCAT('Patient/', pcx_patient_list.anon_id) = enc.subject_ref
