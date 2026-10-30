@@ -11,8 +11,8 @@ tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built 
 cumulus-study-builder 0.5.7 and run by Cumulus Library 6.3.7. Other sites run the study from
 the data-only PyPI package `cumulus-library-pcx` (`release/make_chop_release.py`), which
 ships the whole manifest and every stage, or from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`. This release is 0.4.1, the CHOP
-build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
+`cumulus-library build --study-dir cumulus_library_pcx`. The current release is 0.5.3, the CHOP
+build (`release/make_chop_release.py`). 0.4.0 to 0.5.2 are on PyPI.
 
 ## 0. Source
 
@@ -37,7 +37,7 @@ build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
   default; llm_schema, the NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
   outcome, client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
   (`core__medicationrequest`, `core__medicationdispense`); there is no `fhir_resource` stage.
-- [decided] Data package version 2.
+- [decided] Data package version 3 (2 until 2026-10-29, when the Kaplan cubes changed columns).
 
 ## 2. Population
 
@@ -295,6 +295,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   exported with a floor of 1, like the unsuppressed PCX-30 files, and the site-only copies
   (`counts_kaplan_site.workflow`) are removed. `stage/counts_kaplan.py` checks the workflow with
   the builder's site-only rules, since its shared rules require a floor of at least 10.
+- [decided] 2026-10-30, Andy: the floor-of-1 approval covers the 0.5.3 Kaplan cube layout
+  (whole months, comma-joined `protocol_name`, `documented_trial_arm`), so the cubes are
+  exported as they are for the 2026-11-12 demo.
 - [decided] 2026-10-21, Andy: `diagnosis` is the latest documented CNS embryonal subtype
   (`pcx__client_diagnosis.disease_subtype_ever`, codes such as MEDULLOBLASTOMA or ATRT), Not
   Reported when none is documented. `pcx__kaplan_subject` applies no diagnosis, age or
