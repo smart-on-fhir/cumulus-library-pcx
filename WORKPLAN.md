@@ -294,6 +294,13 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-10-30 — Initial-therapy "not received" needs an assessment date that covers the window
+
+- Pre-release feedback (P1): an EXPLICITLY_NOT_RECEIVED written before diagnosis could make `had_initial_methotrexate_bool` / `had_initial_radiation_bool` FALSE (Kaplan "No"), whatever its date.
+- `outcome_exposure.sql`: a "not received" now gives FALSE only when assessed (`assessed_through_day`, else the note date) on or after the latest day the first event can be. Earlier statements, and any statement for a patient with no dated first event, leave the flag NULL. A methotrexate dose marked not received no longer counts, only the agent.
+- `eligible_rx.methotrexate_not_received_bool` and `eligible_radiation.llm_explicitly_not_received_bool` are unchanged (ever flags, evidence only).
+- Tests: the old "undated not received is FALSE" case is now NULL, and `test_not_received_counts_only_when_assessed_through_the_window` covers before t0, mid-window, after the event, note-date fallback, no event, dose level and radiation. `PROTOCOL.md` records the decision.
+
 ### 2026-10-30 — version 0.5.3
 
 - Built with `release/make_chop_release.py` on builder 0.5.7 and Cumulus Library 6.3.7 (CHOP schemas, CHOP casedef include). Nobody else has had a 0.5.3 build.

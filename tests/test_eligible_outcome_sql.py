@@ -239,8 +239,8 @@ def test_initial_methotrexate_is_yes_no_or_unknown():
     # methotrexate only after progression is salvage: initial chemotherapy without it is "no"
     assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', date(2021, 2, 1))],
                                 [('PROGRESSION', date(2021, 1, 1))]) == (False, True)
-    # explicit non-receipt is "no" even without other initial therapy
-    assert initial_methotrexate([('METHOTREXATE', 'EXPLICITLY_NOT_RECEIVED', None)]) == (False, None)
+    # an undated "not received" with no first event cannot cover the window: unknown
+    assert initial_methotrexate([('METHOTREXATE', 'EXPLICITLY_NOT_RECEIVED', None)]) == (None, None)
     # an undated administration may fall in the window: unknown
     assert initial_methotrexate([initial_chemo, ('METHOTREXATE', 'ADMINISTERED', None)]) == (None, True)
     # methotrexate before t0 is not initial, and with no initial therapy documented the answer is unknown
@@ -356,6 +356,54 @@ def test_undated_mentions_are_bounded_by_their_note_date():
     row = p5_outcome(chemo, events=[progression, ('RECURRENCE', None, None, 'n-ev-early')],
                      notes=[('n-ev-early', date(2020, 11, 1))])
     assert row['efs_censor_source'] == 'event_timing_uncertain'
+
+
+def not_received_outcome(assessed_day=None, note_date=None, event_day=None, level='agent', exposure='methotrexate'):
+    """p5 (t0 2020-05-01, no other therapy) with one EXPLICITLY_NOT_RECEIVED statement in note n-nr
+    (methotrexate at the agent or dose level, or radiation) and an optional progression."""
+    con = sqltest.connect()
+    if exposure == 'radiation':
+        con.execute("INSERT INTO pcx__llm_radiation_wide (subject_ref, note_ref, delivery_status, assessed_through_day) "
+                    "VALUES ('Patient/p5', 'n-nr', 'EXPLICITLY_NOT_RECEIVED', ?)", [assessed_day])
+    elif level == 'agent':
+        con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, delivery_status, agent_name, "
+                    "assessed_through_day, regimen_index, agent_index) "
+                    "VALUES ('Patient/p5', 'n-nr', 'EXPLICITLY_NOT_RECEIVED', 'METHOTREXATE', ?, 1, 1)", [assessed_day])
+    else:
+        con.execute("INSERT INTO pcx__llm_systemic_therapy_agent (subject_ref, note_ref, generated_on, delivery_status, "
+                    "agent_name, regimen_index, agent_index) "
+                    "VALUES ('Patient/p5', 'n-nr', 'run-a', 'NONE_OF_THE_ABOVE', 'METHOTREXATE', 1, 1)")
+        con.execute("INSERT INTO pcx__llm_systemic_therapy_administration (subject_ref, note_ref, generated_on, "
+                    "delivery_status, regimen_index, agent_index) "
+                    "VALUES ('Patient/p5', 'n-nr', 'run-a', 'EXPLICITLY_NOT_RECEIVED', 1, 1)")
+    if note_date:
+        con.execute("INSERT INTO pcx__llm_note_date VALUES ('Patient/p5', 'n-nr', ?)", [note_date])
+    if event_day:
+        con.execute("INSERT INTO pcx__llm_event_wide (subject_ref, note_ref, event_type, event_day) "
+                    "VALUES ('Patient/p5', 'n-ev', 'PROGRESSION', ?)", [event_day])
+    sqltest.run_custom(con)
+    return con.execute(f"SELECT had_initial_{exposure}_bool FROM pcx__outcome_exposure "
+                       "WHERE subject_ref = 'Patient/p5'").fetchone()[0]
+
+
+def test_not_received_counts_only_when_assessed_through_the_window():
+    progression = date(2021, 1, 10)
+    # "not received" assessed before diagnosis says nothing about initial therapy
+    assert not_received_outcome(assessed_day=date(2020, 4, 1), event_day=progression) is None
+    # assessed partway through the window: the rest of the window is unknown
+    assert not_received_outcome(assessed_day=date(2020, 9, 1), event_day=progression) is None
+    # assessed on or after the first event: the whole window is covered, a documented "no"
+    assert not_received_outcome(assessed_day=date(2021, 2, 1), event_day=progression) is False
+    # no assessed-through date: the note date is the latest day the note can speak for
+    assert not_received_outcome(note_date=date(2021, 3, 1), event_day=progression) is False
+    assert not_received_outcome(note_date=date(2020, 5, 2), event_day=progression) is None
+    # no first event: the window has no end, so the statement alone is not enough
+    assert not_received_outcome(assessed_day=date(2023, 1, 1)) is None
+    # one skipped methotrexate dose is not "no methotrexate in initial therapy"
+    assert not_received_outcome(note_date=date(2021, 3, 1), event_day=progression, level='dose') is None
+    # radiation follows the same rule
+    assert not_received_outcome(assessed_day=date(2020, 4, 1), event_day=progression, exposure='radiation') is None
+    assert not_received_outcome(assessed_day=date(2021, 2, 1), event_day=progression, exposure='radiation') is False
 
 
 def test_a_dose_joins_its_agent_within_the_same_extraction_output():

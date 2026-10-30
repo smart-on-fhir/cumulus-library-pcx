@@ -232,11 +232,17 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   - TRUE: a record certainly inside the window.
   - FALSE: no record inside or possibly inside, and initial therapy is documented without it
     (dated chemotherapy in the window for methotrexate and radiation, dated radiation for
-    chemotherapy), or the exposure is EXPLICITLY_NOT_RECEIVED (methotrexate, radiation).
+    chemotherapy), or an EXPLICITLY_NOT_RECEIVED statement covers the whole window (methotrexate,
+    radiation).
+  - [decided] 2026-10-30, Andy (pre-release feedback on 0.5.3): FALSE only when a record says so.
+    An EXPLICITLY_NOT_RECEIVED statement covers the window when it is assessed through
+    (`assessed_through_day`, else its note date) a day on or after the latest day the first event
+    can be. A statement assessed earlier, before t0 included, leaves the flag NULL. With no dated
+    first event the window has no end, so a statement alone is never enough. Methotrexate counts
+    only agent-level statements: a dose marked EXPLICITLY_NOT_RECEIVED is one skipped dose.
   - NULL: unknown. No t0, an undated progression, recurrence or second malignancy of unknown
-    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no initial
-    therapy documented.
-    Missing documentation is never FALSE.
+    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no record of
+    initial therapy. A chart silent on the drug is NULL.
   - `initial_therapy_sequence` orders chemotherapy and radiation from the same flags and adds
     NO_INITIAL_THERAPY (dated chemotherapy or radiation exists, none in the window).
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
