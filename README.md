@@ -21,6 +21,10 @@ eligibility criterion is met in this phase ([limitations.md](limitations.md)).
 - [llm.md](llm.md): the LLM extraction models, note selection, schemas and wide tables.
 - [limitations.md](limitations.md): scientific gaps between ACNS0334 and the EHR emulation.
 
+## Install
+ 
+- [install.md](install.md): CHOP specific installation 
+
 ## Build and release
 
 - [cumulus-study.md](cumulus-study.md): set up, commands, stages, settings, running in the
@@ -31,4 +35,3 @@ eligibility criterion is met in this phase ([limitations.md](limitations.md)).
 ## Status
 
 - [WORKPLAN.md](WORKPLAN.md): open tasks, then the changelog.
-- The pre-builder (make-pcx) version is git tag `0.2-pre-study-builder`.
