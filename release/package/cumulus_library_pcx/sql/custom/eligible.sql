@@ -21,10 +21,12 @@ SELECT  dx.subject_ref,
         dx.t0_source,
         dx.age_months_at_t0,
         CASE
-            WHEN dx.age_months_at_t0 IS NULL   THEN NULL
-            WHEN dx.age_months_at_t0 < 36      THEN 'under_36_months'
-            ELSE                                    '36_months_or_older'
-        END                                                             AS age_band_at_t0,
+            WHEN    dx.age_months_at_t0 IS NULL
+            THEN    NULL
+            WHEN    dx.age_months_at_t0 < 36
+            THEN    'under_36_months'
+            ELSE    '36_months_or_older'
+        END AS      age_band_at_t0,
         surgery.definitive_surgery_day,
         surgery.definitive_surgery_source,
         surgery.age_months_at_definitive_surgery,
@@ -32,10 +34,12 @@ SELECT  dx.subject_ref,
         dx.medulloblastoma_tier1_bool,
         dx.llm_medulloblastoma_bool,
         CASE
-            WHEN dx.atrt_tier1_bool                                     THEN TRUE
-            WHEN dx.llm_atrt_bool                                       THEN TRUE
-            ELSE FALSE
-        END                                                             AS atrt_confirmed_bool,
+            WHEN    dx.atrt_tier1_bool
+            THEN    TRUE
+            WHEN    dx.llm_atrt_bool
+            THEN    TRUE
+            ELSE    FALSE
+        END         AS atrt_confirmed_bool,
         -- relaxed criteria: flags only, pcx__eligible_trial excludes on them
         dx.age_under_36_months_at_t0,
         surgery.age_under_36_months_at_definitive_surgery,
@@ -47,7 +51,7 @@ SELECT  dx.subject_ref,
         dx.llm_anaplastic_bool,
         surgery.llm_residual_disease_bool,
         surgery.llm_residual_tumor_area_cm2_max,
-        (dx.age_months_at_t0 < 8)                                       AS age_under_8_months_at_t0,
+        (dx.age_months_at_t0 < 8)   AS age_under_8_months_at_t0,
         -- exposures (any time, see outcome stage for timing relative to first event)
         rx.methotrexate_any_bool,
         rx.methotrexate_first_day,

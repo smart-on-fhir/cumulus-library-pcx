@@ -221,3 +221,24 @@ table_cols = [
 description = "Case-definition patients with a study-variable Procedure, by variable and code."
 primary_id = "subject_ref"
 min_subject = 10
+
+[tables.cube_patient_sample_task]
+source_table = "(SELECT * FROM pcx__sample_task WHERE subject_ref IS NOT NULL)"
+table_cols = [
+    "topic",
+    "note_display",
+]
+description = "Patients with a note selected for the document tasks (pcx__sample_task), by topic and note display (type or title)."
+primary_id = "subject_ref"
+min_subject = 10
+
+[tables.cube_note_sample_task]
+source_table = "(SELECT * FROM pcx__sample_task WHERE subject_ref IS NOT NULL AND note_ref IS NOT NULL)"
+table_cols = [
+    "topic",
+    "note_display",
+]
+description = "Patients and notes selected for the document tasks (pcx__sample_task), by topic and note display (type or title). cnt is notes (note_ref)."
+secondary_id = "note_ref"
+primary_id = "subject_ref"
+min_subject = 10

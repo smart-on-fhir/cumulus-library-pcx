@@ -8,11 +8,11 @@ depend on: keep the numbers and their order, add subsections freely.
 
 Open work and the changelog are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git
 tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built with
-cumulus-study-builder 0.5.6 and run by Cumulus Library 6.3.5. Other sites run the study from
-the data-only PyPI package `cumulus-library-pcx` (`release/make_data_release.py`), which
+cumulus-study-builder 0.5.7 and run by Cumulus Library 6.3.7. Other sites run the study from
+the data-only PyPI package `cumulus-library-pcx` (`release/make_chop_release.py`), which
 ships the whole manifest and every stage, or from a clone of this repository with
-`cumulus-library build --study-dir cumulus_library_pcx`. This release is 0.4.1, the CHOP
-build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
+`cumulus-library build --study-dir cumulus_library_pcx`. The current release is 0.5.3, the CHOP
+build (`release/make_chop_release.py`). 0.4.0 to 0.5.2 are on PyPI.
 
 ## 0. Source
 
@@ -37,7 +37,7 @@ build (`release/make_chop_release.py`); 0.4.0 went to CHOP first.
   default; llm_schema, the NLP workflows, llm_document_wide, llm_clinical_wide, eligible,
   outcome, client_views, qa_athena opt-in. Medication tables come from Cumulus Library core
   (`core__medicationrequest`, `core__medicationdispense`); there is no `fhir_resource` stage.
-- [decided] Data package version 2.
+- [decided] Data package version 3 (2 until 2026-10-29, when the Kaplan cubes changed columns).
 
 ## 2. Population
 
@@ -232,11 +232,17 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   - TRUE: a record certainly inside the window.
   - FALSE: no record inside or possibly inside, and initial therapy is documented without it
     (dated chemotherapy in the window for methotrexate and radiation, dated radiation for
-    chemotherapy), or the exposure is EXPLICITLY_NOT_RECEIVED (methotrexate, radiation).
+    chemotherapy), or an EXPLICITLY_NOT_RECEIVED statement covers the whole window (methotrexate,
+    radiation).
+  - [decided] 2026-10-30, Andy (pre-release feedback on 0.5.3): FALSE only when a record says so.
+    An EXPLICITLY_NOT_RECEIVED statement covers the window when it is assessed through
+    (`assessed_through_day`, else its note date) a day on or after the latest day the first event
+    can be. A statement assessed earlier, before t0 included, leaves the flag NULL. With no dated
+    first event the window has no end, so a statement alone is never enough. Methotrexate counts
+    only agent-level statements: a dose marked EXPLICITLY_NOT_RECEIVED is one skipped dose.
   - NULL: unknown. No t0, an undated progression, recurrence or second malignancy of unknown
-    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no initial
-    therapy documented.
-    Missing documentation is never FALSE.
+    timing (`event_timing_uncertain_bool`), a record possibly inside the window, or no record of
+    initial therapy. A chart silent on the drug is NULL.
   - `initial_therapy_sequence` orders chemotherapy and radiation from the same flags and adds
     NO_INITIAL_THERAPY (dated chemotherapy or radiation exists, none in the window).
 - [source] Exposure timing (`outcome_exposure.sql`): first methotrexate and chemotherapy days by
@@ -289,6 +295,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   exported with a floor of 1, like the unsuppressed PCX-30 files, and the site-only copies
   (`counts_kaplan_site.workflow`) are removed. `stage/counts_kaplan.py` checks the workflow with
   the builder's site-only rules, since its shared rules require a floor of at least 10.
+- [decided] 2026-10-30, Andy: the floor-of-1 approval covers the 0.5.3 Kaplan cube layout
+  (whole months, comma-joined `protocol_name`, `documented_trial_arm`), so the cubes are
+  exported as they are for the 2026-11-12 demo.
 - [decided] 2026-10-21, Andy: `diagnosis` is the latest documented CNS embryonal subtype
   (`pcx__client_diagnosis.disease_subtype_ever`, codes such as MEDULLOBLASTOMA or ATRT), Not
   Reported when none is documented. `pcx__kaplan_subject` applies no diagnosis, age or
@@ -297,6 +306,36 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   event with `event_free_survival_years` Not Reported. Curve calculations downstream must count
   the event but use no duration for it. `initial_treatment_order` is Not Reported when the
   event timing is uncertain.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries whole months,
+  `overall_survival_months` and `event_free_survival_months` (FLOOR(days / 30.4375), no cap),
+  beside the years columns.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject` also carries `protocol_name` and
+  `documented_trial_arm` from any systemic therapy regimen ever documented (not only initial
+  therapy). Every coded protocol named, sorted and comma-joined (previously Multiple when
+  more than one was named), with `protocol_name_by_date` beside it in first-documented order
+  (subject table only). The arm comes from ACNS0334 regimens only, Not Applicable without one,
+  and Conflicting (previously Multiple) when notes document both arms.
+- [decided] 2026-10-29, Andy: the Kaplan-Meier cubes leave the exact PCX-30 layout.
+  `cube_kaplan_os` and `cube_kaplan_efs` use `overall_survival_months` and
+  `event_free_survival_months` in place of the years columns, and add `protocol_name` and
+  `documented_trial_arm` as their last two columns. Supersedes "Survival years are FLOOR(days /
+  365.25) from t0, capped at >=10" above for the cubes; the years columns stay in
+  `pcx__kaplan_subject`.
+- [decided] 2026-10-29, Andy: `pcx__kaplan_subject_strict` (counts_kaplan stage, renamed from
+  `pcx__kaplan_subject_demo`) is the strict cohort: medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334,
+  PBTC_026 or CCG99703 regimen (documented arm or not) or high-dose methotrexate in initial therapy, and plottable on both curves (valid t0
+  and whole-month OS and EFS durations). It is counted by its own exported cubes,
+  `cube_kaplan_strict_os` and `cube_kaplan_strict_efs`, with the same columns as the
+  all-subject cubes, which keep `pcx__kaplan_subject` as their source.
+- [decided] 2026-10-29, Andy: the `counts_kaplan` stage also exports cubes of the tables that
+  feed the Kaplan source, `pcx__eligible` (`cube_eligible_casedef`, `_prior_therapy`, `_risk`,
+  `_exposure`) and `pcx__outcome` (`cube_outcome_os`, `_efs`, `_initial_therapy`), 4-6 columns
+  each, distinct patients with the same approved floor of 1. Dates, day counts, continuous ages
+  and `protocol_names` are left out. New tables, so `data_package_version` stays 3.
+- [decided] 2026-10-29, Andy: the `counts_kaplan` export does NOT carry the `counts` stage
+  cubes: uploading those stays a deliberate, separate step. (Briefly reversed the same day.)
+  Exporting `counts` alone has no meta tables, which `upload` rejects, and each export clears
+  the previous one.
 
 ### 8.2 Exports and statistical plan
 

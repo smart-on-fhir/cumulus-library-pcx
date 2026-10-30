@@ -16,6 +16,7 @@ eligibility criterion is met in this phase ([limitations.md](limitations.md)).
 
 - [PROTOCOL.md](PROTOCOL.md): frame, population, variables, decisions and open questions.
 - [eligible.md](eligible.md): eligibility criteria and how each is computed.
+- [kaplan_survival.md](kaplan_survival.md): the Kaplan-Meier survival cubes and what each one counts.
 - [laboratory.md](laboratory.md): the toxicity laboratory valuesets.
 - [llm.md](llm.md): the LLM extraction models, note selection, schemas and wide tables.
 - [limitations.md](limitations.md): scientific gaps between ACNS0334 and the EHR emulation.

@@ -1,7 +1,7 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
-Open, study-specific work only, on cumulus-study-builder **0.5.6** (git tag `v0.5.6`, not on
-PyPI) and Cumulus Library **6.3.5**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
+Open, study-specific work only, on cumulus-study-builder **0.5.7** (git tag `v0.5.7`, not on
+PyPI) and Cumulus Library **6.3.7**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
 Done work is in the [Changelog](#changelog) at the end.
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
 Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
@@ -13,15 +13,17 @@ appear in EHR cohorts? The study builds a discovery cohort and a trial-like coho
 must be fixed before NLP results are used ([§5](PROTOCOL.md#5-clinical-notes)); the
 treatment-effect analysis is not yet specified ([§8](PROTOCOL.md#8-analysis)).
 
-Validated 2026-10-22 on builder 0.5.7 and Cumulus Library 6.3.5: build, validate and the
-tests (98 passed).
+Validated 2026-10-30 on builder 0.5.7 and Cumulus Library 6.3.7: build, validate and the
+release checks (`release/make_chop_release.py`).
 
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
-dependency is Cumulus Library (`>=6.3.5,<6.4`), so neither the site nor the package needs
+dependency is Cumulus Library (`>=6.3.7,<6.4`), so neither the site nor the package needs
 cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
-**0.5.0**: the new `counts_kaplan` stage, initial-therapy exposures, date ranges and
-systemic therapy v2. 0.4.3 on PyPI still has the old rules.
+**0.5.3**: the Kaplan-Meier cubes in months with protocol and ACNS0334 arm, the strict cohort
+and its cubes, and cubes of the eligible, outcome and document-task tables (Changelog,
+2026-10-30). PyPI has 0.4.0, 0.4.1, 0.4.3, 0.5.0, 0.5.1 and 0.5.2. 0.5.3 is the release
+for the 2026-11-12 demo (scope below).
 
 ## Release 0.4.0
 
@@ -58,11 +60,64 @@ In order:
   script, upload with the printed `twine upload` (Andy or @msa2984, straight to PyPI), tag
   `v0.4.0`. *Done when* 0.4.0 is on PyPI and tagged. Patch fixes after it go in 0.4.1.
 
-- [ ] P1 · release · **Publish 0.5.0.** `pyproject.toml` says 0.5.0. Run
+- [ ] P1 · release · **Publish 0.5.3.** `pyproject.toml` says 0.5.3. Run
   `python release/make_chop_release.py`, then `cumulus-study build` to restore the BCH build,
-  upload with the printed `twine upload`, tag `v0.5.0`, and publish the GitHub release notes.
-  *Done when* 0.5.0 is on PyPI and tagged. At BCH, rerun systemic therapy v2 before the eligible
+  upload with the printed `twine upload`, tag `v0.5.3`, and publish the GitHub release notes.
+  *Done when* 0.5.3 is on PyPI and tagged. At BCH, rerun systemic therapy v2 before the eligible
   stage (Clinical notes).
+
+## Release 0.5.3 scope and deferred items
+
+The must-have for 0.5.3 is the Kaplan subject tables built at BCH and exported to the
+aggregator (`counts_kaplan`) for the 2026-11-12 demo. Decided 2026-10-30, Andy: BCH only for
+the demo, and the findings of the 2026-10-30 review (Claude project doc
+`claude/pcx-code-review-2026-10-30.md`, ids below) are deferred to a release after 0.5.3.
+None of them needs an LLM rerun: all are SQL in `sql/custom/` plus tests.
+
+- Before the BCH systemic therapy v2 rerun, check the selector by hand (no gate in 0.5.3):
+  `SELECT COUNT(DISTINCT note_ref) AS n FROM pcx__llm_document_task_systemic_therapy` must be
+  above 0, or the run sends every note to the LLM.
+
+Deferred, changing Kaplan cube values:
+
+- [ ] P1 · `outcome` · **A1 Salvage "not received" gives initial "No".** `outcome_exposure.sql`
+  ignores phase: a SALVAGE EXPLICITLY_NOT_RECEIVED assessed after the first event makes
+  `had_initial_radiation_bool` / `_methotrexate_bool` FALSE. BCH 2026-10-30: 1 subject has a
+  SALVAGE radiation statement. The methotrexate side is unsized until the systemic v2 rerun.
+- [ ] P1 · `outcome` · **A2 Contradictory statement dates.** `assessed_through_day` is not capped
+  at the note date, and a first event before t0 lets a pre-t0 statement give FALSE.
+- [ ] P1 · `eligible` · **B1 Coarse surgery dates set the age column.** `eligible_surgery.sql`
+  ignores `surgery_day_precision`, so "2019" is January 1 and
+  `age_under_36_months_at_definitive_surgery` (Kaplan `age_at_diagnosis_under_36mo`) can be wrong.
+- [ ] P1 · `client_views` · **B2 Diagnosis depends on row order.** `client_diagnosis.sql`
+  `MAX_BY(..., ROW(note_order_day, note_ref))` ties when a note has two outputs: diagnosis,
+  subtype and strict-cohort membership can change between builds. Add `generated_on`.
+- [ ] P1 · `outcome` · **O1 Death makes an undated progression a restatement.** The restatement
+  bound in `outcome_first_event.sql` includes the death.
+- [ ] P1 · `outcome` · **O2 Coarse death midpoint before an exact event in its period.** Needs an
+  imputation policy in PROTOCOL 7 first.
+- [ ] P1 · `outcome` · **O3 Partial FHIR `deceasedDateTime`** ("2020") is an exact January 1 on
+  Athena. The DuckDB test helper errors on it, so it is untested.
+- [ ] P1 · `outcome` · **O6 EFS longer than OS.** `last_known_alive_day` ignores dated events
+  (fixture p8: 0 OS months, 12 EFS months).
+- [ ] P2 · `outcome` · **O4 NO_INITIAL_THERAPY from an undated pre-t0 mention.** Require a dated
+  record in `therapy_recorded_bool`.
+
+Deferred, not read by the Kaplan tables:
+
+- [ ] P2 · `casedef` · **A3 CHOP include is roster-only since 2026-10-28.** No tier 1 t0
+  fallback, excludes not applied, `UNKNOWN:<label>` roster rows are cases, no test. Decide the
+  CHOP cohort definition and fix the docs (`eligible_dx` header, eligible.md, PROTOCOL 2).
+- [ ] P2 · `llm` · **A4 CHOP transition_of_care prompt.** CHOP is THIS_INSTITUTION but "resected
+  at CHOP" is the EXTERNAL example and the examples name BCH. The release check misses `BCH` and
+  `CHOP`. Fix with a version bump, or mark the task DEFERRED.
+- [ ] P2 · `llm` · **A6 Schema changes need a version bump.** The NLP cache ignores the prompt,
+  and CHOP has run the clinical tasks. Add a test pinning each schema per task version.
+- [ ] P2 · `nlp` · **H3 Empty-selector gate** before the NLP stages.
+- [ ] P3 · misc · O5 (structured methotrexate is evidence only: policy), the warn and test gaps,
+  `client_outcome` imputation flags, `client_dictionary.csv` t0 row, S12 month arithmetic, the
+  remaining 2026-10-21 items (R5, S4 to S10, M12), the `pypi.yaml` comment, the empty
+  `<new folder>/` at the repo root.
 
 ## Open questions
 
@@ -247,6 +302,24 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `client_timeline_events`; keep only `client_diagnosis`, `client_exposure`, `client_outcome`
   and overrides in `cumulus_library_pcx/sql/custom/` (builder rank 17). *Done when* the client
   tables and `spreadsheet/client_dictionary.csv` columns are unchanged.
+- [ ] P2 · decision · **Local protocol number 07-308**
+  ([#31](https://github.com/smart-on-fhir/cumulus-library-pcx/issues/31), 2026-10-30, after
+  the 0.5.3 release, no change before it). The clinical group asked to treat
+  `protocol_name_verbatim LIKE '%07%308%'` ("07-308", "DFCI 07-308") as ACNS0334
+  beside CCG99703 and PBTC_026. The LLM codes these `NONE_OF_THE_ABOVE`, so today they are inert. Proposed change: in
+  `sql/template/llm_systemic_therapy_regimen.sql.jinja` and `llm_systemic_therapy_cycle.sql.jinja`,
+  set `protocol_name` from the verbatim with a CASE (one shared macro), keep
+  `protocol_name_verbatim` as written, no LLM rerun or version bump, no column change. BCH
+  check 2026-10-30: about a dozen patients have the number, none would be new to
+  `pcx__kaplan_subject_strict` (excluded by subtype NOS/NEC, SHH, ETMR or pineoblastoma, or
+  a missing OS or EFS duration). But BCH notes also write "HeadStart II (07-308)" and
+  "DFCI 07-308 (HeadStart)", same-day as a Head Start regimen, so 07-308 may be Head Start II.
+  Mapping it to ACNS0334 would turn its REGIMEN_B rows into ACNS0334 Regimen B methotrexate
+  exposure (`pcx__exposure_record`, `pcx__eligible_trial`) and feed `documented_trial_arm`.
+  Questions for the clinical group: is 07-308 ACNS0334 or Head Start II (map to `HEAD_START`
+  instead, labels only)? Should medulloblastoma NOS/NEC count in the strict cohort? Should
+  Head Start join the strict protocol list? *Done when* the mapping is decided and, if kept,
+  the cubes are rebuilt at BCH and CHOP.
 
 ## Build, tests and docs
 
@@ -292,6 +365,95 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-10-30 — 0.5.3 scope: Kaplan tables for the Nov 12 demo
+
+- 0.5.3 must deliver the Kaplan subject tables and their `counts_kaplan` export from BCH for the 2026-11-12 demo. The 2026-10-30 review findings are deferred to a later release ("Release 0.5.3 scope and deferred items" above), so 0.5.3 has no SQL change from them.
+- PROTOCOL 8.1 records that the floor-of-1 approval covers the 0.5.3 cube layout. Version lines updated: the PyPI releases here, the release line and data package version 3 in PROTOCOL.
+
+### 2026-10-30 — install.md: build, export and upload
+
+- [install.md](install.md) now stands alone for CHOP: fuller pre-requirements, every build stage in order (default build, then `nlp_document_tasks` through `counts_kaplan`, with the Bedrock options), and `export --stage counts_kaplan` plus `upload`.
+
+### 2026-10-30 — Initial-therapy "not received" needs an assessment date that covers the window
+
+- Pre-release feedback (P1): an EXPLICITLY_NOT_RECEIVED written before diagnosis could make `had_initial_methotrexate_bool` / `had_initial_radiation_bool` FALSE (Kaplan "No"), whatever its date.
+- `outcome_exposure.sql`: a "not received" now gives FALSE only when assessed (`assessed_through_day`, else the note date) on or after the latest day the first event can be. Earlier statements, and any statement for a patient with no dated first event, leave the flag NULL. A methotrexate dose marked not received no longer counts, only the agent.
+- `eligible_rx.methotrexate_not_received_bool` and `eligible_radiation.llm_explicitly_not_received_bool` are unchanged (ever flags, evidence only).
+- Tests: the old "undated not received is FALSE" case is now NULL, and `test_not_received_counts_only_when_assessed_through_the_window` covers before t0, mid-window, after the event, note-date fallback, no event, dose level and radiation. `PROTOCOL.md` records the decision.
+
+### 2026-10-30 — version 0.5.3
+
+- Built with `release/make_chop_release.py` on builder 0.5.7 and Cumulus Library 6.3.7 (CHOP schemas, CHOP casedef include). Nobody else has had a 0.5.3 build.
+- Since 0.5.0, see the 2026-10-28 and 2026-10-29 entries below:
+  - `pcx__kaplan_subject`: survival in months beside years, `protocol_name` (every protocol, comma-joined), `protocol_name_by_date`, `documented_trial_arm` (`Conflicting` when notes disagree).
+  - `cube_kaplan_os` / `_efs` count survival in months and add protocol and arm. They are no longer an exact PCX-30 match.
+  - New strict cohort `pcx__kaplan_subject_strict` and its cubes `cube_kaplan_strict_os` / `_efs`.
+  - New cubes of `pcx__eligible`, `pcx__outcome` (`counts_kaplan`) and `pcx__sample_task` (`counts`).
+  - `outcome.sql` parses again (missing `END`). `qa_athena` runs on Athena (`IS DISTINCT FROM TRUE`).
+- `data_package_version` is 3 (was 2): two exported cubes changed columns.
+- `requirements-tested.txt` pins the development venv: Cumulus Library 6.3.7 (was 6.3.5, below the `>=6.3.7` the package requires), pydantic 2.14.1, pytest 9.2.0, sqlglot 30.25.0. `cumulus-study.md` set up points at builder `v0.5.7`, the release section at `make_chop_release.py`, settings at data package version 3. `PROTOCOL.md` names builder 0.5.7, Cumulus Library 6.3.7 and `make_chop_release.py`.
+
+### 2026-10-30 — install.md
+
+- New [install.md](install.md): pre-requirements (cumulus-library, RxNorm, LOINC, pointing to cumulus-study.md), first-time install, and the CHOP upgrade steps (clean pcx, uninstall, reinstall).
+
+### 2026-10-29 — kaplan_survival.md
+
+- New [kaplan_survival.md](kaplan_survival.md): how the Kaplan tables feed the cubes, how to read a cube, a table of what each of the eleven `counts_kaplan` cubes counts, the label values, the strict cohort, and export. Linked from README.md and the `counts_kaplan` row in cumulus-study.md.
+
+### 2026-10-29 — Counts of the document-task notes
+
+- `counts.workflow` adds `cube_patient_sample_task` (patients) and `cube_note_sample_task` (notes, `secondary_id = note_ref`) over `pcx__sample_task`, by `topic` and `note_display`. Floor of 10 like the other `counts` cubes. They export with the `counts` stage.
+
+### 2026-10-29 — counts_kaplan export: its own cubes and meta only
+
+- `export --stage counts_kaplan` exports the `counts_kaplan.workflow` cubes and the meta tables, not the `counts` cubes: uploading those stays a deliberate, separate step. New `test_counts_kaplan_export_holds_its_cubes_and_meta`.
+
+### 2026-10-29 — Strict cohort cubes
+
+- `pcx__kaplan_subject_demo` is renamed `pcx__kaplan_subject_strict`. Drop the old table in Athena.
+- New exported `cube_kaplan_strict_os` and `cube_kaplan_strict_efs` count the strict cohort with the same columns as `cube_kaplan_os` and `cube_kaplan_efs`, which still count all subjects from `pcx__kaplan_subject`. New tables, so `data_package_version` stays 3. `test_strict_cohort` also builds the two strict cubes.
+
+### 2026-10-29 — outcome.sql: missing END
+
+- The `os_end_day` CASE in `outcome.sql` had lost its `END`, so the outcome stage failed to parse. Restored. No change to results.
+
+### 2026-10-29 — Cubes of pcx__eligible and pcx__outcome
+
+- `counts_kaplan.workflow` adds seven exported cubes of the tables that feed the Kaplan source: `cube_eligible_casedef`, `cube_eligible_prior_therapy`, `cube_eligible_risk`, `cube_eligible_exposure` (from `pcx__eligible`) and `cube_outcome_os`, `cube_outcome_efs`, `cube_outcome_initial_therapy` (from `pcx__outcome`). Floor of 1, like the Kaplan cubes. `stage/counts_kaplan.py` exports them.
+- New `test_source_cubes_on_built_eligible_and_outcome` builds the cubes on the real eligible and outcome SQL over the seeded fixtures.
+
+### 2026-10-29 — Kaplan protocol order by date, Conflicting ACNS0334 arm
+
+- New `pcx__kaplan_subject.protocol_name_by_date`: the same protocols in first-documented order (earliest regimen start date, else the note date). Subject table only, the cubes keep the alphabetical `protocol_name`.
+- `documented_trial_arm` says `Conflicting` instead of `Multiple` when notes document both ACNS0334 arms. Methotrexate exposure from Regimen B mentions is unchanged.
+- New `test_protocol_order_by_date`.
+
+### 2026-10-29 — Kaplan protocol_name lists every protocol
+
+- `pcx__kaplan_subject.protocol_name` (and so the OS and EFS cubes) now lists every coded protocol a patient has, sorted and comma-joined (such as `ACNS0334,HEAD_START`), instead of `Multiple`. `documented_trial_arm` still says `Multiple` when both ACNS0334 arms are documented.
+
+### 2026-10-29 — Kaplan strict cohort
+
+- New `pcx__kaplan_subject_strict` in the `counts_kaplan` stage (not exported): medulloblastoma Group 3, Group 4 or non-WNT/non-SHH, with any ACNS0334, PBTC_026 or CCG99703 regimen (from `pcx__llm_systemic_therapy_regimen`, arm documented or not) or initial high-dose methotrexate, and a valid t0 with whole-month OS and EFS durations. Adds integer `os_months` and `efs_months` for plotting. New `test_strict_cohort`.
+
+### 2026-10-29 — Kaplan cubes in months, with protocol and trial arm
+
+- `pcx__cube_kaplan_os` and `pcx__cube_kaplan_efs` (`counts_kaplan.workflow`) now count survival in whole months (`overall_survival_months`, `event_free_survival_months`) instead of years, and add `protocol_name` and `documented_trial_arm` as their last columns. The cubes are no longer an exact PCX-30 column match. The years columns stay in `pcx__kaplan_subject`.
+- `data_package_version` is unchanged (2), although the columns of two exported tables changed.
+
+### 2026-10-29 — Kaplan subject protocol and trial arm
+
+- `pcx__kaplan_subject` has new `protocol_name` and `documented_trial_arm`, from any systemic therapy regimen ever documented. `protocol_name` is the one coded protocol, Multiple, or Not Reported. `documented_trial_arm` is read from ACNS0334 regimens only: REGIMEN_A, REGIMEN_B, Multiple, Not Reported (ACNS0334 without an arm) or Not Applicable (no ACNS0334 regimen). The cubes are unchanged.
+
+### 2026-10-29 — Kaplan subject survival in months
+
+- `pcx__kaplan_subject` has new `overall_survival_months` and `event_free_survival_months` beside the years columns: whole months, FLOOR(days / 30.4375) (the year divided by 12), no cap, with the same Not Applicable and Not Reported rules. The OS and EFS cubes are unchanged (PCX-30 years layout).
+
+### 2026-10-28 — qa_athena: Athena rejects IS NOT TRUE
+
+- `pcx__warn_molecular_result_no_diagnosis.sql` used `IS NOT TRUE`, which DuckDB accepts but Athena (Trino) does not ("mismatched input 'TRUE'"), so the qa_athena stage failed. Now `IS DISTINCT FROM TRUE`: same result, NULL included, and valid in both engines.
 
 ### 2026-10-22 — version 0.5.0
 

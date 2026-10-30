@@ -1,9 +1,9 @@
 cumulus-study-builder==0.5.7
-cumulus-library==6.3.5
-pydantic==2.13.5
+cumulus-library==6.3.7
+pydantic==2.14.1
 Jinja2==3.1.6
 tomli-w==1.2.0
-pytest==9.1.1
+pytest==9.2.0
 duckdb==1.4.5
-sqlglot==30.23.0
+sqlglot==30.25.0
 PyYAML==6.0.3

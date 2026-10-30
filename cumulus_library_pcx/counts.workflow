@@ -101,3 +101,16 @@ table_cols = ["lab_observation_code", "lab_observation_display", "lab_observatio
 description = "Case-definition patients with a study-variable Procedure, by variable and code."
 source_table = "{{ prefix }}__cohort_casedef_proc"
 table_cols = ["proc_category_display", "proc_code", "proc_display", "proc_system", "variable"]
+
+# Notes selected for the document LLM tasks (pcx__sample_task: the casedef sample plus the
+# Elasticsearch topics). note_display is the note type or document title.
+[tables.cube_patient_sample_task]
+description = "Patients with a note selected for the document tasks (pcx__sample_task), by topic and note display (type or title)."
+source_table = "{{ prefix }}__sample_task"
+table_cols = ["topic", "note_display"]
+
+[tables.cube_note_sample_task]
+description = "Patients and notes selected for the document tasks (pcx__sample_task), by topic and note display (type or title). cnt is notes (note_ref)."
+source_table = "{{ prefix }}__sample_task"
+table_cols = ["topic", "note_display"]
+secondary_id = "note_ref"

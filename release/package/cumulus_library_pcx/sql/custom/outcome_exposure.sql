@@ -19,15 +19,22 @@
 --
 --  had_initial_methotrexate_bool / _chemo_bool / _radiation_bool
 --    TRUE   a record inside the window
---    FALSE  no record inside or possibly inside, and initial therapy is
---           documented without it: for methotrexate and radiation a
+--    FALSE  no record inside or possibly inside, and a record says the
+--           initial therapy went without it: for methotrexate and radiation a
 --           chemotherapy record inside the window, for chemotherapy a
---           radiation record inside it. An explicit EXPLICITLY_NOT_RECEIVED
---           also gives FALSE for methotrexate and radiation.
+--           radiation record inside it. For methotrexate and radiation, an
+--           EXPLICITLY_NOT_RECEIVED statement also gives FALSE when it covers
+--           the whole window: assessed through (assessed_through_day, else its
+--           note date) a day on or after the latest day the first event can
+--           be. A statement assessed earlier, before t0 included, says nothing
+--           about the rest of the window. With no dated first event the window
+--           has no end, so a statement alone is never enough. Methotrexate
+--           counts only an agent-level statement: a dose marked
+--           EXPLICITLY_NOT_RECEIVED is one skipped dose.
 --    NULL   unknown: no t0, an undated progression, recurrence or second
 --           malignancy of unknown timing (event_timing_uncertain_bool), a
---           record possibly inside, or no initial therapy documented at all.
---           Missing documentation is never read as "not given".
+--           record possibly inside, or no record of initial therapy at all.
+--           FALSE needs a record that says so. A chart silent on the drug is NULL.
 --  *_initial_unknown_reason says why a flag is NULL: no_t0,
 --  event_timing_uncertain, possible_record, or no_initial_therapy_documented
 --  (no record possibly inside, and nothing documents initial therapy without
@@ -86,6 +93,39 @@ placed AS (
     WHERE   record.exposure IN ('methotrexate', 'chemo', 'radiation')
     AND     elig.t0_day IS NOT NULL
 ),
+-- explicit non-receipt, and whether it is assessed through the end of the window
+not_received AS (
+    SELECT  agent.subject_ref,
+            'methotrexate'                                                          AS exposure,
+            CASE WHEN agent.assessed_through_day IS NOT NULL
+                 THEN agent.assessed_through_day ELSE note_day.note_date END        AS assessed_day
+    FROM    pcx__llm_systemic_therapy_agent AS agent
+    LEFT JOIN pcx__llm_note_date            AS note_day
+      ON    note_day.subject_ref = agent.subject_ref
+     AND    note_day.note_ref    = agent.note_ref
+    WHERE   agent.agent_name = 'METHOTREXATE'
+    AND     agent.delivery_status = 'EXPLICITLY_NOT_RECEIVED'
+    UNION ALL
+    SELECT  rt.subject_ref,
+            'radiation',
+            CASE WHEN rt.assessed_through_day IS NOT NULL
+                 THEN rt.assessed_through_day ELSE note_day.note_date END
+    FROM    pcx__llm_radiation_wide         AS rt
+    LEFT JOIN pcx__llm_note_date            AS note_day
+      ON    note_day.subject_ref = rt.subject_ref
+     AND    note_day.note_ref    = rt.note_ref
+    WHERE   rt.delivery_status = 'EXPLICITLY_NOT_RECEIVED'
+),
+not_received_window AS (
+    SELECT  nr.subject_ref,
+            BOOL_OR(nr.exposure = 'methotrexate' AND nr.assessed_day >= event.first_event_latest_day)
+                                                                                    AS methotrexate_not_received_bool,
+            BOOL_OR(nr.exposure = 'radiation'    AND nr.assessed_day >= event.first_event_latest_day)
+                                                                                    AS radiation_not_received_bool
+    FROM    not_received                AS nr
+    JOIN    pcx__outcome_first_event    AS event ON event.subject_ref = nr.subject_ref
+    GROUP BY nr.subject_ref
+),
 in_window AS (
     SELECT  subject_ref,
             BOOL_OR(exposure = 'methotrexate' AND window_position = 'inside')              AS methotrexate_inside_bool,
@@ -133,7 +173,8 @@ initial AS (
                 WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
                 WHEN in_window.methotrexate_inside_bool                                THEN TRUE
                 WHEN in_window.methotrexate_possible_bool                              THEN NULL
-                WHEN in_window.chemo_inside_bool OR rx.methotrexate_not_received_bool  THEN FALSE
+                WHEN in_window.chemo_inside_bool
+                  OR not_received_window.methotrexate_not_received_bool              THEN FALSE
             END                                                                     AS had_initial_methotrexate_bool,
             CASE
                 WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
@@ -145,13 +186,15 @@ initial AS (
                 WHEN elig.t0_day IS NULL OR event.event_timing_uncertain_bool       THEN NULL
                 WHEN in_window.radiation_inside_bool                                   THEN TRUE
                 WHEN in_window.radiation_possible_bool                                 THEN NULL
-                WHEN in_window.chemo_inside_bool OR rt.llm_explicitly_not_received_bool THEN FALSE
+                WHEN in_window.chemo_inside_bool
+                  OR not_received_window.radiation_not_received_bool                 THEN FALSE
             END                                                                     AS had_initial_radiation_bool
     FROM    pcx__eligible              AS elig
     JOIN    pcx__eligible_rx           AS rx    ON rx.subject_ref     = elig.subject_ref
     JOIN    pcx__eligible_radiation    AS rt    ON rt.subject_ref     = elig.subject_ref
     LEFT JOIN pcx__outcome_first_event AS event ON event.subject_ref  = elig.subject_ref
     LEFT JOIN in_window                         ON in_window.subject_ref = elig.subject_ref
+    LEFT JOIN not_received_window               ON not_received_window.subject_ref = elig.subject_ref
 )
 SELECT  initial.subject_ref,
         initial.t0_day,

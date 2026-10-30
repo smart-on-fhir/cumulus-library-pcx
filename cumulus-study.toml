@@ -5,7 +5,7 @@ manifest = "stage/manifest.py"
 [builder]
 sample_patient_limit = 10
 sample_note_limit = 50
-data_package_version = 2
+data_package_version = 3
 nlp_deployments = ["gpt_oss_120b"]
 # Note-selection tables the site supplies, each with a note_ref column, for nlp_clinical_tasks.workflow.
 # No stage builds them, so validate accepts them as NLP selectors. Nothing checks they have rows.

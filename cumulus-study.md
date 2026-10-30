@@ -8,12 +8,12 @@ replaces the old `make-pcx` manual (git tag `0.2-pre-study-builder`).
 
 ## Set up
 
-cumulus-study-builder 0.5.6 is the git tag `v0.5.6`, not on PyPI: installing it needs SSH
+cumulus-study-builder 0.5.7 is the git tag `v0.5.7`, not on PyPI: installing it needs SSH
 read access to `smart-on-fhir/cumulus-study-builder`.
 
 ```sh
 python -m venv .venv && source .venv/bin/activate
-python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.6"
+python -m pip install -c requirements-tested.txt "git+ssh://git@github.com/smart-on-fhir/cumulus-study-builder.git@v0.5.7"
 python -m pip install -c requirements-tested.txt -e '.[test]'
 ```
 
@@ -89,7 +89,7 @@ The build order is the `STAGES` list in
 | `client_views` | opt-in | PCX | `pcx__client_*` tables for timeline and survival analysis |
 | `qa_athena` | opt-in | PCX | `pcx__qa_*` and `pcx__warn_*` data-quality tables |
 | `counts` | default | builder | the count tables in [counts.workflow](cumulus_library_pcx/counts.workflow) |
-| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes in the PCX-30 layout, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), exported with the approved floor of 1 |
+| `counts_kaplan` | opt-in | PCX | Kaplan-Meier OS and EFS cubes (all subjects and the strict cohort) and cubes of `pcx__eligible` and `pcx__outcome`, [counts_kaplan.workflow](cumulus_library_pcx/counts_kaplan.workflow), floor of 1. Its export carries the meta tables but not the `counts` cubes, which are uploaded separately ([kaplan_survival.md](kaplan_survival.md)) |
 | `study_meta` | default | builder | study metadata tables |
 
 "PCX" stages are modules in `cumulus_library_pcx/stage/`. "Builder" stages come from the
@@ -105,7 +105,7 @@ before `sample`, because `pcx__sample_task` reads `pcx__elastic_union`.
 | `[study] directory` | the study package, `cumulus_library_pcx` |
 | `[study] manifest` | the stage list, `stage/manifest.py` |
 | `sample_patient_limit`, `sample_note_limit` | note-sampling limits per window (10 patients, 50 notes) |
-| `data_package_version` | the data package version (2) |
+| `data_package_version` | the data package version (3) |
 | `nlp_deployments` | the models whose result tables the wide SQL reads (`gpt_oss_120b`) |
 | `external_tables` | tables a site supplies, so `validate` does not expect a stage to build them: the clinical note-selection tables |
 
@@ -209,7 +209,7 @@ The PyPI package `cumulus-library-pcx` is data-only: the study's `manifest.toml`
 `../spreadsheet/` data dictionary path moves inside the package), every stage it lists with the
 same `skip_by_default` flags, the JSON response schemas of every LLM task, and no Python code. Its
 one dependency is Cumulus Library, in the range this repository's `pyproject.toml` requires
-(`>=6.3.5,<6.4`), so `pip install` brings a site to that range. `cumulus-library build -t pcx`
+(`>=6.3.7,<6.4`), so `pip install` brings a site to that range. `cumulus-library build -t pcx`
 runs the same default stages as the study (`study_population` through `sample`, then
 `study_meta`), and a site runs an opt-in stage by naming it with `--stage`. The opt-in
 `llm_schema` stage is listed, but its Python builder is not shipped, so it cannot run from the
@@ -218,8 +218,11 @@ same path inside the package, and so does `sql/custom/pcx__cohort_casedef_includ
 site version of the casedef include table), which no stage lists.
 
 ```sh
-python release/make_data_release.py     # needs SSH read access to the builder repository
+python release/make_chop_release.py     # needs SSH read access to the builder repository
 ```
+
+`release/make_chop_release.py` is the release script (0.5.3 was built with it). The former
+`release/make_data_release.py`, of which it is a copy, is no longer in the repository.
 
 Run it with the development venv from [Set up](#set-up) active: the script finds the repository
 through the builder's `filetool`, so the builder must be installed in the Python that runs it.
@@ -230,7 +233,7 @@ the assembled package in `release/package/`, and the wheel and sdist in `release
 so nothing stale is released. The version comes from `pyproject.toml`. It never uploads or
 runs git: it prints the `twine upload` command for the person publishing.
 
-`release/make_chop_release.py` makes CHOP's build the same way, with two differences. Before `cumulus-study build` it sets `HOME_INSTITUTION` to
+It makes CHOP's build, with two differences from a plain build. Before `cumulus-study build` it sets `HOME_INSTITUTION` to
 Children's Hospital of Philadelphia, so the `transition_of_care` schemas name CHOP, and the check
 fails if any released schema still names Boston Children's Hospital. After assembling, it points
 the released `casedef.toml` at `sql/custom/pcx__cohort_casedef_include.sql` (the CHOP include
