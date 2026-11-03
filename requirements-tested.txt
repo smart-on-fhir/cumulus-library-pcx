@@ -1,5 +1,5 @@
 cumulus-study-builder==0.5.7
-cumulus-library==6.3.7
+cumulus-library==6.3.9
 pydantic==2.14.1
 Jinja2==3.1.6
 tomli-w==1.2.0
