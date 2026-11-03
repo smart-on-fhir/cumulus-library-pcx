@@ -7,14 +7,15 @@ from start to finish. The study prefix is `pcx`, so every command targets `-t pc
 
 - Python 3.11 or newer.
 - [cumulus-library](https://github.com/smart-on-fhir/cumulus-library), with the `core` study
-  built. `pip install cumulus-library-pcx` brings the version PCX needs (6.3.7 or newer, below 6.4).
+  built. `pip install cumulus-library-pcx` brings the version PCX needs (6.3.9 or newer, below 6.4).
 - [RxNorm](https://github.com/smart-on-fhir/cumulus-library-rxnorm), built.
 - [LOINC](https://github.com/smart-on-fhir/cumulus-library-loinc), built.
 - A working Athena connection for `cumulus-library`, by environment variables
   (`CUMULUS_LIBRARY_DATABASE`, `CUMULUS_LIBRARY_WORKGROUP`, `CUMULUS_LIBRARY_PROFILE`,
   `CUMULUS_LIBRARY_REGION`) or the matching flags (`--database`, `--workgroup`, `--profile`,
   `--region`).
-- For the LLM stages: AWS Bedrock access to `gpt-oss-120b`, the Cumulus ETL folder of clinical
+- For the LLM stages: AWS Bedrock access to `gpt-oss-120b` (document tasks) and Claude Sonnet 5.5
+  (`claude-sonnet55`, Bedrock `us.anthropic.claude-sonnet-5-5`, clinical tasks), the Cumulus ETL folder of clinical
   notes (DiagnosticReport and DocumentReference), and the Cumulus ETL PHI folder.
 
 ## 1. First-time install
@@ -64,11 +65,12 @@ cumulus-library build -t pcx --stage llm_document_wide
 ```
 
 **3.4 LLM clinical tasks.** Diagnosis, surgery, radiation, systemic therapy and the other
-clinical tasks, each over the notes the document tasks marked relevant to it.
+clinical tasks, each over the notes the document tasks marked relevant to it. They run on
+Claude Sonnet 5.5: the clinical wide tables read only `pcx__nlp_<task>_claude_sonnet55`.
 
 ```sh
 cumulus-library build -t pcx --stage nlp_clinical_tasks \
-  --nlp-provider bedrock --nlp-model gpt-oss-120b \
+  --nlp-provider bedrock --nlp-model claude-sonnet55 \
   --note-dir s3://YOUR-BUCKET/NOTES-FOLDER \
   --etl-phi-dir s3://YOUR-BUCKET/PHI-FOLDER
 ```

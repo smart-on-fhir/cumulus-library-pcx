@@ -106,7 +106,7 @@ before `sample`, because `pcx__sample_task` reads `pcx__elastic_union`.
 | `[study] manifest` | the stage list, `stage/manifest.py` |
 | `sample_patient_limit`, `sample_note_limit` | note-sampling limits per window (10 patients, 50 notes) |
 | `data_package_version` | the data package version (3) |
-| `nlp_deployments` | the models whose result tables the wide SQL reads (`gpt_oss_120b`) |
+| `nlp_deployments` | the models whose result tables `validate` expects (`claude_sonnet55`, `gpt_oss_120b`). Each wide stage names its own: document `gpt_oss_120b`, clinical `claude_sonnet55` |
 | `external_tables` | tables a site supplies, so `validate` does not expect a stage to build them: the clinical note-selection tables |
 
 The study prefix `pcx` is set only in `manifest.toml`.
@@ -209,7 +209,7 @@ The PyPI package `cumulus-library-pcx` is data-only: the study's `manifest.toml`
 `../spreadsheet/` data dictionary path moves inside the package), every stage it lists with the
 same `skip_by_default` flags, the JSON response schemas of every LLM task, and no Python code. Its
 one dependency is Cumulus Library, in the range this repository's `pyproject.toml` requires
-(`>=6.3.7,<6.4`), so `pip install` brings a site to that range. `cumulus-library build -t pcx`
+(`>=6.3.9,<6.4`), so `pip install` brings a site to that range. `cumulus-library build -t pcx`
 runs the same default stages as the study (`study_population` through `sample`, then
 `study_meta`), and a site runs an opt-in stage by naming it with `--stage`. The opt-in
 `llm_schema` stage is listed, but its Python builder is not shipped, so it cannot run from the

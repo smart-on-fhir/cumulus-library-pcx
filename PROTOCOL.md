@@ -8,7 +8,7 @@ depend on: keep the numbers and their order, add subsections freely.
 
 Open work and the changelog are in [WORKPLAN.md](WORKPLAN.md). The pre-builder version is git
 tag `0.2-pre-study-builder`. The study package is `cumulus_library_pcx/`, built with
-cumulus-study-builder 0.5.7 and run by Cumulus Library 6.3.7. Other sites run the study from
+cumulus-study-builder 0.5.7 and run by Cumulus Library 6.3.9. Other sites run the study from
 the data-only PyPI package `cumulus-library-pcx` (`release/make_chop_release.py`), which
 ships the whole manifest and every stage, or from a clone of this repository with
 `cumulus-library build --study-dir cumulus_library_pcx`. The current release is 0.5.3, the CHOP
@@ -88,7 +88,12 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   document_type, event, laboratory, metastasis, molecular, radiation, registry_eligibility,
   response, surgery, survival_timeline, systemic_therapy, transition_of_care (`treatment.py`
   is shared context, not a task). Workflows: `nlp_document_tasks` and `nlp_clinical_tasks`; wide and
-  projection templates in `cumulus_library_pcx/sql/template/`. Deployment `gpt_oss_120b` (`cumulus-study.toml`).
+  projection templates in `cumulus_library_pcx/sql/template/`. Deployments: document tasks
+  `gpt_oss_120b`, clinical tasks `claude_sonnet55` (the wide stages, `stage/llm_*_wide.py`).
+- [decided] 2026-11-03, Andy: the clinical tasks run on Claude Sonnet 5.5 (`--nlp-model claude-sonnet55`,
+  Cumulus Library 6.3.9 or newer), the document tasks stay on `gpt-oss-120b`. The clinical wide tables
+  read only the Sonnet results, so the earlier `gpt-oss-120b` clinical results (BCH, CHOP) are not read
+  and every clinical task is rerun at both sites, radiation included. Ships in 0.5.5.
 - [decided] Sample windows from the shared sampler: pre, peri, post around the casedef anchor;
   10 patients and 50 notes per window (`cumulus-study.toml`).
 - [decided] 2026-10-08, Andy: the document tasks (`document_topic`, `document_type`) select every

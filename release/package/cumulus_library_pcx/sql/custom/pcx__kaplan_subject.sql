@@ -16,8 +16,9 @@
 -- precede every exposure) or Not Applicable (no t0). Missing documentation is
 -- Not Reported, never No.
 -- protocol_name is the coded protocol of any systemic therapy regimen ever
--- documented (pcx__llm_systemic_therapy_regimen, dated or not, not only initial
--- therapy): every distinct protocol named, sorted and comma-joined (such as
+-- documented (pcx__systemic_therapy_protocol, dated or not, not only initial
+-- therapy, with verbatims such as DFCI 07-308 resolved through
+-- spreadsheet/include_trial_protocol.csv): every distinct protocol named, sorted and comma-joined (such as
 -- ACNS0334,HEAD_START), Not Reported when none is (NONE_OF_THE_ABOVE is not a
 -- protocol). Naming a protocol does not establish enrollment.
 -- protocol_name_by_date lists the same protocols in the order they are first
@@ -38,7 +39,7 @@ protocol_named AS (
     SELECT  regimen.subject_ref,
             regimen.protocol_name,
             MIN(COALESCE(regimen.regimen_start_day, note_day.note_date)) AS first_day
-    FROM    pcx__llm_systemic_therapy_regimen AS regimen
+    FROM    pcx__systemic_therapy_protocol AS regimen
     LEFT JOIN pcx__llm_note_date AS note_day
       ON    note_day.subject_ref = regimen.subject_ref
      AND    note_day.note_ref    = regimen.note_ref
@@ -56,7 +57,7 @@ protocol AS (
 acns0334_arm AS (
     SELECT  subject_ref,
             NULLIF(documented_trial_arm, 'NONE_OF_THE_ABOVE') AS arm
-    FROM    pcx__llm_systemic_therapy_regimen
+    FROM    pcx__systemic_therapy_protocol
     WHERE   protocol_name = 'ACNS0334'
 ),
 trial_arm AS (

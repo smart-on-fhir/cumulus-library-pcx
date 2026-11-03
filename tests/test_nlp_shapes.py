@@ -5,6 +5,7 @@ import tomllib
 import duckdb
 import sqlglot
 from sqlglot import exp
+from cumulus_study_builder.config import get_config
 from cumulus_study_builder.tools import filetool
 
 def schema_type(node, definitions, name=''):
@@ -55,12 +56,14 @@ def test_all_raw_projections_bind_and_reject_unknown_versions():
             schema = json.loads((root/cfg['schema']).read_text())
             dtype = schema_type(schema, schema.get('$defs', {}))
             payload = json.dumps(response(schema, schema.get('$defs', {})))
-            table = f'{prefix}__nlp_{task}_gpt_oss_120b'
-            available.add(table)
-            db.execute(f'CREATE TABLE {table}(note_ref VARCHAR, subject_ref VARCHAR, encounter_ref VARCHAR, generated_on VARCHAR, task_version BIGINT, system_fingerprint VARCHAR, result {dtype})')
-            for version in sorted(cfg['versions'] | {-1}):
-                db.execute(f'INSERT INTO {table} VALUES (?,?,?,?,?,?,CAST(? AS {dtype}))',
-                           [f'note-v{version}', 'synthetic-subject', 'synthetic-encounter', '2020-01-01', version, 'synthetic', payload])
+            # Every deployment, since each wide stage reads its own (document gpt_oss_120b, clinical claude_sonnet55).
+            for deployment in get_config().nlp_deployments:
+                table = f'{prefix}__nlp_{task}_{deployment}'
+                available.add(table)
+                db.execute(f'CREATE TABLE {table}(note_ref VARCHAR, subject_ref VARCHAR, encounter_ref VARCHAR, generated_on VARCHAR, task_version BIGINT, system_fingerprint VARCHAR, result {dtype})')
+                for version in sorted(cfg['versions'] | {-1}):
+                    db.execute(f'INSERT INTO {table} VALUES (?,?,?,?,?,?,CAST(? AS {dtype}))',
+                               [f'note-v{version}', 'synthetic-subject', 'synthetic-encounter', '2020-01-01', version, 'synthetic', payload])
         tested = []
         for path in sorted(filetool.path_sql_generated().glob(prefix+'__llm_*.sql')):
             tree = sqlglot.parse_one(path.read_text(), read='trino')

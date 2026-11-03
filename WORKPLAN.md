@@ -1,7 +1,7 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
 Open, study-specific work only, on cumulus-study-builder **0.5.7** (git tag `v0.5.7`, not on
-PyPI) and Cumulus Library **6.3.7**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
+PyPI) and Cumulus Library **6.3.9**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
 Done work is in the [Changelog](#changelog) at the end.
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
 Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
@@ -18,7 +18,7 @@ release checks (`release/make_chop_release.py`).
 
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
-dependency is Cumulus Library (`>=6.3.7,<6.4`), so neither the site nor the package needs
+dependency is Cumulus Library (`>=6.3.9,<6.4`), so neither the site nor the package needs
 cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
 **0.5.3**: the Kaplan-Meier cubes in months with protocol and ACNS0334 arm, the strict cohort
 and its cubes, and cubes of the eligible, outcome and document-task tables (Changelog,
@@ -365,6 +365,14 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-11-03 — Clinical tasks on Claude Sonnet 5.5
+
+- The clinical tasks run with `--nlp-model claude-sonnet55`, the document tasks stay on `gpt-oss-120b`. A `.workflow` cannot name its model, so `nlp_clinical_tasks.workflow` says so in its header.
+- New study-owned `stage/llm_clinical_wide.py` (replaces the builder's) renders the clinical wide SQL over `pcx__nlp_<task>_claude_sonnet55` only. `stage/llm_document_wide.py` names `gpt_oss_120b`. `cumulus-study.toml` lists both in `nlp_deployments`, for `validate`.
+- The earlier `gpt-oss-120b` clinical results are no longer read: rerun every clinical task at BCH and CHOP, radiation included (the version 2 radiation results are not carried over).
+- Cumulus Library `>=6.3.9,<6.4` (the first with `claude-sonnet55`), `requirements-tested.txt` pins 6.3.9. `install.md` asks for Bedrock access to Claude Sonnet 5.5 and step 3.4 uses it.
+- `tests/test_nlp_shapes.py` creates the raw tables of every deployment.
 
 ### 2026-10-30 — DFCI 07-308 is ACNS0334 (issue #31)
 
