@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_survival_timeline_gpt_oss_120b' AS origin,
+        'pcx__nlp_survival_timeline_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -46,7 +46,7 @@ SELECT  DISTINCT
         END AS anchor_day_precision,
         anchor.protocol_name                                         AS protocol_name
 FROM
-        pcx__nlp_survival_timeline_gpt_oss_120b AS nlp
+        pcx__nlp_survival_timeline_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.anchors) WITH ORDINALITY AS anchor_t (anchor, anchor_index)
 WHERE
         nlp.result IS NOT NULL

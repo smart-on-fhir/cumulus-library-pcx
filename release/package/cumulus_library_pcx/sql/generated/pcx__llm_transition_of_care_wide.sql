@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_transition_of_care_gpt_oss_120b' AS origin,
+        'pcx__nlp_transition_of_care_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -49,7 +49,7 @@ SELECT  DISTINCT
         nlp.result.prior_therapy_at_entry.prior_therapy_exposure                    AS prior_therapy_exposure,
         array_join(nlp.result.prior_therapy_at_entry.prior_therapy_modalities, ',') AS prior_therapy_modalities
 FROM
-        pcx__nlp_transition_of_care_gpt_oss_120b AS nlp
+        pcx__nlp_transition_of_care_claude_sonnet55 AS nlp
 WHERE
         nlp.result IS NOT NULL
 AND     nlp.task_version = 1

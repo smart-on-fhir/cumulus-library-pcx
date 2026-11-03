@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_radiation_gpt_oss_120b' AS origin,
+        'pcx__nlp_radiation_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -125,7 +125,7 @@ SELECT  DISTINCT
         radiation_round.whole_ventricular_dose                       AS whole_ventricular_dose,
         radiation_round.dose_units                                   AS dose_units
 FROM
-        pcx__nlp_radiation_gpt_oss_120b AS nlp
+        pcx__nlp_radiation_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.radiation_rounds) WITH ORDINALITY AS radiation_round_t (radiation_round, radiation_round_index)
 WHERE
         nlp.result IS NOT NULL
