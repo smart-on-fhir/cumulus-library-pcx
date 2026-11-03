@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_metastasis_gpt_oss_120b' AS origin,
+        'pcx__nlp_metastasis_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -114,7 +114,7 @@ SELECT  DISTINCT
         nlp.result.staging_inputs.csf_cytology                       AS csf_cytology,
         nlp.result.staging_inputs.extraneural_metastasis             AS extraneural_metastasis
 FROM
-        pcx__nlp_metastasis_gpt_oss_120b AS nlp
+        pcx__nlp_metastasis_claude_sonnet55 AS nlp
 WHERE
         nlp.result IS NOT NULL
 AND     nlp.task_version = 2

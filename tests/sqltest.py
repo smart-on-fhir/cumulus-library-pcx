@@ -11,7 +11,8 @@ from cumulus_study_builder.tools import filetool
 SCHEMA = filetool.path_tests_data('schema.sql')
 
 # custom/ SQL in dependency order
-ELIGIBLE_OUTCOME = ['pcx__exposure_record',
+ELIGIBLE_OUTCOME = ['pcx__systemic_therapy_protocol',
+                    'pcx__exposure_record',
                     'eligible_dx',
                     'eligible_surgery',
                     'eligible_rx',
@@ -38,7 +39,15 @@ def connect(data_dir: Path | None = None) -> duckdb.DuckDBPyConnection:
         csv_file = data_dir / f'{table}.csv'
         if csv_file.exists():
             con.execute(f"COPY {table} FROM '{csv_file}' (HEADER, DELIMITER ',', NULLSTR '')")
+    load_include_trial_protocol(con)
     return con
+
+
+def load_include_trial_protocol(con: duckdb.DuckDBPyConnection) -> None:
+    """pcx__include_trial_protocol from the real spreadsheet/include_trial_protocol.csv, as the eligible stage uploads it."""
+    con.execute('CREATE OR REPLACE TABLE pcx__include_trial_protocol (protocol_name VARCHAR, protocol_name_verbatim VARCHAR)')
+    csv_file = filetool.path_spreadsheet('include_trial_protocol.csv')
+    con.execute(f"COPY pcx__include_trial_protocol FROM '{csv_file}' (HEADER, DELIMITER ',', QUOTE '\"')")
 
 
 def run_custom(con: duckdb.DuckDBPyConnection, names: list[str] = ELIGIBLE_OUTCOME) -> None:

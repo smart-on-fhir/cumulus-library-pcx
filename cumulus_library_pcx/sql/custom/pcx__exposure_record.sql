@@ -83,7 +83,7 @@ regimen_b AS (
             regimen_index,
             regimen_start_day,
             regimen_start_day_precision
-    FROM    pcx__llm_systemic_therapy_regimen
+    FROM    pcx__systemic_therapy_protocol
     WHERE   protocol_name = 'ACNS0334'
     AND     documented_trial_arm = 'REGIMEN_B'
 ),

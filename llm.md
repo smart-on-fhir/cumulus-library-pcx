@@ -81,8 +81,9 @@ values without repairing dates or adjudicating evidence:
   name it starts with (`diagnosis_wide` → `diagnosis`).
 
 `cumulus-study build` renders the SQL and the stage files. Each template is rendered once as a
-`UNION ALL` over `pcx__nlp_<task>_<deployment>` for the deployments in `[builder]
-nlp_deployments` of `cumulus-study.toml` (`gpt_oss_120b`), filtered to the task's `version`
+`UNION ALL` over `pcx__nlp_<task>_<deployment>` for the deployments its wide stage names
+(`gpt_oss_120b` in `stage/llm_document_wide.py`, `claude_sonnet55` in
+`stage/llm_clinical_wide.py`), filtered to the task's `version`
 from its `.workflow`. Rendering does not execute SQL or discover source tables: every source
 table must exist with the expected result structure when `cumulus-library build` runs the
 stage, and empty output means no usable source results, not clinical absence. Older result

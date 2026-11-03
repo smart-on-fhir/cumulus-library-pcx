@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_survival_timeline_gpt_oss_120b' AS origin,
+        'pcx__nlp_survival_timeline_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -45,7 +45,7 @@ SELECT  DISTINCT
             ELSE                                                             'DAY'
         END AS assessment_day_precision
 FROM
-        pcx__nlp_survival_timeline_gpt_oss_120b AS nlp
+        pcx__nlp_survival_timeline_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.event_free_follow_up) WITH ORDINALITY AS follow_up_t (follow_up, follow_up_index)
 WHERE
         nlp.result IS NOT NULL

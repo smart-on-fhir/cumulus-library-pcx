@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_systemic_therapy_gpt_oss_120b' AS origin,
+        'pcx__nlp_systemic_therapy_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -116,7 +116,7 @@ SELECT  DISTINCT
             ELSE                                                             'DAY'
         END AS assessed_through_day_precision
 FROM
-        pcx__nlp_systemic_therapy_gpt_oss_120b AS nlp
+        pcx__nlp_systemic_therapy_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.regimens) WITH ORDINALITY AS regimen_t (regimen, regimen_index)
 CROSS JOIN UNNEST(regimen.agents) WITH ORDINALITY AS agent_t (agent, agent_index)
 WHERE

@@ -424,3 +424,38 @@ def test_a_dose_joins_its_agent_within_the_same_extraction_output():
     # the leucovorin dose stays leucovorin (a supportive marker, not chemotherapy)
     assert row == (False, None, False, True)
     assert 'Patient/p7' in trial(con)
+
+
+def test_dfci_07_308_regimen_b_is_acns0334_methotrexate():
+    # spreadsheet/include_trial_protocol.csv: DFCI 07-308 is the Dana-Farber local number for ACNS0334.
+    # p5 (t0 2020-05-01, no other treatment): the LLM coded no protocol, but the verbatim is a listed
+    # spelling (matched ignoring case) and the arm is Regimen B, so p5 has ACNS0334 Regimen B methotrexate.
+    con = sqltest.connect()
+    con.execute("INSERT INTO pcx__llm_systemic_therapy_regimen (subject_ref, note_ref, protocol_name_verbatim, "
+                "regimen_start_day, regimen_start_day_precision, regimen_index, protocol_name, "
+                "documented_trial_arm, generated_on) VALUES "
+                "('Patient/p5', 'note-p5-rx', 'dfci 07-308 (REGIMEN B)', DATE '2020-06-01', 'DAY', 1, "
+                "'NONE_OF_THE_ABOVE', 'REGIMEN_B', 'run-1')")
+    sqltest.run_custom(con)
+    protocol = con.execute("SELECT protocol_name, protocol_name_llm FROM pcx__systemic_therapy_protocol "
+                           "WHERE subject_ref = 'Patient/p5'").fetchall()
+    assert protocol == [('ACNS0334', 'NONE_OF_THE_ABOVE')]
+    rx = con.execute("SELECT methotrexate_source, methotrexate_regimen_b_first_day, methotrexate_any_bool "
+                     "FROM pcx__eligible_rx WHERE subject_ref = 'Patient/p5'").fetchone()
+    assert rx == ('llm_acns0334_regimen_b', date(2020, 6, 1), True)
+    assert con.execute("SELECT had_initial_methotrexate_bool FROM pcx__outcome_exposure "
+                       "WHERE subject_ref = 'Patient/p5'").fetchone() == (True,)
+
+
+def test_include_trial_protocol_maps_each_verbatim_to_one_protocol():
+    # a verbatim (ignoring case) listed under two protocols would duplicate regimen rows in
+    # pcx__systemic_therapy_protocol. Spellings that differ only in case are fine.
+    con = sqltest.connect()
+    duplicated = con.execute("SELECT LOWER(protocol_name_verbatim) FROM pcx__include_trial_protocol "
+                             "GROUP BY LOWER(protocol_name_verbatim) "
+                             "HAVING COUNT(DISTINCT protocol_name) > 1").fetchall()
+    assert duplicated == []
+    # every listed protocol is a coded TreatmentProtocol value
+    from cumulus_library_pcx.llm.models.systemic_therapy import TreatmentProtocol
+    listed = {r[0] for r in con.execute("SELECT DISTINCT protocol_name FROM pcx__include_trial_protocol").fetchall()}
+    assert listed <= {p.value for p in TreatmentProtocol}

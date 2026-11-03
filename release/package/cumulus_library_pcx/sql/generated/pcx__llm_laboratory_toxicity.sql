@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_laboratory_gpt_oss_120b' AS origin,
+        'pcx__nlp_laboratory_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -49,7 +49,7 @@ SELECT  DISTINCT
         END AS event_day_precision,
         toxicity.attribution                                         AS attribution
 FROM
-        pcx__nlp_laboratory_gpt_oss_120b AS nlp
+        pcx__nlp_laboratory_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.toxicities) WITH ORDINALITY AS toxicity_t (toxicity, toxicity_index)
 WHERE
         nlp.result IS NOT NULL

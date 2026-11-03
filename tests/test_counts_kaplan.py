@@ -10,6 +10,7 @@ from tests.conftest import ROOT
 
 SOURCE = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject.sql'
 STRICT = ROOT / 'cumulus_library_pcx/sql/custom/pcx__kaplan_subject_strict.sql'
+PROTOCOL = ROOT / 'cumulus_library_pcx/sql/custom/pcx__systemic_therapy_protocol.sql'
 
 # Based on the headers of the PCX-30 2026-10-02 OS and EFS _cube.csv files, in order, without site:
 # the aggregator adds site when it combines each site's export. Survival is in months instead of
@@ -30,8 +31,8 @@ def outcome(i, t0=T0, os_event=False, os_days=400, efs_event=False, efs_days=400
 
 
 def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = (), note_date_rows: list = ()):
-    """regimen_rows are (subject_ref, protocol_name, documented_trial_arm[, regimen_start_day[, note_ref]]),
-    note_date_rows are (subject_ref, note_ref, note_date)."""
+    """regimen_rows are (subject_ref, protocol_name, documented_trial_arm[, regimen_start_day[, note_ref
+    [, protocol_name_verbatim]]]), note_date_rows are (subject_ref, note_ref, note_date)."""
     # Athena ARRAY_JOIN, as in tests/sqltest.py
     con.execute("CREATE OR REPLACE MACRO array_join(a, s) AS list_aggregate(a, 'string_agg', s)")
     con.execute('CREATE OR REPLACE TABLE pcx__outcome (subject_ref VARCHAR, t0_day DATE, os_event_bool BOOLEAN, '
@@ -44,12 +45,17 @@ def load(con, outcome_rows: list, molecular_rows: list, regimen_rows: list = (),
     if molecular_rows:
         con.executemany('INSERT INTO pcx__client_diagnosis VALUES (?, ?, ?)', molecular_rows)
     con.execute('CREATE OR REPLACE TABLE pcx__llm_systemic_therapy_regimen (subject_ref VARCHAR, '
-                'protocol_name VARCHAR, documented_trial_arm VARCHAR, regimen_start_day DATE, note_ref VARCHAR)')
+                'protocol_name VARCHAR, documented_trial_arm VARCHAR, regimen_start_day DATE, note_ref VARCHAR, '
+                'protocol_name_verbatim VARCHAR, generated_on VARCHAR, regimen_index BIGINT, '
+                'regimen_start_day_precision VARCHAR)')
     padded = list()
     for row in regimen_rows:
-        padded.append(tuple(row) + (None,) * (5 - len(row)))
+        padded.append(tuple(row) + (None,) * (9 - len(row)))
     if padded:
-        con.executemany('INSERT INTO pcx__llm_systemic_therapy_regimen VALUES (?, ?, ?, ?, ?)', padded)
+        con.executemany('INSERT INTO pcx__llm_systemic_therapy_regimen VALUES (' + ', '.join(['?'] * 9) + ')', padded)
+    sqltest.load_include_trial_protocol(con)
+    con.execute('DROP TABLE IF EXISTS pcx__systemic_therapy_protocol')
+    con.execute(PROTOCOL.read_text())
     con.execute('CREATE OR REPLACE TABLE pcx__llm_note_date (subject_ref VARCHAR, note_ref VARCHAR, note_date DATE)')
     if note_date_rows:
         con.executemany('INSERT INTO pcx__llm_note_date VALUES (?, ?, ?)', note_date_rows)
@@ -192,6 +198,33 @@ def test_strict_cohort():
     assert strict_os[strict_os[OS_COLS[1:]].isna().all(axis=1)].cnt.tolist() == [6]
     assert strict_efs[strict_efs[EFS_COLS[1:]].isna().all(axis=1)].cnt.tolist() == [6]
     assert set(strict_efs.event_free_survival_months.dropna()) == {'13'}
+
+
+def test_include_trial_protocol_resolves_dfci_07_308():
+    # spreadsheet/include_trial_protocol.csv: the verbatim decides when it is listed, ignoring case.
+    # 0: no coded protocol, "DFCI 07-308, regimen B": ACNS0334, Regimen B, in the strict cohort
+    # 1: coded HEAD_START, "HeadStart II (07-308)": 07-308 wins, ACNS0334 without an arm
+    # 2: no coded protocol, "dfci 07308": ACNS0334
+    # 3: no coded protocol, "per DFCI 07-308 cycle 2" is not a listed spelling: no protocol, not strict
+    # 4: coded HEAD_START, "Head Start II": stays Head Start, not strict
+    con = duckdb.connect()
+    rows = [outcome(i) for i in range(5)]
+    molecular = [(f'Patient/{i}', 'GROUP_3', 'MEDULLOBLASTOMA') for i in range(5)]
+    nota = 'NONE_OF_THE_ABOVE'
+    regimens = [('Patient/0', nota, 'REGIMEN_B', None, None, 'DFCI 07-308, regimen B'),
+                ('Patient/1', 'HEAD_START', nota, None, None, 'HeadStart II (07-308)'),
+                ('Patient/2', nota, nota, None, None, 'dfci 07308'),
+                ('Patient/3', nota, nota, None, None, 'per DFCI 07-308 cycle 2'),
+                ('Patient/4', 'HEAD_START', nota, None, None, 'Head Start II')]
+    load(con, rows, molecular, regimens)
+    labels = con.execute('SELECT subject_ref, protocol_name, documented_trial_arm FROM pcx__kaplan_subject '
+                         'ORDER BY subject_ref').fetchall()
+    assert labels == [('Patient/0', 'ACNS0334', 'REGIMEN_B'), ('Patient/1', 'ACNS0334', 'Not Reported'),
+                      ('Patient/2', 'ACNS0334', 'Not Reported'), ('Patient/3', 'Not Reported', 'Not Applicable'),
+                      ('Patient/4', 'HEAD_START', 'Not Applicable')]
+    con.execute(STRICT.read_text())
+    strict = [r[0] for r in con.execute('SELECT subject_ref FROM pcx__kaplan_subject_strict ORDER BY subject_ref').fetchall()]
+    assert strict == ['Patient/0', 'Patient/1', 'Patient/2']
 
 
 def test_cube_columns_and_floor_of_one():

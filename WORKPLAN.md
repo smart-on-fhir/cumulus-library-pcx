@@ -1,7 +1,7 @@
 # Workplan: cumulus-library-pcx (prefix `pcx`)
 
 Open, study-specific work only, on cumulus-study-builder **0.5.7** (git tag `v0.5.7`, not on
-PyPI) and Cumulus Library **6.3.7**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
+PyPI) and Cumulus Library **6.3.9**. Set up is in [cumulus-study.md](cumulus-study.md#set-up).
 Done work is in the [Changelog](#changelog) at the end.
 Sections follow [PROTOCOL.md](PROTOCOL.md) (a section with nothing planned says so), then Build, tests and docs.
 Each entry: priority · `stage` · task. Paths are under the study package `cumulus_library_pcx/`.
@@ -18,7 +18,7 @@ release checks (`release/make_chop_release.py`).
 
 Releases are **data-only** PyPI packages: the study's `manifest.toml` as is, every stage with
 its `skip_by_default` flag, the rendered SQL, TOML and JSON, and no Python code. The one
-dependency is Cumulus Library (`>=6.3.7,<6.4`), so neither the site nor the package needs
+dependency is Cumulus Library (`>=6.3.9,<6.4`), so neither the site nor the package needs
 cumulus-study-builder ([cumulus-study.md](cumulus-study.md#release)). The next release is
 **0.5.3**: the Kaplan-Meier cubes in months with protocol and ACNS0334 arm, the strict cohort
 and its cubes, and cubes of the eligible, outcome and document-task tables (Changelog,
@@ -365,6 +365,23 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
   `Stage(qa)`.
 
 ## Changelog
+
+### 2026-11-03 — Clinical tasks on Claude Sonnet 5.5
+
+- The clinical tasks run with `--nlp-model claude-sonnet55`, the document tasks stay on `gpt-oss-120b`. A `.workflow` cannot name its model, so `nlp_clinical_tasks.workflow` says so in its header.
+- New study-owned `stage/llm_clinical_wide.py` (replaces the builder's) renders the clinical wide SQL over `pcx__nlp_<task>_claude_sonnet55` only. `stage/llm_document_wide.py` names `gpt_oss_120b`. `cumulus-study.toml` lists both in `nlp_deployments`, for `validate`.
+- The earlier `gpt-oss-120b` clinical results are no longer read: rerun every clinical task at BCH and CHOP, radiation included (the version 2 radiation results are not carried over).
+- Cumulus Library `>=6.3.9,<6.4` (the first with `claude-sonnet55`), `requirements-tested.txt` pins 6.3.9. `install.md` asks for Bedrock access to Claude Sonnet 5.5 and step 3.4 uses it.
+- `tests/test_nlp_shapes.py` creates the raw tables of every deployment.
+
+### 2026-10-30 — DFCI 07-308 is ACNS0334 (issue #31)
+
+- Clinical team: DFCI 07-308 is the Dana-Farber local number for ACNS0334 (there is no COG 07308). New `spreadsheet/include_trial_protocol.csv` lists the protocols of the strict Kaplan cohort (ACNS0334, PBTC_026, CCG99703) and the verbatim spellings that mean each one (the 07-308 spellings). The eligible stage uploads it as `pcx__include_trial_protocol`.
+- New `pcx__systemic_therapy_protocol` (eligible stage): one row per LLM regimen. `protocol_name` is the sheet's protocol when `protocol_name_verbatim` is listed (exact, ignoring case), else the LLM code, which stays in `protocol_name_llm`. A listed verbatim wins over another coded protocol ("HeadStart II (07-308)" is ACNS0334). No prompt change and no LLM rerun.
+- Everything that reads ACNS0334 reads this table: ACNS0334 Regimen B methotrexate exposure (`pcx__exposure_record`), the Kaplan `protocol_name` and `documented_trial_arm`, the strict cohort (any protocol in the sheet) and the Regimen B date warn check. A "DFCI 07-308, regimen B" patient has methotrexate exposure and Kaplan arm REGIMEN_B.
+- Elasticsearch `systemic_therapy` topic adds "07-308", "07 308", "07–308" and 07308.
+- `include_trial_protocol.csv`: PBTC026 maps to PBTC_026 (the enum value), duplicate en-dash row removed.
+- Tests: `test_dfci_07_308_regimen_b_is_acns0334_methotrexate`, `test_include_trial_protocol_maps_each_verbatim_to_one_protocol`, `test_include_trial_protocol_resolves_dfci_07_308`.
 
 ### 2026-10-30 — CHOP casedef include: typed resource_ref
 

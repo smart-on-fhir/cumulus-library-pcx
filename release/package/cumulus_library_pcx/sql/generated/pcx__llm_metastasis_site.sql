@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_metastasis_gpt_oss_120b' AS origin,
+        'pcx__nlp_metastasis_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -45,7 +45,7 @@ SELECT  DISTINCT
             ELSE                                                             'DAY'
         END AS site_day_precision
 FROM
-        pcx__nlp_metastasis_gpt_oss_120b AS nlp
+        pcx__nlp_metastasis_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.metastasis_sites) WITH ORDINALITY AS metastasis_site_t (metastasis_site, metastasis_site_index)
 WHERE
         nlp.result IS NOT NULL

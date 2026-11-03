@@ -39,6 +39,15 @@ col_types = [
     "BOOLEAN",
 ]
 
+[tables.include_trial_protocol]
+files = [
+    "include_trial_protocol.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+]
+
 [tables.include_utilization]
 files = [
     "include_utilization.csv",

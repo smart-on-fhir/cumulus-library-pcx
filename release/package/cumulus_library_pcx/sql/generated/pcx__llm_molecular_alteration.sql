@@ -3,7 +3,7 @@ SELECT  DISTINCT
         nlp.note_ref,
         nlp.encounter_ref,
         nlp.subject_ref,
-        'pcx__nlp_molecular_gpt_oss_120b' AS origin,
+        'pcx__nlp_molecular_claude_sonnet55' AS origin,
         CAST(nlp.generated_on AS VARCHAR) AS generated_on,
         CAST(nlp.task_version AS BIGINT) AS task_version,
         nlp.system_fingerprint,
@@ -48,7 +48,7 @@ SELECT  DISTINCT
         END AS report_day_precision,
         alteration.testing_method                                    AS testing_method
 FROM
-        pcx__nlp_molecular_gpt_oss_120b AS nlp
+        pcx__nlp_molecular_claude_sonnet55 AS nlp
 CROSS JOIN UNNEST(nlp.result.alterations) WITH ORDINALITY AS alteration_t (alteration, alteration_index)
 WHERE
         nlp.result IS NOT NULL
