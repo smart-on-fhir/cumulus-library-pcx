@@ -366,6 +366,10 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-11-03 — Elasticsearch topic trial_protocol
+
+- New `spreadsheet/query_topics/trial_protocol.txt`: the strict-cohort protocols of `include_trial_protocol.csv` by name (ACNS0334 and the DFCI 07-308 spellings, CCG99703, PBTC026), with space and hyphen forms. Bare 07-308, 07308 and 99703 need protocol context (DFCI, Dana-Farber, protocol, regimen, arm, study, trial, COG, CCG, HeadStart) in the same note. Precision-leaning, unlike the recall topics. `rapid-elastic.md` and PROTOCOL 5 record it. Not yet run.
+
 ### 2026-11-03 — Clinical tasks on Claude Sonnet 5.5
 
 - The clinical tasks run with `--nlp-model claude-sonnet55`, the document tasks stay on `gpt-oss-120b`. A `.workflow` cannot name its model, so `nlp_clinical_tasks.workflow` says so in its header.

@@ -109,6 +109,12 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   subject's last visit, plus END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any
   visit, plus notes not on a study-population visit (no encounter, or one outside the
   population), whose dates the LLM extracts (`pcx__llm_document_task_survival_timeline`).
+- [decided] 2026-11-03, Andy: Elasticsearch topic `trial_protocol` (`spreadsheet/query_topics/trial_protocol.txt`)
+  is precision-leaning, unlike the recall topics (`query_topics/recall/registry_eligibility.txt`). It matches
+  the protocol names of `spreadsheet/include_trial_protocol.csv` plus their space and hyphen forms
+  (ACNS 0334, CCG 99703, COG 99703, PBTC 026). A bare 07-308, 07308 or 99703 counts only with DFCI,
+  Dana-Farber, protocol, regimen, arm, study, trial, COG, CCG or HeadStart in the same note. Terms are
+  candidates for clinical review. Not yet run.
 - [open] Note selectors: the clinical workflow references `pcx__llm_document_task_<task>` tables that the
   source study never created. Supply reviewed selectors, each with a `note_ref` column,
   before running it. The tables are declared as site-supplied under `[builder] external_tables`.

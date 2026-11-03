@@ -39,6 +39,7 @@ revision generated them.
 | `survival_timeline` | Timeline anchors, vital status and follow-up |
 | `laboratory` | Organ function, methotrexate levels/clearance and toxicity evidence |
 | `registry_eligibility` | Evidence relevant to a separate ACNS0334-like eligibility assessment |
+| `trial_protocol` | Precision topic: the strict-cohort protocols of `include_trial_protocol.csv` (ACNS0334 with its DFCI 07-308 spellings, CCG99703, PBTC026) by name; bare 07-308, 07308 or 99703 only with protocol context in the same note |
 | `medulloblastoma` | Compact discovery summary: treatment, molecular group and survival evidence. Its extraction model was replaced by `diagnosis`, so no task reads it now |
 
 The task topics are named after extraction modules in `cumulus_library_pcx/llm/models/`.
