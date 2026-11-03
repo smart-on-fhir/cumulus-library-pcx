@@ -109,6 +109,10 @@ One CSV per concept in `spreadsheet/`; see [spreadsheet/README.md](spreadsheet/R
   subject's last visit, plus END_OF_LIFE_DOCUMENT and EXPLICIT survival_timeline notes from any
   visit, plus notes not on a study-population visit (no encounter, or one outside the
   population), whose dates the LLM extracts (`pcx__llm_document_task_survival_timeline`).
+- [decided] 2026-11-03, Andy: the recall-leaning Elasticsearch topics (`rx_*` and the per-task
+  topics) move to `spreadsheet/query_topics/recall/`. The default run is `diagnosis`, `dx_atrt`,
+  `dx_medulloblastoma` and `trial_protocol` (`elastic_query` does not read subfolders). Recall-topic
+  CSVs already in the output folder are still uploaded unless removed.
 - [decided] 2026-11-03, Andy: Elasticsearch topic `trial_protocol` (`spreadsheet/query_topics/trial_protocol.txt`)
   is precision-leaning, unlike the recall topics (`query_topics/recall/registry_eligibility.txt`). It matches
   the protocol names of `spreadsheet/include_trial_protocol.csv` plus their space and hyphen forms
@@ -274,6 +278,9 @@ SQL in `cumulus_library_pcx/sql/custom/`, opt-in stage `outcome`.
   `counts` stage (counts skill), replacing the former `stage/cube.py` and `cubes.json`. The
   file is `cumulus_library_pcx/counts.workflow`, at the package root next to `manifest.toml`.
   All tables are shared (`export:counts`); no site-only file.
+- [decided] 2026-11-03, Andy: five study population cubes are removed from `counts.workflow`:
+  `cube_patient_study_population_dx`, `_allergy`, `_rx`, `_proc` and `_lab`. The patient,
+  encounter, DocumentReference and DiagnosticReport study population cubes stay (14 tables).
 - [decided] Every table counts distinct patients (`subject_ref`) with the builder floor
   of 10. The encounter, DocumentReference and DiagnosticReport tables count the resource
   through `secondary_id`: a cell needs 10 patients and 10 resources, and `cnt` is the

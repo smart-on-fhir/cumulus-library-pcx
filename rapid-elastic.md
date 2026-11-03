@@ -1,15 +1,20 @@
 # PCX clinical-note retrieval topics
 
 These queries select candidate notes for chart review and extraction. Query definitions were
-last reviewed 2026-09-10; this page was brought up to date 2026-10-09.
+last reviewed 2026-09-10; this page was brought up to date 2026-11-03.
 
 ## Files and selection
 
 Topics use the rapid-elastic format: a folder with one `<topic>.txt` per topic, where the
-file name is the topic and the whole text is the query. The only folder is
-`spreadsheet/query_topics/`. It holds shared topics (`dx_*`, `rx_*`) and one topic per
-extraction task, taken from the precision-leaning set. The earlier separate precision (`ppv`)
-and recall folders are no longer in the repository.
+file name is the topic and the whole text is the query. There are two folders:
+
+- `spreadsheet/query_topics/`: the topics that run by default, `diagnosis`, `dx_atrt`,
+  `dx_medulloblastoma` and the precision topic `trial_protocol`.
+- `spreadsheet/query_topics/recall/`: the recall-leaning topics, `rx_*` and one per extraction
+  task, moved there 2026-11-03. `elastic_query` reads only the `*.txt` files directly in
+  `query_topics/`, not subfolders, so these do not run by default. `elastic_upload` loads every
+  CSV in the output folder, though: remove older recall-topic CSVs from it, or their notes still
+  reach `pcx__elastic_union` and `pcx__sample_task`.
 
 Each file is one line with no trailing newline. Queries target `note` using
 Lucene query-string syntax, not Kibana KQL. Keep grouping, quotes, wildcard stems
@@ -21,13 +26,21 @@ revision generated them.
 
 ## Topic boundaries
 
+Default topics, `spreadsheet/query_topics/`:
+
 | Topic | Candidate evidence |
 | --- | --- |
 | `dx_medulloblastoma` | Named medulloblastoma, morphology codes and contextual historical PNET wording |
 | `dx_atrt` | Named ATRT, morphology or contextual rhabdoid evidence for review/reclassification |
+| `diagnosis` | Broader CNS tumor entities and diagnosis-establishing language; not specific to medulloblastoma |
+| `trial_protocol` | Precision topic: the strict-cohort protocols of `include_trial_protocol.csv` (ACNS0334 with its DFCI 07-308 spellings, CCG99703, PBTC026) by name; bare 07-308, 07308 or 99703 only with protocol context in the same note |
+
+Recall topics, `spreadsheet/query_topics/recall/` (not run by default):
+
+| Topic | Candidate evidence |
+| --- | --- |
 | `rx_contrast_methotrexate` | Methotrexate ingredients, brands and contextual MTX abbreviation across formulations |
 | `rx_chemotherapy` | Six backbone agents represented by `rx_chemo_*` valuesets; methotrexate is separate |
-| `diagnosis` | Broader CNS tumor entities and diagnosis-establishing language; not specific to medulloblastoma |
 | `transition_of_care` | Outside diagnosis, surgery or therapy, transfer/referral and entry to the current institution |
 | `surgery` | Resection, biopsy, residual disease, second-look surgery and dates |
 | `metastasis` | Chang stage, CSF cytology, neuraxis imaging and metastatic sites |
@@ -39,7 +52,6 @@ revision generated them.
 | `survival_timeline` | Timeline anchors, vital status and follow-up |
 | `laboratory` | Organ function, methotrexate levels/clearance and toxicity evidence |
 | `registry_eligibility` | Evidence relevant to a separate ACNS0334-like eligibility assessment |
-| `trial_protocol` | Precision topic: the strict-cohort protocols of `include_trial_protocol.csv` (ACNS0334 with its DFCI 07-308 spellings, CCG99703, PBTC026) by name; bare 07-308, 07308 or 99703 only with protocol context in the same note |
 | `medulloblastoma` | Compact discovery summary: treatment, molecular group and survival evidence. Its extraction model was replaced by `diagnosis`, so no task reads it now |
 
 The task topics are named after extraction modules in `cumulus_library_pcx/llm/models/`.
@@ -99,8 +111,8 @@ clause counts alone do not establish server acceptance.
 
 The entry points are:
 
-- `python -m cumulus_study_builder.tools.elastic_query`: runs every topic in
-  `spreadsheet/query_topics/` through rapid-elastic and writes result CSVs under
+- `python -m cumulus_study_builder.tools.elastic_query`: runs every topic directly in
+  `spreadsheet/query_topics/` (not `recall/`) through rapid-elastic and writes result CSVs under
   `$ELASTIC_OUTPUT_DIR` (else `$CUMULUS_LIBRARY_DATA_PATH/elastic/output`).
 - `cumulus-study build elastic_upload`: when result CSVs exist in that folder, writes
   `file_upload_elastic.toml` beside them and schedules the upload plus the

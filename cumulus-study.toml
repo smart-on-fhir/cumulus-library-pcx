@@ -5,7 +5,7 @@ manifest = "stage/manifest.py"
 [builder]
 sample_patient_limit = 10
 sample_note_limit = 50
-data_package_version = 3
+data_package_version = 4
 # Every model whose result tables validate expects. Each wide stage reads only its own:
 # llm_document_wide reads gpt_oss_120b, llm_clinical_wide reads claude_sonnet55.
 nlp_deployments = ["claude_sonnet55", "gpt_oss_120b"]

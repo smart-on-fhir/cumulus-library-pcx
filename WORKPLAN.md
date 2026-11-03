@@ -366,6 +366,14 @@ Otherwise no changes planned beyond the open questions above. The two `_50k` wor
 
 ## Changelog
 
+### 2026-11-03 — Recall topics moved to query_topics/recall/
+
+- The `rx_*` and per-task Elasticsearch topics move to `spreadsheet/query_topics/recall/`. `elastic_query` reads only the top folder, so the default run is `diagnosis`, `dx_atrt`, `dx_medulloblastoma` and `trial_protocol`, but `elastic_upload` still loads any older recall-topic CSVs left in the output folder. `rapid-elastic.md` lists the two folders and PROTOCOL 5 records the decision.
+
+### 2026-11-03 — Five study population cubes removed
+
+- `counts.workflow` (Andy's edit) no longer builds or exports `cube_patient_study_population_dx`, `_allergy`, `_rx`, `_proc` and `_lab`. The patient, encounter, DocumentReference and DiagnosticReport study population cubes stay, 14 count tables in all. `tests/test_counts.py` is unaffected (it tests the encounter and variable-union cubes).
+
 ### 2026-11-03 — Elasticsearch topic trial_protocol
 
 - New `spreadsheet/query_topics/trial_protocol.txt`: the strict-cohort protocols of `include_trial_protocol.csv` by name (ACNS0334 and the DFCI 07-308 spellings, CCG99703, PBTC026), with space and hyphen forms. Bare 07-308, 07308 and 99703 need protocol context (DFCI, Dana-Farber, protocol, regimen, arm, study, trial, COG, CCG, HeadStart) in the same note. Precision-leaning, unlike the recall topics. `rapid-elastic.md` and PROTOCOL 5 record it. Not yet run.

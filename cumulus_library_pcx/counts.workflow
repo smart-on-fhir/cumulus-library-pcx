@@ -8,41 +8,16 @@
 
 config_type = "counts"
 
-[tables.cube_encounter_study_population_enc]
-description = "Patients and encounters in the study population by age group, encounter class, start year, service type and type. cnt is encounters."
-source_table = "{{ prefix }}__cohort_study_population_enc"
-table_cols = ["age_group", "enc_class_display", "enc_period_start_year", "enc_servicetype_display", "enc_type_display"]
-secondary_id = "encounter_ref"
-
 [tables.cube_patient_study_population]
 description = "Patients in the study population by age group, gender and race."
 source_table = "{{ prefix }}__cohort_study_population"
 table_cols = ["age_group", "gender", "race_display"]
 
-[tables.cube_patient_study_population_dx]
-description = "Patients in the study population with a Condition, by category, clinical status, code and verification status."
-source_table = "{{ prefix }}__cohort_study_population_dx"
-table_cols = ["dx_category_code", "dx_clinical_status", "dx_code", "dx_display", "dx_system", "dx_verification_status"]
-
-[tables.cube_patient_study_population_allergy]
-description = "Patients in the study population with an AllergyIntolerance, by category, criticality, allergen and manifestation."
-source_table = "{{ prefix }}__cohort_study_population_allergy"
-table_cols = ["allergy_category", "allergy_criticality", "allergy_display", "allergy_manifestation_display"]
-
-[tables.cube_patient_study_population_rx]
-description = "Patients in the study population with a MedicationRequest, by category, medication code and status."
-source_table = "{{ prefix }}__cohort_study_population_rx"
-table_cols = ["rx_category_code", "rx_code", "rx_display", "rx_status", "rx_system"]
-
-[tables.cube_patient_study_population_proc]
-description = "Patients in the study population with a Procedure, by category, code and status."
-source_table = "{{ prefix }}__cohort_study_population_proc"
-table_cols = ["proc_category_display", "proc_code", "proc_display", "proc_status", "proc_system"]
-
-[tables.cube_patient_study_population_lab]
-description = "Patients in the study population with a laboratory Observation, by code and status."
-source_table = "{{ prefix }}__cohort_study_population_lab"
-table_cols = ["lab_observation_code", "lab_observation_display", "lab_observation_system", "lab_status"]
+[tables.cube_encounter_study_population_enc]
+description = "Patients and encounters in the study population by age group, encounter class, start year, service type and type. cnt is encounters."
+source_table = "{{ prefix }}__cohort_study_population_enc"
+table_cols = ["age_group", "enc_class_display", "enc_period_start_year", "enc_servicetype_display", "enc_type_display"]
+secondary_id = "encounter_ref"
 
 [tables.cube_patient_study_population_doc]
 description = "Patients in the study population with a DocumentReference, by text availability, status and type."

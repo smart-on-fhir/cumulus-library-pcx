@@ -1,19 +1,5 @@
 config_type = "counts"
 
-[tables.cube_encounter_study_population_enc]
-source_table = "(SELECT * FROM pcx__cohort_study_population_enc WHERE subject_ref IS NOT NULL AND encounter_ref IS NOT NULL)"
-table_cols = [
-    "age_group",
-    "enc_class_display",
-    "enc_period_start_year",
-    "enc_servicetype_display",
-    "enc_type_display",
-]
-description = "Patients and encounters in the study population by age group, encounter class, start year, service type and type. cnt is encounters."
-secondary_id = "encounter_ref"
-primary_id = "subject_ref"
-min_subject = 10
-
 [tables.cube_patient_study_population]
 source_table = "(SELECT * FROM pcx__cohort_study_population WHERE subject_ref IS NOT NULL)"
 table_cols = [
@@ -25,67 +11,17 @@ description = "Patients in the study population by age group, gender and race."
 primary_id = "subject_ref"
 min_subject = 10
 
-[tables.cube_patient_study_population_dx]
-source_table = "(SELECT * FROM pcx__cohort_study_population_dx WHERE subject_ref IS NOT NULL)"
+[tables.cube_encounter_study_population_enc]
+source_table = "(SELECT * FROM pcx__cohort_study_population_enc WHERE subject_ref IS NOT NULL AND encounter_ref IS NOT NULL)"
 table_cols = [
-    "dx_category_code",
-    "dx_clinical_status",
-    "dx_code",
-    "dx_display",
-    "dx_system",
-    "dx_verification_status",
+    "age_group",
+    "enc_class_display",
+    "enc_period_start_year",
+    "enc_servicetype_display",
+    "enc_type_display",
 ]
-description = "Patients in the study population with a Condition, by category, clinical status, code and verification status."
-primary_id = "subject_ref"
-min_subject = 10
-
-[tables.cube_patient_study_population_allergy]
-source_table = "(SELECT * FROM pcx__cohort_study_population_allergy WHERE subject_ref IS NOT NULL)"
-table_cols = [
-    "allergy_category",
-    "allergy_criticality",
-    "allergy_display",
-    "allergy_manifestation_display",
-]
-description = "Patients in the study population with an AllergyIntolerance, by category, criticality, allergen and manifestation."
-primary_id = "subject_ref"
-min_subject = 10
-
-[tables.cube_patient_study_population_rx]
-source_table = "(SELECT * FROM pcx__cohort_study_population_rx WHERE subject_ref IS NOT NULL)"
-table_cols = [
-    "rx_category_code",
-    "rx_code",
-    "rx_display",
-    "rx_status",
-    "rx_system",
-]
-description = "Patients in the study population with a MedicationRequest, by category, medication code and status."
-primary_id = "subject_ref"
-min_subject = 10
-
-[tables.cube_patient_study_population_proc]
-source_table = "(SELECT * FROM pcx__cohort_study_population_proc WHERE subject_ref IS NOT NULL)"
-table_cols = [
-    "proc_category_display",
-    "proc_code",
-    "proc_display",
-    "proc_status",
-    "proc_system",
-]
-description = "Patients in the study population with a Procedure, by category, code and status."
-primary_id = "subject_ref"
-min_subject = 10
-
-[tables.cube_patient_study_population_lab]
-source_table = "(SELECT * FROM pcx__cohort_study_population_lab WHERE subject_ref IS NOT NULL)"
-table_cols = [
-    "lab_observation_code",
-    "lab_observation_display",
-    "lab_observation_system",
-    "lab_status",
-]
-description = "Patients in the study population with a laboratory Observation, by code and status."
+description = "Patients and encounters in the study population by age group, encounter class, start year, service type and type. cnt is encounters."
+secondary_id = "encounter_ref"
 primary_id = "subject_ref"
 min_subject = 10
 

@@ -1,0 +1,10 @@
+config_type = "file_upload"
+
+[tables.include_trial_protocol]
+files = [
+    "include_trial_protocol.csv",
+]
+col_types = [
+    "STRING",
+    "STRING",
+]
